@@ -31,7 +31,7 @@ if ! ping -c 2 -W 5000 192.168.68.106 > /dev/null 2>&1; then
     mkdir -p "$REPO_ROOT/logs"
     echo "$(date): Mac Pro Beast unreachable during auto-sync after commit $(git log --oneline -1)" >> "$REPO_ROOT/logs/mac-pro-sync-warnings.log"
     
-    return 0  # Don't fail the push, just warn
+    exit 0  # Don't fail the push, just warn
 fi
 
 echo "✅ Mac Pro Beast reachable"
@@ -51,7 +51,7 @@ if ! ssh -o ConnectTimeout=10 -o BatchMode=yes markvandendool@192.168.68.106 "ec
     mkdir -p "$REPO_ROOT/logs"
     echo "$(date): SSH failed during auto-sync to Mac Pro Beast after commit $(git log --oneline -1)" >> "$REPO_ROOT/logs/mac-pro-sync-warnings.log"
     
-    return 0  # Don't fail the push, just warn
+    exit 0  # Don't fail the push, just warn
 fi
 
 echo "✅ SSH connection established"
