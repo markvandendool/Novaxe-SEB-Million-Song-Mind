@@ -351,6 +351,27 @@ Before starting ANY task, verify:
 4. **Test thoroughly** before marking complete
 5. **Document new architecture** in systems map
 
+### Agent Commit Attribution & Signature
+
+To avoid collisions between agents (Cursor, Copilot, Claude) and preserve a clear audit trail, all commits MUST include explicit agent attribution.
+
+- Conventional Commit with agent scope:
+  - `feat(cursor): ...`, `chore(copilot): ...`, `docs(claude): ...`
+- Signed-off-by trailer (one per contributing agent):
+  - `Signed-off-by: Cursor AI <cursor@novaxe.local>`
+  - `Signed-off-by: Copilot AI <copilot@novaxe.local>`
+  - `Signed-off-by: Claude AI <claude@novaxe.local>`
+- Optional co-authorship (when agents pair):
+  - `Co-authored-by: Copilot AI <copilot@novaxe.local>`
+  - `Co-authored-by: Claude AI <claude@novaxe.local>`
+
+Recommended commit footer (copy/paste):
+```
+Signed-off-by: Cursor AI <cursor@novaxe.local>
+```
+
+For multi-agent commits, append multiple Signed-off-by lines, and include Co-authored-by lines where relevant.
+
 ### EMERGENCY PROCEDURES
 
 #### If Chat Logging Fails:
