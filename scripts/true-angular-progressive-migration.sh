@@ -1,0 +1,243 @@
+#!/usr/bin/env bash
+
+# TRUE ANGULAR PROGRESSIVE MIGRATION (11 → 20)
+# Military-grade, forensic, non-destructive. Runs in a quarantined temp copy.
+#
+# Usage:
+#   scripts/true-angular-progressive-migration.sh <angular_app_root> [component_glob1] [component_glob2] ...
+#
+# Example:
+#   scripts/true-angular-progressive-migration.sh \
+#     "Novaxe SEB" \
+#     "src/app/components/braid/braid.component.ts" \
+#     "src/app/components/braid/braid.component.scss"
+#
+# Notes:
+# - Requires npm, git, and optionally nvm. Uses npx for versioned @angular/cli.
+# - Creates a quarantined working copy and never touches your source tree.
+# - At each version step: ng update, install, build, and deep forensic validation.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+if [[ $# -lt 1 ]]; then
+  echo "Usage: $0 <angular_app_root> [component_glob ...]" >&2
+  exit 1
+fi
+
+APP_REL_PATH="$1"; shift || true
+COMPONENT_GLOBS=("$@")
+
+# Angular version ladder and rough Node targets
+declare -a ANGULAR_STEPS=(11 12 13 14 15 16 17 18 19 20)
+declare -A NODE_TARGETS=(
+  [11]="14"  # Angular 11 best with Node 14 (fallback: legacy openssl env)
+  [12]="16"
+  [13]="16"
+  [14]="16"
+  [15]="18"
+  [16]="18"
+  [17]="18"
+  [18]="20"
+  [19]="20"
+  [20]="20"
+)
+
+timestamp() { date '+%Y-%m-%d %H:%M:%S'; }
+log() { echo "[$(timestamp)] $*" | tee -a "$RUN_LOG"; }
+err() { echo "[$(timestamp)] ERROR: $*" | tee -a "$RUN_LOG" >&2; }
+
+require_cmd() { command -v "$1" >/dev/null 2>&1 || { err "Missing required command: $1"; exit 1; }; }
+
+require_cmd git
+require_cmd npm
+
+# Prepare quarantine working directory
+RUN_ID="ng-migrate-$(date +%Y%m%d-%H%M%S)"
+QUARANTINE_DIR="${TMPDIR:-/tmp}/$RUN_ID"
+mkdir -p "$QUARANTINE_DIR"
+
+RUN_LOG="$QUARANTINE_DIR/run.log"
+FORENSIC_DIR="$QUARANTINE_DIR/forensics"
+FAIL_DIR="$QUARANTINE_DIR/failures"
+mkdir -p "$FORENSIC_DIR" "$FAIL_DIR"
+
+log "TRUE ANGULAR PROGRESSIVE MIGRATION starting"
+log "Repo root: $REPO_ROOT"
+log "App path (relative to repo): $APP_REL_PATH"
+log "Quarantine: $QUARANTINE_DIR"
+
+# Copy the app into quarantine (shallow rsync to avoid node_modules bloat)
+APP_SRC_ABS="$REPO_ROOT/$APP_REL_PATH"
+if [[ ! -d "$APP_SRC_ABS" ]]; then
+  err "App path not found: $APP_SRC_ABS"
+  exit 1
+fi
+
+APP_WORK="$QUARANTINE_DIR/app"
+log "Copying app to quarantine..."
+rsync -a --exclude node_modules --exclude dist --exclude .angular "$APP_SRC_ABS/" "$APP_WORK/"
+
+# Baseline component fingerprints (optional)
+fingerprint_components() {
+  local stage="$1"; shift || true
+  local out_dir="$FORENSIC_DIR/$stage"
+  mkdir -p "$out_dir"
+  if [[ ${#COMPONENT_GLOBS[@]} -gt 0 ]]; then
+    log "Fingerprinting components ($stage)..."
+    for pattern in "${COMPONENT_GLOBS[@]}"; do
+      while IFS= read -r -d '' file; do
+        local rel="${file#"$APP_WORK/"}"
+        local dst_dir="$out_dir/$(dirname "$rel")"
+        mkdir -p "$dst_dir"
+        wc -l "$file" | tee -a "$out_dir/linecounts.txt" >/dev/null
+        md5sum "$file" | tee -a "$out_dir/md5sums.txt" >/dev/null || shasum -a 256 "$file" >> "$out_dir/sha256sums.txt" 2>/dev/null || true
+        cp "$file" "$dst_dir/$(basename "$file").snapshot"
+      done < <(find "$APP_WORK" -type f -path "$APP_WORK/${pattern}" -print0 2>/dev/null || true)
+    done
+  fi
+}
+
+# Forensic audits inside the app working tree
+forensic_audit() {
+  local version="$1"
+  local out_dir="$FORENSIC_DIR/ng$version"
+  mkdir -p "$out_dir"
+  pushd "$APP_WORK" >/dev/null
+
+  # Dependency snapshot
+  (npm ls --depth=0 || true) > "$out_dir/dependencies.txt" 2>&1
+
+  # Angular & RxJS versions
+  jq -r '.dependencies."@angular/core" // empty' package.json 2>/dev/null | sed 's/^/@angular\/core: /' > "$out_dir/framework-versions.txt" || true
+  jq -r '.devDependencies."@angular/cli" // empty' package.json 2>/dev/null | sed 's/^/@angular\/cli: /' >> "$out_dir/framework-versions.txt" || true
+  jq -r '.dependencies.rxjs // empty' package.json 2>/dev/null | sed 's/^/rxjs: /' >> "$out_dir/framework-versions.txt" || true
+
+  # Risk pattern scans
+  rg -n "\$\(" src || true > "$out_dir/jquery-usages.rg.txt"
+  rg -n "from 'rxjs/Subscription'" src || true > "$out_dir/legacy-rxjs-imports.rg.txt"
+  rg -n "\.subscribe\(" src || true > "$out_dir/subscribes.rg.txt"
+  rg -n "\.unsubscribe\(" src || true > "$out_dir/unsubscribes.rg.txt"
+  rg -n "\.rotate\(" src || true > "$out_dir/rotate-usages.rg.txt"
+
+  # Build stats if available
+  if npx -y @angular/cli@"$version" help build >/dev/null 2>&1; then
+    npx -y @angular/cli@"$version" build --configuration=development --stats-json || true
+    if [[ -f dist/stats.json ]]; then
+      cp dist/stats.json "$out_dir/build-stats.json"
+    fi
+  fi
+
+  popd >/dev/null
+}
+
+# Attempt to switch Node via nvm (optional)
+switch_node() {
+  local want="$1"
+  if command -v nvm >/dev/null 2>&1; then
+    log "Switching Node via nvm to $want (if available)"
+    # shellcheck disable=SC1090
+    . "$HOME/.nvm/nvm.sh" || true
+    nvm install "$want" >/dev/null 2>&1 || true
+    nvm use "$want" >/dev/null 2>&1 || true
+    node -v | tee -a "$RUN_LOG"
+  else
+    log "nvm not found; continuing with current Node $(node -v)"
+  fi
+}
+
+baseline_node="$(node -v 2>/dev/null || echo unknown)"
+log "Current Node: $baseline_node"
+
+pushd "$APP_WORK" >/dev/null
+
+# Ensure clean install at baseline
+log "Installing baseline dependencies (no scripts)..."
+npm ci --ignore-scripts || npm install --ignore-scripts || true
+
+fingerprint_components "baseline"
+forensic_audit "baseline"
+
+previous_version="11"
+
+for target in "${ANGULAR_STEPS[@]}"; do
+  if [[ "$target" == "11" ]]; then
+    # Baseline assumed 11; perform build sanity with legacy OpenSSL if needed
+    log "Baseline Angular 11 build sanity..."
+    (NODE_OPTIONS=--openssl-legacy-provider npx -y @angular/cli@11 build --configuration=development || true) | tee -a "$RUN_LOG"
+    continue
+  fi
+
+  log "=== MIGRATING: Angular $previous_version → $target ==="
+  echo "" >> "$RUN_LOG"
+
+  # Switch Node if possible
+  switch_node "${NODE_TARGETS[$target]}"
+
+  # Update Angular core/cli to target version
+  log "Running ng update to @angular/core@$target @angular/cli@$target..."
+  if ! npx -y @angular/cli@"$target" update @angular/core@"$target" @angular/cli@"$target" --force --allow-dirty --migrate-only --from "${previous_version}.0.0"; then
+    err "ng update failed at Angular $target"
+    forensic_audit "$target-fail-update"
+    exit 2
+  fi
+
+  # RxJS migration when crossing to >= 13
+  if (( target >= 13 )); then
+    log "Ensuring RxJS 7 compatibility (ng update rxjs)..."
+    npx -y @angular/cli@"$target" update rxjs --force --allow-dirty || true
+  fi
+
+  # Install deps
+  log "Installing dependencies..."
+  npm install --no-audit --no-fund || { err "npm install failed at $target"; exit 3; }
+
+  # Build with versioned CLI
+  log "Building with @angular/cli@$target (development config)..."
+  build_log="$FORENSIC_DIR/ng$target/build.log"
+  mkdir -p "$(dirname "$build_log")"
+  if ! npx -y @angular/cli@"$target" build --configuration=development 2>&1 | tee "$build_log"; then
+    err "Build failed at Angular $target"
+    forensic_audit "$target-fail-build"
+    exit 4
+  fi
+
+  # Run unit tests if present (non-interactive)
+  if npm run -s test -- --help >/dev/null 2>&1; then
+    log "Running unit tests..."
+    if ! npm test -- --watch=false --browsers=ChromeHeadless 2>&1 | tee "$FORENSIC_DIR/ng$target/test.log"; then
+      err "Unit tests failed at Angular $target"
+      forensic_audit "$target-fail-test"
+      exit 5
+    fi
+  else
+    log "No test script detected; skipping tests at Angular $target"
+  fi
+
+  # Forensic validation at this step
+  fingerprint_components "ng$target"
+  forensic_audit "$target"
+
+  # Heuristic red flags
+  jq_count=$(wc -l < "$FORENSIC_DIR/ng$target/jquery-usages.rg.txt" 2>/dev/null || echo 0)
+  rx_legacy_count=$(wc -l < "$FORENSIC_DIR/ng$target/legacy-rxjs-imports.rg.txt" 2>/dev/null || echo 0)
+  if (( rx_legacy_count > 0 )); then
+    err "Legacy rxjs/Subscription imports remain at Angular $target ($rx_legacy_count occurrences)." \
+      && exit 6
+  fi
+
+  log "Angular $target migration PASSED (build + forensic checks)"
+  previous_version="$target"
+done
+
+popd >/dev/null
+
+log "✅ COMPLETE: Angular 11 → 20 progressive migration succeeded in quarantine"
+log "Forensic artifacts: $FORENSIC_DIR"
+log "Run ID: $RUN_ID"
+
+exit 0
+
+
