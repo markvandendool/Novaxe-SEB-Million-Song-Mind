@@ -1,0 +1,407 @@
+## 📕 **CANONICAL ANGULAR MIGRATION STRATEGY: FORENSIC ENGINEERING PROTOCOL**
+### **UNBREAKABLE DOCTRINE FOR NOVAXE FULL APP MIGRATION**
+#### **Version 2.0 - CANONICAL STRATEGY - REFERENCE THIS DOCUMENT EVERY 10 MINUTES**
+
+---
+
+## 🎯 **ULTIMATE GOAL STATEMENT**
+
+**MISSION**: Migrate the COMPLETE Novaxe Musical Brain (50+ components, 41,675 lines) from Angular 11 to Angular 20 through EVERY intermediate version (11→12→13→14→15→16→17→18→19→20), preserving 100% of musical functionality, with forensic verification at each step, achieving full E3,A:X,D3,G4,B4,E5 → V(b7) pipeline functionality in the complete Angular 20 application.
+
+**SUCCESS CRITERIA**: 
+- 41,675 lines of code migrated with ZERO loss
+- All 50+ components operational
+- All musical algorithms preserved
+- MIDI pipeline < 10ms latency
+- 100% musical intelligence preservation
+- Zero jQuery dependencies
+- Full Angular 20 compliance
+
+---
+
+## ⚠️ **UNBREAKABLE RULES - VIOLATION = IMMEDIATE TERMINATION**
+
+### **RULE #1: EXTRACTION BEFORE MIGRATION**
+```typescript
+// MANDATORY SEQUENCE:
+1. EXTRACT complete file (100% of lines)
+2. VERIFY line count matches exactly
+3. COMMIT extraction with hash verification
+4. ONLY THEN begin migration
+// NEVER: Simplify during extraction
+// NEVER: Create mocks
+// NEVER: "Improve" code
+```
+
+### **RULE #2: VERSION-BY-VERSION MIGRATION**
+```bash
+# MANDATORY MIGRATION PATH:
+Angular 11 → Angular 12 (verify) → Angular 13 (verify) → Angular 14 (verify) 
+→ Angular 15 (verify) → Angular 16 (verify) → Angular 17 (verify) 
+→ Angular 18 (verify) → Angular 19 (verify) → Angular 20 (final verification)
+
+# NEVER: Skip versions
+# NEVER: Jump directly to Angular 20
+# FORENSIC VERIFICATION at each step
+```
+
+### **RULE #3: ANGULAR DOCUMENTATION CITATIONS**
+```typescript
+// EVERY migration decision MUST include:
+/**
+ * @migration Angular 11→12
+ * @reference https://angular.io/guide/updating-to-version-12
+ * @breaking_change ViewChild static flag default changed
+ * @solution Set {static: false} explicitly
+ * @verified Line 234 of braid.component.ts
+ */
+```
+
+### **RULE #4: MUSICAL LOGIC PRESERVATION**
+```typescript
+// SACRED CODE - NEVER MODIFY:
+- rotate_arrays_for_tona() // Circle of fifths calculation
+- add_emphasis_diatonic_scale() // Scale emphasis
+- detectChord() // Chord detection algorithm
+- E3,A:X,D3,G4,B4,E5 → V(b7) pipeline
+// ANY modification = FAILURE
+```
+
+### **RULE #5: FORENSIC VERIFICATION**
+```bash
+# AT EACH VERSION:
+npm test -- --coverage # Must be 100%
+npm run lint # Zero errors
+npm run build --prod # Must succeed
+npm run lighthouse # Performance > 95
+npm run bundle-analyzer # Size increase < 5%
+```
+
+---
+
+## 📊 **COMPLETE EXTRACTION INVENTORY**
+
+### **PHASE 1: FOUNDATION EXTRACTION (WEEK 1-2)**
+- **Target**: All JSON libraries, fonts, complete SCSS (13,369 lines)
+- **Critical Files**: 50+ asset files (increased from 15+)
+- **Success Metric**: 100% asset extraction verified
+
+### **PHASE 2: CORE SERVICES MIGRATION (WEEK 3-5)**
+- **Target**: All 25+ services (8,435 lines)
+- **Critical Challenge**: Tonal.js integration layer + MIDI processing
+- **Success Metric**: All musical calculations functional
+
+### **PHASE 3: PRIMARY COMPONENTS (WEEK 6-9)**
+- **Target**: All 50+ components (13,805 lines)
+- **Critical Challenge**: Complex musical algorithms + exercise progression
+- **Success Metric**: Visual rendering + musical intelligence + learning system intact
+
+### **PHASE 4: MODELS AND PAGES (WEEK 10-11)**
+- **Target**: All models (4,188 lines) + pages (1,334 lines)
+- **Critical Challenge**: Data structure modernization
+- **Success Metric**: All data models and page components operational
+
+### **PHASE 5: INTEGRATION & TESTING (WEEK 12-13)**
+- **Target**: Complete system integration + comprehensive testing
+- **Critical Challenge**: Dependency resolution + performance optimization
+- **Success Metric**: Complete Novaxe Musical Brain operational
+
+### **PHASE 6: DEPLOYMENT (WEEK 14-16)**
+- **Target**: Angular 20 Web Components wrapper + production deployment
+- **Critical Challenge**: Final system integration + performance validation
+- **Success Metric**: Complete Novaxe Musical Brain deployed
+
+---
+
+## 🔧 **SYSTEMATIC MIGRATION PROTOCOL**
+
+### **ANGULAR 11 → 12 MIGRATION CHECKLIST**
+```typescript
+□ Update package.json dependencies
+□ Run: ng update @angular/core@12 @angular/cli@12
+□ Fix ViewChild static flags (Reference: Angular docs section 3.2.1)
+□ Update RxJS to 6.6 (Reference: RxJS migration guide)
+□ Fix Ivy rendering issues
+□ Run forensic verification suite
+□ Commit with message: "MIGRATION: Angular 11→12 complete, 0 errors"
+```
+
+### **ANGULAR 12 → 13 MIGRATION CHECKLIST**
+```typescript
+□ Update package.json dependencies  
+□ Run: ng update @angular/core@13 @angular/cli@13
+□ Remove IE11 support (Reference: Angular 13 breaking changes)
+□ Update to Node 14+
+□ Fix dynamic component creation
+□ Update Angular Material if used
+□ Run forensic verification suite
+□ Commit with message: "MIGRATION: Angular 12→13 complete, 0 errors"
+```
+
+### **[CONTINUE FOR EACH VERSION 13→14→15→16→17→18→19→20]**
+
+---
+
+## 📋 **FORENSIC VERIFICATION SUITE**
+
+### **AUTOMATED TEST PROTOCOL (RUN AT EACH VERSION)**
+```typescript
+// forensic-verify.ts
+export class ForensicVerification {
+  async verifyMigration(fromVersion: number, toVersion: number): Promise<boolean> {
+    const results = {
+      lineCount: await this.verifyLineCount(),        // Must match original
+      musicalLogic: await this.verifyMusicalLogic(),  // E3→V(b7) pipeline
+      performance: await this.verifyPerformance(),    // <10ms MIDI latency
+      components: await this.verifyComponents(),      // All 50 working
+      build: await this.verifyBuild(),               // Production build success
+      tests: await this.verifyTests(),               // 100% passing
+      bundle: await this.verifyBundleSize(),         // <5% increase
+    };
+    
+    // ALL must pass
+    return Object.values(results).every(r => r === true);
+  }
+  
+  async verifyLineCount(): Promise<boolean> {
+    const expected = {
+      'braid.component.ts': 1196,
+      'midi.service.ts': 382,
+      'chord-detect.service.ts': 253,
+      // ... all 50 components
+    };
+    
+    for (const [file, expectedLines] of Object.entries(expected)) {
+      const actual = await this.getLineCount(file);
+      if (Math.abs(actual - expectedLines) > 0) {
+        console.error(`FAILURE: ${file} has ${actual} lines, expected ${expectedLines}`);
+        return false;
+      }
+    }
+    return true;
+  }
+  
+  async verifyMusicalLogic(): Promise<boolean> {
+    // Test E3,A:X,D3,G4,B4,E5 → V(b7) pipeline
+    const input = [40, null, 50, 67, 71, 76];
+    const result = await this.testPipeline(input);
+    return result.chord === 'Am7b5' && result.roman === 'V(b7)';
+  }
+}
+```
+
+---
+
+## 🚨 **CRITICAL MIGRATION PATTERNS**
+
+### **PATTERN 1: DEPENDENCY INJECTION EVOLUTION**
+```typescript
+// Angular 11 (ORIGINAL - PRESERVE LOGIC)
+constructor(
+  private sel: SelectionModel,
+  private zone: NgZone,
+  public cm: ConfigModel
+) {}
+
+// Angular 14 (Intermediate)
+constructor(
+  @Inject(SelectionModel) private sel: SelectionModel,
+  @Inject(NgZone) private zone: NgZone,
+  @Inject(ConfigModel) public cm: ConfigModel
+) {}
+
+// Angular 16+ (Final)
+private sel = inject(SelectionModel);
+private zone = inject(NgZone);
+public cm = inject(ConfigModel);
+
+// CITATION: Angular.io - Dependency Injection Guide v16
+```
+
+### **PATTERN 2: RXJS EVOLUTION**
+```typescript
+// Angular 11 (ORIGINAL - PRESERVE LOGIC)
+import { Subscription } from 'rxjs/Subscription';
+import { filter, map } from 'rxjs/operators';
+
+// Angular 13+ (Modern)
+import { Subscription } from 'rxjs';
+import { filter, map } from 'rxjs/operators';
+
+// Angular 16+ (With takeUntilDestroyed)
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+// CITATION: RxJS Migration Guide v6→v7
+```
+
+### **PATTERN 3: CONTROL FLOW EVOLUTION**
+```typescript
+// Angular 11 (ORIGINAL)
+<div *ngFor="let item of items">
+<div *ngIf="condition">
+
+// Angular 17+ (New syntax)
+@for (item of items; track item.id) {
+@if (condition) {
+
+// CITATION: Angular.io - Control Flow Documentation v17
+```
+
+---
+
+## 📈 **PROGRESS TRACKING DASHBOARD**
+
+```typescript
+interface MigrationProgress {
+  currentVersion: 11;           // Starting point
+  targetVersion: 20;            // Goal
+  completedMigrations: [];      // Track each version
+  failedMigrations: [];         // Document failures
+  currentPhase: 'EXTRACTION';   // EXTRACTION | MIGRATION | VERIFICATION
+  componentsExtracted: 0;       // Current count
+  totalComponents: 50;          // Target count
+  linesExtracted: 0;           // Current count
+  totalLines: 41675;           // Target count
+  musicalIntegrity: 100;       // Must remain 100%
+  performanceScore: 0;          // Target: 95+
+  lastVerification: null;       // Timestamp of last forensic check
+}
+```
+
+---
+
+## ⚡ **EMERGENCY RECOVERY PROTOCOL**
+
+### **IF MIGRATION FAILS AT ANY VERSION:**
+```bash
+# 1. STOP IMMEDIATELY
+echo "MIGRATION FAILURE at Angular $VERSION"
+
+# 2. DOCUMENT FAILURE
+echo "Error: $ERROR_MESSAGE" >> migration-failures.log
+git diff > failed-migration-$VERSION.patch
+
+# 3. ROLLBACK
+git checkout -
+npm ci
+
+# 4. RESEARCH SOLUTION
+# Search Angular official docs for: "$ERROR_MESSAGE"
+# Search Angular GitHub issues
+# Search StackOverflow with "Angular $VERSION migration"
+
+# 5. APPLY FIX WITH CITATION
+/**
+ * @fix_for Angular $VERSION migration failure
+ * @error $ERROR_MESSAGE
+ * @solution [Detailed solution]
+ * @reference [URL to official documentation]
+ */
+
+# 6. RETRY WITH VERIFICATION
+npm test
+ng build --prod
+```
+
+---
+
+## 🎯 **CURSOR RECALIBRATION COMMAND**
+
+**PASTE THIS EVERY TIME CURSOR DEVIATES:**
+
+```markdown
+STOP. RECALIBRATE. 
+
+You are migrating the COMPLETE Novaxe Musical Brain from Angular 11 to 20.
+Current Status:
+- Extracted: [X] of 50 components
+- Extracted: [Y] of 18,000+ lines
+- Current Angular Version: [Z]
+- Target Angular Version: 20
+
+MANDATORY ACTIONS:
+1. Show me the current line count verification
+2. Show me the current Angular version
+3. Show me the next migration step with documentation reference
+4. Show me the forensic verification results
+
+FORBIDDEN ACTIONS:
+- Creating mocks (NEVER)
+- Simplifying code (NEVER)
+- Skipping versions (NEVER)
+- Modifying musical logic (NEVER)
+
+NEXT STEP: [Specific action based on current status]
+```
+
+---
+
+## 🏁 **FINAL VALIDATION CRITERIA**
+
+### **THE MIGRATION IS ONLY COMPLETE WHEN:**
+```typescript
+const COMPLETION_CRITERIA = {
+  angularVersion: 20,                          // Exactly 20
+  componentsMigrated: 50,                      // All components
+  extractedLines: 41675,                       // All lines
+  musicalPipeline: 'E3→V(b7) WORKING',        // Core functionality
+  buildStatus: 'PRODUCTION SUCCESS',          // Builds clean
+  testCoverage: 100,                          // All tests pass
+  jqueryReferences: 0,                        // No jQuery
+  bundleSize: '<5% increase from Angular 11', // Efficient
+  documentationComplete: true,                // Fully documented
+  forensicVerification: 'PASSED'              // All checks pass
+};
+```
+
+---
+
+## 📊 **DAILY REPORTING PROTOCOL**
+
+### **MORNING BRIEFING (0800 Hours)**
+- Previous day completion status
+- Current day objectives
+- Risk assessment and mitigation plans
+- Resource allocation
+
+### **MIDDAY STATUS (1200 Hours)**
+- Progress against morning objectives
+- Blockers and escalation requirements
+- Afternoon tactical adjustments
+- Quality metrics review
+
+### **EVENING DEBRIEF (2000 Hours)**
+- Day completion summary
+- Critical issues encountered
+- Next day preparation
+- Strategic adjustments
+
+---
+
+## ⚠️ **CRITICAL SUCCESS FACTORS**
+
+### **NON-NEGOTIABLE REQUIREMENTS**
+1. **GitLab Access**: Read-only to prod_fix branch
+2. **Line Count Verification**: Every component must match original
+3. **Musical Functionality**: Zero algorithm corruption
+4. **Visual Accuracy**: Exact CSS/font replication
+5. **MIDI Processing**: Real-time performance maintained
+
+### **FAILURE CONDITIONS**
+- Any placeholder or simplified component
+- Missing musical intelligence
+- Broken Tonal.js integration
+- Incomplete SCSS extraction
+- MIDI timing disruption
+
+---
+
+**THIS DOCUMENT IS THE SINGLE SOURCE OF TRUTH.**
+**REFERENCE IT EVERY 10 MINUTES.**
+**DEVIATION FROM THIS PROTOCOL = IMMEDIATE FAILURE.**
+**EVERY. SINGLE. BYTE. MATTERS.**
+
+**Document Version**: 2.0 (Canonical)  
+**Last Updated**: Current Session  
+**Authority**: Absolute  
+**Enforcement**: Zero Tolerance
