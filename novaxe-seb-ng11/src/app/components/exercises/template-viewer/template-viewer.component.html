@@ -1,0 +1,20 @@
+
+<div style="display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100vh;
+    background-color: #343a40;">
+    
+	<div id="templateContainer" style="border-top:5px black solid;border-bottom:5px black solid;background-color:white;">
+
+		<ng-container #viewContainer > </ng-container>
+	  
+	</div>
+
+
+  <div class="row">
+    <button [hidden]="!gen.loaded_exo_params.DEBUG_MODE"(click)="debug([53],[60,64,67])"> DEBUG</button>
+    <button [hidden]="!gen.loaded_exo_params.DEBUG_MODE"(click)="debug([53],[])"> DEBUG_L</button>
+    <button [hidden]="!gen.loaded_exo_params.DEBUG_MODE"(click)="debug([],[60])"> DEBUG_R</button>
+  </div>
+</div>

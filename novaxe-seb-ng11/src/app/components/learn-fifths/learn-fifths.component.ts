@@ -1,0 +1,61 @@
+import { Component, OnInit, ElementRef } from '@angular/core';
+import { ExerciseModel } from '@models/exercisemodel/exercisemodel';
+
+@Component({
+  selector: 'app-learn-fifths',
+  templateUrl: './learn-fifths.component.html',
+  styleUrls: ['./learn-fifths.component.scss']
+})
+
+
+
+export class LearnFifthsComponent implements OnInit {
+
+  public lock:boolean=true;
+  public win:boolean=undefined;
+  public tonality:any;
+  public exowin:any;
+
+  constructor(public el:ElementRef, public exo:ExerciseModel) {}
+
+  ngOnInit() {}
+
+  public verifyCard(c){
+
+    this.win = this.exo.answer(c);
+
+    if(this.win)
+      for(let i = 0; i < this.exo._question.length; i++) 
+        this.el.nativeElement.querySelector('#question_'+i).style.color = 'green';
+    else
+      for(let i = 0; i < this.exo._question.length; i++) 
+        this.el.nativeElement.querySelector('#question_'+i).style.color = 'red';
+
+    setTimeout(()=>{
+      this.win=undefined;
+      this.exo.start();
+    },500);
+    
+
+  }
+
+  public verifyMidi(e){
+    let chordElmts = [];
+    for(let i = 0; i < this.exo._question.length; i++)
+      chordElmts.push( this.el.nativeElement.querySelector('#question_'+i) );
+
+    if(e.rootName == 'Gb')e.rootName = 'F#';
+    console.log("e.rootName+e.name => ",e.rootName+e.name);
+
+    if(this.exo.verifyNext(e)){
+      this.exo._question[this.exo.verified-1] = e.rootName;
+
+      if(this.exo.win == true){
+        window.setTimeout(()=>{
+          this.exo.start();
+        },100);
+      }
+    }
+  }
+
+}

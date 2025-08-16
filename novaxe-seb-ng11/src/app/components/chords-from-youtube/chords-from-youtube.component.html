@@ -1,0 +1,22 @@
+<div class="tab" [ngClass]="{editOn:edit==true}" (contextmenu)="edit=!edit;$event.preventDefault();" style="" (click)="edit=!edit"><div style="transform: rotate(-90deg) translate(-24px, -39px); width: 5em;">Youtube</div></div>
+
+<div style="display:flex;flex-direction:column;position:fixed;top:22vh;height: 350px;width:800px;border:1px solid red;" [hidden]="edit==false" (contextmenu)="edit=false;$event.preventDefault();" >
+
+	<div>
+		<input type="text" style="opacity:.6;height: 50px;width:88%"
+		[(ngModel)]="link"
+		placeholder="Enter youtube video here"  
+		 />
+		 <button [disabled]="loading" type="button" class="btn btn-primary" (click)="searchYoutube(link)"> Search </button>
+	</div>
+
+	 <textarea readonly style="top:252px;height: inherit;left:0px;opacity:.6"
+	 [(ngModel)]="parsed_tab"
+	 placeholder="no results to display" 
+	  ></textarea>
+
+<div [hidden]="!loading" class="spinner-border" role="status">
+  <span class="sr-only">Loading...</span>
+</div>
+
+</div>
