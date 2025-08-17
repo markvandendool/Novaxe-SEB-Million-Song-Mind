@@ -9,7 +9,7 @@ import { RuntimeSmokeTest } from './tests/runtime-smoke-test';
 })
 export class AppComponent implements OnInit {
   title = 'nuclear-angular';
-  
+
   async ngOnInit() {
     // Load smoke test for browser console access
     console.log('🧪 Nuclear Angular loaded. Type "runSmokeTest()" in console to run smoke tests.');
