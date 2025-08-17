@@ -1,5 +1,5 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
-import { ExerciseModel } from '../../models/exercise.model';
+import { ExerciseModel } from '@models/exercise.model';
 
 @Component({
     selector: 'app-learn-fifths',
