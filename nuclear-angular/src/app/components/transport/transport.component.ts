@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
   selector: 'app-transport',
   templateUrl: './transport.component.html',
   styleUrls: ['./transport.component.scss'],
-  standalone: false
+  standalone: false, // EXPLICITLY declare as non-standalone
 })
 
 export class TransportComponent implements OnInit, OnDestroy {

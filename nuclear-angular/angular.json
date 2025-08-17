@@ -73,12 +73,16 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "buildTarget": "nuclear-angular:build",
+            "port": 4201
+          },
           "configurations": {
             "production": {
-              "browserTarget": "nuclear-angular:build:production"
+              "buildTarget": "nuclear-angular:build:production"
             },
             "development": {
-              "browserTarget": "nuclear-angular:build:development"
+              "buildTarget": "nuclear-angular:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -86,7 +90,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "nuclear-angular:build"
+            "buildTarget": "nuclear-angular:build"
           }
         },
         "test": {
