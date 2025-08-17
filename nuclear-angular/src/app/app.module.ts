@@ -27,6 +27,9 @@ import { EditorComponent } from './components/editor/editor.component';
 import { PianoComponent } from './components/piano/piano.component';
 import { FretboardComponent } from './components/fretboard/fretboard.component';
 
+// MIGRATION STEP 1: Small components with minimal dependencies
+import { TestpageComponent } from './components/testpage/testpage.component';
+
 @NgModule({
   declarations: [
     // Core
@@ -51,7 +54,10 @@ import { FretboardComponent } from './components/fretboard/fretboard.component';
     // BATCH 3: Complex components - ADVANCED CANVAS & INTERACTIVE SYSTEMS (790+ lines total!)
     EditorComponent,
     PianoComponent,
-    FretboardComponent
+    FretboardComponent,
+
+    // MIGRATION STEP 1: Small components with minimal dependencies
+    TestpageComponent
   ],
   imports: [
     BrowserModule,

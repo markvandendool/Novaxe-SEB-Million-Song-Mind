@@ -488,4 +488,16 @@ export class PianoComponent implements OnInit, OnDestroy {
         this.updateSettings();
         console.log(`🎹 Loaded preset: ${preset}`);
     }
+
+    // Audio Gate C: Test Sound Method
+    public async testSound(): Promise<void> {
+        try {
+            // Ensure AudioContext is resumed
+            await (this as any).guitarService['audioContext']?.resume?.();
+            await this.guitarService.play(0, 60, 0.5); // C4
+            console.log('TestSound triggered');
+        } catch (e) {
+            console.error('TestSound failed', e);
+        }
+    }
 }
