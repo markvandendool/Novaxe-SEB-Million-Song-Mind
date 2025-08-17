@@ -21,7 +21,7 @@ export class AppComponent implements OnInit {
     // Load smoke test for browser console access
     const smokeTest = new RuntimeSmokeTest();
     window.runSmokeTest = () => smokeTest.runAllTests();
-    
+
     console.log('🧪 Nuclear Angular loaded. Type "runSmokeTest()" in console to run smoke tests.');
   }
 }

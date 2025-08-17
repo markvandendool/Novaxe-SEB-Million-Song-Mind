@@ -37,6 +37,9 @@ import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fi
 import { PageAlbumComponent } from './pages/page-album/page-album.component';
 import { PageAuthorComponent } from './pages/page-author/page-author.component';
 
+// PHASE 2: Core navigation components (TIER 1)
+import { NavbarComponent } from './components/navbar/navbar.component';
+
 @NgModule({
   declarations: [
     // Core
@@ -71,7 +74,10 @@ import { PageAuthorComponent } from './pages/page-author/page-author.component';
 
     // MIGRATION STEP 4: Simple page components
     PageAlbumComponent,
-    PageAuthorComponent
+    PageAuthorComponent,
+
+    // PHASE 2: Core navigation components (TIER 1)
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
