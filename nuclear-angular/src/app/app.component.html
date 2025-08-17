@@ -1,17 +1,23 @@
-<h1>🎯 RUNTIME PROOF - Nuclear Angular 20 Migration</h1>
+<h1 class="font1">🎯 NOVAXE NUCLEAR - Angular 20 Migration</h1>
 <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 8px;">
     <h2>✅ FORENSIC VALIDATION - RUNTIME OPERATIONAL</h2>
     <p><strong>Dev Server Working:</strong> This HTML proves ng serve is operational!</p>
     <p><strong>Components Rendering:</strong> Real Novaxe components below ↓</p>
 </div>
 
-<!-- Audio Gate D: Audio Unlock Button -->
+<!-- Audio Testing Zone - Step 1: Explicit Instrument Loading -->
 <div style="background: #fff3e0; padding: 15px; margin: 20px 0; border-radius: 8px; text-align: center;">
-    <h3>🔊 Audio Testing Zone</h3>
-    <button (click)="0"
-        style="background: #ff9800; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px;">Click
-        to unlock audio</button>
-    <p><em>Click above once, then use "Test Sound (C4)" button in Piano Component below</em></p>
+    <h3>🔊 Step 1: Audio Proof (Explicit Instrument Loading)</h3>
+    <button (click)="unlockAudio()" [disabled]="audioUnlocked"
+        style="background: #ff9800; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px;">
+        {{audioUnlocked ? '✅ Audio Unlocked' : 'Unlock Audio'}}
+    </button>
+    <button (click)="testSound()" [disabled]="!audioUnlocked"
+        style="background: #e91e63; color: white; padding: 15px 30px; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 10px;">
+        Test Sound (C4)
+    </button>
+    <p><em>{{audioUnlocked ? 'Now click "Test Sound (C4)" - you should hear acoustic guitar!' : 'Click "Unlock Audio"
+            first to enable browser audio'}}</em></p>
 </div>
 
 <h3>Gate: Learn Fifths Component - Phase B Migration</h3>

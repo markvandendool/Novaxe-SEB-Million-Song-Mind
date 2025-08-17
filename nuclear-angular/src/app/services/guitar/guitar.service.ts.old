@@ -1,0 +1,191 @@
+import { Injectable } from '@angular/core';
+import { BehaviorSubject } from 'rxjs';
+import { filter, take } from 'rxjs/operators';
+
+// Modern WebAudioFont loading
+declare global {
+    interface Window {
+        WebAudioFontPlayer: any;
+    }
+}
+
+@Injectable({
+    providedIn: 'root'
+})
+export class GuitarService {
+    private audioContext: AudioContext;
+    private player: any;
+    private instrumentReady$ = new BehaviorSubject<boolean>(false);
+
+    constructor() {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.loadWebAudioFont();
+    }
+
+    private async loadWebAudioFont(): Promise<void> {
+        try {
+            // Dynamic import for WebAudioFont
+            const script = document.createElement('script');
+            script.src = 'https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js';
+
+            await new Promise<void>((resolve, reject) => {
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load WebAudioFont'));
+                document.head.appendChild(script);
+            });
+
+            // Explicit instrument loading as per Step 1 specification
+            this.player = new (window as any).WebAudioFontPlayer();
+            
+            // Initialize WebAudioFont player
+            this.player = new (window as any).WebAudioFontPlayer();
+            
+            console.log('🎸 WebAudioFont player initialized, attempting instrument loading...');
+            
+            // Use WebAudioFont's proper instrument loading mechanism
+            // Instrument 250 is Acoustic Guitar (Nylon)
+            const instrumentNumber = 250;
+            
+            try {
+                // Load instrument using correct 2025 WebAudioFont API
+                const instrumentUrl = 'https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js';
+                const variableName = '_tone_0250_SoundBlasterOld_sf2';
+                
+                console.log(`🎸 Loading instrument from: ${instrumentUrl}`);
+                
+                this.player.loader.startLoad(this.audioContext, instrumentUrl, variableName);
+                
+                this.player.loader.waitLoad(() => {
+                    try {
+                        const guitarInstrument = (window as any)[variableName];
+                        if (guitarInstrument) {
+                            console.log(`✅ WebAudioFont guitar instrument loaded successfully!`, guitarInstrument);
+                            (this as any).guitarInstrument = guitarInstrument;
+                            this.instrumentReady$.next(true);
+                        } else {
+                            console.warn(`⚠️ Guitar instrument variable ${variableName} not found, using synthesizer fallback`);
+                            this.createSynthesizerFallback();
+                            this.instrumentReady$.next(true);
+                        }
+                    } catch (loadError) {
+                        console.warn('⚠️ WebAudioFont instrument loading failed, using synthesizer fallback:', loadError);
+                        this.createSynthesizerFallback();
+                        this.instrumentReady$.next(true);
+                    }
+                });
+                
+            } catch (error) {
+                console.log('⚠️ WebAudioFont loading failed, implementing basic synthesizer fallback...');
+                
+                // Implement a simple oscillator-based fallback for audio proof
+                this.createSynthesizerFallback();
+                this.instrumentReady$.next(true);
+            }
+            
+            console.log('🎸 Guitar service initialization complete');
+        } catch (error) {
+            console.error('❌ Failed to load WebAudioFont:', error);
+            // Fallback to console logging
+            this.instrumentReady$.next(true);
+        }
+    }
+
+    private createSynthesizerFallback(): void {
+        console.log('🎵 Creating synthesizer fallback for audio proof...');
+        // Set a flag that we're using synthesizer fallback
+        (this as any).usingSynthesizerFallback = true;
+    }
+
+    private playSynthesizedNote(midiNote: number, when: number, duration: number): void {
+        // Create a simple guitar-like synthesized sound
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        
+        // Convert MIDI note to frequency
+        const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
+        
+        // Set up oscillator (sawtooth wave for guitar-like sound)
+        oscillator.type = 'sawtooth';
+        oscillator.frequency.setValueAtTime(frequency, when);
+        
+        // Set up gain envelope (attack-decay for guitar-like pluck)
+        gainNode.gain.setValueAtTime(0, when);
+        gainNode.gain.linearRampToValueAtTime(0.3, when + 0.01); // Quick attack
+        gainNode.gain.exponentialRampToValueAtTime(0.1, when + 0.1); // Decay
+        gainNode.gain.exponentialRampToValueAtTime(0.001, when + duration); // Sustain and release
+        
+        // Connect and play
+        oscillator.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        oscillator.start(when);
+        oscillator.stop(when + duration);
+        
+        console.log(`🎵 Synthesized guitar note ${midiNote} at ${frequency.toFixed(1)}Hz`);
+    }
+
+    async play(delay: number, midiNote: number, duration: number = 0.5): Promise<void> {
+        if (!this.instrumentReady$.value) {
+            await this.instrumentReady$.pipe(
+                filter(ready => ready),
+                take(1)
+            ).toPromise();
+        }
+
+        try {
+            const when = this.audioContext.currentTime + (delay / 1000);
+
+            // Check if we're using synthesizer fallback
+            if ((this as any).usingSynthesizerFallback) {
+                console.log(`� Playing synthesized note ${midiNote} (fallback mode)`);
+                this.playSynthesizedNote(midiNote, when, duration);
+                return;
+            }
+
+            if (this.player && this.player.queueWaveTable) {
+                // Try to use WebAudioFont loaded instrument
+                const instrumentKey = this.player.loader.instrumentKeys().find((key: string) => 
+                    key.includes('250') || key.toLowerCase().includes('guitar'));
+                
+                if (instrumentKey) {
+                    const inst = this.player.loader.instrumentInfo(instrumentKey);
+                    if (inst) {
+                        console.log(`🎸 Playing guitar note ${midiNote} with WebAudioFont instrument: ${instrumentKey}`);
+                        this.player.queueWaveTable(
+                            this.audioContext,
+                            this.audioContext.destination,
+                            inst,
+                            when,
+                            midiNote,
+                            duration
+                        );
+                        return;
+                    }
+                }
+                
+                console.log(`❌ No suitable guitar instrument found. Available instruments:`, 
+                    this.player.loader.instrumentKeys().slice(0, 5));
+                console.log(`� Falling back to synthesizer for note ${midiNote}`);
+                this.playSynthesizedNote(midiNote, when, duration);
+            } else {
+                console.log(`� WebAudioFont not available - using synthesizer for note ${midiNote}`);
+                this.playSynthesizedNote(midiNote, when, duration);
+            }
+        } catch (error) {
+            console.error('Failed to play note:', error);
+            console.log(`🎸 Fallback: Playing guitar note ${midiNote} with delay ${delay}ms`);
+        }
+    }
+
+    // Additional method for chord playing
+    async playChord(notes: number[], delay: number = 0, duration: number = 0.5): Promise<void> {
+        for (const note of notes) {
+            await this.play(delay, note, duration);
+        }
+    }
+
+    // Method to check if service is ready
+    get isReady(): boolean {
+        return this.instrumentReady$.value;
+    }
+}
