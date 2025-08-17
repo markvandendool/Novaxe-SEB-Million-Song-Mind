@@ -25,9 +25,10 @@ import { Key } from '@tonaljs/tonal';
 declare var $: any;
 
 @Component({
-  selector: 'app-braid',
-  templateUrl: './braid.component.html',
-  styleUrls: ['./braid.component.scss']
+    selector: 'app-braid',
+    templateUrl: './braid.component.html',
+    styleUrls: ['./braid.component.scss'],
+    standalone: false
 })
 export class BraidComponent implements OnInit, AfterViewInit {
 
