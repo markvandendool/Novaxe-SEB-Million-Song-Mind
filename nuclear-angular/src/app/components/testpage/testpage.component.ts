@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
+import { MusicTheoryStubService } from '../../services/music-theory-stub.service';
 
 @Component({
   selector: 'app-testpage',
@@ -15,7 +16,7 @@ export class TestpageComponent implements OnInit {
   public abcChordString: string = "ceg";
   public chordString: string = "c,e,g";
 
-  constructor() { 
+  constructor(private musicTheory: MusicTheoryStubService) { 
   	this.measure = new Subject();
 	  this.measure.next(1);  
   }
@@ -26,7 +27,9 @@ export class TestpageComponent implements OnInit {
   }
 
   renderChord() {
-
+    // Test the music theory service
+    const note = this.musicTheory.getNote(this.abcChordString);
+    console.log("Music Theory Service Test:", note);
   }
 
   ngOnInit() {
