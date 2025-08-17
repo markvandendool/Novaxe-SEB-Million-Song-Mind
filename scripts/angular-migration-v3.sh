@@ -296,13 +296,29 @@ EOF
     log "Created tsconfig.build.json with abcjs type exclusion"
     
     # Update angular.json to use the custom tsconfig for build
+    # First, find the project name from angular.json
+    local project_name=$(grep -o '"projects": {[^}]*"[^"]*"' angular.json | head -1 | sed 's/.*"\([^"]*\)"$/\1/')
+    if [[ -z "$project_name" ]]; then
+      project_name="novaxe"  # fallback
+    fi
+    
     if command -v jq >/dev/null 2>&1; then
       tmpfile="$(mktemp)"
-      jq '.projects.novaxe.architect.build.options.tsConfig = "tsconfig.build.json"' angular.json > "$tmpfile" && mv "$tmpfile" angular.json || true
-      log "Updated angular.json to use tsconfig.build.json"
+      # Use dynamic project name
+      jq --arg proj "$project_name" '.projects[$proj].architect.build.options.tsConfig = "tsconfig.build.json"' angular.json > "$tmpfile" 2>/dev/null
+      if [[ -s "$tmpfile" ]]; then
+        mv "$tmpfile" angular.json
+        log "Updated angular.json to use tsconfig.build.json (jq method)"
+      else
+        rm -f "$tmpfile"
+        # Fallback to sed if jq fails
+        sed -i.bak 's|"tsConfig": "tsconfig.app.json"|"tsConfig": "tsconfig.build.json"|' angular.json 2>/dev/null || true
+        log "Updated angular.json to use tsconfig.build.json (sed fallback)"
+      fi
     else
-      # Fallback: sed replacement (more robust with exact match)
+      # Direct sed replacement
       sed -i.bak 's|"tsConfig": "tsconfig.app.json"|"tsConfig": "tsconfig.build.json"|' angular.json 2>/dev/null || true
+      log "Updated angular.json to use tsconfig.build.json (sed method)"
     fi
     
     # Disable ES5 differential loading for ng12+ (avoid regeneratorRuntime errors)
