@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -19,6 +20,7 @@ import { MidiChordDetectSimpleComponent } from './components/midi-chord-detect-s
 // BATCH 2: Medium complexity components - MUSIC THEORY & ADVANCED INTERFACES
 import { PianoMiniComponent } from './components/piano-mini/piano-mini.component';
 import { ScaleSelectorComponent } from './components/scale-selector/scale-selector.component';
+import { LearnFifthsComponent } from './components/learn-fifths/learn-fifths.component';
 
 // BATCH 3: Complex components - ADVANCED CANVAS & INTERACTIVE SYSTEMS (790+ lines total!)
 import { EditorComponent } from './components/editor/editor.component';
@@ -44,6 +46,7 @@ import { FretboardComponent } from './components/fretboard/fretboard.component';
     // BATCH 2: Medium complexity components - MUSIC THEORY & ADVANCED INTERFACES
     PianoMiniComponent,
     ScaleSelectorComponent,
+    LearnFifthsComponent,
 
     // BATCH 3: Complex components - ADVANCED CANVAS & INTERACTIVE SYSTEMS (790+ lines total!)
     EditorComponent,
@@ -52,6 +55,7 @@ import { FretboardComponent } from './components/fretboard/fretboard.component';
   ],
   imports: [
     BrowserModule,
+    CommonModule,
     AppRoutingModule,
     FormsModule
   ],

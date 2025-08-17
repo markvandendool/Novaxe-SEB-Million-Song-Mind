@@ -1,0 +1,19 @@
+<div class="row question" >
+	<div 
+		*ngFor="let q of exo._question; let i = index" 
+		[id]="'question_'+i" 
+		[ngClass]="{correct:exowin==true,green:i<exo.verified,'incorrect':exo.win==false,default:exo.win==undefined,tona:i==exo._question.length-1}" 
+		class="correct col-3 ">
+		{{q}}
+	</div>
+</div>
+
+
+<div class="row card-container">
+	<button *ngFor="let card of exo._cards; index as i;" class="col-1 answer-card" (click)="verifyCard(card)"> {{card}} </button>
+</div>
+
+
+<svg height="150px" width="400px" >
+	<svg:g transform="scale(1.5)" anchor="middle" style="transform:opacity:1;" class="cObj centerText"></svg:g>
+</svg>
