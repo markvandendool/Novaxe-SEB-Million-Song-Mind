@@ -1,0 +1,30 @@
+# CLAUDE CHAT CAPTURE INSTRUCTIONS
+## Aug 16 10am-12pm
+**Created**: 2025-08-16T16:06:03.756Z
+**Status**: MANUAL CAPTURE REQUIRED
+
+⚠️ **ATTENTION**: This is a placeholder file for manual chat capture.
+
+**Instructions for Claude Chat Capture**:
+1. Open Claude in your browser
+2. Navigate to the chat conversation
+3. Select ALL chat content (Cmd+A or Ctrl+A)
+4. Copy the entire content (Cmd+C or Ctrl+C)
+5. Replace this entire file content with the copied chat
+6. Save the file (Cmd+S or Ctrl+S)
+
+**File Location**: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind/logs/Full Chat Logs/Claude/Claude Full Chat Aug 16 10am-12pm.txt
+**Expected Format**: Complete conversation including all messages, timestamps, and formatting
+
+---
+
+🔄 **REPLACE THIS ENTIRE CONTENT WITH ACTUAL CHAT LOG**
+
+When you paste the chat content, make sure to:
+- Include the conversation from the beginning of this 2-hour period
+- Preserve all formatting and timestamps
+- Include both user messages and agent responses
+- Save as plain text (.txt format)
+
+**Time Frame**: 10am-12pm
+**Date**: Aug 16

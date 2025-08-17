@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { TransportService} from '@services/transport/transport.service';
+import { TransportService } from '@services/transport/transport.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -9,26 +9,26 @@ import { Subject } from 'rxjs';
   standalone: false
 })
 
-export class TransportComponent implements OnInit, OnDestroy{
+export class TransportComponent implements OnInit, OnDestroy {
 
-  constructor(public transport:TransportService){
+  constructor(public transport: TransportService) {
     // console.log('transport => ',transport);
     // this.transp = transport;
   }
 
-  ngOnInit(){
-    this.transport.stop(1,true);
+  ngOnInit() {
+    this.transport.stop(1, true);
   }
 
-  ngOnDestroy(){
-    this.transport.stop(1,true);
+  ngOnDestroy() {
+    this.transport.stop(1, true);
   }
 
-  play_pause(){}
+  play_pause() { }
 
-  stop(){}
+  stop() { }
 
-  onKeydown(event: any){
+  onKeydown(event: any) {
     // console.log(event.key);
     // if(event.code === 'Space' && event.target.nodeName != "TEXTAREA" && event.target.nodeName != "INPUT" && event.target.nodeName != "SELECT"){
     //   this.transport.stop(0);

@@ -1,0 +1,16 @@
+<div class="guitar-container">
+	<h3>Guitar Component</h3>
+	<p>MIDI Note: {{ midinote }}</p>
+	<p>Delay: {{ delay }}ms</p>
+
+	<button class="play-button" type="button" (click)="play_note()">Play Note</button>
+
+	<div class="controls">
+		<label>MIDI Note:
+			<input type="number" [(ngModel)]="midinote" min="0" max="127">
+		</label>
+		<label>Delay:
+			<input type="number" [(ngModel)]="delay" min="0" max="1000"> ms
+		</label>
+	</div>
+</div>

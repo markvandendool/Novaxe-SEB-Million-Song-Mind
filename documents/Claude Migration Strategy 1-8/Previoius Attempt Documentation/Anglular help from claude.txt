@@ -1,0 +1,883 @@
+
+Error: src/app/app.module.ts:52:35 - error TS2307: Cannot find module '@components/testpage/testpage.component' or its corresponding type declarations.
+
+52 import { TestpageComponent } from '@components/testpage/testpage.component';
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:54:36 - error TS2307: Cannot find module '@components/tab-parser/tab-parser.component' or its corresponding type declarations.
+
+54 import { TabParserComponent } from '@components/tab-parser/tab-parser.component';
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:55:44 - error TS2307: Cannot find module '@components/chords-from-youtube/chords-from-youtube.component' or its corresponding type declarations.
+
+55 import { ChordsFromYoutubeComponent } from '@components/chords-from-youtube/chords-from-youtube.component';
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:56:38 - error TS2307: Cannot find module '@components/fifth-circle/fifth-circle.component' or its corresponding type declarations.
+
+56 import { FifthCircleComponent } from '@components/fifth-circle/fifth-circle.component';
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:58:48 - error TS2307: Cannot find module '@components/midi-chord-detect-simple/midi-chord-detect-simple.component' or its corresponding type declarations.
+
+58 import { MidiChordDetectSimpleComponent } from '@components/midi-chord-detect-simple/midi-chord-detect-simple.component';
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:61:38 - error TS2307: Cannot find module '@components/learn-fifths/learn-fifths.component' or its corresponding type declarations.
+
+61 import { LearnFifthsComponent } from '@components/learn-fifths/learn-fifths.component';
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:62:32 - error TS2307: Cannot find module '@components/piano/piano.component' or its corresponding type declarations.
+
+62 import { PianoComponent } from '@components/piano/piano.component';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:63:47 - error TS2307: Cannot find module '@components/create-fifths-exercise/create-fifths-exercise.component' or its corresponding type declarations.
+
+63 import { CreateFifthsExerciseComponent } from '@components/create-fifths-exercise/create-fifths-exercise.component';
+                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:64:40 - error TS2307: Cannot find module '@components/exercises/templates/rhythm/exercice-rythm.component' or its corresponding type declarations.
+
+64 import { ExerciceRythmComponent } from '@components/exercises/templates/rhythm/exercice-rythm.component';
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:65:36 - error TS2307: Cannot find module '@components/metro/metro-page/metro-page.component' or its corresponding type declarations.
+
+65 import { MetroPageComponent } from '@components/metro/metro-page/metro-page.component';
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:66:33 - error TS2307: Cannot find module '@components/navbar/navbar.component' or its corresponding type declarations.
+
+66 import { NavbarComponent } from '@components/navbar/navbar.component';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:67:30 - error TS2307: Cannot find module 'ngx-cookie' or its corresponding type declarations.
+
+67 import { CookieModule } from 'ngx-cookie';
+                                ~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:70:39 - error TS2307: Cannot find module '@components/youtube-audio/youtube-audio.component' or its corresponding type declarations.
+
+70 import { YoutubeAudioComponent } from '@components/youtube-audio/youtube-audio.component';
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:71:33 - error TS2307: Cannot find module '@components/editor/editor.component' or its corresponding type declarations.
+
+71 import { EditorComponent } from '@components/editor/editor.component';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:72:32 - error TS2307: Cannot find module '@components/draft/draft.component' or its corresponding type declarations.
+
+72 import { DraftComponent } from '@components/draft/draft.component';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:73:42 - error TS2307: Cannot find module '@components/page-fifth-circle/page-fifth-circle.component' or its corresponding type declarations.
+
+73 import { PageFifthCircleComponent } from '@components/page-fifth-circle/page-fifth-circle.component';
+                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:74:41 - error TS2307: Cannot find module '@components/exercises/template-viewer/template-viewer.component' or its corresponding type declarations.
+
+74 import { TemplateViewerComponent } from '@components/exercises/template-viewer/template-viewer.component';
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:75:32 - error TS2307: Cannot find module '@components/exercises/templates/chord/chord.component' or its corresponding type declarations.
+
+75 import { ChordComponent } from '@components/exercises/templates/chord/chord.component';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:76:34 - error TS2307: Cannot find module '@components/exercises/results/results.component' or its corresponding type declarations.
+
+76 import { ResultsComponent } from '@components/exercises/results/results.component';
+                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:77:36 - error TS2307: Cannot find module '@components/exercises/templates/countdown/countdown.component' or its corresponding type declarations.
+
+77 import { CountdownComponent } from '@components/exercises/templates/countdown/countdown.component';
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:78:32 - error TS2307: Cannot find module '@components/exercises/templates/notes/notes.component' or its corresponding type declarations.
+
+78 import { NotesComponent } from '@components/exercises/templates/notes/notes.component';
+                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:83:40 - error TS2307: Cannot find module '@components/exercises/page-generator/page-generator.component' or its corresponding type declarations.
+
+83 import { PageGeneratorComponent } from '@components/exercises/page-generator/page-generator.component';
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:89:36 - error TS2307: Cannot find module '@components/piano-mini/piano-mini.component' or its corresponding type declarations.
+
+89 import { PianoMiniComponent } from '@components/piano-mini/piano-mini.component';
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/app.module.ts:97:17 - error NG1010: Value
+
+Error: src/app/app.module.ts:139:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+139   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:140:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+140   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:153:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+153   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:154:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+154   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:155:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+155   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:176:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+176   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:177:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+177   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:178:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+178   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:181:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+181   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:182:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+182   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/app.module.ts:183:3 - error TS1117: An object literal cannot have multiple properties with the same name.
+
+183   schemas: [CUSTOM_ELEMENTS_SCHEMA],
+      ~~~~~~~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:3:38 - error TS2307: Cannot find module '@services/bindings/bindings.service' or its corresponding type declarations.
+
+3 import { BindingsService,KEYS } from '@services/bindings/bindings.service';
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:5:34 - error TS2307: Cannot find module '@services/soundfont/soundfont.service' or its corresponding type declarations.
+
+5 import { SoundfontService } from '@services/soundfont/soundfont.service';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:42:24 - error NG2003: No suitable injection token for parameter 'keys' of class 'ChordsBrowseComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+42   constructor( private keys:BindingsService, public piano:SoundfontService ) {
+                          ~~~~
+
+  src/app/components/chords-browse/chords-browse.component.ts:42:29
+    42   constructor( private keys:BindingsService, public piano:SoundfontService ) {
+                                   ~~~~~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:152:92 - error TS1005: ';' expected.
+
+152     this.binding$ = this.keys.match( [ KEYS.PAGE_UP, KEYS.PAGE_DOWN ] , []).map(res => res)))).subscribe(() => {
+                                                                                               ~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:152:93 - error TS1128: Declaration or statement expected.
+
+152     this.binding$ = this.keys.match( [ KEYS.PAGE_UP, KEYS.PAGE_DOWN ] , []).map(res => res)))).subscribe(() => {
+                                                                                                ~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:152:94 - error TS1128: Declaration or statement expected.
+
+152     this.binding$ = this.keys.match( [ KEYS.PAGE_UP, KEYS.PAGE_DOWN ] , []).map(res => res)))).subscribe(() => {
+                                                                                                 ~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:152:95 - error TS1128: Declaration or statement expected.
+
+152     this.binding$ = this.keys.match( [ KEYS.PAGE_UP, KEYS.PAGE_DOWN ] , []).map(res => res)))).subscribe(() => {
+                                                                                                  ~
+
+
+Error: src/app/components/chords-browse/chords-browse.component.ts:152:96 - error TS2304: Cannot find name 'subscribe'.
+
+152     this.binding$ = this.keys.match( [ KEYS.PAGE_UP, KEYS.PAGE_DOWN ] , []).map(res => res)))).subscribe(() => {
+                                                                                                   ~~~~~~~~~
+
+
+Error: src/app/components/dico/dico.component.ts:5:27 - error TS2307: Cannot find module '@models/songmodel/songmodel' or its corresponding type declarations.
+
+5 import { Songmodel } from '@models/songmodel/songmodel';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/dico/dico.component.ts:6:32 - error TS2307: Cannot find module '@models/selectionmodel/selectionmodel' or its corresponding type declarations.
+
+6 import { SelectionModel } from '@models/selectionmodel/selectionmodel';
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/dico/dico.component.ts:7:25 - error TS2307: Cannot find module '@models/songmodel/measure' or its corresponding type declarations.
+
+7 import { Measure } from '@models/songmodel/measure';
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/dico/dico.component.ts:8:36 - error TS2307: Cannot find module '@components/piano-mini/piano-mini.component' or its corresponding type declarations.
+
+8 import { PianoMiniComponent } from '@components/piano-mini/piano-mini.component';
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/dico/dico.component.ts:25:23 - error NG2003: No suitable injection token for parameter 'sm' of class 'DicoComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+25   constructor(private sm:Songmodel, private sel:SelectionModel) {
+                         ~~
+
+  src/app/components/dico/dico.component.ts:25:26
+    25   constructor(private sm:Songmodel, private sel:SelectionModel) {
+                                ~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/dico/dico.component.ts:29:70 - error TS1005: ';' expected.
+
+29     this.selectionUpdate$ = this.sel.selected_Update$.map(res => res)))).subscribe(data=>{
+                                                                        ~
+
+
+Error: src/app/components/dico/dico.component.ts:29:71 - error TS1128: Declaration or statement expected.
+
+29     this.selectionUpdate$ = this.sel.selected_Update$.map(res => res)))).subscribe(data=>{
+                                                                         ~
+
+
+Error: src/app/components/dico/dico.component.ts:29:72 - error TS1128: Declaration or statement expected.
+
+29     this.selectionUpdate$ = this.sel.selected_Update$.map(res => res)))).subscribe(data=>{
+                                                                          ~
+
+
+Error: src/app/components/dico/dico.component.ts:29:73 - error TS1128: Declaration or statement expected.
+
+29     this.selectionUpdate$ = this.sel.selected_Update$.map(res => res)))).subscribe(data=>{
+                                                                           ~
+
+
+Error: src/app/components/dico/dico.component.ts:29:74 - error TS2304: Cannot find name 'subscribe'.
+
+29     this.selectionUpdate$ = this.sel.selected_Update$.map(res => res)))).subscribe(data=>{
+                                                                            ~~~~~~~~~
+
+
+Error: src/app/components/draft/draft.component.html:8:15 - error NG8002: Can't bind to 'ngModel' since it isn't a known property of 'textarea'.
+
+8     <textarea [(ngModel)]='abcString' id="abcPaper" rows="4" cols="50"> </textarea>
+                ~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/components/draft/draft.component.ts:8:16
+    8   templateUrl: './draft.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component DraftComponent.
+
+
+Error: src/app/components/draft/draft.component.html:14:58 - error NG8002: Can't bind to 'ngModel' since it isn't a known property of 'input'.
+
+14 <input name="transpose" type="number" min="-12" max="12" [(ngModel)]="transpose" (change)="renderAbcInEditorWithOptions()"/>
+                                                            ~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/components/draft/draft.component.ts:8:16
+    8   templateUrl: './draft.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component DraftComponent.
+
+
+Error: src/app/components/exercises/page-exercise-selection/page-exercise-selection.component.ts:3:27 - error TS2307: Cannot find module '@models/usermodel/usermodel' or its corresponding type declarations.
+
+3 import { UserModel } from '@models/usermodel/usermodel';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/page-exercise-selection/page-exercise-selection.component.ts:14:24 - error NG2003: No suitable injection token for parameter 'user' of class 'PageExerciseSelectionComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+14   constructor( private user:UserModel) {
+                          ~~~~
+
+  src/app/components/exercises/page-exercise-selection/page-exercise-selection.component.ts:14:29
+    14   constructor( private user:UserModel) {
+                                   ~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:6:34 - error TS2307: Cannot find module '@services/transport/transport.service' or its corresponding type declarations.
+
+6 import { TransportService } from '@services/transport/transport.service';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:7:40 - error TS2307: Cannot find module '@services/exercises/exercise_results/exercise-results.service' or its corresponding type declarations.
+
+7 import { ExerciseResultsService } from '@services/exercises/exercise_results/exercise-results.service';
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:8:30 - error TS2307: Cannot find module '@services/synth/synth.service' or its corresponding type declarations.
+
+8 import { SynthService } from '@services/synth/synth.service';
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:9:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+9 import { MidiService } from "@services/midi/midi.service"
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:69:22 - error NG2003: No suitable injection token for parameter 'transport' of class 'AbcCheckerFullScoreComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+69   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                        ~~~~~~~~~
+
+  src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:69:32
+    69   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                                      ~~~~~~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:221:71 - error TS1005: ';' expected.
+
+221         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                          ~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:221:72 - error TS1128: Declaration or statement expected.
+
+221         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                           ~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:221:73 - error TS1128: Declaration or statement expected.
+
+221         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                            ~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:221:74 - error TS1128: Declaration or statement expected.
+
+221         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                             ~
+
+
+Error: src/app/components/exercises/templates/abc-checker-full-score/abc-checker-full-score.component.ts:221:75 - error TS2304: Cannot find name 'subscribe'.
+
+221         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                              ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:5:34 - error TS2307: Cannot find module '@services/transport/transport.service' or its corresponding type declarations.
+
+5 import { TransportService } from '@services/transport/transport.service';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:6:40 - error TS2307: Cannot find module '@services/exercises/exercise_results/exercise-results.service' or its corresponding type declarations.
+
+6 import { ExerciseResultsService } from '@services/exercises/exercise_results/exercise-results.service';
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:7:30 - error TS2307: Cannot find module '@services/synth/synth.service' or its corresponding type declarations.
+
+7 import { SynthService } from '@services/synth/synth.service';
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:8:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+8 import { MidiService } from "@services/midi/midi.service"
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:75:22 - error NG2003: No suitable injection token for parameter 'transport' of class 'AbcCheckerComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+75   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                        ~~~~~~~~~
+
+  src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:75:32
+    75   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                                      ~~~~~~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:189:71 - error TS1005: ';' expected.
+
+189         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                          ~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:189:72 - error TS1128: Declaration or statement expected.
+
+189         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                           ~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:189:73 - error TS1128: Declaration or statement expected.
+
+189         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                            ~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:189:74 - error TS1128: Declaration or statement expected.
+
+189         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                             ~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:189:75 - error TS2304: Cannot find name 'subscribe'.
+
+189         this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                              ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-checker/abc-checker.component.ts:347:9 - error TS2353: Object literal may only specify known properties, and 'element' does not exist in type 'AbcVisualParams'.
+
+347         element: 'abcjs-paper',
+            ~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:5:34 - error TS2307: Cannot find module '@services/transport/transport.service' or its corresponding type declarations.
+
+5 import { TransportService } from '@services/transport/transport.service';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:6:40 - error TS2307: Cannot find module '@services/exercises/exercise_results/exercise-results.service' or its corresponding type declarations.
+
+6 import { ExerciseResultsService } from '@services/exercises/exercise_results/exercise-results.service';
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:7:30 - error TS2307: Cannot find module '@services/synth/synth.service' or its corresponding type declarations.
+
+7 import { SynthService } from '@services/synth/synth.service';
+                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:8:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+8 import { MidiService } from "@services/midi/midi.service"
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:76:22 - error NG2003: No suitable injection token for parameter 'transport' of class 'AbcHearingComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+76   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                        ~~~~~~~~~
+
+  src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:76:32
+    76   constructor(public transport:TransportService, private midi:MidiService, private resService:ExerciseResultsService, private synthService:SynthService, private zone:NgZone) {
+                                      ~~~~~~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:327:67 - error TS1005: ';' expected.
+
+327     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                      ~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:327:68 - error TS1128: Declaration or statement expected.
+
+327     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                       ~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:327:69 - error TS1128: Declaration or statement expected.
+
+327     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                        ~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:327:70 - error TS1128: Declaration or statement expected.
+
+327     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                         ~
+
+
+Error: src/app/components/exercises/templates/abc-hearing/abc-hearing.component.ts:327:71 - error TS2304: Cannot find name 'subscribe'.
+
+327     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                          ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:4:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+4 import { MidiService } from "@services/midi/midi.service"
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:17:23 - error NG2003: No suitable injection token for parameter 'midi' of class 'InstrLvl1Component'.
+  Consider using the @Inject decorator to specify an injection token.
+
+17   constructor(private midi:MidiService, private zone:NgZone) { }
+                         ~~~~
+
+  src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:17:28
+    17   constructor(private midi:MidiService, private zone:NgZone) { }
+                                  ~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:21:67 - error TS1005: ';' expected.
+
+21     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                     ~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:21:68 - error TS1128: Declaration or statement expected.
+
+21     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                      ~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:21:69 - error TS1128: Declaration or statement expected.
+
+21     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                       ~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:21:70 - error TS1128: Declaration or statement expected.
+
+21     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                        ~
+
+
+Error: src/app/components/exercises/templates/instr-lvl1/instr-lvl1.component.ts:21:71 - error TS2304: Cannot find name 'subscribe'.
+
+21     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                         ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:3:27 - error TS2307: Cannot find module '@models/songmodel/songmodel' or its corresponding type declarations.
+
+3 import { Songmodel } from '@models/songmodel/songmodel';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:4:22 - error TS2307: Cannot find module '@models/songmodel/beat' or its corresponding type declarations.
+
+4 import { Beat } from '@models/songmodel/beat';
+                       ~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:5:32 - error TS2307: Cannot find module '@services/display/displayService' or its corresponding type declarations.
+
+5 import { DisplayService } from '@services/display/displayService';
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:8:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+8 import { MidiService } from '@services/midi/midi.service';
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:10:40 - error TS2307: Cannot find module '@services/exercises/exercise_results/exercise-results.service' or its corresponding type declarations.
+
+10 import { ExerciseResultsService } from '@services/exercises/exercise_results/exercise-results.service';
+                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:104:23 - error NG2003: No suitable injection token for parameter 'sm' of class 'MixedTemplateComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+104   constructor(private sm:Songmodel, private ds:DisplayService, private resService:ExerciseResultsService, public midi:MidiService, private zone:NgZone ) {
+                          ~~
+
+  src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:104:26
+    104   constructor(private sm:Songmodel, private ds:DisplayService, private resService:ExerciseResultsService, public midi:MidiService, private zone:NgZone ) {
+                                 ~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:110:67 - error TS1005: ';' expected.
+
+110     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                      ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:110:68 - error TS1128: Declaration or statement expected.
+
+110     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                       ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:110:69 - error TS1128: Declaration or statement expected.
+
+110     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                        ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:110:70 - error TS1128: Declaration or statement expected.
+
+110     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                         ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:110:71 - error TS2304: Cannot find name 'subscribe'.
+
+110     this.midiNotesTab$ = this.midi.notesTabSubject.map(res => res)))).subscribe((data)=>{
+                                                                          ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:170:57 - error TS1005: ';' expected.
+
+170     this.abcString$ = this.ds.abcString$.map(res => res)))).subscribe(abcString=>{
+                                                            ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:170:58 - error TS1128: Declaration or statement expected.
+
+170     this.abcString$ = this.ds.abcString$.map(res => res)))).subscribe(abcString=>{
+                                                             ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:170:59 - error TS1128: Declaration or statement expected.
+
+170     this.abcString$ = this.ds.abcString$.map(res => res)))).subscribe(abcString=>{
+                                                              ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:170:60 - error TS1128: Declaration or statement expected.
+
+170     this.abcString$ = this.ds.abcString$.map(res => res)))).subscribe(abcString=>{
+                                                               ~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:170:61 - error TS2304: Cannot find name 'subscribe'.
+
+170     this.abcString$ = this.ds.abcString$.map(res => res)))).subscribe(abcString=>{
+                                                                ~~~~~~~~~
+
+
+Error: src/app/components/exercises/templates/mixed-template/mixed-template.component.ts:336:9 - error TS2353: Object literal may only specify known properties, and 'element' does not exist in type 'AbcVisualParams'.
+
+336         element: 'abcCanvas',
+            ~~~~~~~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:5:36 - error TS2307: Cannot find module '@services/chord-detect/chord-detect.service' or its corresponding type declarations.
+
+5 import { ChordDetectService } from "@services/chord-detect/chord-detect.service"
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:29:44 - error NG2003: No suitable injection token for parameter 'chord_detect' of class 'MidiChordDetectAbcComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+29   constructor(private zone:NgZone, private chord_detect:ChordDetectService) {
+                                              ~~~~~~~~~~~~
+
+  src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:29:57
+    29   constructor(private zone:NgZone, private chord_detect:ChordDetectService) {
+                                                               ~~~~~~~~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:31:70 - error TS1005: ';' expected.
+
+31     this.midiNotesTab$ = this.chord_detect.abc_chords.map(res => res)))).subscribe( (chords_obj) =>{ //Subscription to chord detection service.
+                                                                        ~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:31:71 - error TS1128: Declaration or statement expected.
+
+31     this.midiNotesTab$ = this.chord_detect.abc_chords.map(res => res)))).subscribe( (chords_obj) =>{ //Subscription to chord detection service.
+                                                                         ~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:31:72 - error TS1128: Declaration or statement expected.
+
+31     this.midiNotesTab$ = this.chord_detect.abc_chords.map(res => res)))).subscribe( (chords_obj) =>{ //Subscription to chord detection service.
+                                                                          ~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:31:73 - error TS1128: Declaration or statement expected.
+
+31     this.midiNotesTab$ = this.chord_detect.abc_chords.map(res => res)))).subscribe( (chords_obj) =>{ //Subscription to chord detection service.
+                                                                           ~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:31:74 - error TS2304: Cannot find name 'subscribe'.
+
+31     this.midiNotesTab$ = this.chord_detect.abc_chords.map(res => res)))).subscribe( (chords_obj) =>{ //Subscription to chord detection service.
+                                                                            ~~~~~~~~~
+
+
+Error: src/app/components/midi-chord-detect-abc/midi-chord-detect-abc.component.ts:67:7 - error TS2353: Object literal may only specify known properties, and 'element' does not exist in type 'AbcVisualParams'.
+
+67       element: 'abcChord'
+         ~~~~~~~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:6:29 - error TS2307: Cannot find module '@services/midi/midi.service' or its corresponding type declarations.
+
+6 import { MidiService } from '@services/midi/midi.service';
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:21:24 - error NG2003: No suitable injection token for parameter 'midi' of class 'MidiSelectorComponent'.
+  Consider using the @Inject decorator to specify an injection token.
+
+21   constructor( private midi: MidiService, private zone:NgZone ) {
+                          ~~~~
+
+  src/app/components/midi-selector/midi-selector.component.ts:21:30
+    21   constructor( private midi: MidiService, private zone:NgZone ) {
+                                    ~~~~~~~~~~~
+    This type does not have a value, so it cannot be used as injection token.
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:23:68 - error TS1005: ';' expected.
+
+23    this.plugged_inputs$ = this.midi.plugged_inputs$.map(res => res)))).subscribe((data)=>{
+                                                                      ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:23:69 - error TS1128: Declaration or statement expected.
+
+23    this.plugged_inputs$ = this.midi.plugged_inputs$.map(res => res)))).subscribe((data)=>{
+                                                                       ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:23:70 - error TS1128: Declaration or statement expected.
+
+23    this.plugged_inputs$ = this.midi.plugged_inputs$.map(res => res)))).subscribe((data)=>{
+                                                                        ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:23:71 - error TS1128: Declaration or statement expected.
+
+23    this.plugged_inputs$ = this.midi.plugged_inputs$.map(res => res)))).subscribe((data)=>{
+                                                                         ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:23:72 - error TS2304: Cannot find name 'subscribe'.
+
+23    this.plugged_inputs$ = this.midi.plugged_inputs$.map(res => res)))).subscribe((data)=>{
+                                                                          ~~~~~~~~~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:27:65 - error TS1005: ';' expected.
+
+27     this.chosen_input$ = this.midi.chosen_input$.map(res => res)))).subscribe((data)=>{
+                                                                   ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:27:66 - error TS1128: Declaration or statement expected.
+
+27     this.chosen_input$ = this.midi.chosen_input$.map(res => res)))).subscribe((data)=>{
+                                                                    ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:27:67 - error TS1128: Declaration or statement expected.
+
+27     this.chosen_input$ = this.midi.chosen_input$.map(res => res)))).subscribe((data)=>{
+                                                                     ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:27:68 - error TS1128: Declaration or statement expected.
+
+27     this.chosen_input$ = this.midi.chosen_input$.map(res => res)))).subscribe((data)=>{
+                                                                      ~
+
+
+Error: src/app/components/midi-selector/midi-selector.component.ts:27:69 - error TS2304: Cannot find name 'subscribe'.
+
+27     this.chosen_input$ = this.midi.chosen_input$.map(res => res)))).subscribe((data)=>{
+                                                                       ~~~~~~~~~
+
+
+Error: src/app/components/page-fifth-circle/page-fifth-circle.component.html:2:3 - error NG8001: 'app-fifth-circle' is not a known element:
+1. If 'app-fifth-circle' is an Angular component, then verify that it is included in the '@Component.imports' of this component.
+2. If 'app-fifth-circle' is a Web Component then add 'CUSTOM_ELEMENTS_SCHEMA' to the '@Component.schemas' of this component to suppress this message.
+
+2   <app-fifth-circle style="width: 70vh;"></app-fifth-circle>
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  src/app/components/page-fifth-circle/page-fifth-circle.component.ts:7:16
+    7   templateUrl: './page-fifth-circle.component.html',
+                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Error occurs in the template of component PageFifthCircleComponent.
+
+
+Error: src/app/components/page-fifth-circle/page-fifth-circle.component.ts:2:38 - error TS2307: Cannot find module '@components/fifth-circle/fifth-circle.component' or its corresponding type declarations.
+
+2 import { FifthCircleComponent } from '@components/fifth-circle/fifth-circle.component';
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Error: Can't resolve 'src/styles.css' in '/Users/markvandendool/HarmonicOracle Cursor/harmonic-oracle/vendor/novaxe-fakebook'
+
+
+markvandendool@Marks-Mac-mini novaxe-fakebook % 
+

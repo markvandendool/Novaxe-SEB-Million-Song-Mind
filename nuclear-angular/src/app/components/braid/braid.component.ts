@@ -31,7 +31,7 @@ import { Component, OnInit } from '@angular/core';
   `]
 })
 export class BraidComponent implements OnInit {
-  
+
   constructor() { }
 
   ngOnInit(): void {

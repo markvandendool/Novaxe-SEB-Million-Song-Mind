@@ -1,0 +1,695 @@
+# Ultra-Prompt: Million Song Mind Integration & Musical Ecosystem Architecture
+
+You are tasked with implementing a world-class, future-proof musical software ecosystem integration that will serve as the foundation for an elite-level music technology business. This integration combines Million Song Mind (MSM) with Novaxe SEB and establishes architectural patterns for AI integration, multi-platform deployment, and scalable musical services.
+
+## Executive Vision & Strategic Context
+
+### Business Imperatives
+- **Foundation for Scale**: This integration establishes the architectural DNA for a global music technology platform
+- **AI-First Future**: Every component must be designed for seamless AI/ML integration and automated music analysis
+- **Universal Platform**: Prepare for tablet apps, mobile apps (iOS/Android), web, desktop, and future form factors
+- **Enterprise Grade**: Performance, reliability, and maintainability standards of Fortune 500 music technology companies
+- **Modular Excellence**: Each service/component should be independently deployable, testable, and scalable
+
+### Core Ecosystem Components
+1. **Million Song Mind (MSM)**: React/Vite TypeScript braid visualization and music theory UI
+2. **Novaxe SEB**: Angular 15 music ecosystem with MIDI, ABCJS, Tonal.js, transport, and mapping services
+3. **Unified Service Layer**: Abstract interfaces enabling AI, mobile, and future platform integrations
+4. **Data Foundation**: Canonical musical data structures for cross-platform consistency
+
+## Technical Architecture Specifications
+
+### Current Technology Stack
+```
+MSM (React/Vite):
+- React 18+ with TypeScript
+- Vite build system
+- Custom braid visualization components
+- Font/typography challenges on braid rendering
+- No monolithic backend (API consumer)
+
+Novaxe SEB (Angular 15):
+- Angular 15 with TypeScript 4.9.5
+- RxJS 7.8 for reactive patterns
+- ABCJS for music notation rendering
+- @tonaljs/* for music theory
+- WebAudio API + MIDI services
+- soundfont-player for audio synthesis
+- CanvasJS for data visualization
+- jQuery and PHP endpoints (src/api)
+- Node.js 20.19 (Angular 15 recommends 18.19)
+
+Constraints:
+- CommonJS dependencies require allowedCommonJs configuration
+- ABCJS types incompatible with TS 4.9 (mitigated via skipLibCheck)
+- Font rendering issues in MSM braid components
+- Potential Tonal.js version conflicts between codebases
+```
+
+### Integration Architecture
+
+#### Phase 1: Foundation & Embedding (Days 1-2)
+**Objective**: Establish MSM as iframe-embedded route within Novaxe with bidirectional communication
+
+**Implementation Strategy**:
+1. **Angular Route Setup**: Create `/msm` route hosting MSM via secure iframe
+2. **PostMessage Bridge**: Implement type-safe communication protocol between host and iframe
+3. **Feature Flag System**: Runtime toggles for integration features and rollback capability
+4. **State Synchronization**: Establish initial handshake and streaming state updates
+5. **Error Boundaries**: Graceful degradation when MSM unavailable
+
+**Required Files & Components**:
+
+```typescript
+// src/app/config/msm.config.ts
+export interface MsmConfig {
+  url: string;
+  timeoutMs: number;
+  retryAttempts: number;
+  enableDebugLogging: boolean;
+}
+
+export const MSM_CONFIG: MsmConfig = {
+  url: environment.msmUrl,
+  timeoutMs: 5000,
+  retryAttempts: 3,
+  enableDebugLogging: !environment.production
+};
+```
+
+```typescript
+// src/app/shared/interfaces/music-services.ts
+export interface IMusicTheoryService {
+  getChord(notesMidi: number[], key?: string): Observable<string[]>;
+  getScale(key: string, mode?: string): Observable<string[]>;
+  transpose(note: string, semitones: number): string;
+  analyzeProgression(chords: string[]): Observable<ProgressionAnalysis>;
+}
+
+export interface IMidiService {
+  start(): Promise<void>;
+  stop(): Promise<void>;
+  playNote(noteMidi: number, velocity?: number, durationMs?: number): void;
+  onNotesChanged(cb: (activeMidi: number[]) => void): () => void;
+  getConnectedDevices(): Observable<MidiDevice[]>;
+  recordingState$: Observable<MidiRecordingState>;
+}
+
+export interface ITransportService {
+  play(): void;
+  pause(): void;
+  stop(): void;
+  setTempo(bpm: number): void;
+  setPosition(positionMs: number): void;
+  state$: Observable<TransportState>;
+  timeSignature$: Observable<TimeSignature>;
+}
+
+export interface IAIAnalysisService {
+  analyzeHarmony(notes: number[]): Promise<HarmonyAnalysis>;
+  suggestNextChord(progression: string[], key: string): Promise<ChordSuggestion[]>;
+  generateMelody(constraints: MelodyConstraints): Promise<MelodySequence>;
+  classifyGenre(audioFeatures: AudioFeatures): Promise<GenreClassification>;
+}
+```
+
+```typescript
+// src/app/shared/types/music.ts
+export interface NoteDTO {
+  name: string;
+  midi: number;
+  freqHz?: number;
+  octave: number;
+  pitchClass: string;
+}
+
+export interface ChordDTO {
+  symbol: string;
+  notes: NoteDTO[];
+  quality: ChordQuality;
+  root: string;
+  bass?: string;
+  extensions?: string[];
+  inversions?: number;
+}
+
+export interface ScaleDTO {
+  name: string;
+  notes: NoteDTO[];
+  mode: string;
+  intervals: number[];
+  keySignature: KeySignature;
+}
+
+export interface TonalityDTO {
+  tonic: string;
+  mode: string;
+  keySignature: KeySignature;
+  circleOfFifthsPosition: number;
+}
+
+export interface ProgressionDTO {
+  key: TonalityDTO;
+  symbols: string[];
+  romanNumerals: string[];
+  functions: HarmonicFunction[];
+  cadences: Cadence[];
+}
+
+export interface TransportState {
+  playing: boolean;
+  bpm: number;
+  positionMs: number;
+  positionBeats: number;
+  timeSignature: TimeSignature;
+  loop: LoopState | null;
+}
+
+export interface MidiEventDTO {
+  timestamp: number;
+  type: 'noteOn' | 'noteOff' | 'controlChange' | 'programChange';
+  note?: number;
+  velocity?: number;
+  channel: number;
+  controller?: number;
+  value?: number;
+}
+
+export interface BraidNodeDTO {
+  id: string;
+  label: string;
+  tonality: TonalityDTO;
+  position: { x: number; y: number };
+  connections: string[];
+  strength: number;
+  metadata?: Record<string, any>;
+}
+
+export interface BraidEdgeDTO {
+  from: string;
+  to: string;
+  weight: number;
+  relationshipType: 'dominant' | 'subdominant' | 'relative' | 'parallel' | 'chromatic';
+  strength: number;
+}
+
+// Future-proofing for AI integration
+export interface AudioFeatures {
+  tempo: number;
+  key: number;
+  mode: number;
+  energy: number;
+  valence: number;
+  danceability: number;
+  acousticness: number;
+  instrumentalness: number;
+  liveness: number;
+  speechiness: number;
+}
+
+export interface HarmonyAnalysis {
+  key: TonalityDTO;
+  chords: ChordDTO[];
+  progression: ProgressionDTO;
+  modulationPoints: ModulationPoint[];
+  complexity: number;
+  stability: number;
+}
+
+export interface MelodyConstraints {
+  key: TonalityDTO;
+  range: { low: number; high: number };
+  rhythm: RhythmPattern;
+  style: MelodyStyle;
+  length: number;
+}
+```
+
+```typescript
+// src/app/features/msm/services/msm-bridge.service.ts
+@Injectable({
+  providedIn: 'root'
+})
+export class MsmBridgeService implements OnDestroy {
+  private iframe$ = new BehaviorSubject<HTMLIFrameElement | null>(null);
+  private ready$ = new BehaviorSubject<boolean>(false);
+  private messageQueue: MsmMessage[] = [];
+  private responseHandlers = new Map<string, (data: any) => void>();
+  private subscriptions = new Subscription();
+
+  constructor(
+    private logger: Logger,
+    private config: MsmConfig
+  ) {}
+
+  initialize(iframe: HTMLIFrameElement): Observable<boolean> {
+    this.iframe$.next(iframe);
+    
+    // Setup message listener
+    const messageHandler = (event: MessageEvent) => {
+      if (event.origin !== new URL(this.config.url).origin) return;
+      this.handleMessage(event.data);
+    };
+    
+    window.addEventListener('message', messageHandler);
+    this.subscriptions.add(() => window.removeEventListener('message', messageHandler));
+    
+    // Send handshake
+    return this.sendHandshake().pipe(
+      timeout(this.config.timeoutMs),
+      retry(this.config.retryAttempts),
+      tap(ready => this.ready$.next(ready)),
+      catchError(error => {
+        this.logger.error('MSM initialization failed', error);
+        return of(false);
+      })
+    );
+  }
+
+  sendToMsm<T>(message: MsmMessage): Observable<T> {
+    if (!this.ready$.value) {
+      return throwError(() => new Error('MSM not ready'));
+    }
+    
+    return new Observable(observer => {
+      const messageId = this.generateMessageId();
+      const messageWithId = { ...message, id: messageId };
+      
+      this.responseHandlers.set(messageId, (data: T) => {
+        observer.next(data);
+        observer.complete();
+        this.responseHandlers.delete(messageId);
+      });
+      
+      this.postMessage(messageWithId);
+      
+      // Cleanup timeout
+      setTimeout(() => {
+        if (this.responseHandlers.has(messageId)) {
+          this.responseHandlers.delete(messageId);
+          observer.error(new Error('MSM response timeout'));
+        }
+      }, this.config.timeoutMs);
+    });
+  }
+
+  // State synchronization with debouncing
+  syncState(stateType: string, data: any): void {
+    const debouncedSync = this.getDebouncedSync(stateType);
+    debouncedSync(data);
+  }
+
+  private getDebouncedSync(stateType: string): (data: any) => void {
+    const debounceTime = this.getDebounceTime(stateType);
+    return debounce((data: any) => {
+      this.sendToMsm({
+        type: 'state:update',
+        payload: { stateType, data }
+      }).subscribe();
+    }, debounceTime);
+  }
+
+  private getDebounceTime(stateType: string): number {
+    switch (stateType) {
+      case 'notes': return 16; // High frequency note events
+      case 'transport': return 60; // Transport position updates
+      case 'analysis': return 200; // Heavy computation results
+      default: return 100;
+    }
+  }
+}
+```
+
+#### Phase 2: Service Unification & Adapter Layer (Days 3-9)
+**Objective**: Create unified service abstractions with feature-flagged implementations
+
+**Service Factory Pattern**:
+```typescript
+// src/app/shared/interfaces/tokens.ts
+export const MUSIC_THEORY = new InjectionToken<IMusicTheoryService>('MUSIC_THEORY');
+export const MIDI = new InjectionToken<IMidiService>('MIDI');
+export const TRANSPORT = new InjectionToken<ITransportService>('TRANSPORT');
+export const AI_ANALYSIS = new InjectionToken<IAIAnalysisService>('AI_ANALYSIS');
+
+// src/app/app.module.ts providers
+{
+  provide: MUSIC_THEORY,
+  deps: [FeatureFlagService, NovaxeTheoryService, MsmTheoryAdapter],
+  useFactory: (ff: FeatureFlagService, novaxe: NovaxeTheoryService, msm: MsmTheoryAdapter) =>
+    ff.isEnabled('useMsmTheory') ? msm : novaxe
+},
+{
+  provide: MIDI,
+  deps: [FeatureFlagService, NovaxeMidiService, MsmMidiAdapter],
+  useFactory: (ff: FeatureFlagService, novaxe: NovaxeMidiService, msm: MsmMidiAdapter) =>
+    ff.isEnabled('useMsmMidi') ? msm : novaxe
+},
+{
+  provide: AI_ANALYSIS,
+  deps: [HttpClient, Logger],
+  useFactory: (http: HttpClient, logger: Logger) =>
+    new AIAnalysisService(http, logger) // Future AI service
+}
+```
+
+#### Phase 3: Component Migration & Angular Elements (Days 10-21)
+**Objective**: Selective migration of MSM components to Angular Elements for tight integration
+
+**Architecture Considerations**:
+- Preserve MSM's React components where superior (braid visualization)
+- Migrate data-heavy components to Angular for service integration
+- Use Angular Elements for embed-anywhere capability
+
+### Future-Proof Architecture Patterns
+
+#### Multi-Platform Strategy
+```typescript
+// src/app/core/platform/platform.service.ts
+export abstract class PlatformService {
+  abstract getPlatform(): PlatformType;
+  abstract getCapabilities(): PlatformCapabilities;
+  abstract adaptUIForPlatform(component: any): any;
+}
+
+export class WebPlatformService extends PlatformService {
+  getPlatform(): PlatformType { return 'web'; }
+  getCapabilities(): PlatformCapabilities {
+    return {
+      midi: this.hasMidiSupport(),
+      audio: this.hasWebAudioSupport(),
+      touch: this.hasTouchSupport(),
+      fileSystem: this.hasFileSystemAccess()
+    };
+  }
+}
+
+export class MobilePlatformService extends PlatformService {
+  // Mobile-specific implementations
+}
+
+export class TabletPlatformService extends PlatformService {
+  // Tablet-specific implementations
+}
+```
+
+#### AI Integration Framework
+```typescript
+// src/app/core/ai/ai-orchestrator.service.ts
+@Injectable({
+  providedIn: 'root'
+})
+export class AIOrchestrator {
+  private models = new Map<string, AIModel>();
+  private pipeline$ = new Subject<AITask>();
+
+  registerModel(name: string, model: AIModel): void {
+    this.models.set(name, model);
+  }
+
+  analyzeMusic(audioData: AudioBuffer): Observable<MusicAnalysis> {
+    return this.pipeline$.pipe(
+      map(task => this.routeToModel(task)),
+      switchMap(model => model.analyze(audioData)),
+      share()
+    );
+  }
+
+  generateMusic(constraints: GenerationConstraints): Observable<GeneratedMusic> {
+    // AI music generation pipeline
+  }
+
+  private routeToModel(task: AITask): AIModel {
+    // Intelligent model selection based on task requirements
+  }
+}
+```
+
+#### Responsive Design System
+```typescript
+// src/app/core/design/responsive.service.ts
+export class ResponsiveDesignService {
+  private breakpoints = {
+    mobile: '(max-width: 767px)',
+    tablet: '(min-width: 768px) and (max-width: 1023px)',
+    desktop: '(min-width: 1024px)',
+    wide: '(min-width: 1440px)'
+  };
+
+  adaptLayoutForDevice(): LayoutConfiguration {
+    const device = this.getCurrentDevice();
+    return {
+      midiKeyboard: this.getMidiKeyboardLayout(device),
+      braid: this.getBraidLayout(device),
+      transport: this.getTransportLayout(device),
+      sidebar: this.getSidebarLayout(device)
+    };
+  }
+}
+```
+
+## Implementation Requirements
+
+### File Structure (Complete)
+```
+src/app/
+├── core/                                    # Core singleton services
+│   ├── ai/
+│   │   ├── ai-orchestrator.service.ts      # AI pipeline management
+│   │   ├── models/                         # AI model interfaces
+│   │   └── tasks/                          # AI task definitions
+│   ├── platform/
+│   │   ├── platform.service.ts             # Platform abstraction
+│   │   ├── web-platform.service.ts         # Web implementation
+│   │   ├── mobile-platform.service.ts      # Mobile implementation
+│   │   └── tablet-platform.service.ts      # Tablet implementation
+│   ├── design/
+│   │   ├── responsive.service.ts            # Responsive design logic
+│   │   ├── theme.service.ts                # Theme management
+│   │   └── layout.service.ts               # Layout configurations
+│   └── audio/
+│       ├── audio-context.service.ts        # WebAudio management
+│       ├── audio-worklet.service.ts        # Audio processing
+│       └── audio-effects.service.ts        # Effects pipeline
+├── features/
+│   ├── msm/                                # MSM integration module
+│   │   ├── msm.module.ts                   # Feature module
+│   │   ├── msm-routing.module.ts           # MSM routes
+│   │   ├── components/
+│   │   │   ├── msm-container/              # Iframe container
+│   │   │   ├── msm-fallback/               # Error fallback UI
+│   │   │   └── msm-loading/                # Loading states
+│   │   ├── services/
+│   │   │   ├── msm-bridge.service.ts       # PostMessage bridge
+│   │   │   └── msm-state.service.ts        # State management
+│   │   ├── adapters/
+│   │   │   ├── msm-theory-adapter.ts       # Theory service adapter
+│   │   │   ├── msm-midi-adapter.ts         # MIDI service adapter
+│   │   │   └── msm-transport-adapter.ts    # Transport adapter
+│   │   └── guards/
+│   │       └── msm-ready.guard.ts          # Route guard for MSM availability
+│   ├── braid/                              # Braid visualization
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── models/
+│   ├── midi/                               # MIDI functionality
+│   │   ├── components/
+│   │   ├── services/
+│   │   └── models/
+│   └── transport/                          # Transport controls
+│       ├── components/
+│       ├── services/
+│       └── models/
+├── shared/
+│   ├── interfaces/
+│   │   ├── music-services.ts               # Service contracts
+│   │   ├── tokens.ts                       # DI tokens
+│   │   ├── ai-interfaces.ts                # AI service contracts
+│   │   └── platform-interfaces.ts          # Platform contracts
+│   ├── types/
+│   │   ├── music.ts                        # Musical data types
+│   │   ├── ai.ts                           # AI data types
+│   │   ├── platform.ts                     # Platform types
+│   │   └── ui.ts                           # UI component types
+│   ├── services/
+│   │   ├── feature-flag.service.ts         # Feature toggles
+│   │   ├── logger.service.ts               # Logging abstraction
+│   │   ├── error-handler.service.ts        # Error handling
+│   │   └── performance.service.ts          # Performance monitoring
+│   ├── utils/
+│   │   ├── musical-calculations.ts         # Music theory utilities
+│   │   ├── midi-utils.ts                   # MIDI utilities
+│   │   ├── audio-utils.ts                  # Audio utilities
+│   │   └── platform-utils.ts               # Platform detection
+│   └── components/                         # Reusable UI components
+│       ├── loading/
+│       ├── error-boundary/
+│       └── responsive-container/
+├── config/
+│   ├── msm.config.ts                       # MSM configuration
+│   ├── ai.config.ts                        # AI configuration
+│   ├── audio.config.ts                     # Audio configuration
+│   └── platform.config.ts                 # Platform configuration
+└── environments/
+    ├── environment.ts                      # Development config
+    ├── environment.prod.ts                 # Production config
+    ├── environment.mobile.ts               # Mobile config
+    └── environment.tablet.ts               # Tablet config
+
+scripts/                                    # Build and verification scripts
+├── analyze-bundle.js                       # Bundle analysis
+├── smoke-test.js                          # Smoke testing
+├── check-performance.js                   # Performance validation
+├── test-midi-loopback.js                  # MIDI testing
+├── verify-integration.js                  # Integration verification
+└── deploy/                                 # Deployment scripts
+    ├── web-deploy.js
+    ├── mobile-build.js
+    └── tablet-build.js
+```
+
+### Verification Requirements
+
+#### Phase 1 Verification
+```bash
+# Build verification
+npm run build:prod
+# Expected: Build completes without errors, bundle size < baseline + 10%
+
+# Smoke test
+npm run test:smoke
+# Expected: All routes load successfully, MSM iframe loads within 5s
+
+# Integration test
+npm run test:integration
+# Expected: PostMessage handshake completes, state sync works
+```
+
+#### Phase 2 Verification
+```bash
+# Service injection test
+npm run test:services
+# Expected: All services resolve correctly via DI, feature flags work
+
+# MIDI loopback test
+npm run test:midi
+# Expected: MIDI note-on/off completes roundtrip < 50ms
+
+# Bundle analysis
+npm run analyze:bundle
+# Expected: No duplicate dependencies, tree shaking effective
+```
+
+#### Phase 3 Verification
+```bash
+# E2E integration test
+npm run test:e2e
+# Expected: MSM braid renders, MIDI integration works, transport sync
+
+# Performance test
+npm run test:performance
+# Expected: FPS >= 30, memory usage stable, no memory leaks
+
+# Cross-platform test
+npm run test:responsive
+# Expected: Layout adapts correctly for mobile/tablet/desktop
+```
+
+### Performance Requirements
+- **Bundle Size**: Initial load < 6.0MB, lazy routes < 2.0MB each
+- **Time to Interactive**: < 3 seconds on 3G connection
+- **MIDI Latency**: < 50ms note-on to audio output
+- **Frame Rate**: >= 30 FPS for braid visualizations
+- **Memory**: < 100MB baseline, < 200MB with AI features
+
+### Security Requirements
+- **CSP Headers**: Strict content security policy with MSM origin allowlist
+- **Input Sanitization**: All ABCJS and musical inputs sanitized
+- **MIDI Security**: Secure MIDI device access with user consent
+- **AI Data**: Encrypt all AI training data and model parameters
+
+### Accessibility Requirements
+- **WCAG 2.1 AA**: Full compliance for all UI components
+- **Keyboard Navigation**: Complete keyboard accessibility for MIDI-less users
+- **Screen Reader**: Semantic markup for musical concepts
+- **High Contrast**: Theme support for visual accessibility
+
+### Testing Strategy
+- **Unit Tests**: 90%+ coverage for services and utilities
+- **Integration Tests**: Full service interaction coverage
+- **E2E Tests**: Critical user journeys and cross-browser compatibility
+- **Performance Tests**: Automated bundle size and runtime performance monitoring
+- **AI Tests**: Model accuracy and inference time validation
+
+### Deployment Strategy
+- **Feature Flags**: Gradual rollout with instant rollback capability
+- **Blue-Green**: Zero-downtime deployments
+- **CDN**: Global distribution for web assets
+- **App Stores**: Automated mobile/tablet app deployment
+- **Monitoring**: Real-time performance and error tracking
+
+## Deliverable Requirements
+
+### Code Generation Standards
+1. **Complete File Contents**: Provide full, production-ready file contents (not diffs)
+2. **TypeScript Strict**: All code must pass TypeScript strict mode
+3. **ESLint/Prettier**: Follow Angular style guide and consistent formatting
+4. **Documentation**: JSDoc comments for all public APIs
+5. **Error Handling**: Comprehensive error handling with logging
+
+### Architecture Documentation
+1. **ASCII Diagrams**: Simple architectural diagrams for complex integrations
+2. **Migration Guide**: Step-by-step migration documentation
+3. **API Reference**: Complete interface documentation
+4. **Performance Guide**: Optimization recommendations
+
+### Verification Scripts
+1. **Shell Scripts**: Complete executable verification commands
+2. **Expected Outputs**: Clear success/failure criteria
+3. **Rollback Commands**: One-command rollback instructions
+4. **Performance Baselines**: Quantifiable performance expectations
+
+### Project Management
+1. **Milestone Tags**: Git tags for each integration phase
+2. **Branch Strategy**: Clear branching and merge strategy
+3. **Risk Mitigation**: Rollback plans for each phase
+4. **Progress Tracking**: Measurable completion criteria
+
+## Success Criteria
+
+### Technical Success
+- [ ] MSM successfully embedded and communicating via PostMessage
+- [ ] Unified service layer with feature-flag switching
+- [ ] Zero regressions in existing Novaxe functionality
+- [ ] Performance targets met for all platforms
+- [ ] Full test coverage and automated verification
+
+### Business Success
+- [ ] Foundation for AI integration established
+- [ ] Multi-platform deployment ready
+- [ ] Scalable architecture for team growth
+- [ ] Production-ready error handling and monitoring
+- [ ] Documentation for future developers
+
+### Future Readiness
+- [ ] AI service integration points defined
+- [ ] Mobile/tablet adaptation framework ready
+- [ ] Responsive design system implemented
+- [ ] Platform abstraction layer complete
+- [ ] Microservice architecture foundations laid
+
+## Implementation Instructions for ChatGPT-5
+
+Generate the complete integration implementation following these requirements:
+
+1. **Start with Phase 1**: Complete file contents for MSM embedding, bridge service, and feature flags
+2. **Provide verification after each step group**: Include shell commands and expected outputs
+3. **Use incremental architecture**: Build foundational abstractions that support future phases
+4. **Include performance monitoring**: Add timing marks and bundle analysis
+5. **Create rollback safety**: Tag milestones and provide rollback commands
+6. **Think enterprise-scale**: Every decision should support a global music platform
+7. **Prioritize maintainability**: Code that a team of 50+ developers can work on
+8. **Design for AI**: Every service should be AI-integration ready
+9. **Plan for mobile**: Responsive and platform-aware from day one
+10. **Document extensively**: Assume future developers haven't seen this conversation
+
+Begin with Phase 1 implementation, providing complete production-ready files and verification procedures.

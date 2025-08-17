@@ -1,0 +1,21 @@
+<div class="chordBrowse">
+
+  <i class="p-2 fas fa-arrow-up" (click)="move_root('up')" ></i>
+  <i class="p-2 fas fa-arrow-down" (click)="move_root('down')"></i>
+
+  <span >
+    <span class="p-2" (touchmove)="scroll_root($event)">{{root}}</span>
+    <span class="p-2" (touchmove)="scroll_mode($event)">{{mode}}</span>
+    <span class="p-2" style="min-width: 3.5em;display: inline-block;">{{quality}}</span>
+  </span>
+
+  <div class="q-selector row">
+    <span class="q-buttons col-3 p-0" (click)="quality = q" *ngFor="let q of qualities"> {{ q }} </span> 
+  </div>
+
+  <span style="    display: inline-flex; height: auto; width: 168px;">
+    <app-piano-mini style="left: 18px; position: relative; "></app-piano-mini> 
+  </span>
+
+
+</div>

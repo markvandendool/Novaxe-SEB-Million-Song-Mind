@@ -1,0 +1,245 @@
+What This Does and Why It Works
+
+Switches to compatible Node 16.20.2.
+Cleans caches and kills port conflicts.
+Updates package.json: Upgrades TypeScript to ~4.1.6 (fixes potential d.ts parsing issues in @tonaljs); adds tailwindcss ^3.4.10 and autoprefixer ^10.4.20 (resolves PostCSS errors by providing compatible versions and configs for Tailwind directives in your SCSS); uses overrides to pin worker-plugin@4.0.3 (compatible with Webpack 4 in Angular 11, fixing the parser.addPresentationalDependency error caused by a mismatched version assuming Webpack 5).
+Configures tsconfig files with skipLibCheck: true to bypass any remaining lib type issues.
+Creates empty proxy.conf.json to avoid missing file errors.
+Sets up postcss.config.js and tailwind.config.js for Tailwind v3 processing (handles @tailwind directives in SCSS without the v4 plugin migration error).
+Installs with --legacy-peer-deps to handle version warnings.
+Serves with flags to disable strict builds and avoid compilation hangs.
+
+Expected Result
+The server should start: "** Angular Live Development Server is listening on 127.0.0.1:4202 **". Access http://127.0.0.1:4202/. If runtime errors persist, share the new logs. Running on Intel Mac Pro may not change outcomes, as issues are version-related, not architecture-specific (Apple Silicon handles Node 16 fine via Rosetta if needed).32 web pages3.6s** Angular Live Development Server is listening on 127.0.0.1:4202, open your browser on http://127.0.0.1:4202/ **
+ 
+✔ Browser application bundle generation complete.
+ 
+Initial Chunk Files | Names  |    Size
+styles.css          | styles | 0 bytes
+ 
+5 unchanged chunks
+ 
+Build at: 2025-08-12T15:06:59.673Z - Hash: f0473d894836249d375f - Time: 328ms
+ 
+Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:15 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };
+                 ~~~~~~
+ 
+ 
+Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:28 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };
+                              ~~~~
+ 
+ 
+Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:39 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };
+                                         ~~~~~~~~~~~
+ 
+ 
+Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:57 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };
+                                                           ~~~~~~~~
+and many more in the terminal.Thought for 4m 54sCommands to Launch Novaxe V2 Angular App
+Run these commands in your terminal to resolve the remaining TypeScript parsing errors in @tonaljs d.ts files and serve the app on port 4202. This adds a patch to remove the 'type' modifiers from export statements in the affected d.ts files (fixing TS1005 without breaking type definitions), while keeping all previous fixes.
+bashcd "/Users/markvandendool/HarmonicOracle GitHub/Novaxe SEB"
+export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use 16.20.2
+lsof -ti:4202 | xargs kill -9 2>/dev/null || true
+rm -rf node_modules package-lock.json "$HOME/.npm/_cacache/tmp"
+npm cache clean --force
+cat > package.json << 'EOF'
+{
+  "name": "novaxe-v2",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "11.2.14",
+    "@angular/common": "11.2.14",
+    "@angular/compiler": "11.2.14",
+    "@angular/core": "11.2.14",
+    "@angular/forms": "11.2.14",
+    "@angular/platform-browser": "11.2.14",
+    "@angular/platform-browser-dynamic": "11.2.14",
+    "@angular/router": "11.2.14",
+    "@angular/youtube-player": "10.2.7",
+    "@apollo/client": "^3.0.0",
+    "@fortawesome/fontawesome-free": "^5.14.0",
+    "@paypal/paypal-js": "^5.0.6",
+    "@tonaljs/tonal": "3.7.2",
+    "@types/canvasjs": "^1.9.6",
+    "abcjs": "^6.2.3",
+    "bootstrap": "^5.3.7",
+    "canvasjs": "^1.8.3",
+    "graphql": "^15.0.0",
+    "jquery": "^3.5.1",
+    "jquery-ui-dist": "^1.12.1",
+    "ngx-cookie": "^5.0.0",
+    "rxjs": "~6.6.3",
+    "rxjs-compat": "^6.5.5",
+    "soundfont-player": "^0.12.0",
+    "soundtouchjs": "^0.1.24",
+    "tslib": "^2.0.0",
+    "uikit": "^3.5.10",
+    "wavesurfer.js": "^4.0.1",
+    "webaudiofont": "^2.5.49",
+    "zone.js": "~0.10.2"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "0.1102.19",
+    "@angular/cli": "11.2.19",
+    "@angular/compiler-cli": "11.2.14",
+    "@angular/language-service": "11.2.14",
+    "@types/jasmine": "~3.3.8",
+    "@types/jasminewd2": "~2.0.3",
+    "@types/jquery": "^3.3.38",
+    "@types/node": "^12.11.1",
+    "@types/webaudioapi": "0.0.27",
+    "autoprefixer": "^10.4.20",
+    "codelyzer": "^5.1.2",
+    "jasmine-core": "~3.5.0",
+    "jasmine-spec-reporter": "~5.0.0",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage-istanbul-reporter": "~3.0.2",
+    "karma-jasmine": "~4.0.0",
+    "karma-jasmine-html-reporter": "^1.5.0",
+    "protractor": "^6.0.0",
+    "tailwindcss": "^3.4.10",
+    "ts-node": "~7.0.0",
+    "tslint": "~6.1.0",
+    "typescript": "4.1.6"
+  },
+  "overrides": {
+    "worker-plugin": "4.0.3"
+  }
+}
+EOF
+cat > tsconfig.json << 'EOF'
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "es2020",
+      "dom",
+      "dom.iterable",
+      "esnext.asynciterable"
+    ],
+    "paths": {
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@services/*": [
+        "./src/app/services/*"
+      ],
+      "@models/*": [
+        "./src/app/models/*"
+      ],
+      "@components/*": [
+        "./src/app/components/*"
+      ],
+      "@pages/*": [
+        "./src/app/pages/*"
+      ],
+      "@queries/*": [
+        "./src/app/apollo/queries/*"
+      ]
+    },
+    "resolveJsonModule": true
+  },
+  "angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true,
+    "skipLibCheck": true,
+    "skipMetadataEmit": true
+  }
+}
+EOF
+cat > tsconfig.app.json << 'EOF'
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["node"],
+    "typeRoots": [ "./node_modules/@types" ],
+    "skipLibCheck": true
+  },
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.worker.ts"
+  ]
+}
+EOF
+echo "{}" > src/proxy.conf.json
+cat > postcss.config.js << 'EOF'
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  }
+}
+EOF
+cat > tailwind.config.js << 'EOF'
+module.exports = {
+  content: ['./src/**/*.{html,ts}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+EOF
+npm install --legacy-peer-deps
+find node_modules/@tonaljs -name '*.d.ts' -exec sed -i '' '/export {/s/type //g' {} \;
+./node_modules/.bin/ng serve --host 127.0.0.1 --port 4202 --disable-host-check --aot=false --optimization=false --source-map=false
+What This Does and Why It Works
+
+All previous steps remain to clean, pin versions (now using exact "typescript": "4.1.6" for stability), and configure.
+After install, the find/sed command patches all @tonaljs d.ts files: It searches for lines containing 'export {' and removes 'type ' from them (e.g., 'type NoNote' becomes 'NoNote'), fixing the parse error without affecting type definitions like 'type Foo ='. This allows the compiler to parse the files, and with skipLibCheck: true, it bypasses any resulting type mismatches.
+Serves the app as before.
+
+Expected Result
+The server should start without TS1005 errors: "** Angular Live Development Server is listening on 127.0.0.1:4202 **". Open http://127.0.0.1:4202/. If new errors appear (e.g., runtime), share the logs. The Intel Mac Pro shouldn't be necessary, as this is a version/syntax fix.32 web pages3.1ssame result...Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:15 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };
+                 ~~~~~~
+ 
+ 
+Error: ../node_modules/@tonaljs/core/node_modules/@tonaljs/pitch-note/dist/index.d.ts:44:28 - error TS1005: ',' expected.
+ 
+44 export { type NoNote, type Note, type NoteLiteral, type NoteName, type NoteWithOctave, type PcName, accToAlt, altToAcc, coordToNote, note, stepToLetter, tokenizeNote };

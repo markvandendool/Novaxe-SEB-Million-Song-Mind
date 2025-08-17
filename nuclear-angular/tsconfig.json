@@ -18,10 +18,18 @@
     "module": "es2020",
     "baseUrl": "./src",
     "paths": {
-      "@services/*": ["app/services/*"],
-      "@models/*": ["app/models/*"],
-      "@components/*": ["app/components/*"],
-      "@assets/*": ["assets/*"]
+      "@services/*": [
+        "app/services/*"
+      ],
+      "@models/*": [
+        "app/models/*"
+      ],
+      "@components/*": [
+        "app/components/*"
+      ],
+      "@assets/*": [
+        "assets/*"
+      ]
     },
     "lib": [
       "es2018",

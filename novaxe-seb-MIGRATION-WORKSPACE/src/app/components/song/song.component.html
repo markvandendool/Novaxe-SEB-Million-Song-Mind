@@ -1,0 +1,548 @@
+<section id="song" (keyup.control.enter)="control_enter($event)" (keyup.control.shift.enter)="control_shift_enter($event)">
+<!-- <button class="btn btn-primary mr-2 btn-sm" style="position: fixed;top:120px;z-index: 1000;" (click)="debug()">debug</button> -->
+<div class="song" 
+autofocus
+tabindex="0" 
+(window:resize)="onResize()">
+
+		
+
+    <div class="flip-card-video">
+      <div id="flipCardVideo" class="flip-card-inner">
+
+        <div class="flip-card-front">
+          <div id="abcCanvas" (contextmenu)="flip_card('flipCardVideo')" class="" > </div>
+        </div>
+
+        <div id="flipCardVideoBack" class="flip-card-back" (contextmenu)="flip_card('flipCardVideoBack')" >
+          <div class="flip-card-back-wrapper">
+            <div class="youtube-video-container">
+              <div class="yt_player" id="player" style="width:100%; height:80%;"></div>
+            </div>
+          </div> <!-- flip card back wrapper -->
+        </div> <!-- flip card back -->
+        
+      </div>
+    </div>
+
+
+
+    <!--------------------------------->
+    <!----------- SIDE TABS ----------->
+    <!--------------------------------->
+    <div class="editor_tab" [ngClass]="{editor_visible:cm.isEditor_visible()||cm.isMetro_visible() || cm.isCircle_visible() || cm.isDico_visible() || cm.isOptions_visible(), active:cm.isEditor_visible()}" 
+      (contextmenu)="cm.toggleEditor_visible();$event.preventDefault();" 
+      (click)="cm.toggleEditor_visible();cm.setMetro_visible(false);cm.setCircle_visible(false);cm.setDico_visible(false);cm.setOptions_visible(false);">
+      <img width="100%" src="assets/img/icons/edit_icon.svg"> 
+    </div >
+
+		<!-- <app-transport ></app-transport> -->
+    <div class="metro_tab" [ngClass]="{metro_visible:cm.isEditor_visible()||cm.isMetro_visible() || cm.isCircle_visible() || cm.isDico_visible() || cm.isOptions_visible(), active:cm.isMetro_visible()}" 
+      (contextmenu)="cm.toggleMetro_visible();$event.preventDefault();" 
+      (click)="cm.setEditor_visible(false);cm.toggleMetro_visible();cm.setCircle_visible(false);cm.setDico_visible(false);cm.setOptions_visible(false);">
+     <img width="100%" src="assets/img/metronome_ico.svg"> 
+    </div >
+
+		<div class="circle_tab" [ngClass]="{circle_visible:cm.isEditor_visible()||cm.isMetro_visible() || cm.isCircle_visible() || cm.isDico_visible() || cm.isOptions_visible(), active:cm.isCircle_visible()}" 
+		(contextmenu)="cm.toggleCircle_visible();$event.preventDefault();" 
+		(click)="cm.setEditor_visible(false);cm.setMetro_visible(false);cm.toggleCircle_visible();cm.setDico_visible(false);cm.setOptions_visible(false);">
+      <div style="font-size:1.3rem" class="fas fa-circle" ></div>
+		</div >
+
+    <div class="dico_tab" [ngClass]="{dico_visible:cm.isEditor_visible()||cm.isMetro_visible() || cm.isCircle_visible() || cm.isDico_visible() || cm.isOptions_visible(), active:cm.isDico_visible()}" 
+      (contextmenu)="cm.toggleDico_visible();$event.preventDefault();" 
+      (click)="cm.setEditor_visible(false);cm.setMetro_visible(false);cm.setCircle_visible(false);cm.toggleDico_visible();cm.setOptions_visible(false);">
+      <img width="100%" src="assets/img/icons/dico_icon.svg"> 
+    </div >
+
+    <div class="options_tab" [ngClass]="{options_visible:cm.isEditor_visible()||cm.isMetro_visible() || cm.isCircle_visible() || cm.isDico_visible() || cm.isOptions_visible(), active:cm.isOptions_visible()}" 
+      (contextmenu)="cm.toggleOptions_visible();$event.preventDefault();" 
+      (click)="cm.setEditor_visible(false);cm.setMetro_visible(false);cm.setCircle_visible(false);cm.setDico_visible(false);cm.toggleOptions_visible();">
+      <div style="font-size:1.3rem" class="fa fa-cog"></div>
+    </div >
+
+
+    <!--------------------------------->
+    <!------------ EDITOR ------------->
+    <!--------------------------------->
+    <div class="editor_menu" [ngClass]="{editor_visible:cm.isEditor_visible()}">
+    	<app-editor style="z-index: 3;"></app-editor>
+    </div>
+
+    <!--------------------------------->
+    <!----------- METRONOME ----------->
+    <!--------------------------------->
+		<div class="metro_menu" [ngClass]="{metro_visible:cm.isMetro_visible()}">
+			<app-metro [hidden]="!cm.isMetro_visible()" [metro_volume]="cm.metroVolume"></app-metro>
+		</div>
+
+    <!--------------------------------->
+    <!------ 5th CIRCLE / BRAID ------->
+    <!--------------------------------->
+		<div class="circle_menu" [ngClass]="{circle_visible:cm.isCircle_visible()}">
+      
+      <!--------------------------------->
+      <!----------- TOP MENU ------------>
+      <!--------------------------------->
+      <div class="d-flex w-100 top-menu">
+        <div class="img-icon" (click)="cm.setBraid_visible(false);cm.setFifths_visible(true)">
+          <img src="assets/img/icons/fifths_icon.png" [ngClass]="cm.isBraid_visible() ? 'icon dark' : 'icon'">
+          <span data-tooltip="Fifths circle" data-tooltip-position="bottom"></span>
+        </div>
+        <div class="img-icon" (click)="cm.setBraid_visible(true);cm.setFifths_visible(false)">     
+          <img src="assets/img/icons/braid_icon.png" [ngClass]="cm.isFifths_visible() ? 'icon dark' : 'icon'">
+          <span data-tooltip="Braid" data-tooltip-position="bottom"></span>
+        </div>
+
+        <div class="braid-range" [hidden]="!cm.isBraid_visible()">
+          <input type="range" class="form-range" #braidRange min="0.4" max="2" step="0.1" value="1" (change)="updateZoom(braidRange.value)">
+        </div>
+
+        <div id="braid_display" class="braid-options" [hidden]="!cm.isBraid_visible()">
+          <a class="collapsible" data-toggle="collapse" href="#collapseBraidDisplay" role="button" aria-expanded="false" aria-controls="collapseBraidDisplay">
+            <i class="fas fa-cog p-2" title="Braid options"></i>
+          </a>
+
+          <div class="collapse" id="collapseBraidDisplay">
+            <div>
+              <h6 style="margin-top:1.5rem;">Skin</h6>
+              <select (click)="refresh_tonality()" [(ngModel)]="braidModel" [hidden]="!cm.isBraid_visible()" name="braids" id="braid-select" class="braid-selector" title="Braid skin">
+                <option value="tonal">Classic</option>
+                <option value="blues">Classic Blues</option>
+                <option value="new1">Beacon</option>
+                <option value="new2">Hive</option>
+              </select>
+            </div>
+
+            <div class="d-flex apply-btns">
+              <h6>Display</h6>
+              <div class="switch-titled" [hidden]="!cm.isBraid_visible()" [ngClass]="{disabled:cm.letters_Numbers_sync}">
+                <span class="title" >Roman display</span>
+                <label class="switch" title="Roman numerals/Chord symbols" [hidden]="!cm.isBraid_visible()">
+                  <input type="checkbox" [disabled]="cm.letters_Numbers_sync"  [(ngModel)]="si.braid_param_roman"/>
+                  <span class="slider round">
+                    <span class="number">I</span>
+                    <span class="letter">A</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                <span class="title" >Show midi</span>
+                <label class="switch" title="Off/On">
+                  <input type="checkbox" [(ngModel)]="si.braid_param_show_midi"/>
+                  <span class="slider classic round">
+                    <span class="number">I</span>
+                    <span class="letter">O</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                <span class="title" >Show score chords</span>
+                <label class="switch" title="Off/On">
+                  <input type="checkbox" [(ngModel)]="si.braid_param_show_score_chords"/>
+                  <span class="slider classic round">
+                    <span class="number">I</span>
+                    <span class="letter">O</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                <span class="title" >Simplified braid</span>
+                <label class="switch" title="Off/On">
+                  <input type="checkbox" [(ngModel)]="si.braid_param_simplified_braid" />
+                  <span class="slider classic round">
+                    <span class="number">I</span>
+                    <span class="letter">O</span>
+                  </span>
+                </label>
+              </div>
+            </div>
+
+
+            <div class="d-flex apply-btns emphasis">
+              <h6>Emphasis</h6>
+
+              <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                <span class="title">Score chords</span>
+                <label class="switch" title="Off/On">
+                  <input type="checkbox" (change)="update_chords_in_score()" [(ngModel)]="si.braid_param_emph_score_chords"/>
+                  <span class="slider classic round">
+                    <span class="number">I</span>
+                    <span class="letter">O</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="row-emph">
+                <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                  <span class="title">Diatonic scale</span>
+                  <label class="switch" title="Off/On">
+                    <input type="checkbox" [(ngModel)]="si.braid_param_emph_diatonic_scale"/>
+                    <span class="slider classic round">
+                      <span class="number">I</span>
+                      <span class="letter">O</span>
+                    </span>
+                  </label>
+                </div>
+
+                <!-- <div class="select">
+                  <select name="emphMode" id="emphMode" class="braid-selector" title="Mode" (click)="updateEmphasisScale()"  [(ngModel)]="emphasisMode">
+                    <option value="major">Major</option>
+                    <option value="minor">Minor</option>
+                  </select>
+
+                  <select name="emphScale" id="emphScale" class="braid-selector scale" title="Scale" (click)="updateEmphasisScale()"  [(ngModel)]="emphasisScale">
+                    <option value="c">C</option>
+                    <option value="c#">C#</option>
+                    <option value="db">Db</option>
+                    <option value="d">D</option>
+                    <option value="d#">D#</option>
+                    <option value="eb">Eb</option>
+                    <option value="e">E</option>
+                    <option value="f">F</option>
+                    <option value="f#">F#</option>
+                    <option value="gb">Gb</option>
+                    <option value="g">G</option>
+                    <option value="g#">G#</option>
+                    <option value="ab">Ab</option>
+                    <option value="a">A</option>
+                    <option value="a#">A#</option>
+                    <option value="bb">Bb</option>
+                    <option value="b">B</option>
+                  </select>
+                </div> -->
+              </div>
+
+
+              <div class="row-emph">
+                <div class="switch-titled" [hidden]="!cm.isBraid_visible()">
+                  <span class="title">One tona</span>
+                  <label class="switch" title="Off/On">
+                    <input type="checkbox" [(ngModel)]="si.braid_param_emph_one_tona"/>
+                    <span class="slider classic round">
+                      <span class="number">I</span>
+                      <span class="letter">O</span>
+                    </span>
+                  </label>
+                </div>
+
+                <div class="switch-titled position options_menu" [hidden]="!cm.isBraid_visible()">
+                  <span class="title" for="isBefore">Before</span>
+                  <input id="isBefore" type="checkbox" (change)="updateOneTona()" [(ngModel)]="isBefore"/>
+
+                  <span class="title" for="isAfter">After</span>
+                  <input id="isAfter" type="checkbox" (change)="updateOneTona()" [(ngModel)]="isAfter"/>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!--------------------------------->
+      <!---------- 5th CIRCLE ----------->
+      <!--------------------------------->
+      <div [hidden]="!cm.isFifths_visible()" class="fifths_submenu">
+        <app-fifth-circle [midi_chord]="cur_midi_chord" [score_chord]="cur_chord" [hidden]="!cm.isCircle_visible()"></app-fifth-circle>
+      </div>
+
+      <!--------------------------------->
+      <!------------ BRAIDS ------------->
+      <!--------------------------------->
+      <div class="braid_submenu" [hidden]="!cm.isBraid_visible()">
+        <app-braid  (askChordsInScore)="update_chords_in_score()" [braidModel]="braidModel" [cur_chord]="cur_midi_chord" [is_roman]="si.braid_param_roman" [chordsInScore]="chords_from_dico" [one_tona_mode]="oneTonaMode" [zoom_val]="zoomVal"></app-braid>
+      </div>
+    </div>
+
+    <!--------------------------------->
+    <!------------- DICO -------------->
+    <!--------------------------------->
+    <div class="dico_menu" [ngClass]="{dico_visible:cm.isDico_visible()}">
+      <app-dico [hidden]="!cm.isDico_visible()"></app-dico>
+    </div>
+
+    <!--------------------------------->
+    <!----------- SETTINGS ------------>
+    <!--------------------------------->
+    <div id="options" class="options_menu" [ngClass]="{options_visible:cm.isOptions_visible()}">
+      <div class="d-flex m-3">
+        <h6>RENDERING</h6>
+        <span>
+          <label class="p-3" for="isMinimalRendering">Minimal rendering</label>
+          <input id="isMinimalRendering" type="checkbox" 
+          style="vertical-align: text-bottom;" [(ngModel)]="cm.minimalRendering" (change)="dm.renderFromModel()"/>
+        </span>
+      </div>
+      
+      <div class="d-flex m-3">
+        <h6>MIDI</h6>
+        <span>
+          <label class="p-3" for="midiSelector">Midi input source </label>
+          <app-midi-selector id="midiSelector" (hasChanged)="cm.saveInCookie();cur_midi_abc={l:'',r:''}" [is_guitar]="cm.is_midi_guitar()"></app-midi-selector>
+          <span class="midi_indicator" [ngClass]="{midi_in_active:this.cur_midi_chord.full_chord.full_notes.length}"></span>
+        </span>
+        <span>
+          <label class="p-3" for="controlSelector">Control input source </label>
+          <app-control-selector id="controlSelector" (hasChanged)="cm.saveInCookie()" ></app-control-selector>
+          <span class="midi_indicator" [ngClass]="{midi_in_active:this.cur_midi_ctrl}"></span>
+        </span> 
+
+        <span>
+          <label class="p-3" for="isMidiGuitar">Is midi guitar </label>
+          <input id="idMidiGuitar" type="checkbox" style="vertical-align: text-bottom;" [(ngModel)]="cm.midi_is_guitar" (change)="cm.saveInCookie();"/>
+        </span>
+
+        <div class="shortcuts ml-3 mb-4">
+          <a class="collapsible " data-toggle="collapse" href="#collapseShortcuts" role="button" aria-expanded="false" aria-controls="collapseShortcuts">
+            <i class="fas collapsible fa-angle-double-down"></i>Shortcuts
+          </a>
+
+          <div id="collapseShortcuts" class="collapse pl-3">
+            <div class="m-2" style="display: flex;flex-direction: row-reverse;">
+              <button class="btn btn-primary mr-2 btn-sm" (click)="modalImport=true">Import</button>
+              <button class="btn btn-primary mr-2 btn-sm" (click)="export_control_bindings();modalExport=true">Export</button>
+            </div>
+            <div class="shortcuts-selection">
+              <select [(ngModel)]="midi_ctrl_note_selected">
+                <option *ngFor="let note of midi_ctrl_midi_notes_tab" >{{note}}</option>
+              </select> 
+
+              <select [(ngModel)]="midi_ctrl_fct_selected">
+                <option *ngFor="let fct of midi_ctrl_functions">{{fct}}</option>
+              </select> 
+
+              <input [(ngModel)]="midi_ctrl_opt_selected" type="text"/>
+              <i class="fa fa-plus" (click)="addShortcut()"></i>
+            </div>
+            
+            <div *ngFor="let midi_note of midi_ctrl_tab;let iNote = index;">
+              <div class="list" *ngFor="let ctrl of midi_note; let iCtrl = index;">
+                <span class="param1">{{ctrl.number}}</span>
+                <span class="param2">{{ctrl.control_name}}</span>
+                <span class="param3">{{ctrl.control_action}}</span>
+                <span class="fa fa-times param4" (click)="removeShortcut(ctrl.number , iCtrl)"></span>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      <div style="margin-left:20px;display: flex; flex-direction: column;" class="apply-btns">
+        <h6>DISPLAY</h6>
+        <span>
+          <label class="p-3" for="isTonalityButtonOpen">Leave Tonality Button open</label>
+          <input id="isTonalityButtonOpen" type="checkbox" (change)="cm.saveInCookie();" style="vertical-align: text-bottom;" [(ngModel)]="cm.tonality_button_always_open"/>
+        </span>
+
+        <div class="switch-titled">
+          <span class="p-3">Chords Notation</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="cm.novaxe_notation_on" (change)="cm.saveInCookie();" (click)="change_novaxe_notation()"/>
+            <span class="slider classic round">
+              <span class="number">Novaxe</span>
+              <span class="letter">Classic</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="switch-titled">
+          <span class="p-3">Letters/Number system <b>sync</b></span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="cm.letters_Numbers_sync" (change)="cm.saveInCookie();" (click)="change_novaxe_numbers_sync()"/>
+            <span class="slider classic round">
+              <span class="letter">Free</span>
+              <span class="number">Sync</span>
+            </span>
+          </label>
+        </div>
+
+        <div class="switch-titled" [ngClass]="{disabled:!cm.letters_Numbers_sync}">
+          <span class="p-3">Letters/Number system </span>
+          <label class="switch">
+            <input type="checkbox" (change)="cm.saveInCookie();" [disabled]="!cm.letters_Numbers_sync"  [(ngModel)]="display_note_mode" (click)="change_novaxe_numbers_display_note_mode()"/>
+            <span class="slider classic round">
+              <span class="number">Num</span>
+              <span class="letter">Let</span>
+            </span>
+          </label>
+        </div>
+        
+        <div class="switch-titled">
+          <span class="p-3">Global show Score chords</span>
+          <label class="switch">
+            <input type="checkbox" [(ngModel)]="cm.global_show_score_chords" (change)="cm.saveInCookie();" (click)="change_novaxe_toggle_show_score_chords()"/>
+            <span class="slider classic round">
+              <span class="letter">Show</span>
+              <span class="number">Hide</span>
+            </span>
+          </label>
+        </div>
+        
+      </div>
+    </div>
+
+	<!-- <app-tab-parser ></app-tab-parser> -->
+	<!-- <app-chords-from-youtube ></app-chords-from-youtube> -->
+
+  <!--------------------------------->
+  <!--------- BOTTOM TABS ----------->
+  <!--------------------------------->
+  <div class="bottom-tabs" [ngClass]="{show:((cm.display_audio==true || cm.display_chordstrip==true) && display_Y==false )}">
+
+    <!-- YT TAB -->
+    <div class="bottom-tab" id="yt-tab"
+      (contextmenu)="cm.set_audio_visible(!cm.is_audio_visible());$event.preventDefault();" 
+      (click)="manage_yt_tab()" [ngClass]="{active:cm.is_audio_visible()}">
+      <img src="assets/img/wave.png" style="width: auto;height: 50px;" role="button" class="p-2">
+    </div>
+
+    <!-- CHORDSTRIP TAB -->
+    <div class="bottom-tab" id="chordstrip-tab"
+      (contextmenu)="cm.set_chordstrip_visible(!cm.is_chordstrip_visible());$event.preventDefault();" 
+      (click)="manage_strip_tab()" [ngClass]="{active:cm.is_chordstrip_visible()}">
+      <img src="assets/img/chordstrip.png" style="width: auto;height: 35px;" role="button" class="p-2">
+    </div>
+
+    <!-- PIANO TAB -->
+    <div class="bottom-tab" id="piano-tab" [ngClass]="{show:cm.display_piano==true}" (contextmenu)="toggle_piano('on');$event.preventDefault();" (click)="toggle_piano('on');savePrefs();">
+      <img src="assets/img/piano.png">
+    </div>
+
+    <!-- FRETBOARD TAB -->
+    <div class="bottom-tab" id="fretboard-tab" [ngClass]="{show:cm.display_fretboard==true}" (contextmenu)="toggle_fretboard('on');$event.preventDefault();" (click)="toggle_fretboard('on');savePrefs();">
+      <img src="assets/img/fretboard/fretboard_logo.png">
+    </div>
+
+    <!-- MIDI CHORD TAB -->
+    <div class="bottom-tab" id="midi-chord-tab" [ngClass]="{show:cm.display_midi_chord==true}" (contextmenu)="toggle_midi_chord(true);$event.preventDefault();" (click)="toggle_midi_chord(true)">
+      <img src="assets/img/icons/G-clef.svg"  style="width: auto;height: 30px;fill:white;">
+    </div>
+
+  </div>
+  
+  <!--------------------------------->
+  <!---------- MIDI-CHORD-DISPLAY --->
+  <!--------------------------------->
+  <app-midi-chord-display [display]="cm.is_midi_chord_display_visible()" [midi_abc]="cur_midi_abc" (visibleState)="changeMidiChordDisplayVisibleState($event)" [midi_chord]="cur_midi_chord"></app-midi-chord-display>
+
+  <!--------------------------------->
+  <!------------ PIANO -------------->
+  <!--------------------------------->
+	<app-piano [display]="cm.display_piano" (displayChange)="change_piano_display($event)" [cur_chord]="cur_midi_chord"></app-piano>
+
+  <!--------------------------------->
+  <!----------- FRETBOARD ----------->
+  <!--------------------------------->
+  <app-fretboard [display]="cm.display_fretboard" (displayChange)="change_fretboard_display($event)" [cur_chord]="cur_midi_chord"></app-fretboard>
+
+  <!--------------------------------->
+  <!------------ YOUTUBE ------------>
+  <!--------------------------------->
+	<app-youtube-audio [display]="cm.is_audio_visible()" [cur_chord]="cur_midi_chord"></app-youtube-audio>
+
+  <!--------------------------------->
+  <!---------- CHORDSTRIP ----------->
+  <!--------------------------------->
+  <app-chordstrip [display]="cm.is_chordstrip_visible()" [cur_chord]="cur_midi_chord"></app-chordstrip>
+
+
+
+</div><!-- END OF SONG -->
+
+
+<!--------------------------------->
+<!------- SAVE CHECK SIGN --------->
+<!--------------------------------->
+<div id="saved_ok_mark" class="save-sign">
+  <i class="fas fa-check" style="color:green;"></i>
+</div>
+<div id="saved_pb_mark" class="save-sign">
+  <i class="fas fa-times" style="color:red;"></i>
+</div>
+<div id="saved_pb_owner" class="save-string" >
+  <p>Score can only be modified by its owner</p>
+</div>
+<div id="saved_pb_title" class="save-string" >
+  <p>Please enter a score title</p>
+</div>
+
+<!--------------------------------->
+<!------- TONALITY BUTTON --------->
+<!--------------------------------->
+<app-tonality-button style="position: fixed;bottom:0px;right:25px;overflow: visible;z-index: 1000;" [is_opened]="cm.tonality_button_always_open" [cur_chord_midi_chord]="cur_midi_chord"></app-tonality-button>
+
+<!--------------------------------->
+<!--------- MODAL VIDEO ----------->
+<!--------------------------------->
+<div class="fakebook-modal modal" id="tuto-modal" [hidden]="modalInfos==false" tabindex="-1" role="dialog" aria-labelledby="tuto-modal-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tuto-modal-label">How to use Novaxe ?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="close_tutoModal(false)">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <iframe id="tuto-modal-iframe" width="560" height="315" src="https://www.youtube-nocookie.com/embed/e4d8H49v8ko?modestbranding=1&enablejsapi=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="close_tutoModal(false)" data-dismiss="modal">Got it !</button>
+        <label for="skip_tutorial">Skip this window next time</label>
+        <input label="skip_tutorial" type="checkbox" [(ngModel)]="cm.tutorial_skipped" (click)="close_tutoModal(true)" />
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--------------------------------->
+<!--------- MODAL IMPORT CONTROLS-->
+<!--------------------------------->
+<div class="fakebook-modal modal" id="import-modal" [hidden]="modalImport==false" tabindex="-1" role="dialog" aria-labelledby="import-modal-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="import-modal-label">Import controls</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalImport=false">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <textarea [(ngModel)]="imported_controls"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modalImport=false;import_control_bindings();" data-dismiss="modal">Import</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!--------------------------------->
+<!--------- MODAL EXPORT CONTROLS-->
+<!--------------------------------->
+<div class="fakebook-modal modal" id="export-modal" [hidden]="modalExport==false" tabindex="-1" role="dialog" aria-labelledby="export-modal-label" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="export-modal-label">Export controls</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalExport=false">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- <textarea [(ngModel)]="exported_controls" readonly></textarea> -->
+        <pre>{{exported_controls}}</pre>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" (click)="modalExport=false;" data-dismiss="modal">Export</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</section>

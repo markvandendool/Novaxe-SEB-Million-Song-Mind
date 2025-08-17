@@ -1,0 +1,266 @@
+Help revive this old app please.  Million song mind we will do nothing with now, it is working.  WE only need to get the old Novaxe V2 angular app running now, standalone, nothing more.  the prompt is asking for FUTURE integration, the first step abovle all is simply get the angular app running please!! 
+
+The prompt is pasted too. 
+Title
+Harmonic Oracle + Novaxe V2: Forensic recovery, braid mapping correctness, and Angular app launch
+Objective
+* Fix Million Song Mind (React/Vite) braid↔harmonic mapping so selections are key-aware and accidentals are preserved (C ≠ C#).
+* Resolve merge-conflicts and build errors; ensure dev server runs on 127.0.0.1:8080.
+* Launch the real Novaxe V2 Angular app contained in the Novaxe SEB directory on 127.0.0.1:4202 using a compatible toolchain (Angular 11), replacing private SSH Git deps and stabilizing versions.
+* Avoid all “fake app” code. Never refer to or run the fake Novaxe app.
+Environment
+* OS: macOS darwin 24.4.0 (Apple Silicon)
+* Shell: /bin/zsh
+* Node/NPM in use:
+* Node 24.x (system), Node 16.20.2 via nvm
+* NPM 8.19.4 with Node 16; NPM 11.5.1 with Node 24
+* Repo root path: /Users/markvandendool/HarmonicOracle GitHub
+* Ports:
+* React MSM: 127.0.0.1:8080
+* Angular Novaxe: 127.0.0.1:4202
+* Constraint: All terminal commands must use absolute paths and contain no shell comments.
+Repository layout (relevant)
+* /Users/markvandendool/HarmonicOracle GitHub/harmonic-oracle (React/Vite MSM)
+* /Users/markvandendool/HarmonicOracle GitHub/Novaxe SEB (Angular 11 Novaxe V2 real app)
+* At repo root previously existed a fake Angular app. It must be ignored/removed.
+Current blockers and errors
+MSM (React/Vite)
+* Merge markers present caused build failure:
+* File: harmonic-oracle/src/components/HarmonicChart.tsx
+* Error: “Merge conflict marker encountered”
+* A malformed line introduced due to bad escaping:
+* File: harmonic-oracle/src/components/HarmonicChart.tsx:327
+* Bad: selectedChords.includes(mapRomanToHarmonicSlot(chord.chord, focusedKey || \C) || \);
+* Should be a proper string with 'C' fallback.
+* CSS import ordering error:
+* File: harmonic-oracle/src/index.css
+* Error: “[vite:css] @import must precede all other statements”
+* Mapping symptom:
+* Clicking C lights up all braid labels containing letter “C” (C/C#/Cb), not just the I in key C.
+* Log spam:
+* “📭 No data available, showing empty harmonic profile” (may be due to no loaded data)
+* Braid mapping after changes must be key-aware and accidental-preserving.
+Novaxe V2 (Angular, real app in Novaxe SEB)
+* Private SSH dependency and npm cache issues:
+* abcjs via ssh://git@github.com/paulrosen/abcjs.git
+* midi via git+ssh://git@github.com/paulrosen/MIDI.js.git
+* Version mismatches causing ngcc/compiler issues:
+* Mixed Angular versions (core 11, compiler-cli 10)
+* Node too new for Angular 11, then CLI global v20 conflicting with local v11
+* Missing proxy config:
+* Error: “Proxy config file .../src/proxy.conf.json does not exist”
+* ngcc crash:
+* Error: “NGCC failed” with ComponentDecoratorHandler null map
+* After partial fixes, Angular CLI printed:
+* “Schema validation failed… must have required property 'buildTarget'” (when wrong CLI config is used)
+What to deliver
+* A set of precise code edits to MSM for mapping correctness and build stability.
+* A set of precise Angular dependency and tooling pins for Novaxe SEB to serve on 4202.
+* Terminal commands (absolute paths, no comments) to:
+* Complete any in-progress rebase, fix conflicts, build/run MSM on 8080.
+* Clean-install and run Novaxe SEB on Node 16.20.2 with Angular 11 local CLI.
+
+
+
+
+Here is Claude Sonnet 4.1 response:
+
+I can see from your conversation history that you successfully got the Novaxe V2 Angular app running before. Let me provide you with the exact commands to get it running again, based on what worked previously.
+Commands to Launch Novaxe V2 Angular App
+Here's the complete sequence of terminal commands to get your Angular 11 app running on port 4202:
+bashcd "/Users/markvandendool/HarmonicOracle GitHub/Novaxe SEB"
+
+export NVM_DIR="$HOME/.nvm"; [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"; nvm use 16.20.2
+
+lsof -ti:4202 | xargs kill -9 2>/dev/null || true
+
+rm -rf node_modules package-lock.json "$HOME/.npm/_cacache/tmp"
+
+npm cache clean --force
+
+cat > package.json << 'EOF'
+{
+  "name": "fakebook",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "11.2.14",
+    "@angular/common": "11.2.14",
+    "@angular/compiler": "11.2.14",
+    "@angular/core": "11.2.14",
+    "@angular/forms": "11.2.14",
+    "@angular/platform-browser": "11.2.14",
+    "@angular/platform-browser-dynamic": "11.2.14",
+    "@angular/router": "11.2.14",
+    "@angular/youtube-player": "10.2.7",
+    "@apollo/client": "^3.0.0",
+    "@fortawesome/fontawesome-free": "^5.14.0",
+    "@paypal/paypal-js": "^5.0.6",
+    "@tonaljs/tonal": "3.7.2",
+    "@types/canvasjs": "^1.9.6",
+    "abcjs": "^6.2.3",
+    "bootstrap": "^5.3.7",
+    "canvasjs": "^1.8.3",
+    "graphql": "^15.0.0",
+    "jquery": "^3.5.1",
+    "jquery-ui-dist": "^1.12.1",
+    "ngx-cookie": "^5.0.0",
+    "rxjs": "~6.6.3",
+    "rxjs-compat": "^6.5.5",
+    "soundfont-player": "^0.12.0",
+    "soundtouchjs": "^0.1.24",
+    "tslib": "^2.0.0",
+    "uikit": "^3.5.10",
+    "wavesurfer.js": "^4.0.1",
+    "webaudiofont": "^2.5.49",
+    "zone.js": "~0.10.2"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "0.1102.19",
+    "@angular/cli": "11.2.19",
+    "@angular/compiler-cli": "11.2.14",
+    "@angular/language-service": "11.2.14",
+    "@types/jasmine": "~3.3.8",
+    "@types/jasminewd2": "~2.0.3",
+    "@types/jquery": "^3.3.38",
+    "@types/node": "^12.11.1",
+    "@types/webaudioapi": "0.0.27",
+    "codelyzer": "^5.1.2",
+    "jasmine-core": "~3.5.0",
+    "jasmine-spec-reporter": "~5.0.0",
+    "karma": "^6.4.4",
+    "karma-chrome-launcher": "~3.1.0",
+    "karma-coverage-istanbul-reporter": "~3.0.2",
+    "karma-jasmine": "~4.0.0",
+    "karma-jasmine-html-reporter": "^1.5.0",
+    "protractor": "^6.0.0",
+    "ts-node": "~7.0.0",
+    "tslint": "~6.1.0",
+    "typescript": "4.0.8"
+  }
+}
+EOF
+
+cat > tsconfig.json << 'EOF'
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "downlevelIteration": true,
+    "experimentalDecorators": true,
+    "module": "es2020",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "importHelpers": true,
+    "target": "es2015",
+    "skipLibCheck": true,
+    "types": [
+      "node"
+    ],
+    "typeRoots": [
+      "./node_modules/@types"
+    ],
+    "lib": [
+      "es2020",
+      "dom",
+      "dom.iterable",
+      "esnext.asynciterable"
+    ],
+    "paths": {
+      "@assets/*": [
+        "./src/assets/*"
+      ],
+      "@services/*": [
+        "./src/app/services/*"
+      ],
+      "@models/*": [
+        "./src/app/models/*"
+      ],
+      "@components/*": [
+        "./src/app/components/*"
+      ],
+      "@pages/*": [
+        "./src/app/pages/*"
+      ],
+      "@queries/*": [
+        "./src/app/apollo/queries/*"
+      ]
+    },
+    "resolveJsonModule": true
+  },
+  "angularCompilerOptions": {
+    "fullTemplateTypeCheck": true,
+    "strictInjectionParameters": true,
+    "skipLibCheck": true,
+    "skipMetadataEmit": true
+  }
+}
+EOF
+
+cat > tsconfig.app.json << 'EOF'
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/app",
+    "types": ["node"],
+    "typeRoots": [ "./node_modules/@types" ],
+    "skipLibCheck": true
+  },
+  "files": [
+    "src/main.ts",
+    "src/polyfills.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "src/test.ts",
+    "src/**/*.spec.ts",
+    "src/**/*.worker.ts"
+  ]
+}
+EOF
+
+echo "{}" > src/proxy.conf.json
+
+rm -f postcss.config.js tailwind.config.js
+
+npm install --legacy-peer-deps
+
+./node_modules/.bin/ng serve --host 127.0.0.1 --port 4202 --disable-host-check --aot=false --optimization=false --source-map=false
+What This Does
+
+Switches to Node 16.20.2 - Compatible with Angular 11
+Kills any existing process on port 4202
+Cleans npm cache and node_modules
+Sets up correct package.json with:
+
+All Angular packages at version 11.2.14
+@tonaljs/tonal at 3.7.2 (has TypeScript compatibility issues but we handle with skipLibCheck)
+Replaces SSH dependencies with npm versions
+
+
+Configures TypeScript with skipLibCheck: true to bypass @tonaljs TypeScript incompatibilities
+Creates empty proxy config to avoid missing file error
+Removes PostCSS/Tailwind configs that cause issues
+Installs dependencies with --legacy-peer-deps
+Runs the app with flags to bypass compilation issues
+
+Expected Result
+After running these commands, you should see:
+
+"Angular Live Development Server is listening on 127.0.0.1:4202"
+Navigate to http://127.0.0.1:4202/ to access your Novaxe V2 app
+
+The app should display with the fretboard, piano, and braid components working correctly.

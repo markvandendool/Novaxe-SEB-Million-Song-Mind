@@ -1,0 +1,780 @@
+Lovable
+Worked for 3m 37s
+8:42 AM on Aug 13
+
+Thought for 58 seconds
+Plan: I’ll deliver a complete Angular 15 repository blueprint: structure, critical files’ contents, CI/CD, linting, testing, SEO, Tailwind theming, NgRx state, 3D setup, plus a README and cross-references to your current React app.
+
+Overarching summary: This app visualizes musical harmony at scale—tonal centers, chord progressions, and braid topologies—via high-performance SVG and 3D (Three.js), with deterministic state (NgRx), semantic SEO, and a reusable design system. Intent is realized by isolating domain math (harmonic mapping, geometry) into pure TypeScript services, feature-scoped UI modules for Classic/Tonal/New braids and Live Metrics, and a clean, testable state layer mirroring your current GlobalKey context.
+
+Repository scaffold (create in a new GitHub repo; use Angular CLI to generate, then apply the files below)
+
+Angular version: 15.x
+Node: 18 LTS
+Package manager: npm
+Commands to bootstrap locally
+
+npm i -g @angular/cli@15
+ng new msm-braid --routing --style=scss --strict
+cd msm-braid
+npm i @ngrx/store @ngrx/effects @ngrx/router-store @ngrx/entity
+npm i three
+npm i -D @angular-eslint/builder @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template @angular-eslint/schematics @angular-eslint/template-parser eslint eslint-config-prettier prettier husky lint-staged commitlint @commitlint/cli @commitlint/config-conventional tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+Repository tree (key paths)
+
+.github/
+workflows/ci.yml
+dependabot.yml
+ISSUE_TEMPLATE/
+bug_report.md
+feature_request.md
+PULL_REQUEST_TEMPLATE.md
+.husky/
+pre-commit
+commit-msg
+src/
+app/
+app.module.ts
+app-routing.module.ts
+app.component.ts
+app.component.html
+core/
+core.module.ts
+services/
+seo/seo.service.ts
+seo/jsonld.service.ts
+seo/canonical.service.ts
+data/csv.service.ts
+data/harmonic-mapping.service.ts
+data/braid-geometry.service.ts
+data/live-metrics.service.ts
+api/http.service.ts
+api/interceptors/auth.interceptor.ts
+api/interceptors/error.interceptor.ts
+state/app-store.module.ts
+guards/pending-changes.guard.ts
+shared/
+shared.module.ts
+ui/
+toast/toast.service.ts
+toast/toast-container.component.ts
+badge/badge.component.ts
+checkbox/checkbox.component.ts
+switch/switch.component.ts
+radio-group/radio-group.component.ts
+slider/slider.component.ts
+progress/progress.component.ts
+avatar/avatar.component.ts
+card/card.component.ts
+tabs/tabs.component.ts
+skeleton/skeleton.component.ts
+tooltip/tooltip.directive.ts
+popover/popover.component.ts
+toggle/toggle.component.ts
+input/input.component.ts
+textarea/textarea.component.ts
+directives/lazy-img.directive.ts
+pipes/key-format.pipe.ts
+pipes/chord-format.pipe.ts
+pipes/roman-numeral.pipe.ts
+features/
+braid-classic/
+braid-classic.module.ts
+braid-classic.page.ts
+braid-classic.page.html
+braid-tonal/
+braid-tonal.module.ts
+braid-tonal.page.ts
+braid-tonal.page.html
+braid-new2/
+braid-new2.module.ts
+braid-new2.page.ts
+braid-new2.page.html
+braid-3d/
+braid-3d.module.ts
+braid-3d.page.ts
+braid-3d.page.html
+components/braid-three/braid-three.component.ts
+components/braid-three/braid-three.component.html
+live-metrics/
+live-metrics.module.ts
+live-metrics.page.ts
+live-metrics.page.html
+components/metrics-bubbles/metrics-bubbles.component.ts
+components/metrics-bubbles/metrics-bubbles.component.html
+state/
+global-key/global-key.actions.ts
+global-key/global-key.reducer.ts
+global-key/global-key.selectors.ts
+index.ts
+assets/
+environments/
+environment.ts
+environment.prod.ts
+styles.scss
+tailwind.config.js
+postcss.config.js
+angular.json
+tsconfig.json
+tsconfig.app.json
+tsconfig.spec.json
+.editorconfig
+.gitattributes
+.nvmrc
+.eslintrc.json
+.prettierrc.json
+.lintstagedrc.json
+commitlint.config.cjs
+README.md
+LICENSE
+CODEOWNERS
+CONTRIBUTING.md
+SECURITY.md
+Critical files (drop-in contents)
+
+README.md
+Put this at repo root.
+MillionSongMind — Angular 15
+High-performance harmonic analysis and braid visualizations. Angular 15 + NgRx + Tailwind + Three.js.
+
+Badges: CI, License, Commitizen-friendly.
+
+Overview
+
+Purpose: Explore tonal centers, progressions, and braid/torus topologies using deterministic state and optimized rendering.
+Key Features:
+Classic/Tonal/New braid visualizations (SVG + 3D).
+Global key context with score/user lock.
+Live metrics from corpus (presence, standalone, progressions).
+SEO-first pages with canonical/meta/JSON-LD.
+Reusable UI primitives themed via Tailwind semantic tokens (HSL).
+Tech Stack
+
+Angular 15, RxJS, NgRx, Tailwind, Three.js, Karma/Jasmine, Cypress, GitHub Actions.
+Getting Started
+
+Prereqs: Node 18 LTS, npm, Angular CLI 15.
+Install: npm ci
+Dev: npm start
+Lint: npm run lint
+Test: npm test
+Build: npm run build
+E2E (if added): npm run e2e
+Architecture
+
+Core services (SEO, data parsing, geometry).
+Shared UI (headless components).
+Feature modules (braid-classic, braid-tonal, braid-new2, live-metrics, braid-3d).
+NgRx store slices (globalKey + router-store).
+SEO
+
+Title < 60 chars, meta description < 160 chars.
+Single H1 per page. Canonical links and JSON-LD via services.
+Lazy images, responsive layout.
+Design System
+
+Tailwind with semantic HSL tokens in styles.scss.
+No hard-coded colors; use CSS vars.
+State
+
+NgRx with memoized selectors, OnPush, async pipes.
+3D
+
+Three.js integrated directly; careful cleanup in ngOnDestroy.
+Contributing
+
+Conventional commits, pre-commit hooks (lint-staged), PR template, CODEOWNERS.
+Security
+
+Report via SECURITY.md. Avoid secrets in repo.
+License
+
+MIT
+Cross-Reference (React → Angular)
+
+src/pages/BraidClassicPage.tsx → app/features/braid-classic/braid-classic.page.*
+src/pages/BraidTonalPage.tsx → app/features/braid-tonal/*
+src/pages/BraidNew2Page.tsx → app/features/braid-new2/*
+src/pages/BraidLiveMetricsPage.tsx → app/features/live-metrics/*
+src/state/globalKeyStore.tsx → app/state/global-key/*
+src/components/ui/* → app/shared/ui/*
+.github/workflows/ci.yml
+name: CI on: push: branches: [ main ] pull_request: branches: [ main ] permissions: contents: read checks: write jobs: build-test: runs-on: ubuntu-latest steps: - uses: actions/checkout@v4 - uses: actions/setup-node@v4 with: node-version: 18 cache: npm - run: npm ci - run: npm run lint - run: npm test -- --watch=false --browsers=ChromeHeadless - run: npm run build -- --configuration=production
+
+.github/dependabot.yml
+version: 2 updates:
+
+package-ecosystem: "npm" directory: "/" schedule: interval: "weekly" open-pull-requests-limit: 10
+.husky/pre-commit
+#!/usr/bin/env sh . "$(dirname -- "$0")/_/husky.sh" npx lint-staged
+
+.husky/commit-msg
+#!/usr/bin/env sh . "$(dirname -- "$0")/_/husky.sh" npx commitlint --edit "$1"
+
+commitlint.config.cjs
+module.exports = { extends: ['@commitlint/config-conventional'] };
+
+.lintstagedrc.json
+{ ".{ts,js,json,md,html,scss,css}": ["prettier --write"], "src/**/.{ts,html,scss}": ["eslint --fix"] }
+
+.eslintrc.json
+{ "root": true, "ignorePatterns": ["projects/**/"], "overrides": [ { "files": [".ts"], "extends": ["plugin:@angular-eslint/recommended", "plugin:@angular-eslint/template/process-inline-templates", "prettier"], "parserOptions": { "project": ["tsconfig.json"], "createDefaultProgram": true }, "rules": { "@angular-eslint/component-class-suffix": ["error", { "suffixes": ["Component", "Page"] }] } }, { "files": ["*.html"], "extends": ["plugin:@angular-eslint/template/recommended"], "rules": {} } ] }
+
+.prettierrc.json
+{ "singleQuote": true, "printWidth": 100, "trailingComma": "es5", "semi": true }
+
+.editorconfig
+root = true [*] charset = utf-8 end_of_line = lf insert_final_newline = true indent_style = space indent_size = 2 trim_trailing_whitespace = true
+
+[*.md] trim_trailing_whitespace = false
+
+.gitattributes
+text=auto eol=lf
+.nvmrc
+18
+
+tailwind.config.js
+/** @type {import('tailwindcss').Config} / module.exports = { content: ["./src/**/.{html,ts}"], theme: { extend: { colors: { background: "hsl(var(--background) / <alpha-value>)", foreground: "hsl(var(--foreground) / <alpha-value>)", primary: "hsl(var(--primary) / <alpha-value>)", "primary-foreground": "hsl(var(--primary-foreground) / <alpha-value>)", secondary: "hsl(var(--secondary) / <alpha-value>)", muted: "hsl(var(--muted) / <alpha-value>)", ring: "hsl(var(--ring) / <alpha-value>)", card: "hsl(var(--card) / <alpha-value>)", "card-foreground": "hsl(var(--card-foreground) / <alpha-value>)", input: "hsl(var(--input) / <alpha-value>)", border: "hsl(var(--border) / <alpha-value>)", popover: "hsl(var(--popover) / <alpha-value>)", "popover-foreground": "hsl(var(--popover-foreground) / <alpha-value>)" }, }, }, plugins: [], };
+
+postcss.config.js
+module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } };
+
+styles.scss (design tokens, HSL)
+:root { --background: 0 0% 100%; --foreground: 224 71.4% 4.1%; --primary: 262 83% 57%; --primary-foreground: 210 40% 98%; --secondary: 220 14% 96%; --muted: 220 14% 96%; --ring: 262 83% 57%; --card: 0 0% 100%; --card-foreground: 224 71.4% 4.1%; --input: 214.3 31.8% 91.4%; --border: 214.3 31.8% 91.4%; --popover: 0 0% 100%; --popover-foreground: 222.2 47.4% 11.2%; } @media (prefers-color-scheme: dark) { :root { --background: 224 71.4% 4.1%; --foreground: 210 40% 98%; --primary: 262 83% 57%; --primary-foreground: 224 71.4% 4.1%; --secondary: 215 27.9% 16.9%; --muted: 215 27.9% 16.9%; --ring: 262 83% 57%; --card: 224 71.4% 4.1%; --card-foreground: 210 40% 98%; --input: 215 27.9% 16.9%; --border: 215 27.9% 16.9%; --popover: 224 71.4% 4.1%; --popover-foreground: 210 40% 98%; } } @tailwind base; @tailwind components; @tailwind utilities;
+
+angular.json (key parts; mostly from ng new, with budgets)
+{ "$schema": "./node_modules/@angular/cli/lib/config/schema.json", "version": 1, "projects": { "msm-braid": { "projectType": "application", "schematics": {}, "architect": { "build": { "options": { "outputPath": "dist/msm-braid", "index": "src/index.html", "main": "src/main.ts", "polyfills": ["zone.js"], "tsConfig": "tsconfig.app.json", "assets": ["src/favicon.ico", "src/assets"], "styles": ["src/styles.scss"], "scripts": [] }, "configurations": { "production": { "budgets": [ { "type": "initial", "maximumWarning": "1.2mb", "maximumError": "2mb" }, { "type": "anyComponentStyle", "maximumWarning": "6kb", "maximumError": "10kb" } ], "outputHashing": "all" } } }, "serve": { "options": { "browserTarget": "msm-braid:build" } }, "test": { "options": { "karmaConfig": "karma.conf.js" } }, "lint": { "builder": "@angular-eslint/builder:lint", "options": { "lintFilePatterns": ["src//*.ts", "src//*.html"] } } } } }, "defaultProject": "msm-braid" }
+
+tsconfig.json
+{ "compileOnSave": false, "compilerOptions": { "baseUrl": "./", "outDir": "./dist/out-tsc", "forceConsistentCasingInFileNames": true, "strict": true, "noImplicitOverride": true, "noPropertyAccessFromIndexSignature": true, "noImplicitReturns": true, "noFallthroughCasesInSwitch": true, "sourceMap": true, "declaration": false, "moduleResolution": "node", "emitDecoratorMetadata": true, "experimentalDecorators": true, "target": "ES2022", "module": "ES2022", "useDefineForClassFields": false, "lib": ["ES2022", "DOM"] } }
+
+environments/environment.ts
+export const environment = { production: false, apiBaseUrl: '/api' };
+
+environments/environment.prod.ts
+export const environment = { production: true, apiBaseUrl: '/api' };
+
+src/app/app-routing.module.ts
+import { NgModule } from '@angular/core'; import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [ { path: '', redirectTo: 'braid-classic', pathMatch: 'full' }, { path: 'braid-classic', loadChildren: () => import('./features/braid-classic/braid-classic.module').then(m => m.BraidClassicModule) }, { path: 'braid-tonal', loadChildren: () => import('./features/braid-tonal/braid-tonal.module').then(m => m.BraidTonalModule) }, { path: 'braid-new2', loadChildren: () => import('./features/braid-new2/braid-new2.module').then(m => m.BraidNew2Module) }, { path: 'live-metrics', loadChildren: () => import('./features/live-metrics/live-metrics.module').then(m => m.LiveMetricsModule) }, { path: 'braid-3d', loadChildren: () => import('./features/braid-3d/braid-3d.module').then(m => m.Braid3DModule) }, { path: '**', redirectTo: 'braid-classic' } ];
+
+@NgModule({ imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })], exports: [RouterModule] }) export class AppRoutingModule {}
+
+src/app/app.module.ts
+import { NgModule } from '@angular/core'; import { BrowserModule, Title, Meta } from '@angular/platform-browser'; import { AppRoutingModule } from './app-routing.module'; import { AppComponent } from './app.component'; import { CoreModule } from './core/core.module'; import { SharedModule } from './shared/shared.module';
+
+@NgModule({ declarations: [AppComponent], imports: [BrowserModule, AppRoutingModule, CoreModule, SharedModule], providers: [Title, Meta], bootstrap: [AppComponent], }) export class AppModule {}
+
+src/app/app.component.html
+<app-toast-container></app-toast-container> <router-outlet></router-outlet>
+
+CoreModule and SEO services
+src/app/core/core.module.ts
+import { NgModule } from '@angular/core'; import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'; import { AppStoreModule } from './state/app-store.module'; import { AuthInterceptor } from './services/api/interceptors/auth.interceptor'; import { ErrorInterceptor } from './services/api/interceptors/error.interceptor';
+
+@NgModule({ imports: [HttpClientModule, AppStoreModule], providers: [ { provide: HTTP_INTERCEPTORS, multi: true, useClass: AuthInterceptor }, { provide: HTTP_INTERCEPTORS, multi: true, useClass: ErrorInterceptor }, ], }) export class CoreModule {}
+
+src/app/core/services/seo/seo.service.ts
+import { Injectable } from '@angular/core'; import { Meta, Title } from '@angular/platform-browser'; @Injectable({ providedIn: 'root' }) export class SeoService { constructor(private title: Title, private meta: Meta) {} setMeta(opts: { title: string; description?: string; canonicalUrl?: string }) { this.title.setTitle(opts.title); if (opts.description) this.meta.updateTag({ name: 'description', content: opts.description }); if (opts.canonicalUrl) { let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement | null; if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); } link.href = opts.canonicalUrl; } } }
+
+src/app/core/services/seo/jsonld.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class JsonLdService { set(data: object) { const id = 'app-jsonld'; let script = document.getElementById(id) as HTMLScriptElement | null; if (!script) { script = document.createElement('script'); script.id = id; script.type = 'application/ld+json'; document.head.appendChild(script); } script.text = JSON.stringify(data); } }
+
+SharedModule and Toast
+src/app/shared/shared.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { ToastContainerComponent } from './ui/toast/toast-container.component'; @NgModule({ declarations: [ToastContainerComponent], imports: [CommonModule], exports: [ToastContainerComponent], }) export class SharedModule {}
+
+src/app/shared/ui/toast/toast.service.ts
+import { Injectable } from '@angular/core'; import { Subject } from 'rxjs'; export type Toast = { id?: string; title?: string; description?: string; type?: 'success'|'error'|'info' }; @Injectable({ providedIn: 'root' }) export class ToastService { private _toasts = new Subject<Toast>(); toasts$ = this._toasts.asObservable(); push(t: Toast) { this._toasts.next({ id: crypto.randomUUID(), ...t }); } }
+
+src/app/shared/ui/toast/toast-container.component.ts
+import { Component } from '@angular/core'; import { ToastService } from './toast.service'; @Component({ selector: 'app-toast-container', template: `
+
+<section class="fixed bottom-4 right-4 space-y-2 z-50"> <article *ngFor="let t of toasts | async" class="rounded-md border bg-background text-foreground shadow-lg p-3"> <h4 *ngIf="t.title" class="font-semibold">{{t.title}}</h4> <p *ngIf="t.description" class="text-sm text-muted-foreground">{{t.description}}</p> </article> </section> `, }) export class ToastContainerComponent { toasts = this.toast.toasts$; constructor(private toast: ToastService) {} }
+NgRx AppStore and Global Key slice
+src/app/core/state/app-store.module.ts
+import { NgModule } from '@angular/core'; import { StoreModule } from '@ngrx/store'; import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store'; import { EffectsModule } from '@ngrx/effects'; import { globalKeyReducer } from '../../state/global-key/global-key.reducer'; @NgModule({ imports: [ StoreModule.forRoot({ router: routerReducer, globalKey: globalKeyReducer }), EffectsModule.forRoot([]), StoreRouterConnectingModule.forRoot(), ], }) export class AppStoreModule {}
+
+src/app/state/global-key/global-key.actions.ts
+import { createAction, props } from '@ngrx/store'; export const setTonality = createAction('[GlobalKey] Set Tonality', props<{ tonality: string }>()); export const setScoreTonality = createAction('[GlobalKey] Set Score Tonality', props<{ scoreTonality: string }>()); export const toggleLock = createAction('[GlobalKey] Toggle Lock');
+
+src/app/state/global-key/global-key.reducer.ts
+import { createReducer, on } from '@ngrx/store'; import * as Key from './global-key.actions'; export interface GlobalKeyState { tonality: string; scoreTonality: string; isLockedToScore: boolean; } export const initialState: GlobalKeyState = { tonality: 'C', scoreTonality: 'C', isLockedToScore: false }; export const globalKeyReducer = createReducer( initialState, on(Key.setTonality, (s, { tonality }) => ({ ...s, tonality })), on(Key.setScoreTonality, (s, { scoreTonality }) => ({ ...s, scoreTonality })), on(Key.toggleLock, s => ({ ...s, isLockedToScore: !s.isLockedToScore })), );
+
+src/app/state/global-key/global-key.selectors.ts
+import { createFeatureSelector, createSelector } from '@ngrx/store'; import { GlobalKeyState } from './global-key.reducer'; export const selectGlobalKey = createFeatureSelector<GlobalKeyState>('globalKey'); export const selectTonality = createSelector(selectGlobalKey, s => s.tonality); export const selectScoreTonality = createSelector(selectGlobalKey, s => s.scoreTonality); export const selectIsLocked = createSelector(selectGlobalKey, s => s.isLockedToScore); export const selectFocusedKey = createSelector(selectGlobalKey, s => (s.isLockedToScore ? s.scoreTonality : s.tonality) || 'C');
+
+Feature example: Braid Classic
+src/app/features/braid-classic/braid-classic.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { RouterModule, Routes } from '@angular/router'; import { BraidClassicPage } from './braid-classic.page'; const routes: Routes = [{ path: '', component: BraidClassicPage }]; @NgModule({ declarations: [BraidClassicPage], imports: [CommonModule, RouterModule.forChild(routes)] }) export class BraidClassicModule {}
+
+src/app/features/braid-classic/braid-classic.page.ts
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'; import { SeoService } from '../../core/services/seo/seo.service'; @Component({ selector: 'app-braid-classic-page', templateUrl: './braid-classic.page.html', changeDetection: ChangeDetectionStrategy.OnPush, }) export class BraidClassicPage implements OnInit { constructor(private seo: SeoService) {} ngOnInit(): void { this.seo.setMeta({ title: 'Classic Braid — MillionSongMind', description: 'Exact classic Novaxe braid scaffold with tonalities.', canonicalUrl: '/braid-classic', }); } }
+
+src/app/features/braid-classic/braid-classic.page.html
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-6"> <header class="flex items-center justify-between"> <h1 class="text-2xl font-mono font-bold">Classic Braid</h1> </header> <!-- TODO: <app-braid-canvas /> --> <section class="text-muted-foreground">Coming soon: Braid canvas</section> </main>
+Feature example: Live Metrics (parity with click handler)
+src/app/features/live-metrics/live-metrics.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { RouterModule, Routes } from '@angular/router'; import { LiveMetricsPage } from './live-metrics.page'; const routes: Routes = [{ path: '', component: LiveMetricsPage }]; @NgModule({ declarations: [LiveMetricsPage], imports: [CommonModule, RouterModule.forChild(routes)] }) export class LiveMetricsModule {}
+
+src/app/features/live-metrics/live-metrics.page.ts
+import { Component } from '@angular/core'; @Component({ selector: 'app-live-metrics-page', templateUrl: './live-metrics.page.html', }) export class LiveMetricsPage { handleBubbleClick(chord: string) { console.log(Querying Million Song Mind for chord: ${chord}); // TODO: navigate to MSM with chord filter } }
+
+src/app/features/live-metrics/live-metrics.page.html
+<main class="container mx-auto px-4 py-8"> <header class="mb-8"> <h1 class="text-3xl font-bold text-primary mb-2">Live Harmonic Metrics</h1> <p class="text-muted-foreground">Real-time visualization of chord frequencies and progressions.</p> </header> <section> <!-- <app-metrics-bubbles (bubbleClick)="handleBubbleClick($event)"></app-metrics-bubbles> --> <button class="px-3 py-2 rounded-md border" (click)="handleBubbleClick('Cmaj7')">Test Bubble</button> </section> </main>
+Three.js component
+src/app/features/braid-3d/components/braid-three/braid-three.component.ts
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core'; import * as THREE from 'three'; @Component({ selector: 'app-braid-three', templateUrl: './braid-three.component.html', }) export class BraidThreeComponent implements AfterViewInit, OnDestroy { @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>; private renderer!: THREE.WebGLRenderer; private scene = new THREE.Scene(); private camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000); private frameId: number | null = null; ngAfterViewInit(): void { const canvas = this.canvasRef.nativeElement; this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); this.resize(); window.addEventListener('resize', this.resize); this.initScene(); this.animate(); } private initScene() { const ambient = new THREE.AmbientLight(0x404040); this.scene.add(ambient); const dir = new THREE.DirectionalLight(0xffffff, 1); dir.position.set(1,1,1); this.scene.add(dir); const geo = new THREE.TorusGeometry(1.5, 0.5, 16, 100); const mat = new THREE.MeshPhongMaterial({ color: 0xff0000 }); this.scene.add(new THREE.Mesh(geo, mat)); this.camera.position.z = 5; } private animate = () => { this.frameId = requestAnimationFrame(this.animate); this.renderer.render(this.scene, this.camera); }; private resize = () => { const canvas = this.canvasRef.nativeElement; const w = canvas.clientWidth || 800, h = canvas.clientHeight || 600; this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h, false); }; ngOnDestroy(): void { if (this.frameId) cancelAnimationFrame(this.frameId); window.removeEventListener('resize', this.resize); this.renderer.dispose(); } }
+
+src/app/features/braid-3d/components/braid-three/braid-three.component.html
+<canvas #canvas class="w-full h-[60vh] block"></canvas>
+
+Data services stubs
+src/app/core/services/data/csv.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class CsvService { parse(text: string): string[][] { return text.split('\n').map(r => r.split(',')); } }
+
+src/app/core/services/data/harmonic-mapping.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class HarmonicMappingService { toRoman(chord: string, key: string): string { return chord; /* TODO: port exact logic */ } }
+
+src/app/core/services/data/braid-geometry.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class BraidGeometryService { // TODO: port braid geometry math used by Classic/Tonal/New2 }
+
+src/app/core/services/data/live-metrics.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class LiveMetricsService { // TODO: connect to corpus or adapters; returns observables with metrics }
+
+HTTP interceptors (stubs)
+src/app/core/services/api/interceptors/auth.interceptor.ts
+import { Injectable } from '@angular/core'; import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http'; import { Observable } from 'rxjs'; @Injectable() export class AuthInterceptor implements HttpInterceptor { intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> { // const authReq = req.clone({ setHeaders: { Authorization: Bearer ${token} } }); return next.handle(req); } }
+
+src/app/core/services/api/interceptors/error.interceptor.ts
+import { Injectable } from '@angular/core'; import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse } from '@angular/common/http'; import { Observable, throwError } from 'rxjs'; import { catchError } from 'rxjs/operators'; @Injectable() export class ErrorInterceptor implements HttpInterceptor { intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> { return next.handle(req).pipe(catchError((err: HttpErrorResponse) => throwError(() => err))); } }
+
+ISSUE/PR templates
+.github/ISSUE_TEMPLATE/bug_report.md and feature_request.md (standard GitHub templates)
+.github/PULL_REQUEST_TEMPLATE.md
+Summary
+What changed and why?
+Checklist
+[ ] Tests added/updated
+[ ] Docs updated
+[ ] Follows coding standards
+[ ] E2E/local verified
+CONTRIBUTING.md (key points)
+Branching, conventional commits, PR review, test/lint requirements, coding style, architecture overview.
+CODEOWNERS (example)
+@your-org/maintainers
+SECURITY.md
+Responsible disclosure process, contact, timelines.
+LICENSE
+MIT License text.
+Mermaid architecture diagram
+
+Plan: I’ll deliver a complete Angular 15 repository blueprint: structure, critical files’ contents, CI/CD, linting, testing, SEO, Tailwind theming, NgRx state, 3D setup, plus a README and cross-references to your current React app.
+
+Overarching summary: This app visualizes musical harmony at scale—tonal centers, chord progressions, and braid topologies—via high-performance SVG and 3D (Three.js), with deterministic state (NgRx), semantic SEO, and a reusable design system. Intent is realized by isolating domain math (harmonic mapping, geometry) into pure TypeScript services, feature-scoped UI modules for Classic/Tonal/New braids and Live Metrics, and a clean, testable state layer mirroring your current GlobalKey context.
+
+Repository scaffold (create in a new GitHub repo; use Angular CLI to generate, then apply the files below)
+
+Angular version: 15.x
+Node: 18 LTS
+Package manager: npm
+Commands to bootstrap locally
+
+npm i -g @angular/cli@15
+ng new msm-braid --routing --style=scss --strict
+cd msm-braid
+npm i @ngrx/store @ngrx/effects @ngrx/router-store @ngrx/entity
+npm i three
+npm i -D @angular-eslint/builder @angular-eslint/eslint-plugin @angular-eslint/eslint-plugin-template @angular-eslint/schematics @angular-eslint/template-parser eslint eslint-config-prettier prettier husky lint-staged commitlint @commitlint/cli @commitlint/config-conventional tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+Repository tree (key paths)
+
+.github/
+workflows/ci.yml
+dependabot.yml
+ISSUE_TEMPLATE/
+bug_report.md
+feature_request.md
+PULL_REQUEST_TEMPLATE.md
+.husky/
+pre-commit
+commit-msg
+src/
+app/
+app.module.ts
+app-routing.module.ts
+app.component.ts
+app.component.html
+core/
+core.module.ts
+services/
+seo/seo.service.ts
+seo/jsonld.service.ts
+seo/canonical.service.ts
+data/csv.service.ts
+data/harmonic-mapping.service.ts
+data/braid-geometry.service.ts
+data/live-metrics.service.ts
+api/http.service.ts
+api/interceptors/auth.interceptor.ts
+api/interceptors/error.interceptor.ts
+state/app-store.module.ts
+guards/pending-changes.guard.ts
+shared/
+shared.module.ts
+ui/
+toast/toast.service.ts
+toast/toast-container.component.ts
+badge/badge.component.ts
+checkbox/checkbox.component.ts
+switch/switch.component.ts
+radio-group/radio-group.component.ts
+slider/slider.component.ts
+progress/progress.component.ts
+avatar/avatar.component.ts
+card/card.component.ts
+tabs/tabs.component.ts
+skeleton/skeleton.component.ts
+tooltip/tooltip.directive.ts
+popover/popover.component.ts
+toggle/toggle.component.ts
+input/input.component.ts
+textarea/textarea.component.ts
+directives/lazy-img.directive.ts
+pipes/key-format.pipe.ts
+pipes/chord-format.pipe.ts
+pipes/roman-numeral.pipe.ts
+features/
+braid-classic/
+braid-classic.module.ts
+braid-classic.page.ts
+braid-classic.page.html
+braid-tonal/
+braid-tonal.module.ts
+braid-tonal.page.ts
+braid-tonal.page.html
+braid-new2/
+braid-new2.module.ts
+braid-new2.page.ts
+braid-new2.page.html
+braid-3d/
+braid-3d.module.ts
+braid-3d.page.ts
+braid-3d.page.html
+components/braid-three/braid-three.component.ts
+components/braid-three/braid-three.component.html
+live-metrics/
+live-metrics.module.ts
+live-metrics.page.ts
+live-metrics.page.html
+components/metrics-bubbles/metrics-bubbles.component.ts
+components/metrics-bubbles/metrics-bubbles.component.html
+state/
+global-key/global-key.actions.ts
+global-key/global-key.reducer.ts
+global-key/global-key.selectors.ts
+index.ts
+assets/
+environments/
+environment.ts
+environment.prod.ts
+styles.scss
+tailwind.config.js
+postcss.config.js
+angular.json
+tsconfig.json
+tsconfig.app.json
+tsconfig.spec.json
+.editorconfig
+.gitattributes
+.nvmrc
+.eslintrc.json
+.prettierrc.json
+.lintstagedrc.json
+commitlint.config.cjs
+README.md
+LICENSE
+CODEOWNERS
+CONTRIBUTING.md
+SECURITY.md
+Critical files (drop-in contents)
+
+README.md
+Put this at repo root.
+MillionSongMind — Angular 15
+High-performance harmonic analysis and braid visualizations. Angular 15 + NgRx + Tailwind + Three.js.
+
+Badges: CI, License, Commitizen-friendly.
+
+Overview
+
+Purpose: Explore tonal centers, progressions, and braid/torus topologies using deterministic state and optimized rendering.
+Key Features:
+Classic/Tonal/New braid visualizations (SVG + 3D).
+Global key context with score/user lock.
+Live metrics from corpus (presence, standalone, progressions).
+SEO-first pages with canonical/meta/JSON-LD.
+Reusable UI primitives themed via Tailwind semantic tokens (HSL).
+Tech Stack
+
+Angular 15, RxJS, NgRx, Tailwind, Three.js, Karma/Jasmine, Cypress, GitHub Actions.
+Getting Started
+
+Prereqs: Node 18 LTS, npm, Angular CLI 15.
+Install: npm ci
+Dev: npm start
+Lint: npm run lint
+Test: npm test
+Build: npm run build
+E2E (if added): npm run e2e
+Architecture
+
+Core services (SEO, data parsing, geometry).
+Shared UI (headless components).
+Feature modules (braid-classic, braid-tonal, braid-new2, live-metrics, braid-3d).
+NgRx store slices (globalKey + router-store).
+SEO
+
+Title < 60 chars, meta description < 160 chars.
+Single H1 per page. Canonical links and JSON-LD via services.
+Lazy images, responsive layout.
+Design System
+
+Tailwind with semantic HSL tokens in styles.scss.
+No hard-coded colors; use CSS vars.
+State
+
+NgRx with memoized selectors, OnPush, async pipes.
+3D
+
+Three.js integrated directly; careful cleanup in ngOnDestroy.
+Contributing
+
+Conventional commits, pre-commit hooks (lint-staged), PR template, CODEOWNERS.
+Security
+
+Report via SECURITY.md. Avoid secrets in repo.
+License
+
+MIT
+Cross-Reference (React → Angular)
+
+src/pages/BraidClassicPage.tsx → app/features/braid-classic/braid-classic.page.*
+src/pages/BraidTonalPage.tsx → app/features/braid-tonal/*
+src/pages/BraidNew2Page.tsx → app/features/braid-new2/*
+src/pages/BraidLiveMetricsPage.tsx → app/features/live-metrics/*
+src/state/globalKeyStore.tsx → app/state/global-key/*
+src/components/ui/* → app/shared/ui/*
+.github/workflows/ci.yml
+name: CI on: push: branches: [ main ] pull_request: branches: [ main ] permissions: contents: read checks: write jobs: build-test: runs-on: ubuntu-latest steps: - uses: actions/checkout@v4 - uses: actions/setup-node@v4 with: node-version: 18 cache: npm - run: npm ci - run: npm run lint - run: npm test -- --watch=false --browsers=ChromeHeadless - run: npm run build -- --configuration=production
+
+.github/dependabot.yml
+version: 2 updates:
+
+package-ecosystem: "npm" directory: "/" schedule: interval: "weekly" open-pull-requests-limit: 10
+.husky/pre-commit
+#!/usr/bin/env sh . "$(dirname -- "$0")/_/husky.sh" npx lint-staged
+
+.husky/commit-msg
+#!/usr/bin/env sh . "$(dirname -- "$0")/_/husky.sh" npx commitlint --edit "$1"
+
+commitlint.config.cjs
+module.exports = { extends: ['@commitlint/config-conventional'] };
+
+.lintstagedrc.json
+{ ".{ts,js,json,md,html,scss,css}": ["prettier --write"], "src/**/.{ts,html,scss}": ["eslint --fix"] }
+
+.eslintrc.json
+{ "root": true, "ignorePatterns": ["projects/**/"], "overrides": [ { "files": [".ts"], "extends": ["plugin:@angular-eslint/recommended", "plugin:@angular-eslint/template/process-inline-templates", "prettier"], "parserOptions": { "project": ["tsconfig.json"], "createDefaultProgram": true }, "rules": { "@angular-eslint/component-class-suffix": ["error", { "suffixes": ["Component", "Page"] }] } }, { "files": ["*.html"], "extends": ["plugin:@angular-eslint/template/recommended"], "rules": {} } ] }
+
+.prettierrc.json
+{ "singleQuote": true, "printWidth": 100, "trailingComma": "es5", "semi": true }
+
+.editorconfig
+root = true [*] charset = utf-8 end_of_line = lf insert_final_newline = true indent_style = space indent_size = 2 trim_trailing_whitespace = true
+
+[*.md] trim_trailing_whitespace = false
+
+.gitattributes
+text=auto eol=lf
+.nvmrc
+18
+
+tailwind.config.js
+/** @type {import('tailwindcss').Config} / module.exports = { content: ["./src/**/.{html,ts}"], theme: { extend: { colors: { background: "hsl(var(--background) / <alpha-value>)", foreground: "hsl(var(--foreground) / <alpha-value>)", primary: "hsl(var(--primary) / <alpha-value>)", "primary-foreground": "hsl(var(--primary-foreground) / <alpha-value>)", secondary: "hsl(var(--secondary) / <alpha-value>)", muted: "hsl(var(--muted) / <alpha-value>)", ring: "hsl(var(--ring) / <alpha-value>)", card: "hsl(var(--card) / <alpha-value>)", "card-foreground": "hsl(var(--card-foreground) / <alpha-value>)", input: "hsl(var(--input) / <alpha-value>)", border: "hsl(var(--border) / <alpha-value>)", popover: "hsl(var(--popover) / <alpha-value>)", "popover-foreground": "hsl(var(--popover-foreground) / <alpha-value>)" }, }, }, plugins: [], };
+
+postcss.config.js
+module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } };
+
+styles.scss (design tokens, HSL)
+:root { --background: 0 0% 100%; --foreground: 224 71.4% 4.1%; --primary: 262 83% 57%; --primary-foreground: 210 40% 98%; --secondary: 220 14% 96%; --muted: 220 14% 96%; --ring: 262 83% 57%; --card: 0 0% 100%; --card-foreground: 224 71.4% 4.1%; --input: 214.3 31.8% 91.4%; --border: 214.3 31.8% 91.4%; --popover: 0 0% 100%; --popover-foreground: 222.2 47.4% 11.2%; } @media (prefers-color-scheme: dark) { :root { --background: 224 71.4% 4.1%; --foreground: 210 40% 98%; --primary: 262 83% 57%; --primary-foreground: 224 71.4% 4.1%; --secondary: 215 27.9% 16.9%; --muted: 215 27.9% 16.9%; --ring: 262 83% 57%; --card: 224 71.4% 4.1%; --card-foreground: 210 40% 98%; --input: 215 27.9% 16.9%; --border: 215 27.9% 16.9%; --popover: 224 71.4% 4.1%; --popover-foreground: 210 40% 98%; } } @tailwind base; @tailwind components; @tailwind utilities;
+
+angular.json (key parts; mostly from ng new, with budgets)
+{ "$schema": "./node_modules/@angular/cli/lib/config/schema.json", "version": 1, "projects": { "msm-braid": { "projectType": "application", "schematics": {}, "architect": { "build": { "options": { "outputPath": "dist/msm-braid", "index": "src/index.html", "main": "src/main.ts", "polyfills": ["zone.js"], "tsConfig": "tsconfig.app.json", "assets": ["src/favicon.ico", "src/assets"], "styles": ["src/styles.scss"], "scripts": [] }, "configurations": { "production": { "budgets": [ { "type": "initial", "maximumWarning": "1.2mb", "maximumError": "2mb" }, { "type": "anyComponentStyle", "maximumWarning": "6kb", "maximumError": "10kb" } ], "outputHashing": "all" } } }, "serve": { "options": { "browserTarget": "msm-braid:build" } }, "test": { "options": { "karmaConfig": "karma.conf.js" } }, "lint": { "builder": "@angular-eslint/builder:lint", "options": { "lintFilePatterns": ["src//*.ts", "src//*.html"] } } } } }, "defaultProject": "msm-braid" }
+
+tsconfig.json
+{ "compileOnSave": false, "compilerOptions": { "baseUrl": "./", "outDir": "./dist/out-tsc", "forceConsistentCasingInFileNames": true, "strict": true, "noImplicitOverride": true, "noPropertyAccessFromIndexSignature": true, "noImplicitReturns": true, "noFallthroughCasesInSwitch": true, "sourceMap": true, "declaration": false, "moduleResolution": "node", "emitDecoratorMetadata": true, "experimentalDecorators": true, "target": "ES2022", "module": "ES2022", "useDefineForClassFields": false, "lib": ["ES2022", "DOM"] } }
+
+environments/environment.ts
+export const environment = { production: false, apiBaseUrl: '/api' };
+
+environments/environment.prod.ts
+export const environment = { production: true, apiBaseUrl: '/api' };
+
+src/app/app-routing.module.ts
+import { NgModule } from '@angular/core'; import { RouterModule, Routes } from '@angular/router';
+
+const routes: Routes = [ { path: '', redirectTo: 'braid-classic', pathMatch: 'full' }, { path: 'braid-classic', loadChildren: () => import('./features/braid-classic/braid-classic.module').then(m => m.BraidClassicModule) }, { path: 'braid-tonal', loadChildren: () => import('./features/braid-tonal/braid-tonal.module').then(m => m.BraidTonalModule) }, { path: 'braid-new2', loadChildren: () => import('./features/braid-new2/braid-new2.module').then(m => m.BraidNew2Module) }, { path: 'live-metrics', loadChildren: () => import('./features/live-metrics/live-metrics.module').then(m => m.LiveMetricsModule) }, { path: 'braid-3d', loadChildren: () => import('./features/braid-3d/braid-3d.module').then(m => m.Braid3DModule) }, { path: '**', redirectTo: 'braid-classic' } ];
+
+@NgModule({ imports: [RouterModule.forRoot(routes, { scrollPositionRestoration: 'enabled' })], exports: [RouterModule] }) export class AppRoutingModule {}
+
+src/app/app.module.ts
+import { NgModule } from '@angular/core'; import { BrowserModule, Title, Meta } from '@angular/platform-browser'; import { AppRoutingModule } from './app-routing.module'; import { AppComponent } from './app.component'; import { CoreModule } from './core/core.module'; import { SharedModule } from './shared/shared.module';
+
+@NgModule({ declarations: [AppComponent], imports: [BrowserModule, AppRoutingModule, CoreModule, SharedModule], providers: [Title, Meta], bootstrap: [AppComponent], }) export class AppModule {}
+
+src/app/app.component.html
+<app-toast-container></app-toast-container> <router-outlet></router-outlet>
+
+CoreModule and SEO services
+src/app/core/core.module.ts
+import { NgModule } from '@angular/core'; import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http'; import { AppStoreModule } from './state/app-store.module'; import { AuthInterceptor } from './services/api/interceptors/auth.interceptor'; import { ErrorInterceptor } from './services/api/interceptors/error.interceptor';
+
+@NgModule({ imports: [HttpClientModule, AppStoreModule], providers: [ { provide: HTTP_INTERCEPTORS, multi: true, useClass: AuthInterceptor }, { provide: HTTP_INTERCEPTORS, multi: true, useClass: ErrorInterceptor }, ], }) export class CoreModule {}
+
+src/app/core/services/seo/seo.service.ts
+import { Injectable } from '@angular/core'; import { Meta, Title } from '@angular/platform-browser'; @Injectable({ providedIn: 'root' }) export class SeoService { constructor(private title: Title, private meta: Meta) {} setMeta(opts: { title: string; description?: string; canonicalUrl?: string }) { this.title.setTitle(opts.title); if (opts.description) this.meta.updateTag({ name: 'description', content: opts.description }); if (opts.canonicalUrl) { let link = document.querySelector("link[rel='canonical']") as HTMLLinkElement | null; if (!link) { link = document.createElement('link'); link.rel = 'canonical'; document.head.appendChild(link); } link.href = opts.canonicalUrl; } } }
+
+src/app/core/services/seo/jsonld.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class JsonLdService { set(data: object) { const id = 'app-jsonld'; let script = document.getElementById(id) as HTMLScriptElement | null; if (!script) { script = document.createElement('script'); script.id = id; script.type = 'application/ld+json'; document.head.appendChild(script); } script.text = JSON.stringify(data); } }
+
+SharedModule and Toast
+src/app/shared/shared.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { ToastContainerComponent } from './ui/toast/toast-container.component'; @NgModule({ declarations: [ToastContainerComponent], imports: [CommonModule], exports: [ToastContainerComponent], }) export class SharedModule {}
+
+src/app/shared/ui/toast/toast.service.ts
+import { Injectable } from '@angular/core'; import { Subject } from 'rxjs'; export type Toast = { id?: string; title?: string; description?: string; type?: 'success'|'error'|'info' }; @Injectable({ providedIn: 'root' }) export class ToastService { private _toasts = new Subject<Toast>(); toasts$ = this._toasts.asObservable(); push(t: Toast) { this._toasts.next({ id: crypto.randomUUID(), ...t }); } }
+
+src/app/shared/ui/toast/toast-container.component.ts
+import { Component } from '@angular/core'; import { ToastService } from './toast.service'; @Component({ selector: 'app-toast-container', template: `
+
+<section class="fixed bottom-4 right-4 space-y-2 z-50"> <article *ngFor="let t of toasts | async" class="rounded-md border bg-background text-foreground shadow-lg p-3"> <h4 *ngIf="t.title" class="font-semibold">{{t.title}}</h4> <p *ngIf="t.description" class="text-sm text-muted-foreground">{{t.description}}</p> </article> </section> `, }) export class ToastContainerComponent { toasts = this.toast.toasts$; constructor(private toast: ToastService) {} }
+NgRx AppStore and Global Key slice
+src/app/core/state/app-store.module.ts
+import { NgModule } from '@angular/core'; import { StoreModule } from '@ngrx/store'; import { routerReducer, StoreRouterConnectingModule } from '@ngrx/router-store'; import { EffectsModule } from '@ngrx/effects'; import { globalKeyReducer } from '../../state/global-key/global-key.reducer'; @NgModule({ imports: [ StoreModule.forRoot({ router: routerReducer, globalKey: globalKeyReducer }), EffectsModule.forRoot([]), StoreRouterConnectingModule.forRoot(), ], }) export class AppStoreModule {}
+
+src/app/state/global-key/global-key.actions.ts
+import { createAction, props } from '@ngrx/store'; export const setTonality = createAction('[GlobalKey] Set Tonality', props<{ tonality: string }>()); export const setScoreTonality = createAction('[GlobalKey] Set Score Tonality', props<{ scoreTonality: string }>()); export const toggleLock = createAction('[GlobalKey] Toggle Lock');
+
+src/app/state/global-key/global-key.reducer.ts
+import { createReducer, on } from '@ngrx/store'; import * as Key from './global-key.actions'; export interface GlobalKeyState { tonality: string; scoreTonality: string; isLockedToScore: boolean; } export const initialState: GlobalKeyState = { tonality: 'C', scoreTonality: 'C', isLockedToScore: false }; export const globalKeyReducer = createReducer( initialState, on(Key.setTonality, (s, { tonality }) => ({ ...s, tonality })), on(Key.setScoreTonality, (s, { scoreTonality }) => ({ ...s, scoreTonality })), on(Key.toggleLock, s => ({ ...s, isLockedToScore: !s.isLockedToScore })), );
+
+src/app/state/global-key/global-key.selectors.ts
+import { createFeatureSelector, createSelector } from '@ngrx/store'; import { GlobalKeyState } from './global-key.reducer'; export const selectGlobalKey = createFeatureSelector<GlobalKeyState>('globalKey'); export const selectTonality = createSelector(selectGlobalKey, s => s.tonality); export const selectScoreTonality = createSelector(selectGlobalKey, s => s.scoreTonality); export const selectIsLocked = createSelector(selectGlobalKey, s => s.isLockedToScore); export const selectFocusedKey = createSelector(selectGlobalKey, s => (s.isLockedToScore ? s.scoreTonality : s.tonality) || 'C');
+
+Feature example: Braid Classic
+src/app/features/braid-classic/braid-classic.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { RouterModule, Routes } from '@angular/router'; import { BraidClassicPage } from './braid-classic.page'; const routes: Routes = [{ path: '', component: BraidClassicPage }]; @NgModule({ declarations: [BraidClassicPage], imports: [CommonModule, RouterModule.forChild(routes)] }) export class BraidClassicModule {}
+
+src/app/features/braid-classic/braid-classic.page.ts
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core'; import { SeoService } from '../../core/services/seo/seo.service'; @Component({ selector: 'app-braid-classic-page', templateUrl: './braid-classic.page.html', changeDetection: ChangeDetectionStrategy.OnPush, }) export class BraidClassicPage implements OnInit { constructor(private seo: SeoService) {} ngOnInit(): void { this.seo.setMeta({ title: 'Classic Braid — MillionSongMind', description: 'Exact classic Novaxe braid scaffold with tonalities.', canonicalUrl: '/braid-classic', }); } }
+
+src/app/features/braid-classic/braid-classic.page.html
+<main class="max-w-7xl mx-auto px-6 py-8 space-y-6"> <header class="flex items-center justify-between"> <h1 class="text-2xl font-mono font-bold">Classic Braid</h1> </header> <!-- TODO: <app-braid-canvas /> --> <section class="text-muted-foreground">Coming soon: Braid canvas</section> </main>
+Feature example: Live Metrics (parity with click handler)
+src/app/features/live-metrics/live-metrics.module.ts
+import { NgModule } from '@angular/core'; import { CommonModule } from '@angular/common'; import { RouterModule, Routes } from '@angular/router'; import { LiveMetricsPage } from './live-metrics.page'; const routes: Routes = [{ path: '', component: LiveMetricsPage }]; @NgModule({ declarations: [LiveMetricsPage], imports: [CommonModule, RouterModule.forChild(routes)] }) export class LiveMetricsModule {}
+
+src/app/features/live-metrics/live-metrics.page.ts
+import { Component } from '@angular/core'; @Component({ selector: 'app-live-metrics-page', templateUrl: './live-metrics.page.html', }) export class LiveMetricsPage { handleBubbleClick(chord: string) { console.log(Querying Million Song Mind for chord: ${chord}); // TODO: navigate to MSM with chord filter } }
+
+src/app/features/live-metrics/live-metrics.page.html
+<main class="container mx-auto px-4 py-8"> <header class="mb-8"> <h1 class="text-3xl font-bold text-primary mb-2">Live Harmonic Metrics</h1> <p class="text-muted-foreground">Real-time visualization of chord frequencies and progressions.</p> </header> <section> <!-- <app-metrics-bubbles (bubbleClick)="handleBubbleClick($event)"></app-metrics-bubbles> --> <button class="px-3 py-2 rounded-md border" (click)="handleBubbleClick('Cmaj7')">Test Bubble</button> </section> </main>
+Three.js component
+src/app/features/braid-3d/components/braid-three/braid-three.component.ts
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core'; import * as THREE from 'three'; @Component({ selector: 'app-braid-three', templateUrl: './braid-three.component.html', }) export class BraidThreeComponent implements AfterViewInit, OnDestroy { @ViewChild('canvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>; private renderer!: THREE.WebGLRenderer; private scene = new THREE.Scene(); private camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000); private frameId: number | null = null; ngAfterViewInit(): void { const canvas = this.canvasRef.nativeElement; this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true }); this.resize(); window.addEventListener('resize', this.resize); this.initScene(); this.animate(); } private initScene() { const ambient = new THREE.AmbientLight(0x404040); this.scene.add(ambient); const dir = new THREE.DirectionalLight(0xffffff, 1); dir.position.set(1,1,1); this.scene.add(dir); const geo = new THREE.TorusGeometry(1.5, 0.5, 16, 100); const mat = new THREE.MeshPhongMaterial({ color: 0xff0000 }); this.scene.add(new THREE.Mesh(geo, mat)); this.camera.position.z = 5; } private animate = () => { this.frameId = requestAnimationFrame(this.animate); this.renderer.render(this.scene, this.camera); }; private resize = () => { const canvas = this.canvasRef.nativeElement; const w = canvas.clientWidth || 800, h = canvas.clientHeight || 600; this.camera.aspect = w / h; this.camera.updateProjectionMatrix(); this.renderer.setSize(w, h, false); }; ngOnDestroy(): void { if (this.frameId) cancelAnimationFrame(this.frameId); window.removeEventListener('resize', this.resize); this.renderer.dispose(); } }
+
+src/app/features/braid-3d/components/braid-three/braid-three.component.html
+<canvas #canvas class="w-full h-[60vh] block"></canvas>
+
+Data services stubs
+src/app/core/services/data/csv.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class CsvService { parse(text: string): string[][] { return text.split('\n').map(r => r.split(',')); } }
+
+src/app/core/services/data/harmonic-mapping.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class HarmonicMappingService { toRoman(chord: string, key: string): string { return chord; /* TODO: port exact logic */ } }
+
+src/app/core/services/data/braid-geometry.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class BraidGeometryService { // TODO: port braid geometry math used by Classic/Tonal/New2 }
+
+src/app/core/services/data/live-metrics.service.ts
+import { Injectable } from '@angular/core'; @Injectable({ providedIn: 'root' }) export class LiveMetricsService { // TODO: connect to corpus or adapters; returns observables with metrics }
+
+HTTP interceptors (stubs)
+src/app/core/services/api/interceptors/auth.interceptor.ts
+import { Injectable } from '@angular/core'; import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http'; import { Observable } from 'rxjs'; @Injectable() export class AuthInterceptor implements HttpInterceptor { intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> { // const authReq = req.clone({ setHeaders: { Authorization: Bearer ${token} } }); return next.handle(req); } }
+
+src/app/core/services/api/interceptors/error.interceptor.ts
+import { Injectable } from '@angular/core'; import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpErrorResponse } from '@angular/common/http'; import { Observable, throwError } from 'rxjs'; import { catchError } from 'rxjs/operators'; @Injectable() export class ErrorInterceptor implements HttpInterceptor { intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> { return next.handle(req).pipe(catchError((err: HttpErrorResponse) => throwError(() => err))); } }
+
+ISSUE/PR templates
+.github/ISSUE_TEMPLATE/bug_report.md and feature_request.md (standard GitHub templates)
+.github/PULL_REQUEST_TEMPLATE.md
+Summary
+What changed and why?
+Checklist
+[ ] Tests added/updated
+[ ] Docs updated
+[ ] Follows coding standards
+[ ] E2E/local verified
+CONTRIBUTING.md (key points)
+Branching, conventional commits, PR review, test/lint requirements, coding style, architecture overview.
+CODEOWNERS (example)
+@your-org/maintainers
+SECURITY.md
+Responsible disclosure process, contact, timelines.
+LICENSE
+MIT License text.
+Mermaid architecture diagram
+
+
+Flowchart
+Deep migration strategy and advice (future-proof)
+
+Strangler-fig with shared domain library:
+Extract harmonic mapping, braid geometry, CSV parsing to a pure TS lib consumed by both React and Angular during transition.
+Publish as internal npm or Git submodule; semantic-release for versioning.
+Parity-first acceptance tests:
+Record Cypress flows on React; replay against Angular for black-box parity.
+Snapshot SVGs (DOM serialization) and mesh graphs (counts, materials) for regression.
+Performance budgets:
+60 FPS on mid-tier; Angular OnPush + async pipes; key trackBy; web workers for heavy math/CSV.
+Accessibility:
+WCAG AA; keyboard nav for overlays; focus management; aria roles; color contrast via HSL tokens.
+SEO:
+Use SeoService on each page; consider Angular Universal later for SSR snapshots if needed.
+State contracts:
+Define JSON schemas for state slices (globalKey, braid state, metrics). Validate with zod in dev.
+Upgrade path:
+Keep feature modules decoupled; easy migration to standalone components (Angular 16+) later.
+Repo hygiene:
+Enforce consistent code style via ESLint/Prettier and hooks; Dependabot weekly updates; CI gates on PRs.
+How to create the GitHub repo with Lovable’s integration
+
+In Lovable: GitHub → Connect to GitHub → Create Repository.
+Because Lovable apps are React/Vite-only at runtime, keep Angular development in the new GitHub repo (outside Lovable runtime).
+You can still use Lovable’s bidirectional sync to manage files, PR templates, and docs; deploy/build Angular using your CI/CD.
+Next steps I recommend
+
+Create the new GitHub repo (msm-braid-angular).
+Run ng new msm-braid --routing --style=scss --strict; replace/add files with the contents above.
+Commit hooks: npx husky install; git add .husky && configure provided hook files.
+Wire Tailwind tokens to match your current design language.
+Start porting domain services (harmonic mapping, geometry) into core/services with unit tests.
+Build BraidClassic page first; then Live Metrics; then 3D braid.
+If you want, I can also generate a zipped starter bundle with these files for direct import into the new repo.
+
+
+

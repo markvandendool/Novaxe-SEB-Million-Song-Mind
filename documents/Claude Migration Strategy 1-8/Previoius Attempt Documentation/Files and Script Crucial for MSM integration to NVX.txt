@@ -1,0 +1,117 @@
+Based on the comprehensive prompt requirements, here are the **critical files** you should include for the forensic audit and migration strategy. I'll organize them by category:
+
+## **📁 CORE MSM APPLICATION FILES**
+
+### **Main Application Files**
+- [`apps/msm/src/App.tsx`](apps/msm/src/App.tsx) - Main React application entry point
+- [`apps/msm/src/main.tsx`](apps/msm/src/main.tsx) - Application bootstrap
+- [`apps/msm/src/pages/Index.tsx`](apps/msm/src/pages/Index.tsx) - Main MSM landing page with all features
+- [`apps/msm/src/pages/MillionSongMind.tsx`](apps/msm/src/pages/MillionSongMind.tsx) - Alternative main page
+
+### **Configuration Files**
+- [`apps/msm/package.json`](apps/msm/package.json) - Dependencies and scripts
+- [`apps/msm/vite.config.ts`](apps/msm/vite.config.ts) - Vite build configuration
+- [`apps/msm/tsconfig.json`](apps/msm/tsconfig.json) - TypeScript configuration
+- [`apps/msm/tailwind.config.ts`](apps/msm/tailwind.config.ts) - Tailwind CSS configuration
+- [`apps/msm/postcss.config.js`](apps/msm/postcss.config.js) - PostCSS configuration
+
+## **�� MUSIC THEORY & BRAID COMPONENTS**
+
+### **Braid Visualization**
+- [`apps/msm/src/components/braid/RealNovaxeBraid.tsx`](apps/msm/src/components/braid/RealNovaxeBraid.tsx) - Current braid implementation
+- [`apps/msm/src/components/braid/BraidExact.tsx`](apps/msm/src/components/braid/BraidExact.tsx) - Alternative braid component
+- [`apps/msm/src/components/braid/NovaxeBraid.css`](apps/msm/src/components/braid/NovaxeBraid.css) - Braid styling
+
+### **Music Analysis Components**
+- [`apps/msm/src/components/HarmonicChart.tsx`](apps/msm/src/components/HarmonicChart.tsx) - Harmonic profile visualization
+- [`apps/msm/src/components/MusicVizFileUploader.tsx`](apps/msm/src/components/MusicVizFileUploader.tsx) - File upload component
+- [`apps/msm/src/components/MusicVizDashboard.tsx`](apps/msm/src/components/MusicVizDashboard.tsx) - Music visualization dashboard
+
+## **🔍 DATA & UTILITIES**
+
+### **Data Processing**
+- [`apps/msm/src/utils/cpmlParser.ts`](apps/msm/src/utils/cpmlParser.ts) - CPML data parsing utilities
+- [`apps/msm/src/test_data3_real.ts`](apps/msm/src/test_data3_real.ts) - Real test data
+- [`apps/msm/src/test_data3_simple.ts`](apps/msm/src/test_data3_simple.ts) - Simple test data
+
+### **Constants & Types**
+- [`apps/msm/src/constants/harmony.ts`](apps/msm/src/constants/harmony.ts) - Harmony constants and chord groups
+- [`apps/msm/src/types/cpml.ts`](apps/msm/src/types/cpml.ts) - CPML data types
+- [`apps/msm/src/types/index.ts`](apps/msm/src/types/index.ts) - General type definitions
+
+## **🎨 UI COMPONENTS**
+
+### **Core UI Components**
+- [`apps/msm/src/components/SearchFilters.tsx`](apps/msm/src/components/SearchFilters.tsx) - Search functionality
+- [`apps/msm/src/components/SongTable.tsx`](apps/msm/src/components/SongTable.tsx) - Song data table
+- [`apps/msm/src/components/FileDropZone.tsx`](apps/msm/src/components/FileDropZone.tsx) - File upload zone
+- [`apps/msm/src/components/ui/button.tsx`](apps/msm/src/components/ui/button.tsx) - UI button component
+
+### **Styling**
+- [`apps/msm/src/index.css`](apps/msm/src/index.css) - Global styles
+- [`apps/msm/src/App.css`](apps/msm/src/App.css) - App-specific styles
+
+## **🔗 BRIDGE & COMMUNICATION**
+
+### **Cross-App Communication**
+- [`apps/msm/src/bridge/msm-bridge.ts`](apps/msm/src/bridge/msm-bridge.ts) - MSM bridge implementation
+- [`packages/shared/src/index.ts`](packages/shared/src/index.ts) - Shared types
+- [`packages/msm-bridge/src/index.ts`](packages/msm-bridge/src/index.ts) - Bridge package
+
+## **📊 TARGET ANGULAR 15 FILES**
+
+### **Existing Novaxe Angular App**
+- [`apps/novaxe/src/app/app.module.ts`](apps/novaxe/src/app/app.module.ts) - Main Angular module
+- [`apps/novaxe/src/app/app-routing.module.ts`](apps/novaxe/src/app/app-routing.module.ts) - Routing configuration
+- [`apps/novaxe/src/app/components/braid/braid.component.ts`](apps/novaxe/src/app/components/braid/braid.component.ts) - Original Novaxe braid
+- [`apps/novaxe/src/app/components/braid/braid.component.html`](apps/novaxe/src/app/components/braid/braid.component.html) - Braid template
+- [`apps/novaxe/src/app/pages/msm-landing/msm-landing.component.ts`](apps/novaxe/src/app/pages/msm-landing/msm-landing.component.ts) - MSM integration component
+- [`apps/novaxe/src/app/pages/msm-landing/msm-landing.component.html`](apps/novaxe/src/app/pages/msm-landing/msm-landing.component.html) - MSM landing template
+
+### **Configuration**
+- [`apps/novaxe/package.json`](apps/novaxe/package.json) - Angular dependencies
+- [`apps/novaxe/tsconfig.json`](apps/novaxe/tsconfig.json) - Angular TypeScript config
+- [`apps/novaxe/src/environments/environment.ts`](apps/novaxe/src/environments/environment.ts) - Environment configuration
+
+## **🚨 FAILED MIGRATION ATTEMPT**
+
+### **Failed Angular 15 MSM App**
+- [`apps/msm-angular/src/app/app.module.ts`](apps/msm-angular/src/app/app.module.ts) - Failed module configuration
+- [`apps/msm-angular/src/app/components/msm-index/msm-index.component.ts`](apps/msm-angular/src/app/components/msm-index/msm-index.component.ts) - Failed component
+- [`apps/msm-angular/tsconfig.json`](apps/msm-angular/tsconfig.json) - Failed TypeScript config
+- [`apps/msm-angular/package.json`](apps/msm-angular/package.json) - Failed dependencies
+
+## **📋 MONOREPO CONFIGURATION**
+
+### **Root Configuration**
+- [`package.json`](package.json) - Root monorepo configuration
+- [`tsconfig.base.json`](tsconfig.base.json) - Base TypeScript configuration
+- [`README.md`](README.md) - Project documentation
+
+### **Scripts & Automation**
+- [`scripts/smoke-check.js`](scripts/smoke-check.js) - Health check script
+- [`scripts/test-all.js`](scripts/test-all.js) - Test runner
+- [`scripts/dry-run-setup.sh`](scripts/dry-run-setup.sh) - Dry run setup
+
+### **CI/CD & Documentation**
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml) - CI/CD pipeline
+- [`PHASE_1_TIMELINE.md`](PHASE_1_TIMELINE.md) - Migration timeline
+- [`PHASE_0.5_CHECKLIST.md`](PHASE_0.5_CHECKLIST.md) - Stability checklist
+- [`INTEGRATION_READY.md`](INTEGRATION_READY.md) - Integration status
+
+## **�� PRIORITY FILES FOR FORENSIC AUDIT**
+
+**Start with these critical files for the most comprehensive analysis:**
+
+1. **`apps/msm/src/pages/Index.tsx`** - Main application logic
+2. **`apps/msm/src/components/braid/RealNovaxeBraid.tsx`** - Core braid functionality
+3. **`apps/msm/src/utils/cpmlParser.ts`** - Data processing logic
+4. **`apps/msm/src/constants/harmony.ts`** - Music theory constants
+5. **`apps/msm/package.json`** - Dependencies and architecture
+6. **`apps/novaxe/src/app/components/braid/braid.component.ts`** - Target Angular component
+7. **`apps/msm-angular/src/app/app.module.ts`** - Failed migration example
+
+These files will provide Claude with the complete picture needed for the forensic audit and comprehensive migration strategy.
+
+
+

@@ -1,0 +1,180 @@
+# 🚀 **MEGA PROMPT: ANGULAR 15 → 20 → SVELTEKIT MIGRATION**
+
+```markdown
+## IMMEDIATE CONTEXT
+I have a complex Angular music application (Novaxe) currently at Angular 15.2.10 that needs migration to Angular 20, with eventual goal of moving to SvelteKit. The app has:
+- 100,000+ lines of code
+- Complex musical algorithms (Tonal.js, Web Audio API, MIDI)
+- Heavy jQuery usage that needs removal
+- RxJS state management
+- Complex Braid visualization component (1,196 lines TS)
+- Real-time audio processing
+
+Current location: `/Users/markvandendool/HarmonicOracle Cursor/harmonic-oracle/vendor/novaxe-fakebook`
+
+## PHASE 1: ANGULAR 15 → 20 FAST TRACK (Priority: Get it working)
+
+### STEP 1: Version Jump Strategy
+Instead of incremental updates, we'll do strategic jumps:
+- 15 → 17 (get standalone components)
+- 17 → 19 (get signals stable)  
+- 19 → 20 (get zoneless)
+
+For each jump, provide:
+1. Exact ng update command
+2. Package.json modifications needed
+3. Critical breaking changes to fix
+4. Quick test command to verify
+
+### STEP 2: Fix Music Dependencies NOW
+```json
+{
+  "@tonaljs/tonal": "4.10.0",  // Last stable before v5 breaking changes
+  "tone": "^14.8.0",            // Modern MIDI replacement
+  "rxjs": "~7.8.0",
+  "abcjs": "^6.2.0",
+  "soundfont-player": "^0.12.0"
+}
+```
+
+### STEP 3: Minimal Working Configuration
+Generate ONLY these files with Angular 20 compatibility:
+1. angular.json (remove vendorChunk, defaultProject)
+2. tsconfig.json (ES2022 target)
+3. package.json (exact versions that work)
+
+## PHASE 2: MODERNIZATION FOR SVELTEKIT PREP
+
+### CRITICAL: Decouple Business Logic
+Since we're going to SvelteKit, prioritize:
+1. Extract all musical algorithms into framework-agnostic TypeScript classes
+2. Move Web Audio API code to standalone services
+3. Create pure functions for chord detection, scale analysis
+4. Separate UI components from business logic
+
+Example structure:
+```typescript
+// core/music-engine.ts (framework agnostic)
+export class MusicEngine {
+  detectChord(notes: Note[]): Chord
+  analyzeProgression(chords: Chord[]): Analysis
+  processAudio(buffer: AudioBuffer): ProcessedAudio
+}
+
+// angular/components/piano.component.ts (thin wrapper)
+export class PianoComponent {
+  constructor(private engine: MusicEngine) {}
+}
+```
+
+### JQUERY REMOVAL (Essential for SvelteKit)
+Replace these patterns NOW:
+```javascript
+// OLD jQuery
+$('#piano').animate({...})
+$('.note').on('click', ...)
+
+// NEW Native
+element.animate([...], {...})
+element.addEventListener('click', ...)
+```
+
+### STATE MANAGEMENT SIMPLIFICATION
+Convert complex RxJS to simple signals for easier SvelteKit migration:
+```typescript
+// OLD RxJS
+private chordSubject = new BehaviorSubject<Chord>(null);
+chord$ = this.chordSubject.asObservable();
+
+// NEW Signals (Angular 20)
+chord = signal<Chord>(null);
+
+// FUTURE SvelteKit
+import { writable } from 'svelte/store';
+const chord = writable(null);
+```
+
+## PHASE 3: SVELTEKIT MIGRATION PATH
+
+### PARALLEL DEVELOPMENT STRATEGY
+1. Keep Angular 20 app running
+2. Create SvelteKit app alongside: `vendor/novaxe-sveltekit`
+3. Migrate one component at a time
+4. Share the core music engine between both
+
+### COMPONENT MAPPING
+Provide migration examples for:
+1. Piano Component (Angular → Svelte)
+2. Chord Detector (Angular service → Svelte store)
+3. Audio Processor (Angular → Svelte)
+4. Routing structure
+
+## IMMEDIATE DELIVERABLES NEEDED
+
+### 1. EMERGENCY FIX SCRIPT
+```bash
+#!/bin/bash
+# fix-angular20.sh
+# Complete script that gets me from broken Angular 15 to working Angular 20
+# Including all dependency fixes, config updates, and import corrections
+```
+
+### 2. WORKING PACKAGE.JSON
+Complete package.json with EXACT versions that work together for Angular 20 + music libs
+
+### 3. MIGRATION AUTOMATION
+Script that:
+- Fixes all RxJS imports
+- Updates all template syntax (*ngIf → @if)
+- Converts components to standalone
+- Fixes all AbcVisualParams
+
+### 4. SVELTEKIT SCAFFOLD
+Basic SvelteKit app structure that can import the music engine
+
+## SUCCESS CRITERIA
+1. Angular 20 builds with 0 errors
+2. Music features work (MIDI, audio, visualization)
+3. Core logic extracted and ready for SvelteKit
+4. Clear migration path documented
+
+## CONSTRAINTS
+- Time: Need working app TODAY
+- Cannot lose ANY music functionality
+- Must maintain real-time performance
+- jQuery must be removed (incompatible with SvelteKit)
+- State must be simplified for framework migration
+
+## OUTPUT FORMAT
+Provide in this order:
+1. Emergency fix commands (run immediately)
+2. Updated file contents (complete files)
+3. Test commands to verify each step
+4. SvelteKit migration starter code
+5. Timeline: Angular 20 today, SvelteKit migration over 2 weeks
+
+Focus on PRACTICAL FIXES over documentation. I need commands to run, not explanations of what might work.
+
+REMEMBER: The goal is Angular 20 working TODAY as a stepping stone to SvelteKit, not a perfect Angular 20 app we'll keep forever.
+```
+
+---
+
+## **🎯 USE THIS PROMPT WITH:**
+
+1. **Cursor Composer** (Cmd+Shift+I)
+2. **Enable:** Max mode, Claude-4-Sonnet
+3. **Context:** Include your package.json and angular.json
+4. **Follow-up:** "Focus on the emergency fix first"
+
+This prompt is engineered to:
+- Get you from Angular 15 → 20 quickly
+- Prepare for SvelteKit migration simultaneously  
+- Focus on working code over perfect code
+- Extract business logic for framework independence
+- Provide actual commands, not theory
+
+The key insight: Since you're migrating to SvelteKit anyway, don't over-optimize for Angular 20 - just get it working and focus on making the code portable!
+
+
+
