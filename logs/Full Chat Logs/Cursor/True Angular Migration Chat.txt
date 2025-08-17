@@ -1,0 +1,48 @@
+Scanning the repo for any "Claude Angular migration strategy" documents and related migration guides to incorporate into an automation script plan. Running multiple searches in parallel.
+Search files...
+Ran tool
+Ran tool
+Ran tool
+
+Reading the Claude migration strategy documents and existing migration scripts/protocols to embed their guidance into a robust automation script.
+Ran tool
+Ran tool
+Ran tool
+Ran tool
+
+Ran tool
+Ran tool
+Ran tool
+Ran tool
+Ran tool
+
+Creating a new automation script that performs a true Angular 11→20 progressive migration in a quarantined workspace with per-version ng update, install, build, and forensic validation gates. It will not touch your source tree; it clones to a temp dir, advances version-by-version, and logs detailed results.
+Ran tool
+Ran tool
+Built a non-destructive, version-by-version migration harness that actually upgrades and validates across Angular 11→20 in a quarantined copy of your app.
+
+What I added
+- scripts/true-angular-progressive-migration.sh
+  - Clones your app into a temp quarantine dir (no changes to source).
+  - Steps Angular 11 → 12 → … → 20 with real ng update per version.
+  - Switches Node targets per version (uses nvm if available).
+  - Runs install, build, and optional tests at each step using the matching @angular/cli.
+  - Captures forensic artifacts per version: dependency snapshots, framework versions, ripgrep scans for jquery/$, legacy rxjs imports, subscribe/unsubscribe counts, rotate usages, build stats.
+  - Optionally fingerprints specified components with line counts and hashes at baseline and each version.
+  - Hard-stops on failure with captured logs.
+
+How to run
+- Example (migrate Angular app under Novaxe SEB and fingerprint braid files):
+```bash
+bash scripts/true-angular-progressive-migration.sh "Novaxe SEB" \
+  "src/app/components/braid/braid.component.ts" \
+  "src/app/components/braid/braid.component.scss"
+```
+- Artifacts will be in a temp folder printed at the end (forensics per version, build logs, scans).
+
+Notes
+- It enforces actual RxJS import cleanup (fails if legacy rxjs/Subscription remains after 13+).
+- Leaves your repo untouched; you review forensics and then decide what to apply.
+- Next, we can extend with the Claude strategy checks (tonal.js pinning, jQuery replacement, signals/zoneless gates) and add per-version Playwright snapshots.
+
+- Added a real progressive migration script that runs ng update + build/test per Angular version in quarantine, logs forensics, and fails on genuine issues.
