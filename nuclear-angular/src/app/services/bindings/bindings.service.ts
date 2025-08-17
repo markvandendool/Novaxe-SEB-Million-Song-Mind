@@ -7,74 +7,74 @@ export const KEYS = { A: 65, ALT: 18, APOSTROPHE: 192, AT_SIGN: 64, B: 66, BACKS
 export type KeyNames = keyof typeof KEYS;
 
 export class MatchConfig {
-  public listenOn: EventTarget = window;
-  constructor(init: Partial<MatchConfig>) {Object.assign(this, init); }
+    public listenOn: EventTarget = window;
+    constructor(init: Partial<MatchConfig>) { Object.assign(this, init); }
 }
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class BindingsService {
 
-  private bindings = new Subject<any>();
-  public bindings$ = this.bindings.asObservable();
+    private bindings = new Subject<any>();
+    public bindings$ = this.bindings.asObservable();
 
-  constructor() {
-    // Keyboard event listening setup
-    // Example: window.addEventListener('keydown', (event: KeyboardEvent) => {
-    //   const D = KEYS['A'];
-    //   if (this.hasKeycode(event, [D]) && this.hasModifierKey(event, 'ctrlKey', 'altKey')) {
-    //     // Do action
-    //   }
-    // });
-  }
-
-  private hasModifierKey(event: KeyboardEvent, ...modifiers: ModifierKey[]): boolean {
-    if (modifiers.length) {
-      return modifiers.some(modifier => event[modifier]);
+    constructor() {
+        // Keyboard event listening setup
+        // Example: window.addEventListener('keydown', (event: KeyboardEvent) => {
+        //   const D = KEYS['A'];
+        //   if (this.hasKeycode(event, [D]) && this.hasModifierKey(event, 'ctrlKey', 'altKey')) {
+        //     // Do action
+        //   }
+        // });
     }
-    return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
-  }
 
-  /**
-   * Checks if an event has any of the provided keycodes
-   * @param {KeyboardEvent} event
-   * @param {Array<number>} codes
-   */
-  private hasKeycode(event: KeyboardEvent, codes: number[]): boolean {
-    return codes.some(value => (event.keyCode || event.which) === value);
-  }
-
-  public match(matchKey: number[], matchModifiers: ModifierKey[] = [], options?: MatchConfig): Observable<KeyboardEvent> {
-    const { listenOn } = new MatchConfig(options || {});
-
-    return new Observable((observer) => {
-      const listener$ = fromEvent<KeyboardEvent>(listenOn, 'keydown');
-
-      listener$.subscribe((event) => {
-        if (this.hasKeycode(event, matchKey) && (!matchModifiers.length || this.hasModifierKey(event, ...matchModifiers))) {
-          observer.next(event);
+    private hasModifierKey(event: KeyboardEvent, ...modifiers: ModifierKey[]): boolean {
+        if (modifiers.length) {
+            return modifiers.some(modifier => event[modifier]);
         }
-      });
-    });
-  }
+        return event.altKey || event.shiftKey || event.ctrlKey || event.metaKey;
+    }
 
-  /**
-   * Helper method to get key code by name
-   * @param keyName Name of the key (e.g., 'A', 'ENTER')
-   * @returns Key code number
-   */
-  public getKeyCode(keyName: KeyNames): number {
-    return KEYS[keyName];
-  }
+    /**
+     * Checks if an event has any of the provided keycodes
+     * @param {KeyboardEvent} event
+     * @param {Array<number>} codes
+     */
+    private hasKeycode(event: KeyboardEvent, codes: number[]): boolean {
+        return codes.some(value => (event.keyCode || event.which) === value);
+    }
 
-  /**
-   * Helper method to create simple key bindings
-   * @param keyName Name of the key
-   * @param modifiers Optional modifier keys
-   * @returns Observable of keyboard events
-   */
-  public bindKey(keyName: KeyNames, modifiers: ModifierKey[] = []): Observable<KeyboardEvent> {
-    return this.match([this.getKeyCode(keyName)], modifiers);
-  }
+    public match(matchKey: number[], matchModifiers: ModifierKey[] = [], options?: MatchConfig): Observable<KeyboardEvent> {
+        const { listenOn } = new MatchConfig(options || {});
+
+        return new Observable((observer) => {
+            const listener$ = fromEvent<KeyboardEvent>(listenOn, 'keydown');
+
+            listener$.subscribe((event) => {
+                if (this.hasKeycode(event, matchKey) && (!matchModifiers.length || this.hasModifierKey(event, ...matchModifiers))) {
+                    observer.next(event);
+                }
+            });
+        });
+    }
+
+    /**
+     * Helper method to get key code by name
+     * @param keyName Name of the key (e.g., 'A', 'ENTER')
+     * @returns Key code number
+     */
+    public getKeyCode(keyName: KeyNames): number {
+        return KEYS[keyName];
+    }
+
+    /**
+     * Helper method to create simple key bindings
+     * @param keyName Name of the key
+     * @param modifiers Optional modifier keys
+     * @returns Observable of keyboard events
+     */
+    public bindKey(keyName: KeyNames, modifiers: ModifierKey[] = []): Observable<KeyboardEvent> {
+        return this.match([this.getKeyCode(keyName)], modifiers);
+    }
 }
