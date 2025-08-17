@@ -1,16 +1,5 @@
 import { Component, OnInit, ElementRef } from '@angular/core';
-
-// Temporary stub for ExerciseModel - will be replaced with proper service
-class ExerciseModel {
-    public _question: string[] = ['C', 'G', 'D', 'A'];
-    public _cards: string[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-    public verified: number = 0;
-    public win: boolean = false;
-
-    answer(card: string): boolean { return Math.random() > 0.5; }
-    start(): void { this.verified = 0; this.win = false; }
-    verifyNext(e: any): boolean { this.verified++; return true; }
-}
+import { ExerciseModel } from '../../models/exercise.model';
 
 @Component({
     selector: 'app-learn-fifths',
