@@ -1,0 +1,5 @@
+id,chords,artist_name,song_name
+1,"<verse> F C E7 Am C F C G7 C <chorus> F C F C G C F C E7 Am C F G7 C","Test Artist 1","Test Song 1"
+2,"<verse> Em Am D G <chorus> C G Am F","Test Artist 2","Test Song 2"  
+3,"<verse> A C#m A C#m A B <chorus> C#m A F#m A B","Test Artist 3","Test Song 3"
+4,"<verse> Dm Bb F C <chorus> Bb F C Dm","Test Artist 4","Test Song 4"

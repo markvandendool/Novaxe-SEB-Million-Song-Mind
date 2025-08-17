@@ -1,0 +1,42 @@
+One or more browsers which are configured in the project's Browserslist configuration will be ignored as ES5 output is not supported by the Angular CLI.
+Ignored browsers: kaios 2.5, op_mini all
+- Generating browser application bundles (phase: setup)...
+✔ Browser application bundle generation complete.
+
+./node_modules/bootstrap/dist/css/bootstrap.min.css - Warning: Module Warning (from ./node_modules/postcss-loader/dist/cjs.js):
+(6:61388) from "autoprefixer" plugin: Replace color-adjust to print-color-adjust. The color-adjust shorthand is currently deprecated.
+
+Code:
+  color-adjust:exact
+
+
+Warning: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind/Novaxe SEB/src/app/app.module.ts depends on '@components/metro/metro.component'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+Warning: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind/Novaxe SEB/src/app/app.module.ts depends on 'abcjs'. CommonJS or AMD dependencies can cause optimization bailouts.
+For more info see: https://angular.io/guide/build#configuring-commonjs-dependencies
+
+
+✔ Browser application bundle generation complete.
+
+Error: src/app/app.module.ts:182:12 - error NG6002: 'CookieModule' does not appear to be an NgModule class.
+
+182   imports: [
+               ~
+183     BrowserModule,
+    ~~~~~~~~~~~~~~~~~~
+... 
+188     CookieModule.forRoot(),
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+189   ],
+    ~~~
+
+  node_modules/ngx-cookie/lib/cookie.module.d.ts:3:22
+    3 export declare class CookieModule {
+                           ~~~~~~~~~~~~
+    This likely means that the library (ngx-cookie) which declares CookieModule is not compatible with Angular Ivy. Check if a newer version of the library is available, and update if so. Also consider checking with the library's authors to see if the library is expected to be compatible with Ivy.
+
+
+
+✔ Browser application bundle generation complete.
+✔ Browser application bundle generation complete.

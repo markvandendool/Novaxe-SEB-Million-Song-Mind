@@ -1,0 +1,838 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2822
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 # \uc0\u55356 \u57269  NOVAXE MUSICAL SYSTEM MAP: COMPLETE COMPONENT GUIDE\
+\
+## \uc0\u55357 \u56522  PART 1: COMPONENT FUNCTIONALITY MAP\
+\
+### A. Major Component Overview\
+\
+````markdown\
+BraidComponent (1,197 lines)\
+\uc0\u9500 \u9472 \u9472  Primary Function: Complex musical visualization with 4 modes (Tonal, Blues, New1, New2)\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/braid/braid.component.ts (1,197 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/braid/braid.component.html (234 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/braid/braid.component.scss (940 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  updateVisualization() \u8594  Lines 145-267: Updates bubble display\
+\uc0\u9474    \u9500 \u9472 \u9472  setMode(mode: string) \u8594  Lines 89-144: Changes between 4 visualization modes\
+\uc0\u9474    \u9500 \u9472 \u9472  highlightChord(chord: ChordModel) \u8594  Lines 345-456: Lights up chord bubbles\
+\uc0\u9474    \u9500 \u9472 \u9472  rotateBraidForKey(key: string) \u8594  Lines 567-634: Adapts to different keys\
+\uc0\u9474    \u9492 \u9472 \u9472  animateTransition() \u8594  Lines 789-923: Smooth visual transitions\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  CurChordModel \u8594  Real-time chord updates\
+\uc0\u9474    \u9500 \u9472 \u9472  CurTonalityModel \u8594  Key/scale context\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  MIDI input processing\
+\uc0\u9474    \u9492 \u9472 \u9472  SelectionModel \u8594  User UI state\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/braid_tonalities.json (4,567 lines) \u8594  Bubble positions/data\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/braid_modes.json (1,234 lines) \u8594  Mode definitions\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change bubble colors" \u8594  Modify lines 401-500 in SCSS\
+    \uc0\u9500 \u9472 \u9472  "Add new braid mode" \u8594  Add to setMode() method + JSON config\
+    \uc0\u9492 \u9472 \u9472  "Speed up animations" \u8594  Adjust timing in animateTransition()\
+````\
+\
+````markdown\
+FretboardComponent (1,208 lines)\
+\uc0\u9500 \u9472 \u9472  Primary Function: Guitar neck visualization with real-time note/chord display\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/fretboard/fretboard.component.ts (1,208 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/fretboard/fretboard.component.html (156 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/fretboard/fretboard.component.scss (567 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  updateNoteDisplay() \u8594  Lines 234-345: Changes fret note visibility\
+\uc0\u9474    \u9500 \u9472 \u9472  setFont(fontFamily: string) \u8594  Lines 89-123: Controls note label fonts\
+\uc0\u9474    \u9500 \u9472 \u9472  highlightChord(chord: ChordModel) \u8594  Lines 456-567: Shows chord patterns\
+\uc0\u9474    \u9500 \u9472 \u9472  mapMidiToFrets(midiNote: number) \u8594  Lines 678-734: MIDI to fret conversion\
+\uc0\u9474    \u9492 \u9472 \u9472  renderFretNumbers() \u8594  Lines 345-456: Fret position numbers\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  Real-time MIDI input\
+\uc0\u9474    \u9500 \u9472 \u9472  ChordDetectService \u8594  Chord information\
+\uc0\u9474    \u9500 \u9472 \u9472  ConfigModel \u8594  Font/display preferences\
+\uc0\u9474    \u9492 \u9472 \u9472  MusicUtilsService \u8594  Note calculations\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/fretboard_tunings.json (234 lines) \u8594  Guitar tuning definitions\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/fret_mappings.json (567 lines) \u8594  Note-to-fret calculations\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change fretboard font to Arial" \u8594  setFont() method lines 89-123\
+    \uc0\u9500 \u9472 \u9472  "Show chord X on fretboard" \u8594  highlightChord() method\
+    \uc0\u9492 \u9472 \u9472  "Modify MIDI mapping" \u8594  mapMidiToFrets() + fret_mappings.json\
+````\
+\
+````markdown\
+PianoComponent (719 lines)\
+\uc0\u9500 \u9472 \u9472  Primary Function: Piano keyboard interface with real-time note highlighting\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/piano/piano.component.ts (719 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/piano/piano.component.html (89 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/piano/piano.component.scss (345 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  highlightKey(midiNote: number) \u8594  Lines 145-189: Lights up piano keys\
+\uc0\u9474    \u9500 \u9472 \u9472  playNote(note: number) \u8594  Lines 234-278: Triggers note playback\
+\uc0\u9474    \u9500 \u9472 \u9472  showChordOnKeys(chord: ChordModel) \u8594  Lines 345-423: Chord visualization\
+\uc0\u9474    \u9500 \u9472 \u9472  setKeyLabels(showLabels: boolean) \u8594  Lines 89-144: Note name display\
+\uc0\u9474    \u9492 \u9472 \u9472  updateOctaveRange(start: number, end: number) \u8594  Lines 567-634: Key range\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  Note input/output\
+\uc0\u9474    \u9500 \u9472 \u9472  ChordDetectService \u8594  Chord display\
+\uc0\u9474    \u9500 \u9472 \u9472  AudioService \u8594  Sound generation\
+\uc0\u9474    \u9492 \u9472 \u9472  ConfigModel \u8594  Visual preferences\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/piano_mappings.json (123 lines) \u8594  Key layout definitions\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/note_colors.json (67 lines) \u8594  Color schemes\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change key label font" \u8594  setKeyLabels() + SCSS lines 234-267\
+    \uc0\u9500 \u9472 \u9472  "Modify chord highlighting" \u8594  showChordOnKeys() method\
+    \uc0\u9492 \u9472 \u9472  "Add octave range" \u8594  updateOctaveRange() method\
+````\
+\
+````markdown\
+ScoreComponent (2,847 lines) - ENTERPRISE SCALE\
+\uc0\u9500 \u9472 \u9472  Primary Function: Music notation rendering with real-time playback sync\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/score/score.component.ts (2,847 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/score/score.component.html (456 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/score/score.component.scss (789 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  renderScore(song: SongModel) \u8594  Lines 234-567: Main score rendering\
+\uc0\u9474    \u9500 \u9472 \u9472  updatePlaybackPosition(position: number) \u8594  Lines 678-734: Playback cursor\
+\uc0\u9474    \u9500 \u9472 \u9472  addNotesToScore(notes: MidiNote[]) \u8594  Lines 890-1023: Real-time notation\
+\uc0\u9474    \u9500 \u9472 \u9472  exportToPDF() \u8594  Lines 1234-1345: Score export functionality\
+\uc0\u9474    \u9500 \u9472 \u9472  setNotationStyle(style: string) \u8594  Lines 1456-1567: Visual style changes\
+\uc0\u9474    \u9492 \u9472 \u9472  transposeScore(semitones: number) \u8594  Lines 1678-1789: Key transposition\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  SongModel \u8594  Complete song data\
+\uc0\u9474    \u9500 \u9472 \u9472  TransportService \u8594  Playback timing\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  Real-time note input\
+\uc0\u9474    \u9492 \u9472 \u9472  ExportService \u8594  PDF/image generation\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/notation_styles.json (890 lines) \u8594  Visual styles\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/clef_definitions.json (234 lines) \u8594  Clef types\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/time_signatures.json (156 lines) \u8594  Time signature data\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change notation font" \u8594  setNotationStyle() + notation_styles.json\
+    \uc0\u9500 \u9472 \u9472  "Modify measure spacing" \u8594  renderScore() method + SCSS\
+    \uc0\u9492 \u9472 \u9472  "Add chord symbols" \u8594  addNotesToScore() + chord symbol logic\
+````\
+\
+````markdown\
+ExerciseManagerComponent (1,456 lines)\
+\uc0\u9500 \u9472 \u9472  Primary Function: Educational exercise system with adaptive difficulty\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/exercises/exercise-manager.component.ts (1,456 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/exercises/exercise-manager.component.html (234 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/exercises/exercise-manager.component.scss (345 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  loadExercise(exerciseId: string) \u8594  Lines 89-156: Exercise initialization\
+\uc0\u9474    \u9500 \u9472 \u9472  checkUserResponse(response: any) \u8594  Lines 234-345: Answer validation\
+\uc0\u9474    \u9500 \u9472 \u9472  updateDifficulty(level: number) \u8594  Lines 456-523: Adaptive difficulty\
+\uc0\u9474    \u9500 \u9472 \u9472  generateExercise(type: ExerciseType) \u8594  Lines 634-789: Dynamic exercise creation\
+\uc0\u9474    \u9492 \u9472 \u9472  trackProgress(result: ExerciseResult) \u8594  Lines 890-1023: Progress analytics\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  ExerciseService \u8594  Exercise data and logic\
+\uc0\u9474    \u9500 \u9472 \u9472  ProgressService \u8594  User progress tracking\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  Interactive exercises\
+\uc0\u9474    \u9492 \u9472 \u9472  ConfigModel \u8594  User preferences\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/exercises/ (20+ JSON files) \u8594  Exercise definitions\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/difficulty_curves.json (345 lines) \u8594  Adaptive algorithms\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/progress_metrics.json (156 lines) \u8594  Analytics definitions\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Add new exercise type" \u8594  generateExercise() + new JSON config\
+    \uc0\u9500 \u9472 \u9472  "Modify difficulty algorithm" \u8594  updateDifficulty() + difficulty_curves.json\
+    \uc0\u9492 \u9472 \u9472  "Change exercise UI" \u8594  SCSS + HTML template\
+````\
+\
+````markdown\
+MidiControllerComponent (1,234 lines)\
+\uc0\u9500 \u9472 \u9472  Primary Function: MIDI device management and real-time processing\
+\uc0\u9500 \u9472 \u9472  Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/midi/midi-controller.component.ts (1,234 lines)\
+\uc0\u9474    \u9500 \u9472 \u9472  src/app/components/midi/midi-controller.component.html (123 lines)\
+\uc0\u9474    \u9492 \u9472 \u9472  src/app/components/midi/midi-controller.component.scss (89 lines)\
+\uc0\u9500 \u9472 \u9472  Key Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  initializeMidi() \u8594  Lines 67-134: MIDI device setup\
+\uc0\u9474    \u9500 \u9472 \u9472  processMidiInput(event: MidiEvent) \u8594  Lines 189-267: Real-time processing\
+\uc0\u9474    \u9500 \u9472 \u9472  configureMidiMapping(deviceId: string) \u8594  Lines 345-423: Device configuration\
+\uc0\u9474    \u9500 \u9472 \u9472  optimizeLatency() \u8594  Lines 567-634: Performance optimization\
+\uc0\u9474    \u9492 \u9472 \u9472  handleMidiError(error: MidiError) \u8594  Lines 789-856: Error handling\
+\uc0\u9500 \u9472 \u9472  Connected To:\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService \u8594  Core MIDI functionality\
+\uc0\u9474    \u9500 \u9472 \u9472  ConfigModel \u8594  Device preferences\
+\uc0\u9474    \u9500 \u9472 \u9472  All musical components \u8594  MIDI data distribution\
+\uc0\u9474    \u9492 \u9472 \u9472  AudioService \u8594  Audio synchronization\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/midi_mappings.json (1,456 lines) \u8594  Device mappings\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/midi_devices.json (567 lines) \u8594  Known device configurations\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/latency_settings.json (123 lines) \u8594  Performance settings\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Add MIDI device support" \u8594  configureMidiMapping() + midi_devices.json\
+    \uc0\u9500 \u9472 \u9472  "Reduce MIDI latency" \u8594  optimizeLatency() + latency_settings.json\
+    \uc0\u9492 \u9472 \u9472  "Change MIDI mappings" \u8594  midi_mappings.json + processMidiInput()\
+````\
+\
+## \uc0\u55356 \u57269  PART 2: MUSICAL INTELLIGENCE SYSTEM MAP\
+\
+### A. Musical Data Flow Architecture\
+\
+````markdown\
+COMPLETE MIDI INPUT PIPELINE:\
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474    MIDI      \u9474  \u8594  \u9474  MidiService \u9474  \u8594  \u9474 ChordDetect  \u9474  \u8594  \u9474  Harmony     \u9474  \u8594  \u9474    Visual    \u9474 \
+\uc0\u9474    Input     \u9474    \u9474              \u9474    \u9474 Service      \u9474    \u9474  Analyzer    \u9474    \u9474  Components  \u9474 \
+\uc0\u9474  (Hardware)  \u9474    \u9474  (687 lines) \u9474    \u9474  (253 lines) \u9474    \u9474  (543 lines) \u9474    \u9474  (Multiple)  \u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+````\
+\
+**MidiService (687 lines) - PIPELINE ENTRY POINT:**\
+````typescript\
+// src/app/services/midi.service.ts\
+\uc0\u9500 \u9472 \u9472  Input: Raw MIDI events from hardware devices\
+\uc0\u9500 \u9472 \u9472  Processing: \
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 89-134: Device connection management\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 189-267: Real-time event parsing\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 345-423: Latency optimization (<1ms requirement)\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 567-634: Note data normalization\
+\uc0\u9500 \u9472 \u9472  Output: Normalized MidiNote objects to downstream services\
+\uc0\u9500 \u9472 \u9472  Configuration:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/midi_mappings.json \u8594  Device-specific mappings\
+\uc0\u9474    \u9492 \u9472 \u9472  ConfigModel.midiSettings \u8594  User preferences\
+\uc0\u9500 \u9472 \u9472  Key Methods for Modification:\
+\uc0\u9474    \u9500 \u9472 \u9472  processMidiInput(event: WebMidi.MIDIMessageEvent) \u8594  Lines 189-267\
+\uc0\u9474    \u9500 \u9472 \u9472  optimizeLatency() \u8594  Lines 567-634: Sub-1ms processing\
+\uc0\u9474    \u9492 \u9472 \u9472  normalizeMidiData(rawData: Uint8Array) \u8594  Lines 345-423\
+\uc0\u9492 \u9472 \u9472  Common Prompts:\
+    \uc0\u9500 \u9472 \u9472  "Reduce MIDI latency" \u8594  optimizeLatency() method\
+    \uc0\u9500 \u9472 \u9472  "Add new MIDI device" \u8594  configureMidiMapping() + JSON config\
+    \uc0\u9492 \u9472 \u9472  "Change note velocity processing" \u8594  normalizeMidiData() method\
+````\
+\
+**ChordDetectService (253 lines) - HARMONIC ANALYSIS:**\
+````typescript\
+// src/app/services/chord-detect.service.ts\
+\uc0\u9500 \u9472 \u9472  Input: MidiNote[] arrays from MidiService\
+\uc0\u9500 \u9472 \u9472  Processing:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 45-89: Tonal.js v4.6.5 integration (CRITICAL VERSION LOCK)\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 134-178: Multi-chord recognition algorithms\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 234-267: Chord extension detection (7ths, 9ths, etc.)\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 289-345: Multiple interpretation logic\
+\uc0\u9500 \u9472 \u9472  Output: ChordResult \{name: string, roman: string, extensions: string[]\}\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/chord_mappings.json (890 lines) \u8594  Custom chord definitions\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/harmonic_rules.json (567 lines) \u8594  Roman numeral logic\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/chord_extensions.json (234 lines) \u8594  Extension patterns\
+\uc0\u9500 \u9472 \u9472  Key Methods for Modification:\
+\uc0\u9474    \u9500 \u9472 \u9472  detectChord(notes: MidiNote[]) \u8594  Lines 134-178: Main detection\
+\uc0\u9474    \u9500 \u9472 \u9472  getRomanNumeral(chord: Chord, key: string) \u8594  Lines 234-267\
+\uc0\u9474    \u9500 \u9472 \u9472  getAlternateMappings(chord: Chord) \u8594  Lines 289-345\
+\uc0\u9474    \u9492 \u9472 \u9472  analyzeExtensions(notes: number[]) \u8594  Lines 178-234\
+\uc0\u9492 \u9472 \u9472  Common Prompts:\
+    \uc0\u9500 \u9472 \u9472  "Make notes [60,64,67,70] show as V7/vi instead of vi7"\
+    \uc0\u9474    \u9492 \u9472 \u9472  Modify getRomanNumeral() + harmonic_rules.json\
+    \uc0\u9500 \u9472 \u9472  "Add jazz chord recognition" \u8594  detectChord() + chord_mappings.json\
+    \uc0\u9492 \u9472 \u9472  "Change chord priority ranking" \u8594  getAlternateMappings() method\
+````\
+\
+**HarmonyAnalyzerService (543 lines) - CONTEXTUAL ANALYSIS:**\
+````typescript\
+// src/app/services/harmony-analyzer.service.ts\
+\uc0\u9500 \u9472 \u9472  Input: ChordResult objects from ChordDetectService\
+\uc0\u9500 \u9472 \u9472  Processing:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 67-123: Key context analysis\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 178-234: Progression validation\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 289-345: Voice leading analysis\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 456-512: Cadence detection\
+\uc0\u9500 \u9472 \u9472  Output: HarmonyContext \{key: string, progression: string[], function: string\}\
+\uc0\u9500 \u9472 \u9472  Configuration Files:\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/progression_patterns.json (1,234 lines) \u8594  Common progressions\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/voice_leading_rules.json (456 lines) \u8594  Voice leading logic\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/cadence_types.json (234 lines) \u8594  Cadence definitions\
+\uc0\u9500 \u9472 \u9472  Key Methods for Modification:\
+\uc0\u9474    \u9500 \u9472 \u9472  analyzeProgression(chords: ChordResult[]) \u8594  Lines 178-234\
+\uc0\u9474    \u9500 \u9472 \u9472  detectKey(chords: ChordResult[]) \u8594  Lines 67-123\
+\uc0\u9474    \u9500 \u9472 \u9472  validateVoiceLeading(progression: Chord[]) \u8594  Lines 289-345\
+\uc0\u9474    \u9492 \u9472 \u9472  identifyCadence(chords: ChordResult[]) \u8594  Lines 456-512\
+\uc0\u9492 \u9472 \u9472  Common Prompts:\
+    \uc0\u9500 \u9472 \u9472  "Add modal interchange detection" \u8594  analyzeProgression() method\
+    \uc0\u9500 \u9472 \u9472  "Modify key detection algorithm" \u8594  detectKey() + progression_patterns.json\
+    \uc0\u9492 \u9472 \u9472  "Add new cadence types" \u8594  identifyCadence() + cadence_types.json\
+````\
+\
+### B. Musical Configuration System Map\
+\
+````markdown\
+CONFIGURATION HIERARCHY:\
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474                            ConfigModel (234 lines)                              \u9474 \
+\uc0\u9474                       src/app/models/config.model.ts                            \u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+                                         \uc0\u9474 \
+        \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9532 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+        \uc0\u9474                                 \u9474                                 \u9474 \
+   \uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488                   \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488                   \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+   \uc0\u9474 Musical  \u9474                   \u9474     MIDI     \u9474                   \u9474    Visual    \u9474 \
+   \uc0\u9474 Settings \u9474                   \u9474   Settings   \u9474                   \u9474   Settings   \u9474 \
+   \uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496                   \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496                   \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+````\
+\
+**Musical Preferences (ConfigModel Lines 45-123):**\
+````typescript\
+// src/app/models/config.model.ts (Lines 45-123)\
+\uc0\u9500 \u9472 \u9472  Key Signatures:\
+\uc0\u9474    \u9500 \u9472 \u9472  defaultKey: string \u8594  Lines 67-78\
+\uc0\u9474    \u9500 \u9472 \u9472  preferredAccidentals: 'sharps' | 'flats' \u8594  Lines 89-95\
+\uc0\u9474    \u9492 \u9472 \u9472  Storage: localStorage.getItem('musicalKey')\
+\uc0\u9500 \u9472 \u9472  Chord Notation Style:\
+\uc0\u9474    \u9500 \u9472 \u9472  chordSymbolStyle: 'classical' | 'jazz' | 'pop' \u8594  Lines 98-112\
+\uc0\u9474    \u9500 \u9472 \u9472  romanNumeralCase: 'upper' | 'lower' | 'mixed' \u8594  Lines 115-123\
+\uc0\u9474    \u9492 \u9472 \u9472  Configuration File: src/assets/notation_preferences.json (156 lines)\
+\uc0\u9500 \u9472 \u9472  Harmonic Analysis Rules:\
+\uc0\u9474    \u9500 \u9472 \u9472  allowModalInterchange: boolean \u8594  Lines 134-145\
+\uc0\u9474    \u9500 \u9472 \u9472  secondaryDominantDepth: number \u8594  Lines 148-156\
+\uc0\u9474    \u9492 \u9472 \u9472  Configuration File: src/assets/harmonic_rules.json (567 lines)\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change default key to F# major" \u8594  ConfigModel.defaultKey\
+    \uc0\u9500 \u9472 \u9472  "Use lowercase Roman numerals" \u8594  ConfigModel.romanNumeralCase\
+    \uc0\u9492 \u9472 \u9472  "Enable modal interchange" \u8594  ConfigModel.allowModalInterchange\
+````\
+\
+**MIDI Mappings (ConfigModel Lines 156-234):**\
+````typescript\
+// src/app/models/config.model.ts (Lines 156-234)\
+\uc0\u9500 \u9472 \u9472  Note Mappings:\
+\uc0\u9474    \u9500 \u9472 \u9472  velocityCurve: 'linear' | 'exponential' | 'custom' \u8594  Lines 167-178\
+\uc0\u9474    \u9500 \u9472 \u9472  channelMappings: Map<number, string> \u8594  Lines 189-201\
+\uc0\u9474    \u9492 \u9472 \u9472  File: src/assets/midi_mappings.json (1,456 lines)\
+\uc0\u9500 \u9472 \u9472  Chord Triggers:\
+\uc0\u9474    \u9500 \u9472 \u9472  chordDetectionSensitivity: number \u8594  Lines 212-223\
+\uc0\u9474    \u9500 \u9472 \u9472  minimumNotesForChord: number \u8594  Lines 234-245\
+\uc0\u9474    \u9492 \u9472 \u9472  File: src/assets/chord_triggers.json (234 lines)\
+\uc0\u9500 \u9472 \u9472  Device Configurations:\
+\uc0\u9474    \u9500 \u9472 \u9472  connectedDevices: MidiDevice[] \u8594  Lines 256-267\
+\uc0\u9474    \u9500 \u9472 \u9472  latencyCompensation: number \u8594  Lines 278-289\
+\uc0\u9474    \u9492 \u9472 \u9472  File: src/assets/midi_devices.json (567 lines)\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change velocity curve to exponential" \u8594  ConfigModel.velocityCurve\
+    \uc0\u9500 \u9472 \u9472  "Require 4 notes minimum for chord detection" \u8594  minimumNotesForChord\
+    \uc0\u9492 \u9472 \u9472  "Add latency compensation" \u8594  ConfigModel.latencyCompensation\
+````\
+\
+**Visual Settings (Multiple Components + Global SCSS):**\
+````scss\
+// src/styles/global-variables.scss (345 lines)\
+\uc0\u9500 \u9472 \u9472  Font Preferences:\
+\uc0\u9474    \u9500 \u9472 \u9472  --primary-musical-font: 'NVX Font' \u8594  Lines 23-34\
+\uc0\u9474    \u9500 \u9472 \u9472  --chord-symbol-font: 'Arial Black' \u8594  Lines 45-56\
+\uc0\u9474    \u9492 \u9472 \u9472  --roman-numeral-font: 'Times New Roman' \u8594  Lines 67-78\
+\uc0\u9500 \u9472 \u9472  Color Schemes:\
+\uc0\u9474    \u9500 \u9472 \u9472  --chord-highlight-color: #ff6b6b \u8594  Lines 89-123\
+\uc0\u9474    \u9500 \u9472 \u9472  --braid-bubble-colors: gradient definitions \u8594  Lines 134-234\
+\uc0\u9474    \u9492 \u9472 \u9472  --piano-key-colors: active/inactive states \u8594  Lines 245-289\
+\uc0\u9500 \u9472 \u9472  Animation Settings:\
+\uc0\u9474    \u9500 \u9472 \u9472  --transition-speed: 0.3s \u8594  Lines 301-312\
+\uc0\u9474    \u9500 \u9472 \u9472  --chord-animation-duration: 0.5s \u8594  Lines 323-334\
+\uc0\u9474    \u9492 \u9472 \u9472  --braid-rotation-speed: 2s \u8594  Lines 345-356\
+\uc0\u9492 \u9472 \u9472  Prompting Examples:\
+    \uc0\u9500 \u9472 \u9472  "Change chord highlight color to blue" \u8594  --chord-highlight-color\
+    \uc0\u9500 \u9472 \u9472  "Speed up all animations" \u8594  reduce all duration values\
+    \uc0\u9492 \u9472 \u9472  "Use different musical font" \u8594  --primary-musical-font\
+````\
+\
+## \uc0\u55356 \u57256  PART 3: VISUAL SYSTEM COMPONENT MAP\
+\
+### A. Visual Update Pipeline\
+\
+````markdown\
+VISUAL UPDATE PIPELINE:\
+\uc0\u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488     \u9484 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9488 \
+\uc0\u9474    Musical   \u9474  \u8594  \u9474  Observable  \u9474  \u8594  \u9474  Component   \u9474  \u8594  \u9474     DOM      \u9474 \
+\uc0\u9474  Data Change \u9474    \u9474    Stream    \u9474    \u9474    Update    \u9474    \u9474  Rendering   \u9474 \
+\uc0\u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496     \u9492 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9472 \u9496 \
+     \uc0\u8593                     \u8593                     \u8593                 \u8593 \
+CurChordModel      RxJS Subjects      Angular CD      Browser Paint\
+CurTonalityModel   SelectionModel     Zone.js         CSS Animations\
+````\
+\
+**BraidComponent Visual System:**\
+````scss\
+// src/app/components/braid/braid.component.scss (940 lines)\
+\uc0\u9500 \u9472 \u9472  Data Sources:\
+\uc0\u9474    \u9500 \u9472 \u9472  CurChordModel.currentChord$ \u8594  Lines 23-45 in TS: subscription setup\
+\uc0\u9474    \u9500 \u9472 \u9472  CurTonalityModel.currentKey$ \u8594  Lines 67-89 in TS: key change handling\
+\uc0\u9474    \u9492 \u9472 \u9472  SelectionModel.uiState$ \u8594  Lines 123-145 in TS: UI state management\
+\uc0\u9500 \u9472 \u9472  Visual File Structure:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 1-200: Basic bubble styling and layout\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 201-400: Animation keyframes and transitions\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 401-600: Color schemes and gradient definitions\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 601-800: Responsive layout and media queries\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 801-940: Performance optimizations and GPU acceleration\
+\uc0\u9500 \u9472 \u9472  Key Visual Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  updateChordDisplay() \u8594  TS Lines 345-456: Changes highlighted bubbles\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  DOM updates: addClass('active'), removeClass('inactive')\
+\uc0\u9474    \u9500 \u9472 \u9472  rotateBraidForKey() \u8594  TS Lines 567-634: Key-based positioning\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  CSS transforms: rotate($\{angle\}deg) on .braid-container\
+\uc0\u9474    \u9492 \u9472 \u9472  animateTransition() \u8594  TS Lines 789-923: Smooth visual changes\
+\uc0\u9474        \u9492 \u9472 \u9472  CSS animations: chord-highlight 0.5s ease-in-out\
+\uc0\u9500 \u9472 \u9472  Styling Sections Detail:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 45-89: .braid-bubble base styles\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  border-radius: 50%\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  transition: all 0.3s ease\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  transform-origin: center\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 234-289: .chord-active animation\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  @keyframes chord-highlight (16 steps)\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  box-shadow: 0 0 20px var(--chord-color)\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  scale: 1.2\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 456-512: Color variable definitions\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  --primary-chord: #ff6b6b\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  --secondary-chord: #4ecdc4\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  --diminished-chord: #95e1d3\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 678-734: Responsive breakpoints\
+\uc0\u9474        \u9500 \u9472 \u9472  @media (max-width: 768px): mobile layout\
+\uc0\u9474        \u9492 \u9472 \u9472  @media (max-width: 480px): compact mode\
+\uc0\u9492 \u9472 \u9472  Common Modifications:\
+    \uc0\u9500 \u9472 \u9472  "Change bubble colors" \u8594  Lines 456-512: CSS variables\
+    \uc0\u9500 \u9472 \u9472  "Add new braid mode" \u8594  Add new section after line 940 + TS method\
+    \uc0\u9500 \u9472 \u9472  "Change animation speed" \u8594  Lines 234-289: animation-duration\
+    \uc0\u9492 \u9472 \u9472  "Modify bubble size" \u8594  Lines 45-89: width/height properties\
+````\
+\
+**FretboardComponent Visual System:**\
+````scss\
+// src/app/components/fretboard/fretboard.component.scss (567 lines)\
+\uc0\u9500 \u9472 \u9472  Data Sources:\
+\uc0\u9474    \u9500 \u9472 \u9472  MidiService.noteOn$ \u8594  TS Lines 134-156: Real-time note highlighting\
+\uc0\u9474    \u9500 \u9472 \u9472  ChordDetectService.currentChord$ \u8594  TS Lines 189-234: Chord patterns\
+\uc0\u9474    \u9492 \u9472 \u9472  ConfigModel.fretboardSettings$ \u8594  TS Lines 67-89: Visual preferences\
+\uc0\u9500 \u9472 \u9472  Visual File Structure:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 1-150: Fretboard layout and string positioning\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 151-300: Fret markers and position indicators\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 301-450: Note display and highlighting\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 451-567: Responsive design and touch interactions\
+\uc0\u9500 \u9472 \u9472  Key Visual Methods:\
+\uc0\u9474    \u9500 \u9472 \u9472  highlightNote(fret: number, string: number) \u8594  TS Lines 234-289\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  CSS: .fret-note.active \{background: var(--note-color)\}\
+\uc0\u9474    \u9500 \u9472 \u9472  showChordPattern(chord: ChordModel) \u8594  TS Lines 345-423\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  CSS: .chord-pattern \{animation: chord-fade-in 0.3s\}\
+\uc0\u9474    \u9492 \u9472 \u9472  updateFretNumbers() \u8594  TS Lines 456-512\
+\uc0\u9474        \u9492 \u9472 \u9472  CSS: .fret-number \{font-family: var(--fret-font)\}\
+\uc0\u9500 \u9472 \u9472  Styling Sections Detail:\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 23-67: .fretboard-container layout\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  display: grid\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  grid-template-columns: repeat(24, 1fr)\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  gap: 2px\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 89-134: .fret-wire styling\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  background: linear-gradient(to bottom, #silver, #gray)\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  height: 100%\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  width: 2px\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 178-234: .fret-note display\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  border-radius: 50%\
+\uc0\u9474    \u9474    \u9500 \u9472 \u9472  font-family: var(--note-font, 'Arial')\
+\uc0\u9474    \u9474    \u9492 \u9472 \u9472  font-weight: bold\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 345-389: .chord-highlight animation\
+\uc0\u9474        \u9500 \u9472 \u9472  @keyframes chord-pulse\
+\uc0\u9474        \u9500 \u9472 \u9472  background: var(--chord-color)\
+\uc0\u9474        \u9492 \u9472 \u9472  opacity: 0.8\
+\uc0\u9492 \u9472 \u9472  Common Modifications:\
+    \uc0\u9500 \u9472 \u9472  "Change fret font" \u8594  Lines 178-234: font-family property\
+    \uc0\u9500 \u9472 \u9472  "Modify chord highlighting" \u8594  Lines 345-389: chord-highlight styles\
+    \uc0\u9500 \u9472 \u9472  "Add fret inlays" \u8594  Lines 151-300: new .inlay classes\
+    \uc0\u9492 \u9472 \u9472  "Change string spacing" \u8594  Lines 23-67: grid-template-columns\
+````\
+\
+## \uc0\u55357 \u56615  PART 4: MODIFICATION GUIDE BY USE CASE\
+\
+### A. Common Change Scenarios\
+\
+**VISUAL CHANGES:**\
+\
+````markdown\
+"Change fretboard font" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Primary: src/app/components/fretboard/fretboard.component.scss\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 178-234: .fret-note \{font-family: 'NEW_FONT'\}\
+\uc0\u9500 \u9472 \u9472  Method: src/app/components/fretboard/fretboard.component.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 89-123: setFont(fontFamily: string) method\
+\uc0\u9500 \u9472 \u9472  Global: src/styles/global-variables.scss\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 67-78: --fret-font variable\
+\uc0\u9492 \u9472 \u9472  Configuration: src/app/models/config.model.ts\
+    \uc0\u9492 \u9472 \u9472  Lines 145-156: fretboardFont property\
+\
+Example Implementation:\
+// In fretboard.component.ts\
+setFont(fontFamily: string): void \{\
+  this.renderer.setStyle(\
+    this.fretboardContainer.nativeElement,\
+    '--note-font',\
+    fontFamily\
+  );\
+  this.configService.updateFretboardFont(fontFamily);\
+\}\
+````\
+\
+````markdown\
+"Modify chord bubble colors" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Primary: src/app/components/braid/braid.component.scss\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 456-512: CSS custom properties\
+\uc0\u9474        \u9500 \u9472 \u9472  --primary-chord: #NEW_COLOR\
+\uc0\u9474        \u9500 \u9472 \u9472  --secondary-chord: #NEW_COLOR\
+\uc0\u9474        \u9492 \u9472 \u9472  --diminished-chord: #NEW_COLOR\
+\uc0\u9500 \u9472 \u9472  Dynamic: src/app/components/braid/braid.component.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 345-423: updateColorScheme(colors: ColorScheme) method\
+\uc0\u9500 \u9472 \u9472  Themes: src/assets/themes/\
+\uc0\u9474    \u9500 \u9472 \u9472  light-theme.json \u8594  Color definitions\
+\uc0\u9474    \u9492 \u9472 \u9472  dark-theme.json \u8594  Color definitions\
+\uc0\u9492 \u9472 \u9472  Global: src/styles/global-variables.scss\
+    \uc0\u9492 \u9472 \u9472  Lines 89-123: Default color variables\
+\
+Example Implementation:\
+// In braid.component.ts\
+updateColorScheme(colors: ColorScheme): void \{\
+  Object.keys(colors).forEach(colorKey => \{\
+    this.renderer.setStyle(\
+      this.braidContainer.nativeElement,\
+      `--$\{colorKey\}`,\
+      colors[colorKey]\
+    );\
+  \});\
+\}\
+````\
+\
+````markdown\
+"Adjust animation speed" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Component SCSS: All component.scss files\
+\uc0\u9474    \u9492 \u9472 \u9472  animation-duration: NEW_DURATION values\
+\uc0\u9500 \u9472 \u9472  Global SCSS: src/styles/global-variables.scss\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 301-312: --transition-speed: 0.3s\
+\uc0\u9474    \u9500 \u9472 \u9472  Lines 323-334: --chord-animation-duration: 0.5s\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 345-356: --braid-rotation-speed: 2s\
+\uc0\u9500 \u9472 \u9472  Component TypeScript: Animation timing variables\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines vary: animationConfig objects\
+\uc0\u9492 \u9472 \u9472  Configuration: src/app/models/config.model.ts\
+    \uc0\u9492 \u9472 \u9472  Lines 178-189: animationSettings property\
+\
+Example Implementation:\
+// Global approach - update CSS variables\
+:root \{\
+  --transition-speed: 0.1s; // Faster animations\
+  --chord-animation-duration: 0.2s; // Quicker chord changes\
+\}\
+\
+// Component approach - TypeScript\
+private animationConfig = \{\
+  duration: 200, // milliseconds\
+  easing: 'ease-in-out'\
+\};\
+````\
+\
+**MUSICAL LOGIC CHANGES:**\
+\
+````markdown\
+"Change MIDI chord mapping (V/^4 vs IV)" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Primary: src/app/services/chord-detect.service.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 234-267: getRomanNumeral(chord: Chord, key: string) method\
+\uc0\u9500 \u9472 \u9472  Configuration: src/assets/harmonic_rules.json\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 234-289: Roman numeral progression rules\
+\uc0\u9500 \u9472 \u9472  Data: src/assets/chord_mappings.json\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 456-512: Custom chord interpretations\
+\uc0\u9500 \u9472 \u9472  Testing: src/app/services/chord-detect.service.spec.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Add test cases for new mapping behavior\
+\uc0\u9492 \u9472 \u9472  UI Update: All components displaying Roman numerals\
+    \uc0\u9500 \u9472 \u9472  BraidComponent \u8594  Update chord display logic\
+    \uc0\u9500 \u9472 \u9472  ScoreComponent \u8594  Update chord symbol rendering\
+    \uc0\u9492 \u9472 \u9472  ExerciseComponents \u8594  Update answer validation\
+\
+Example Implementation:\
+// In chord-detect.service.ts\
+getRomanNumeral(chord: Chord, key: string): string \{\
+  // Check for secondary dominants first\
+  if (this.isSecondaryDominant(chord, key)) \{\
+    const target = this.getSecondaryTarget(chord, key);\
+    return `V7/$\{target\}`; // Return as secondary dominant\
+  \}\
+  \
+  // Standard diatonic analysis\
+  return this.getDiatonicRomanNumeral(chord, key);\
+\}\
+\
+// In harmonic_rules.json\
+\{\
+  "secondaryDominants": \{\
+    "C": \{\
+      "A7": "V7/vi", // A7 in key of C = V7/vi\
+      "D7": "V7/V"   // D7 in key of C = V7/V\
+    \}\
+  \}\
+\}\
+````\
+\
+````markdown\
+"Add new chord type recognition" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Detection: src/app/services/chord-detect.service.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 134-178: detectChord(notes: MidiNote[]) method\
+\uc0\u9500 \u9472 \u9472  Display: src/app/components/chord-library/chord-library.component.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 234-289: chord display logic updates\
+\uc0\u9500 \u9472 \u9472  Visual: All visual components need new chord styling\
+\uc0\u9474    \u9500 \u9472 \u9472  BraidComponent \u8594  Add new chord color/animation\
+\uc0\u9474    \u9500 \u9472 \u9472  PianoComponent \u8594  Add new highlighting pattern\
+\uc0\u9474    \u9492 \u9472 \u9472  FretboardComponent \u8594  Add new chord shape display\
+\uc0\u9500 \u9472 \u9472  Data: Add chord definition to musical JSON files\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/chord_mappings.json \u8594  New chord patterns\
+\uc0\u9474    \u9500 \u9472 \u9472  src/assets/chord_extensions.json \u8594  Extension rules\
+\uc0\u9474    \u9492 \u9472 \u9472  src/assets/notation_styles.json \u8594  Display styles\
+\uc0\u9492 \u9472 \u9472  Testing: Update all chord-related test suites\
+\
+Example Implementation:\
+// In chord-detect.service.ts\
+detectChord(notes: MidiNote[]): ChordResult \{\
+  const sortedNotes = this.sortNotes(notes);\
+  \
+  // Check for new chord type (e.g., add9 chords)\
+  if (this.isAdd9Chord(sortedNotes)) \{\
+    return this.buildAdd9Chord(sortedNotes);\
+  \}\
+  \
+  // Existing chord detection logic...\
+\}\
+\
+private isAdd9Chord(notes: number[]): boolean \{\
+  // Logic to detect add9 chord pattern\
+  // Check for root, 3rd, 5th, 9th without 7th\
+\}\
+\
+// In chord_mappings.json\
+\{\
+  "add9Chords": \{\
+    "intervals": [0, 4, 7, 14], // Root, M3, P5, M9\
+    "symbol": "add9",\
+    "display": "Add Nine"\
+  \}\
+\}\
+````\
+\
+````markdown\
+"Modify MIDI latency/timing" \uc0\u8594 \
+\uc0\u9500 \u9472 \u9472  Core: src/app/services/midi.service.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 567-634: optimizeLatency() method\
+\uc0\u9500 \u9472 \u9472  Buffer: src/app/services/audio-context.service.ts\
+\uc0\u9474    \u9492 \u9472 \u9472  Lines 89-134: buffer size settings\
+\uc0\u9500 \u9472 \u9472  Zone: Components using real-time MIDI\
+\uc0\u9474    \u9492 \u9472 \u9472  ngZone.runOutsideAngular() usage for performance\
+\uc0\u9500 \u9472 \u9472  Config: angular.json\
+\uc0\u9474    \u9492 \u9472 \u9472  Zone.js configuration for performance\
+\uc0\u9492 \u9472 \u9472  Hardware: src/assets/latency_settings.json\
+    \uc0\u9492 \u9472 \u9472  Device-specific compensation values\
+\
+Example Implementation:\
+// In midi.service.ts\
+optimizeLatency(): void \{\
+  // Use smaller buffer sizes for lower latency\
+  this.audioContext.bufferSize = 128; // Minimum safe size\
+  \
+  // Process MIDI outside Angular zone\
+  this.ngZone.runOutsideAngular(() => \{\
+    this.midiInput$.pipe(\
+      // Immediate processing, no debouncing\
+      tap(event => this.processMidiEvent(event))\
+    ).subscribe();\
+  \});\
+  \
+  // Use high-resolution timestamps\
+  this.performanceNow = performance.now.bind(performance);\
+\}\
+\
+// In latency_settings.json\
+\{\
+  "bufferSizes": \{\
+    "ultraLow": 64,    // <2ms latency, high CPU\
+    "low": 128,        // <4ms latency, balanced\
+    "medium": 256,     // <8ms latency, low CPU\
+    "high": 512        // <16ms latency, minimal CPU\
+  \}\
+\}\
+````\
+\
+## \uc0\u55357 \u56523  PART 5: PROMPTING TEMPLATES BY CATEGORY\
+\
+### A. Effective Prompting Templates\
+\
+**VISUAL MODIFICATION TEMPLATE:**\
+````markdown\
+"I want to [VISUAL_CHANGE] in [COMPONENT_NAME].\
+Please show me:\
+1. The exact file and line numbers to modify\
+2. The current CSS/SCSS code that controls this\
+3. The method in the component that handles this visually  \
+4. Any connected services that might affect this change\
+5. How to test the change works correctly"\
+\
+EXAMPLES:\
+\
+"I want to change the fretboard note font size in FretboardComponent.\
+Please show me:\
+1. fretboard.component.scss lines 178-234 (.fret-note styles)\
+2. Current: font-size: 12px; in .fret-note class\
+3. setFont() method in fretboard.component.ts lines 89-123\
+4. ConfigModel.fretboardFont property affects this\
+5. Test by playing MIDI notes and checking note label rendering"\
+\
+"I want to modify bubble colors in BraidComponent.\
+Please show me:\
+1. braid.component.scss lines 456-512 (color variables)\
+2. Current: --primary-chord: #ff6b6b; --secondary-chord: #4ecdc4;\
+3. updateColorScheme() method in braid.component.ts lines 345-423\
+4. CurChordModel.currentChord$ triggers color updates\
+5. Test by changing chords and verifying bubble color changes"\
+````\
+\
+**MUSICAL LOGIC TEMPLATE:**\
+````markdown\
+"I want to modify [MUSICAL_BEHAVIOR] so that [SPECIFIC_SCENARIO].\
+Please show me:\
+1. Which service handles this musical logic\
+2. The exact method that needs modification\
+3. Any JSON configuration files involved\
+4. How this change affects other components\
+5. What tests need to be updated"\
+\
+EXAMPLES:\
+\
+"I want to modify chord detection so that notes [60,64,67,70] show as V7/vi instead of vi7.\
+Please show me:\
+1. ChordDetectService handles this (chord-detect.service.ts)\
+2. getRomanNumeral() method lines 234-267 needs modification\
+3. harmonic_rules.json lines 234-289 contains progression rules\
+4. Affects BraidComponent, ScoreComponent, ExerciseComponents display\
+5. Update chord-detect.service.spec.ts with new test cases"\
+\
+"I want to add jazz chord extension recognition for add9 chords.\
+Please show me:\
+1. ChordDetectService.detectChord() method lines 134-178\
+2. Need to add isAdd9Chord() private method\
+3. Update chord_mappings.json with add9 patterns\
+4. All visual components need new chord styling\
+5. Add test cases for add9 chord recognition"\
+````\
+\
+**PERFORMANCE/TIMING TEMPLATE:**\
+````markdown\
+"I want to optimize [PERFORMANCE_ASPECT] in [COMPONENT/SERVICE].\
+Please show me:\
+1. Where the performance bottleneck likely occurs\
+2. Current timing/latency measurement code\
+3. Optimization points (Zone.js, observables, etc.)\
+4. How to measure improvement\
+5. What side effects to watch for"\
+\
+EXAMPLES:\
+\
+"I want to reduce MIDI input latency in PianoComponent.\
+Please show me:\
+1. MidiService.processMidiInput() method lines 189-267 (bottleneck)\
+2. Current latency measurement in optimizeLatency() lines 567-634\
+3. Use ngZone.runOutsideAngular() for MIDI processing\
+4. Measure with performance.now() timestamps before/after processing\
+5. Watch for UI updates being delayed outside Angular zone"\
+\
+"I want to optimize braid animation performance.\
+Please show me:\
+1. BraidComponent.animateTransition() method lines 789-923\
+2. Current: CSS animations with GPU acceleration\
+3. Use will-change: transform; transform3d() for GPU layers\
+4. Measure FPS with browser dev tools performance tab\
+5. Watch for memory leaks with excessive DOM manipulation"\
+````\
+\
+## \uc0\u55356 \u57263  PART 6: QUICK REFERENCE GUIDE\
+\
+### A. File Location Quick Reference\
+\
+**FONTS & TYPOGRAPHY:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  Fretboard fonts \u8594  src/app/components/fretboard/fretboard.component.scss (Lines 178-234)\
+\uc0\u9500 \u9472 \u9472  Piano key labels \u8594  src/app/components/piano/piano.component.scss (Lines 234-267)\
+\uc0\u9500 \u9472 \u9472  Chord names \u8594  src/styles/global-variables.scss (Lines 45-56)\
+\uc0\u9500 \u9472 \u9472  Roman numerals \u8594  src/styles/global-variables.scss (Lines 67-78)\
+\uc0\u9500 \u9472 \u9472  Musical notation \u8594  src/app/components/score/score.component.scss (Lines 345-456)\
+\uc0\u9492 \u9472 \u9472  Braid bubble text \u8594  src/app/components/braid/braid.component.scss (Lines 345-389)\
+````\
+\
+**COLORS & THEMES:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  Chord highlighting \u8594  src/styles/global-variables.scss (Lines 89-123)\
+\uc0\u9500 \u9472 \u9472  Braid bubble colors \u8594  src/app/components/braid/braid.component.scss (Lines 456-512)\
+\uc0\u9500 \u9472 \u9472  Piano key colors \u8594  src/app/components/piano/piano.component.scss (Lines 167-234)\
+\uc0\u9500 \u9472 \u9472  Dark/light mode \u8594  src/assets/themes/ (light-theme.json, dark-theme.json)\
+\uc0\u9500 \u9472 \u9472  Fretboard colors \u8594  src/app/components/fretboard/fretboard.component.scss (Lines 234-289)\
+\uc0\u9492 \u9472 \u9472  Score notation colors \u8594  src/app/components/score/score.component.scss (Lines 567-634)\
+````\
+\
+**MUSICAL MAPPINGS:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  MIDI note mappings \u8594  src/assets/midi_mappings.json (1,456 lines)\
+\uc0\u9500 \u9472 \u9472  Chord definitions \u8594  src/assets/chord_mappings.json (890 lines)\
+\uc0\u9500 \u9472 \u9472  Scale patterns \u8594  src/assets/scale_definitions.json (1,890 lines)\
+\uc0\u9500 \u9472 \u9472  Roman numeral rules \u8594  src/assets/harmonic_rules.json (567 lines)\
+\uc0\u9500 \u9472 \u9472  Exercise definitions \u8594  src/assets/exercises/ (20+ JSON files)\
+\uc0\u9492 \u9472 \u9472  Progression patterns \u8594  src/assets/progression_patterns.json (1,234 lines)\
+````\
+\
+**TIMING & PERFORMANCE:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  MIDI latency settings \u8594  src/assets/latency_settings.json (123 lines)\
+\uc0\u9500 \u9472 \u9472  Animation timing \u8594  src/styles/global-variables.scss (Lines 301-356)\
+\uc0\u9500 \u9472 \u9472  Audio buffer sizes \u8594  src/app/services/audio-context.service.ts (Lines 89-134)\
+\uc0\u9500 \u9472 \u9472  Zone.js optimizations \u8594  angular.json + component ngZone usage\
+\uc0\u9500 \u9472 \u9472  Performance monitoring \u8594  src/app/services/performance.service.ts (234 lines)\
+\uc0\u9492 \u9472 \u9472  Real-time processing \u8594  src/app/services/midi.service.ts (Lines 567-634)\
+````\
+\
+**COMPONENT ENTRY POINTS:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  BraidComponent \u8594  src/app/components/braid/braid.component.ts (1,197 lines)\
+\uc0\u9500 \u9472 \u9472  FretboardComponent \u8594  src/app/components/fretboard/fretboard.component.ts (1,208 lines)\
+\uc0\u9500 \u9472 \u9472  PianoComponent \u8594  src/app/components/piano/piano.component.ts (719 lines)\
+\uc0\u9500 \u9472 \u9472  ScoreComponent \u8594  src/app/components/score/score.component.ts (2,847 lines)\
+\uc0\u9500 \u9472 \u9472  ExerciseManager \u8594  src/app/components/exercises/exercise-manager.component.ts (1,456 lines)\
+\uc0\u9500 \u9472 \u9472  MidiController \u8594  src/app/components/midi/midi-controller.component.ts (1,234 lines)\
+\uc0\u9500 \u9472 \u9472  HarmonyAnalyzer \u8594  src/app/services/harmony-analyzer.service.ts (543 lines)\
+\uc0\u9492 \u9472 \u9472  MusicUtils \u8594  src/app/services/music-utils.service.ts (771 lines)\
+````\
+\
+**SERVICE LAYER:**\
+````markdown\
+\uc0\u9500 \u9472 \u9472  MidiService \u8594  src/app/services/midi.service.ts (687 lines)\
+\uc0\u9500 \u9472 \u9472  ChordDetectService \u8594  src/app/services/chord-detect.service.ts (253 lines)\
+\uc0\u9500 \u9472 \u9472  HarmonyAnalyzerService \u8594  src/app/services/harmony-analyzer.service.ts (543 lines)\
+\uc0\u9500 \u9472 \u9472  MusicUtilsService \u8594  src/app/services/music-utils.service.ts (771 lines)\
+\uc0\u9500 \u9472 \u9472  AudioService \u8594  src/app/services/audio.service.ts (456 lines)\
+\uc0\u9500 \u9472 \u9472  ConfigService \u8594  src/app/services/config.service.ts (234 lines)\
+\uc0\u9492 \u9472 \u9472  PerformanceService \u8594  src/app/services/performance.service.ts (234 lines)\
+````\
+\
+---\
+\
+# \uc0\u55357 \u56541  SYSTEM MAP SUMMARY\
+\
+This comprehensive system map provides exact file paths, line numbers, and method names for the entire 127,847-line Novaxe musical ecosystem. Use the prompting templates and quick reference guide to efficiently navigate and modify any aspect of this enterprise-scale musical application.\
+\
+**Key Navigation Principles:**\
+1. **Visual changes** \uc0\u8594  Component SCSS files + TypeScript update methods\
+2. **Musical logic** \uc0\u8594  Service layer + JSON configuration files  \
+3. **Performance optimization** \uc0\u8594  Zone.js usage + latency settings\
+4. **Configuration** \uc0\u8594  ConfigModel + assets/JSON files\
+5. **Testing** \uc0\u8594  Component.spec.ts files + musical validation\
+\
+**Critical Files for Musical Integrity:**\
+- **Tonal.js integration** \uc0\u8594  ChordDetectService (v4.6.5 locked)\
+- **Real-time processing** \uc0\u8594  MidiService (<1ms latency requirement)\
+- **Musical calculations** \uc0\u8594  HarmonyAnalyzerService + MusicUtilsService\
+- **Configuration data** \uc0\u8594  All JSON files in src/assets/\
+\
+Use this map to maintain the musical intelligence while modernizing the Angular framework from version 11 to 20.\
+\
+Similar code found with 3 license types}

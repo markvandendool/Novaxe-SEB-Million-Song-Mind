@@ -15,3 +15,22 @@
 **/yarn-debug.log*
 **/yarn-error.log*
 **/pnpm-debug.log*
+
+# SENSITIVE DOCUMENTS - Exclude all folders starting with 'z' from git sync
+documents/[Zz]*/
+**/[Zz]*/
+
+# Protected audit storage - contains sensitive analysis
+documents/AUDIT_SYSTEMS_SUMMARIES/
+
+# Embedded git repositories - prevent submodule conflicts  
+Novaxe A20 Oracle React/
+Novaxe SEB/
+novaxe-seb-ng11/
+verification/
+
+# Chat logs and sensitive data
+logs/
+documents/logs/
+chat-capture*.log
+*.log

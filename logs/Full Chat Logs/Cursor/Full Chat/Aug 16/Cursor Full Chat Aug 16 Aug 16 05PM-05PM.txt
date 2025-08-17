@@ -1,0 +1,770 @@
+Cursor session log start: Sat Aug 16 17:14:23 MDT 2025
+==== migration-20250816-165840.log ====
+=== MASTER AGENT PROTOCOL v3.0 ACKNOWLEDGMENT ===
+✅ I will NEVER use the forbidden word
+✅ I will COPY complete files only (quarantine copy)
+✅ I will use LOCAL repos only
+✅ I will verify EVERY step with forensic logs
+✅ I will NEVER create fake work
+=== ACKNOWLEDGMENT COMPLETE ===
+Angular Migration Script v2.0.0
+scripts/angular-migration-v2.sh: line 48: declare: -A: invalid option
+declare: usage: declare [-afFirtx] [-p] [name[=value] ...]
+
+==== migration-20250816-165854.log ====
+=== MASTER AGENT PROTOCOL v3.0 ACKNOWLEDGMENT ===
+✅ I will NEVER use the forbidden word
+✅ I will COPY complete files only (quarantine copy)
+✅ I will use LOCAL repos only
+✅ I will verify EVERY step with forensic logs
+✅ I will NEVER create fake work
+=== ACKNOWLEDGMENT COMPLETE ===
+Angular Migration Script v2.0.0
+[2025-08-16 16:58:54] Angular Migration v2.0.0 starting
+[2025-08-16 16:58:54] Repo root: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind
+[2025-08-16 16:58:54] App path (relative to repo): Novaxe SEB
+[2025-08-16 16:58:54] Quarantine: /var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T//ng-migrate-v2-20250816-165854
+[2025-08-16 16:58:55] Copying app to quarantine...
+[2025-08-16 16:58:55] Node: v24.5.0
+[2025-08-16 16:58:56] NPM:  11.5.1
+[2025-08-16 16:58:56] Installing dependencies (baseline, ignore scripts)...
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @angular/youtube-player@10.2.7
+npm error Found: @angular/common@16.2.12
+npm error node_modules/@angular/common
+npm error   @angular/common@"^16.2.12" from the root project
+npm error   peer @angular/common@"16.2.12" from @angular/forms@16.2.12
+npm error   node_modules/@angular/forms
+npm error     @angular/forms@"^16.2.12" from the root project
+npm error   5 more (@angular/platform-browser, ...)
+npm error
+npm error Could not resolve dependency:
+npm error peer @angular/common@"^10.0.0 || ^11.0.0-0" from @angular/youtube-player@10.2.7
+npm error node_modules/@angular/youtube-player
+npm error   @angular/youtube-player@"^10.2.0" from the root project
+npm error
+npm error Conflicting peer dependency: @angular/common@11.2.14
+npm error node_modules/@angular/common
+npm error   peer @angular/common@"^10.0.0 || ^11.0.0-0" from @angular/youtube-player@10.2.7
+npm error   node_modules/@angular/youtube-player
+npm error     @angular/youtube-player@"^10.2.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/markvandendool/.npm/_logs/2025-08-16T22_58_56_093Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/markvandendool/.npm/_logs/2025-08-16T22_58_56_093Z-debug-0.log
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @angular/youtube-player@10.2.7
+npm error Found: @angular/common@16.2.12
+npm error node_modules/@angular/common
+npm error   @angular/common@"^16.2.12" from the root project
+npm error   peer @angular/common@"16.2.12" from @angular/forms@16.2.12
+npm error   node_modules/@angular/forms
+npm error     @angular/forms@"^16.2.12" from the root project
+npm error   5 more (@angular/platform-browser, ...)
+npm error
+npm error Could not resolve dependency:
+npm error peer @angular/common@"^10.0.0 || ^11.0.0-0" from @angular/youtube-player@10.2.7
+npm error node_modules/@angular/youtube-player
+npm error   @angular/youtube-player@"^10.2.0" from the root project
+npm error
+npm error Conflicting peer dependency: @angular/common@11.2.14
+npm error node_modules/@angular/common
+npm error   peer @angular/common@"^10.0.0 || ^11.0.0-0" from @angular/youtube-player@10.2.7
+npm error   node_modules/@angular/youtube-player
+npm error     @angular/youtube-player@"^10.2.0" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/markvandendool/.npm/_logs/2025-08-16T22_58_57_444Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/markvandendool/.npm/_logs/2025-08-16T22_58_57_444Z-debug-0.log
+[2025-08-16 16:58:57] Baseline Angular 11 build sanity...
+npm warn deprecated @npmcli/ci-detect@1.4.0: this package has been deprecated, use `ci-info` instead
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+npm warn deprecated har-validator@5.1.5: this library is no longer supported
+npm warn deprecated npmlog@4.1.2: This package is no longer supported.
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated are-we-there-yet@1.1.7: This package is no longer supported.
+npm warn deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+npm warn deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+npm warn deprecated gauge@2.7.4: This package is no longer supported.
+npm warn deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm warn deprecated @schematics/update@0.1101.2: This was an internal-only Angular package up through Angular v11 which is no longer used or maintained. Upgrade Angular to v12+ to remove this dependency.
+An unhandled exception occurred: Cannot find module '@angular-devkit/build-angular/package.json'
+Require stack:
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/architect/node/node-modules-architect-host.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/architect/node/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/models/architect-command.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/commands/build-impl.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/schematics/tools/export-ref.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/schematics/tools/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/utilities/json-schema.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/models/command-runner.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/lib/cli/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/lib/init.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/bin/ng
+See "/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-Eajw4T/angular-errors.log" for further details.
+[2025-08-16 16:59:07] === MIGRATING: Angular 11 → 12 ===
+[2025-08-16 16:59:07] nvm not found; continuing with current Node v24.5.0
+[2025-08-16 16:59:07] ng update @angular/core@12 @angular/cli@12
+Package specifier has no effect when using "migrate-only" option.
+Package specifier has no effect when using "migrate-only" option.
+Repository is not clean. Update changes will be mixed with pre-existing changes.
+Using package manager: 'npm'
+Collecting installed dependencies...
+Found 0 dependencies.
+A single package must be specified when using the "migrate-only" option.
+[2025-08-16 16:59:11] ERROR: ng update failed at Angular 12
+
+==== migration-ng11-20250816-165939.log ====
+=== MASTER AGENT PROTOCOL v3.0 ACKNOWLEDGMENT ===
+✅ I will NEVER use the forbidden word
+✅ I will COPY complete files only (quarantine copy)
+✅ I will use LOCAL repos only
+✅ I will verify EVERY step with forensic logs
+✅ I will NEVER create fake work
+=== ACKNOWLEDGMENT COMPLETE ===
+Angular Migration Script v2.0.0
+[2025-08-16 16:59:39] Angular Migration v2.0.0 starting
+[2025-08-16 16:59:39] Repo root: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind
+[2025-08-16 16:59:39] App path (relative to repo): novaxe-seb-ng11
+[2025-08-16 16:59:39] Quarantine: /var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T//ng-migrate-v2-20250816-165939
+[2025-08-16 16:59:39] Copying app to quarantine...
+[2025-08-16 16:59:39] Node: v24.5.0
+[2025-08-16 16:59:39] NPM:  11.5.1
+[2025-08-16 16:59:39] Installing dependencies (baseline, ignore scripts)...
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @angular-devkit/build-angular@0.1100.7
+npm error Found: @angular/compiler-cli@10.1.6
+npm error node_modules/@angular/compiler-cli
+npm error   dev @angular/compiler-cli@"~10.1.1" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer @angular/compiler-cli@"^11.0.0" from @angular-devkit/build-angular@0.1100.7
+npm error node_modules/@angular-devkit/build-angular
+npm error   dev @angular-devkit/build-angular@"^0.1100.2" from the root project
+npm error
+npm error Conflicting peer dependency: @angular/compiler-cli@11.2.14
+npm error node_modules/@angular/compiler-cli
+npm error   peer @angular/compiler-cli@"^11.0.0" from @angular-devkit/build-angular@0.1100.7
+npm error   node_modules/@angular-devkit/build-angular
+npm error     dev @angular-devkit/build-angular@"^0.1100.2" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/markvandendool/.npm/_logs/2025-08-16T22_59_40_043Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/markvandendool/.npm/_logs/2025-08-16T22_59_40_043Z-debug-0.log
+npm error code ERESOLVE
+npm error ERESOLVE could not resolve
+npm error
+npm error While resolving: @angular-devkit/build-angular@0.1100.7
+npm error Found: @angular/compiler-cli@10.1.6
+npm error node_modules/@angular/compiler-cli
+npm error   dev @angular/compiler-cli@"~10.1.1" from the root project
+npm error
+npm error Could not resolve dependency:
+npm error peer @angular/compiler-cli@"^11.0.0" from @angular-devkit/build-angular@0.1100.7
+npm error node_modules/@angular-devkit/build-angular
+npm error   dev @angular-devkit/build-angular@"^0.1100.2" from the root project
+npm error
+npm error Conflicting peer dependency: @angular/compiler-cli@11.2.14
+npm error node_modules/@angular/compiler-cli
+npm error   peer @angular/compiler-cli@"^11.0.0" from @angular-devkit/build-angular@0.1100.7
+npm error   node_modules/@angular-devkit/build-angular
+npm error     dev @angular-devkit/build-angular@"^0.1100.2" from the root project
+npm error
+npm error Fix the upstream dependency conflict, or retry
+npm error this command with --force or --legacy-peer-deps
+npm error to accept an incorrect (and potentially broken) dependency resolution.
+npm error
+npm error
+npm error For a full report see:
+npm error /Users/markvandendool/.npm/_logs/2025-08-16T22_59_41_147Z-eresolve-report.txt
+npm error A complete log of this run can be found in: /Users/markvandendool/.npm/_logs/2025-08-16T22_59_41_147Z-debug-0.log
+[2025-08-16 16:59:41] Baseline Angular 11 build sanity...
+An unhandled exception occurred: Cannot find module '@angular-devkit/build-angular/package.json'
+Require stack:
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/architect/node/node-modules-architect-host.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/architect/node/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/models/architect-command.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/commands/build-impl.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/schematics/tools/export-ref.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular-devkit/schematics/tools/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/utilities/json-schema.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/models/command-runner.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/lib/cli/index.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/lib/init.js
+- /Users/markvandendool/.npm/_npx/14bbb7934d02ddf9/node_modules/@angular/cli/bin/ng
+See "/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-dasVtq/angular-errors.log" for further details.
+[2025-08-16 16:59:43] === MIGRATING: Angular 11 → 12 ===
+[2025-08-16 16:59:43] nvm not found; continuing with current Node v24.5.0
+[2025-08-16 16:59:43] ng update @angular/core@12 @angular/cli@12
+Package specifier has no effect when using "migrate-only" option.
+Package specifier has no effect when using "migrate-only" option.
+Using package manager: 'npm'
+Collecting installed dependencies...
+Found 0 dependencies.
+A single package must be specified when using the "migrate-only" option.
+[2025-08-16 16:59:45] ERROR: ng update failed at Angular 12
+
+==== migration-ng11-20250816-170016.log ====
+=== MASTER AGENT PROTOCOL v3.0 ACKNOWLEDGMENT ===
+✅ I will NEVER use the forbidden word
+✅ I will COPY complete files only (quarantine copy)
+✅ I will use LOCAL repos only
+✅ I will verify EVERY step with forensic logs
+✅ I will NEVER create fake work
+=== ACKNOWLEDGMENT COMPLETE ===
+Angular Migration Script v2.0.0
+[2025-08-16 17:00:16] Angular Migration v2.0.0 starting
+[2025-08-16 17:00:16] Repo root: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind
+[2025-08-16 17:00:16] App path (relative to repo): novaxe-seb-ng11
+[2025-08-16 17:00:16] Quarantine: /var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T//ng-migrate-v2-20250816-170016
+[2025-08-16 17:00:16] Copying app to quarantine...
+[2025-08-16 17:00:16] Node: v24.5.0
+[2025-08-16 17:00:16] NPM:  11.5.1
+[2025-08-16 17:00:16] Installing dependencies (baseline, lenient peer resolution)...
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/schematics@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular/cli@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/architect@0.1102.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@schematics/angular@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@schematics/update@0.1102.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn skipping integrity check for git dependency ssh://git@github.com/paulrosen/abcjs.git
+npm warn deprecated is-data-descriptor@0.1.4: Please upgrade to v0.1.5
+npm warn deprecated is-accessor-descriptor@0.1.6: Please upgrade to v0.1.7
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @npmcli/ci-detect@1.4.0: this package has been deprecated, use `ci-info` instead
+npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+npm warn deprecated source-map-url@0.4.1: See https://github.com/lydell/source-map-url#deprecated
+npm warn deprecated move-concurrently@1.0.1: This package is no longer supported.
+npm warn deprecated @babel/plugin-proposal-unicode-property-regex@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-unicode-property-regex instead.
+npm warn deprecated @babel/plugin-proposal-numeric-separator@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+npm warn deprecated @babel/plugin-proposal-export-namespace-from@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
+npm warn deprecated @babel/plugin-proposal-logical-assignment-operators@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-logical-assignment-operators instead.
+npm warn deprecated @babel/plugin-proposal-json-strings@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-json-strings instead.
+npm warn deprecated @babel/plugin-proposal-optional-catch-binding@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-catch-binding instead.
+npm warn deprecated @babel/plugin-proposal-class-properties@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+npm warn deprecated @babel/plugin-proposal-dynamic-import@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-dynamic-import instead.
+npm warn deprecated @babel/plugin-proposal-private-methods@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+npm warn deprecated figgy-pudding@3.5.2: This module is no longer supported.
+npm warn deprecated @babel/plugin-proposal-async-generator-functions@7.15.8: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-async-generator-functions instead.
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+npm warn deprecated npmlog@4.1.2: This package is no longer supported.
+npm warn deprecated har-validator@5.1.5: this library is no longer supported
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated copy-concurrently@1.0.5: This package is no longer supported.
+npm warn deprecated @babel/plugin-proposal-optional-chaining@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+npm warn deprecated @babel/plugin-proposal-object-rest-spread@7.15.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
+npm warn deprecated abab@2.0.5: Use your platform's native atob() and btoa() methods instead
+npm warn deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+npm warn deprecated are-we-there-yet@1.1.7: This package is no longer supported.
+npm warn deprecated source-map-resolve@0.5.3: See https://github.com/lydell/source-map-resolve#deprecated
+npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+npm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated q@1.4.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated fs-write-stream-atomic@1.0.10: This package is no longer supported.
+npm warn deprecated fsevents@1.2.13: Upgrade to fsevents v2 to mitigate potential security issues
+npm warn deprecated fsevents@1.2.13: Upgrade to fsevents v2 to mitigate potential security issues
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated querystring@0.2.0: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
+npm warn deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+npm warn deprecated gauge@2.7.4: This package is no longer supported.
+npm warn deprecated @schematics/update@0.1102.14: This was an internal-only Angular package up through Angular v11 which is no longer used or maintained. Upgrade Angular to v12+ to remove this dependency.
+npm warn deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
+npm warn deprecated protractor@7.0.0: We have news to share - Protractor is deprecated and will reach end-of-life by Summer 2023. To learn more and find out about other options please refer to this post on the Angular blog. Thank you for using and contributing to Protractor. https://goo.gle/state-of-e2e-in-angular
+npm warn deprecated tslint@6.1.3: TSLint has been deprecated in favor of ESLint. Please see https://github.com/palantir/tslint/issues/4534 for more information.
+npm warn deprecated core-js@3.6.5: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
+
+added 1607 packages in 9s
+[2025-08-16 17:00:26] Baseline Angular 11 build sanity...
+An unhandled exception occurred: Configuration 'development' is not set in the workspace.
+See "/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-Xkt4NS/angular-errors.log" for further details.
+[2025-08-16 17:00:26] === MIGRATING: Angular 11 → 12 ===
+[2025-08-16 17:00:26] nvm not found; continuing with current Node v24.5.0
+[2025-08-16 17:00:26] ng update @angular/core@12 @angular/cli@12
+Using package manager: 'npm'
+Collecting installed dependencies...
+Found 51 dependencies.
+Fetching dependency metadata from registry...
+    Updating package.json with dependency @angular-devkit/build-angular @ "12.2.18" (was "0.1100.7")...
+    Updating package.json with dependency @angular/cli @ "12.2.18" (was "11.2.14")...
+    Updating package.json with dependency @angular/compiler-cli @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/language-service @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency karma @ "6.4.4" (was "5.0.9")...
+    Updating package.json with dependency typescript @ "4.3.5" (was "3.9.5")...
+    Updating package.json with dependency @angular/animations @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/common @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/compiler @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/core @ "12.2.17" (was "11.0.9")...
+    Updating package.json with dependency @angular/forms @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/platform-browser @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/platform-browser-dynamic @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/router @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency zone.js @ "0.11.8" (was "0.10.3")...
+  UPDATE package.json (1978 bytes)
+(node:21159) [DEP0147] DeprecationWarning: In future versions of Node.js, fs.rmdir(path, { recursive: true }) will be removed. Use fs.rm(path, { recursive: true }) instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+- Installing packages...
+(node:21159) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+✔ Packages successfully installed.
+** Executing migrations of package '@angular/cli' **
+
+❯ Remove deprecated options from 'angular.json' that are no longer present in v12.
+  UPDATE angular.json (4755 bytes)
+  Migration completed.
+
+❯ Update 'zone.js' to version 0.11.x.
+  Read more about this here: https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md#breaking-changes-since-zonejs-v0111
+  UPDATE package.json (1978 bytes)
+  UPDATE src/polyfills.ts (2828 bytes)
+  UPDATE src/test.ts (632 bytes)
+  UPDATE src/environments/environment.ts (1910 bytes)
+- Installing packages (npm)...
+✔ Packages installed successfully.
+  Migration completed.
+
+❯ Remove 'emitDecoratorMetadata' TypeScript compiler option.
+  Decorator metadata is no longer needed by Angular.
+  Read more about this here: https://www.typescriptlang.org/docs/handbook/decorators.html#metadata
+  Migration completed.
+
+❯ Lazy loading syntax migration.
+  Update lazy loading string syntax to use dynamic imports.
+  Migration completed.
+
+❯ Remove deprecated ViewEngine-based i18n build and extract options.
+  Options present in the configuration will be converted to use non-deprecated options.
+  Migration completed.
+
+❯ Updates Web Worker consumer usage to use the new syntax supported directly by Webpack 5.
+  UPDATE src/app/services/transport/transport.service.ts (6470 bytes)
+  Migration completed.
+
+❯ Remove invalid 'skipTests' option in '@schematics/angular:module' Angular schematic options.
+  Migration completed.
+
+❯ Replace the deprecated '--prod' in package.json scripts.
+  UPDATE package.json (1978 bytes)
+  Migration completed.
+
+** Executing migrations of package '@angular/core' **
+
+❯ Removes `canActivate` from a `Route` config when `redirectTo` is also present.
+  Migration completed.
+
+❯ In Angular version 12, the type of ActivatedRouteSnapshot.fragment is nullable.
+  This migration automatically adds non-null assertions to it.
+  Migration completed.
+
+❯ `XhrFactory` has been moved from `@angular/common/http` to `@angular/common`.
+  Migration completed.
+
+❯ Automatically migrates shadow-piercing selector from `/deep/` to the recommended alternative `::ng-deep`.
+  Migration completed.
+
+[2025-08-16 17:01:12] npm install (lenient peer deps)
+
+removed 1 package in 726ms
+[2025-08-16 17:01:13] Build with @angular/cli@12 (development)
+An unhandled exception occurred: Configuration 'development' is not set in the workspace.
+See "/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-jWp6ph/angular-errors.log" for further details.
+[2025-08-16 17:01:14] ERROR: Build failed at Angular 12
+
+==== migration-ng11-20250816-170803.log ====
+=== MASTER AGENT PROTOCOL v3.0 ACKNOWLEDGMENT ===
+✅ I will NEVER use the forbidden word
+✅ I will COPY complete files only (quarantine copy)
+✅ I will use LOCAL repos only
+✅ I will verify EVERY step with forensic logs
+✅ I will NEVER create fake work
+=== ACKNOWLEDGMENT COMPLETE ===
+Angular Migration Script v2.0.0
+[2025-08-16 17:08:03] Angular Migration v2.0.0 starting
+[2025-08-16 17:08:03] Repo root: /Users/markvandendool/Novaxe-SEB-Million-Song-Mind
+[2025-08-16 17:08:03] App path (relative to repo): novaxe-seb-ng11
+[2025-08-16 17:08:03] Quarantine: /var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T//ng-migrate-v2-20250816-170803
+[2025-08-16 17:08:03] Copying app to quarantine...
+[2025-08-16 17:08:04] Node: v24.5.0
+[2025-08-16 17:08:04] NPM:  11.5.1
+[2025-08-16 17:08:04] Installing dependencies (baseline, lenient peer resolution)...
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/schematics@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular/cli@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/architect@0.1102.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@schematics/angular@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@schematics/update@0.1102.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn EBADENGINE Unsupported engine {
+npm warn EBADENGINE   package: '@angular-devkit/core@11.2.14',
+npm warn EBADENGINE   required: { node: '>= 10.13.0', npm: '^6.11.0 || ^7.5.6', yarn: '>= 1.13.0' },
+npm warn EBADENGINE   current: { node: 'v24.5.0', npm: '11.5.1' }
+npm warn EBADENGINE }
+npm warn skipping integrity check for git dependency ssh://git@github.com/paulrosen/abcjs.git
+npm warn deprecated is-data-descriptor@0.1.4: Please upgrade to v0.1.5
+npm warn deprecated is-accessor-descriptor@0.1.6: Please upgrade to v0.1.7
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated @npmcli/move-file@1.1.2: This functionality has been moved to @npmcli/fs
+npm warn deprecated @npmcli/ci-detect@1.4.0: this package has been deprecated, use `ci-info` instead
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-data-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated is-accessor-descriptor@1.0.0: Please upgrade to v1.0.1
+npm warn deprecated stable@0.1.8: Modern JS already guarantees Array#sort() is a stable sort, so this library is deprecated. See the compatibility table on MDN: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#browser_compatibility
+npm warn deprecated source-map-url@0.4.1: See https://github.com/lydell/source-map-url#deprecated
+npm warn deprecated move-concurrently@1.0.1: This package is no longer supported.
+npm warn deprecated @babel/plugin-proposal-private-methods@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-private-methods instead.
+npm warn deprecated @babel/plugin-proposal-json-strings@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-json-strings instead.
+npm warn deprecated @babel/plugin-proposal-export-namespace-from@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-export-namespace-from instead.
+npm warn deprecated @babel/plugin-proposal-logical-assignment-operators@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-logical-assignment-operators instead.
+npm warn deprecated @babel/plugin-proposal-optional-catch-binding@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-catch-binding instead.
+npm warn deprecated @babel/plugin-proposal-unicode-property-regex@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-unicode-property-regex instead.
+npm warn deprecated @babel/plugin-proposal-numeric-separator@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-numeric-separator instead.
+npm warn deprecated @babel/plugin-proposal-nullish-coalescing-operator@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-nullish-coalescing-operator instead.
+npm warn deprecated @babel/plugin-proposal-dynamic-import@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-dynamic-import instead.
+npm warn deprecated @babel/plugin-proposal-class-properties@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-class-properties instead.
+npm warn deprecated figgy-pudding@3.5.2: This module is no longer supported.
+npm warn deprecated @babel/plugin-proposal-async-generator-functions@7.15.8: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-async-generator-functions instead.
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+npm warn deprecated npmlog@4.1.2: This package is no longer supported.
+npm warn deprecated har-validator@5.1.5: this library is no longer supported
+npm warn deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated copy-concurrently@1.0.5: This package is no longer supported.
+npm warn deprecated @babel/plugin-proposal-object-rest-spread@7.15.6: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-object-rest-spread instead.
+npm warn deprecated @babel/plugin-proposal-optional-chaining@7.14.5: This proposal has been merged to the ECMAScript standard and thus this plugin is no longer maintained. Please use @babel/plugin-transform-optional-chaining instead.
+npm warn deprecated abab@2.0.5: Use your platform's native atob() and btoa() methods instead
+npm warn deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+npm warn deprecated are-we-there-yet@1.1.7: This package is no longer supported.
+npm warn deprecated source-map-resolve@0.5.3: See https://github.com/lydell/source-map-resolve#deprecated
+npm warn deprecated glob@7.1.6: Glob versions prior to v9 are no longer supported
+npm warn deprecated q@1.5.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated q@1.4.1: You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+npm warn deprecated
+npm warn deprecated (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated fs-write-stream-atomic@1.0.10: This package is no longer supported.
+npm warn deprecated fsevents@1.2.13: Upgrade to fsevents v2 to mitigate potential security issues
+npm warn deprecated fsevents@1.2.13: Upgrade to fsevents v2 to mitigate potential security issues
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated debug@4.1.1: Debug versions >=3.2.0 <3.2.7 || >=4 <4.3.1 have a low-severity ReDos regression when used in a Node.js environment. It is recommended you upgrade to 3.2.7 or 4.3.1. (https://github.com/visionmedia/debug/issues/797)
+npm warn deprecated querystring@0.2.0: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
+npm warn deprecated uuid@3.4.0: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
+npm warn deprecated gauge@2.7.4: This package is no longer supported.
+npm warn deprecated @schematics/update@0.1102.14: This was an internal-only Angular package up through Angular v11 which is no longer used or maintained. Upgrade Angular to v12+ to remove this dependency.
+npm warn deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm warn deprecated svgo@1.3.2: This SVGO version is no longer supported. Upgrade to v2.x.x.
+npm warn deprecated protractor@7.0.0: We have news to share - Protractor is deprecated and will reach end-of-life by Summer 2023. To learn more and find out about other options please refer to this post on the Angular blog. Thank you for using and contributing to Protractor. https://goo.gle/state-of-e2e-in-angular
+npm warn deprecated tslint@6.1.3: TSLint has been deprecated in favor of ESLint. Please see https://github.com/palantir/tslint/issues/4534 for more information.
+npm warn deprecated core-js@3.6.5: core-js@<3.23.3 is no longer maintained and not recommended for usage due to the number of issues. Because of the V8 engine whims, feature detection in old core-js versions could cause a slowdown up to 100x even if nothing is polyfilled. Some versions have web compatibility issues. Please, upgrade your dependencies to the actual version of core-js.
+
+added 1607 packages in 9s
+[2025-08-16 17:08:14] Baseline Angular 11 build sanity...
+Compiling @angular/core : es2015 as esm2015
+Compiling @angular/animations : es2015 as esm2015
+Compiling @angular/animations/browser : es2015 as esm2015
+Compiling @angular/common : es2015 as esm2015
+Compiling @angular/forms : es2015 as esm2015
+Compiling @angular/platform-browser : es2015 as esm2015
+Compiling @angular/common/http : es2015 as esm2015
+Compiling @angular/platform-browser-dynamic : es2015 as esm2015
+Compiling ngx-cookie : es2015 as esm2015
+Compiling @angular/platform-browser/animations : es2015 as esm2015
+Compiling @angular/router : es2015 as esm2015
+- Generating browser application bundles...
+(node:34569) [DEP0060] DeprecationWarning: The `util._extend` API is deprecated. Please use Object.assign() instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+✔ Browser application bundle generation complete.
+
+Error: node_modules/abcjs/types/index.d.ts:200:15 - error TS1337: An index signature parameter type cannot be a union type. Consider using a mapped object type instead.
+
+200  	format?: { [attr: FormatAttributes]: any };
+     	            ~~~~
+
+
+
+[2025-08-16 17:08:21] === MIGRATING: Angular 11 → 12 ===
+[2025-08-16 17:08:21] nvm not found; continuing with current Node v24.5.0
+[2025-08-16 17:08:21] ng update @angular/core@12 @angular/cli@12
+Using package manager: 'npm'
+Collecting installed dependencies...
+Found 51 dependencies.
+Fetching dependency metadata from registry...
+    Updating package.json with dependency @angular-devkit/build-angular @ "12.2.18" (was "0.1100.7")...
+    Updating package.json with dependency @angular/cli @ "12.2.18" (was "11.2.14")...
+    Updating package.json with dependency @angular/compiler-cli @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/language-service @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency karma @ "6.4.4" (was "5.0.9")...
+    Updating package.json with dependency typescript @ "4.3.5" (was "3.9.5")...
+    Updating package.json with dependency @angular/animations @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/common @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/compiler @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/core @ "12.2.17" (was "11.0.9")...
+    Updating package.json with dependency @angular/forms @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/platform-browser @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/platform-browser-dynamic @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency @angular/router @ "12.2.17" (was "10.1.6")...
+    Updating package.json with dependency zone.js @ "0.11.8" (was "0.10.3")...
+  UPDATE package.json (1978 bytes)
+(node:34871) [DEP0147] DeprecationWarning: In future versions of Node.js, fs.rmdir(path, { recursive: true }) will be removed. Use fs.rm(path, { recursive: true }) instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+- Installing packages...
+(node:34871) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+✔ Packages successfully installed.
+** Executing migrations of package '@angular/cli' **
+
+❯ Remove deprecated options from 'angular.json' that are no longer present in v12.
+  UPDATE angular.json (4755 bytes)
+  Migration completed.
+
+❯ Update 'zone.js' to version 0.11.x.
+  Read more about this here: https://github.com/angular/angular/blob/master/packages/zone.js/CHANGELOG.md#breaking-changes-since-zonejs-v0111
+  UPDATE package.json (1978 bytes)
+  UPDATE src/polyfills.ts (2828 bytes)
+  UPDATE src/test.ts (632 bytes)
+  UPDATE src/environments/environment.ts (1910 bytes)
+- Installing packages (npm)...
+✔ Packages installed successfully.
+  Migration completed.
+
+❯ Remove 'emitDecoratorMetadata' TypeScript compiler option.
+  Decorator metadata is no longer needed by Angular.
+  Read more about this here: https://www.typescriptlang.org/docs/handbook/decorators.html#metadata
+  Migration completed.
+
+❯ Lazy loading syntax migration.
+  Update lazy loading string syntax to use dynamic imports.
+  Migration completed.
+
+❯ Remove deprecated ViewEngine-based i18n build and extract options.
+  Options present in the configuration will be converted to use non-deprecated options.
+  Migration completed.
+
+❯ Updates Web Worker consumer usage to use the new syntax supported directly by Webpack 5.
+  UPDATE src/app/services/transport/transport.service.ts (6470 bytes)
+  Migration completed.
+
+❯ Remove invalid 'skipTests' option in '@schematics/angular:module' Angular schematic options.
+  Migration completed.
+
+❯ Replace the deprecated '--prod' in package.json scripts.
+  UPDATE package.json (1978 bytes)
+  Migration completed.
+
+** Executing migrations of package '@angular/core' **
+
+❯ Removes `canActivate` from a `Route` config when `redirectTo` is also present.
+  Migration completed.
+
+❯ In Angular version 12, the type of ActivatedRouteSnapshot.fragment is nullable.
+  This migration automatically adds non-null assertions to it.
+  Migration completed.
+
+❯ `XhrFactory` has been moved from `@angular/common/http` to `@angular/common`.
+  Migration completed.
+
+❯ Automatically migrates shadow-piercing selector from `/deep/` to the recommended alternative `::ng-deep`.
+  Migration completed.
+
+[2025-08-16 17:09:10] npm install (lenient peer deps)
+
+removed 1 package in 706ms
+[2025-08-16 17:09:10] Build with @angular/cli@12 (config fallback)
+An unhandled exception occurred: Configuration 'development' is not set in the workspace.
+See "/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-EQT8FG/angular-errors.log" for further details.
+- Generating browser application bundles (phase: setup)...
+Compiling @angular/core : es2015 as esm2015
+Compiling @angular/animations : es2015 as esm2015
+Compiling @angular/animations/browser : es2015 as esm2015
+Compiling @angular/common : es2015 as esm2015
+Compiling @angular/platform-browser : es2015 as esm2015
+Compiling @angular/forms : es2015 as esm2015
+Compiling @angular/common/http : es2015 as esm2015
+Compiling @angular/platform-browser-dynamic : es2015 as esm2015
+Compiling ngx-cookie : es2015 as esm2015
+Compiling @angular/platform-browser/animations : es2015 as esm2015
+Compiling @angular/router : es2015 as esm2015
+node:internal/crypto/hash:103
+  this[kHandle] = new _Hash(algorithm, xofLen, algorithmId, getHashCache());
+                  ^
+
+Error: error:0308010C:digital envelope routines::unsupported
+    at new Hash (node:internal/crypto/hash:103:19)
+    at Object.createHash (node:crypto:137:10)
+    at BulkUpdateDecorator.hashFactory (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/util/createHash.js:145:18)
+    at BulkUpdateDecorator.update (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/util/createHash.js:46:50)
+    at RawSource.updateHash (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/node_modules/webpack-sources/lib/RawSource.js:132:8)
+    at NormalModule._initBuildHash (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:880:17)
+    at handleParseResult (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:946:10)
+    at /private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:1040:4
+    at processResult (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:755:11)
+    at /private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:819:5 {
+  opensslErrorStack: [
+    'error:03000086:digital envelope routines::initialization error',
+    'error:0308010C:digital envelope routines::unsupported'
+  ],
+  library: 'digital envelope routines',
+  reason: 'unsupported',
+  code: 'ERR_OSSL_EVP_UNSUPPORTED'
+}
+
+Node.js v24.5.0
+- Generating browser application bundles (phase: setup)...
+node:internal/crypto/hash:103
+  this[kHandle] = new _Hash(algorithm, xofLen, algorithmId, getHashCache());
+                  ^
+
+Error: error:0308010C:digital envelope routines::unsupported
+    at new Hash (node:internal/crypto/hash:103:19)
+    at Object.createHash (node:crypto:137:10)
+    at BulkUpdateDecorator.hashFactory (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/util/createHash.js:145:18)
+    at BulkUpdateDecorator.update (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/util/createHash.js:46:50)
+    at OriginalSource.updateHash (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/node_modules/webpack-sources/lib/OriginalSource.js:193:8)
+    at NormalModule._initBuildHash (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:880:17)
+    at handleParseResult (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:946:10)
+    at /private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:1040:4
+    at processResult (/private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:755:11)
+    at /private/var/folders/ns/h93y_5s14mx8fyv5w4yw4__c0000gn/T/ng-migrate-v2-20250816-170803/app/node_modules/webpack/lib/NormalModule.js:819:5 {
+  opensslErrorStack: [
+    'error:03000086:digital envelope routines::initialization error',
+    'error:0308010C:digital envelope routines::unsupported'
+  ],
+  library: 'digital envelope routines',
+  reason: 'unsupported',
+  code: 'ERR_OSSL_EVP_UNSUPPORTED'
+}
+
+Node.js v24.5.0
+[2025-08-16 17:09:22] ERROR: Build failed at Angular 12
+
