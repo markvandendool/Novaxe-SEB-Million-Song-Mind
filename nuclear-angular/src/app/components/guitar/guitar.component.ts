@@ -22,7 +22,7 @@ export class GuitarComponent implements OnInit {
 
   async play_note(): Promise<void> {
     console.log("🎸 Playing note with advanced service...");
-    
+
     // Use the enhanced play method with duration
     await this.guit.play(this.delay, this.midinote, 1.0);
   }
@@ -31,7 +31,7 @@ export class GuitarComponent implements OnInit {
     // Example C major chord (C, E, G)
     const cMajorChord = [60, 64, 67];
     console.log("🎸 Playing C major chord...");
-    
+
     await this.guit.playChord(cMajorChord, this.delay, 1.5);
   }
 

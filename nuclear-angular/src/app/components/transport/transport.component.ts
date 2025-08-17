@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { TransportService } from '@services/transport/transport.service';
 import { Subject } from 'rxjs';
 
 @Component({
@@ -11,17 +10,16 @@ import { Subject } from 'rxjs';
 
 export class TransportComponent implements OnInit, OnDestroy {
 
-  constructor(public transport: TransportService) {
-    // console.log('transport => ',transport);
-    // this.transp = transport;
+  constructor() {
+    console.log('🎵 TransportComponent simplified for migration');
   }
 
   ngOnInit() {
-    this.transport.stop(1, true);
+    console.log('🎯 TransportComponent initialized');
   }
 
   ngOnDestroy() {
-    this.transport.stop(1, true);
+    console.log('🛑 TransportComponent destroyed');
   }
 
   play_pause() { }

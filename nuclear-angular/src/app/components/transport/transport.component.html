@@ -1,17 +1,16 @@
 <div style="padding:10px;text-align: center;">
-
-	<!-- <p>Transport module</p> -->
-	<button type="button" class="btn btn-success" (mousedown)="transport.play_pause()">
-		<i [hidden]="transport.state=='playing' " class="fa fa-play"></i>
-		<i [hidden]="transport.state!='playing'" class="fa fa-pause"></i>
+	<h3>🎵 Transport Component</h3>
+	<p>Transport controls (simplified for migration)</p>
+	<button type="button" class="btn btn-success">
+		<i class="fa fa-play"></i> Play
 	</button>
-	<button type="button" class="btn btn-danger" (mousedown)="transport.stop()">
-		<i class="fa fa-stop"></i>
+	<button type="button" class="btn btn-danger">
+		<i class="fa fa-stop"></i> Stop
 	</button>
 
 
-<!-- KEEP IT FOR DEBUG --------------------->
-<!-- 	<table  class="col-1" style="margin:auto;">
+	<!-- KEEP IT FOR DEBUG --------------------->
+	<!-- 	<table  class="col-1" style="margin:auto;">
 		<tr>
 			<th>M</th>
 			<th>B</th>
@@ -25,7 +24,6 @@
 		</tr>
 
 	</table>
- -->	
-<!-- KEEP IT FOR DEBUG --------------------->
-</div> 
-
+ -->
+	<!-- KEEP IT FOR DEBUG --------------------->
+</div>

@@ -1,0 +1,230 @@
+.piano-mini-container {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    color: #ecf0f1;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.piano-mini-container h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #e74c3c;
+    font-weight: 600;
+}
+
+/* Octave Controls */
+.octave-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 25px;
+    gap: 15px;
+}
+
+.octave-btn {
+    background: #3498db;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.octave-btn:hover:not(:disabled) {
+    background: #2980b9;
+    transform: translateY(-2px);
+}
+
+.octave-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.octave-display {
+    font-weight: 600;
+    font-size: 16px;
+    color: #e67e22;
+    min-width: 80px;
+    text-align: center;
+}
+
+/* Keyboard Container */
+.keyboard-container {
+    position: relative;
+    height: 120px;
+    margin: 20px 0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* White Keys */
+.white-keys {
+    display: flex;
+    height: 100%;
+    gap: 2px;
+}
+
+.white-key {
+    flex: 1;
+    background: linear-gradient(to bottom, #fff, #f8f9fa);
+    border: 2px solid #dee2e6;
+    border-radius: 0 0 8px 8px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 8px 4px;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.white-key:hover {
+    background: linear-gradient(to bottom, #e9ecef, #dee2e6);
+    transform: translateY(2px);
+}
+
+.white-key.active {
+    background: linear-gradient(to bottom, #28a745, #20c997);
+    color: white;
+}
+
+.key-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.white-key.active .key-label {
+    color: white;
+}
+
+.midi-number {
+    font-size: 10px;
+    color: #6c757d;
+    margin-top: 2px;
+}
+
+.white-key.active .midi-number {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* Black Keys */
+.black-keys {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70%;
+}
+
+.black-key {
+    position: absolute;
+    width: 8%;
+    height: 100%;
+    background: linear-gradient(to bottom, #343a40, #212529);
+    border: 1px solid #000;
+    border-radius: 0 0 4px 4px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 4px 2px;
+    transition: all 0.15s ease;
+    z-index: 10;
+}
+
+.black-key:hover {
+    background: linear-gradient(to bottom, #495057, #343a40);
+    transform: translateY(1px);
+}
+
+.black-key.active {
+    background: linear-gradient(to bottom, #dc3545, #c82333);
+}
+
+.black-key .key-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #f8f9fa;
+}
+
+/* Status Display */
+.status-display {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.current-note,
+.velocity-display {
+    margin: 0;
+    font-size: 14px;
+}
+
+.current-note span {
+    color: #e74c3c;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.current-note span.playing {
+    color: #27ae60;
+    text-shadow: 0 0 10px rgba(39, 174, 96, 0.5);
+    animation: pulse 0.2s ease-in-out;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Migration Status */
+.migration-status {
+    background: rgba(39, 174, 96, 0.1);
+    border-left: 4px solid #27ae60;
+    padding: 10px 15px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.migration-status p {
+    margin: 2px 0;
+    color: #27ae60;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .piano-mini-container {
+        margin: 10px;
+        padding: 15px;
+    }
+
+    .keyboard-container {
+        height: 100px;
+    }
+
+    .status-display {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
