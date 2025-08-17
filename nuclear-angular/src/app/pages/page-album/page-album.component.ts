@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {ActivatedRoute} from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-page-album',
@@ -9,14 +9,14 @@ import {ActivatedRoute} from '@angular/router';
 })
 export class PageAlbumComponent implements OnInit {
 
-  public album:string = '';
+  public album: string = '';
 
-  constructor(private route:ActivatedRoute) {
+  constructor(private route: ActivatedRoute) {
 
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe( paramMap => {
+    this.route.paramMap.subscribe(paramMap => {
       this.album = paramMap.get('album') || 'unknown';
     })
   }

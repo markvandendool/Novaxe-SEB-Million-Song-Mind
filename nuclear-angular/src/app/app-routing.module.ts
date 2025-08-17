@@ -7,6 +7,7 @@ import { LearnFifthsComponent } from './components/learn-fifths/learn-fifths.com
 import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fifth-circle.component';
 import { TestpageComponent } from './components/testpage/testpage.component';
 import { PageAlbumComponent } from './pages/page-album/page-album.component';
+import { PageAuthorComponent } from './pages/page-author/page-author.component';
 
 const routes: Routes = [
   { path: '', pathMatch: 'full', component: HomeComponent },
@@ -16,6 +17,7 @@ const routes: Routes = [
   { path: 'fifths', component: PageFifthCircleComponent },
   { path: 'test', component: TestpageComponent },
   { path: 'album/:album', component: PageAlbumComponent },
+  { path: 'author/:author', component: PageAuthorComponent },
   { path: '**', redirectTo: '' }
 ];
 

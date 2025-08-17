@@ -35,6 +35,7 @@ import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fi
 
 // MIGRATION STEP 4: Simple page components
 import { PageAlbumComponent } from './pages/page-album/page-album.component';
+import { PageAuthorComponent } from './pages/page-author/page-author.component';
 
 @NgModule({
   declarations: [
@@ -69,7 +70,8 @@ import { PageAlbumComponent } from './pages/page-album/page-album.component';
     PageFifthCircleComponent,
 
     // MIGRATION STEP 4: Simple page components
-    PageAlbumComponent
+    PageAlbumComponent,
+    PageAuthorComponent
   ],
   imports: [
     BrowserModule,
