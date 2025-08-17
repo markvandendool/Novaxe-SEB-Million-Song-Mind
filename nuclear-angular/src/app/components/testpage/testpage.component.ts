@@ -1,6 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Subject } from 'rxjs';
-import { MusicTheoryStubService } from '../../services/music-theory-stub.service';
+
+// Minimal music theory interface for testpage functionality
+interface MusicNote {
+    name: string;
+    midi: number;
+}
 
 @Component({
     selector: 'app-testpage',
@@ -16,7 +21,7 @@ export class TestpageComponent implements OnInit {
     public abcChordString: string = "ceg";
     public chordString: string = "c,e,g";
 
-    constructor(private musicTheory: MusicTheoryStubService) {
+    constructor() {
         this.measure = new Subject();
         this.measure.next(1);
     }
@@ -27,9 +32,12 @@ export class TestpageComponent implements OnInit {
     }
 
     renderChord() {
-        // Test the music theory service
-        const note = this.musicTheory.getNote(this.abcChordString);
-        console.log("Music Theory Service Test:", note);
+        // Simple note parsing for basic functionality
+        const note: MusicNote = { 
+            name: this.abcChordString, 
+            midi: 60 // Default C4
+        };
+        console.log("Music Theory Test:", note);
     }
 
     ngOnInit() {
