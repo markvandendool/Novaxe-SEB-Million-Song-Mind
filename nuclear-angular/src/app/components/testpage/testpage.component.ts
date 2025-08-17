@@ -33,8 +33,8 @@ export class TestpageComponent implements OnInit {
 
     renderChord() {
         // Simple note parsing for basic functionality
-        const note: MusicNote = { 
-            name: this.abcChordString, 
+        const note: MusicNote = {
+            name: this.abcChordString,
             midi: 60 // Default C4
         };
         console.log("Music Theory Test:", note);

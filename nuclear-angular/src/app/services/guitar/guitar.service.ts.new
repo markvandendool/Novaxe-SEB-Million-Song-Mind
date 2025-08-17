@@ -40,15 +40,15 @@ export class GuitarService {
             // Initialize WebAudioFont player
             this.player = new (window as any).WebAudioFontPlayer();
             console.log('🎸 WebAudioFont player initialized, attempting instrument loading...');
-
+            
             // Use correct 2025 WebAudioFont API for dynamic loading
             const instrumentUrl = 'https://surikov.github.io/webaudiofontdata/sound/0250_SoundBlasterOld_sf2.js';
             const variableName = '_tone_0250_SoundBlasterOld_sf2';
-
+            
             console.log(`🎸 Loading guitar instrument from: ${instrumentUrl}`);
-
+            
             this.player.loader.startLoad(this.audioContext, instrumentUrl, variableName);
-
+            
             this.player.loader.waitLoad(() => {
                 try {
                     this.guitarInstrument = (window as any)[variableName];
@@ -64,7 +64,7 @@ export class GuitarService {
                     this.createSynthesizerFallback();
                 }
             });
-
+            
             console.log('🎸 Guitar service initialization complete');
         } catch (error) {
             console.error('❌ Failed to load WebAudioFont:', error);
@@ -82,27 +82,27 @@ export class GuitarService {
         // Create a simple guitar-like synthesized sound
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
-
+        
         // Convert MIDI note to frequency
         const frequency = 440 * Math.pow(2, (midiNote - 69) / 12);
-
+        
         // Set up oscillator (sawtooth wave for guitar-like sound)
         oscillator.type = 'sawtooth';
         oscillator.frequency.setValueAtTime(frequency, when);
-
+        
         // Set up gain envelope (attack-decay for guitar-like pluck)
         gainNode.gain.setValueAtTime(0, when);
         gainNode.gain.linearRampToValueAtTime(0.3, when + 0.01); // Quick attack
         gainNode.gain.exponentialRampToValueAtTime(0.1, when + 0.1); // Decay
         gainNode.gain.exponentialRampToValueAtTime(0.001, when + duration); // Sustain and release
-
+        
         // Connect and play
         oscillator.connect(gainNode);
         gainNode.connect(this.audioContext.destination);
-
+        
         oscillator.start(when);
         oscillator.stop(when + duration);
-
+        
         console.log(`🎵 Synthesized guitar note ${midiNote} at ${frequency.toFixed(1)}Hz`);
     }
 

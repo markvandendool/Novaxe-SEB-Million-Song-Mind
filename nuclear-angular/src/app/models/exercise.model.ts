@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class ExerciseModel {
-  
+
   public _question: string[] = ['C', 'G', 'D', 'A'];
   public _cards: string[] = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B'];
   public verified: number = 0;

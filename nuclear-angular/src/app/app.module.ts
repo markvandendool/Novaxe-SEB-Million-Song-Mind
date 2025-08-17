@@ -30,6 +30,9 @@ import { FretboardComponent } from './components/fretboard/fretboard.component';
 // MIGRATION STEP 1: Small components with minimal dependencies
 import { TestpageComponent } from './components/testpage/testpage.component';
 
+// STEP 3A: Real Novaxe component migration
+import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fifth-circle.component';
+
 @NgModule({
   declarations: [
     // Core
@@ -57,7 +60,10 @@ import { TestpageComponent } from './components/testpage/testpage.component';
     FretboardComponent,
 
     // MIGRATION STEP 1: Small components with minimal dependencies
-    TestpageComponent
+    TestpageComponent,
+
+    // STEP 3A: Real Novaxe component migration
+    PageFifthCircleComponent
   ],
   imports: [
     BrowserModule,
