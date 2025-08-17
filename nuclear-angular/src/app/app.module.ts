@@ -33,6 +33,9 @@ import { TestpageComponent } from './components/testpage/testpage.component';
 // STEP 3A: Real Novaxe component migration
 import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fifth-circle.component';
 
+// MIGRATION STEP 4: Simple page components
+import { PageAlbumComponent } from './pages/page-album/page-album.component';
+
 @NgModule({
   declarations: [
     // Core
@@ -63,7 +66,10 @@ import { PageFifthCircleComponent } from './components/page-fifth-circle/page-fi
     TestpageComponent,
 
     // STEP 3A: Real Novaxe component migration
-    PageFifthCircleComponent
+    PageFifthCircleComponent,
+
+    // MIGRATION STEP 4: Simple page components
+    PageAlbumComponent
   ],
   imports: [
     BrowserModule,

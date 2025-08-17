@@ -1,36 +1,18 @@
 <h1 class="font1">🎯 NOVAXE NUCLEAR - Angular 20 Migration</h1>
 <div style="background: #e3f2fd; padding: 20px; margin: 20px 0; border-radius: 8px;">
-    <h2>✅ FORENSIC VALIDATION - RUNTIME OPERATIONAL</h2>
-    <p><strong>Dev Server Working:</strong> This HTML proves ng serve is operational!</p>
-    <p><strong>Components Rendering:</strong> Real Novaxe components below ↓</p>
+    <h2>✅ RUNTIME OPERATIONAL - Component Migration</h2>
+    <p><strong>Navigation:</strong> Use the router links below to test components</p>
 </div>
 
-<h3>Gate: Learn Fifths Component - Phase B Migration</h3>
-<div style="border: 2px solid #9c27b0; padding: 15px; margin: 10px 0;">
-    <app-learn-fifths></app-learn-fifths>
-</div>
+<nav style="display:flex; gap:12px; margin:10px 0; flex-wrap:wrap">
+  <a routerLink="/" routerLinkActive="active">Home</a>
+  <a routerLink="/piano" routerLinkActive="active">Piano</a>
+  <a routerLink="/fretboard" routerLinkActive="active">Fretboard</a>
+  <a routerLink="/learn-fifths" routerLinkActive="active">Learn Fifths</a>
+  <a routerLink="/fifths" routerLinkActive="active">Fifth Circle</a>
+  <a routerLink="/test" routerLinkActive="active">Test Page</a>
+  <a routerLink="/album/test-album" routerLinkActive="active">Album Test</a>
+  <span style="opacity:.6">| routes prove navigation parity</span>
+</nav>
 
-<h3>🎹 Piano Component - Audio Testing</h3>
-<div style="border: 2px solid #4caf50; padding: 15px; margin: 10px 0;">
-    <app-piano></app-piano>
-</div>
-
-<h3>🎸 Fretboard Component - Interactive Guitar</h3>
-<div style="border: 2px solid #ff9800; padding: 15px; margin: 10px 0;">
-    <app-fretboard></app-fretboard>
-</div>
-
-<h3>🧪 Migration Step 1: Testpage Component</h3>
-<div style="border: 2px solid #e91e63; padding: 15px; margin: 10px 0;">
-    <app-testpage></app-testpage>
-</div>
-
-<h3>🎵 Step 3A: Page Fifth Circle</h3>
-<div style="border: 2px solid #2196f3; padding: 15px; margin: 10px 0;">
-    <app-page-fifth-circle></app-page-fifth-circle>
-</div>
-
-<h3>📝 Original Working Components</h3>
-<app-braid></app-braid>
-<app-transport></app-transport>
 <router-outlet></router-outlet>
