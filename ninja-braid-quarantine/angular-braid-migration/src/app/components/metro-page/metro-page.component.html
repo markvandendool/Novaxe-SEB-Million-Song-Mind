@@ -1,0 +1,16 @@
+<div class="metro-container">
+    <h3>🎼 Metronome Page</h3>
+    <p><strong>Migration Status:</strong> ✅ Successfully migrated to Angular 20!</p>
+    <p><strong>Original Size:</strong> 15 lines</p>
+
+    <div class="metronome-controls">
+        <div class="bpm-display">{{ bpm }} BPM</div>
+        <button (click)="toggleMetronome()" [class.active]="isPlaying" class="metro-btn">
+            {{ isPlaying ? '⏸️ Stop' : '▶️ Start' }} Metronome
+        </button>
+    </div>
+
+    <div class="status-indicator">
+        <span class="success">🟢 Metronome Component Active</span>
+    </div>
+</div>

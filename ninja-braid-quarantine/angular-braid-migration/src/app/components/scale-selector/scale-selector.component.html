@@ -1,0 +1,76 @@
+<div class="scale-selector-container">
+    <h3>🎵 Scale Selector</h3>
+
+    <!-- Root Note Selection -->
+    <div class="root-note-section">
+        <h4>Root Note</h4>
+        <div class="root-note-buttons">
+            <button *ngFor="let noteName of rootNoteNames; let i = index" class="root-note-btn"
+                [class.active]="rootNote === 60 + i" (click)="changeRootNote(i)">
+                {{ noteName }}
+            </button>
+        </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="category-section">
+        <h4>Scale Category</h4>
+        <select class="category-select" [(ngModel)]="selectedCategory" (change)="onCategoryChange()">
+            <option value="all">All Scales</option>
+            <option value="major">Major Scales</option>
+            <option value="minor">Minor Scales</option>
+            <option value="modal">Modal Scales</option>
+            <option value="exotic">Exotic Scales</option>
+        </select>
+    </div>
+
+    <!-- Scale Selection Grid -->
+    <div class="scales-section">
+        <h4>Available Scales</h4>
+        <div class="scales-grid">
+            <div *ngFor="let scale of filteredScales" class="scale-card"
+                [class.selected]="selectedScale.name === scale.name" (click)="selectScale(scale)">
+                <div class="scale-name">{{ scale.name }}</div>
+                <div class="scale-description">{{ scale.description }}</div>
+                <div class="scale-category">{{ scale.category }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Selection Display -->
+    <div class="current-selection">
+        <h4>Current Selection</h4>
+        <div class="selection-details">
+            <p><strong>Scale:</strong> {{ selectedScale.name }}</p>
+            <p><strong>Root:</strong> {{ getRootNoteName() }}</p>
+            <p><strong>Description:</strong> {{ selectedScale.description }}</p>
+        </div>
+
+        <!-- Scale Notes Display -->
+        <div class="scale-notes">
+            <h5>Scale Notes:</h5>
+            <div class="notes-display">
+                <span *ngFor="let note of scaleNotes; let i = index" class="scale-note" [class.root]="i === 0">
+                    {{ getNoteName(note) }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Intervals Display -->
+        <div class="intervals-display">
+            <h5>Intervals:</h5>
+            <div class="intervals-list">
+                <span *ngFor="let interval of selectedScale.intervals; let i = index" class="interval"
+                    [class.root]="i === 0">
+                    {{ interval }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Migration Status -->
+    <div class="migration-status">
+        <p>✅ Batch 2 Migration: ScaleSelector Component Active</p>
+        <p>🎼 Music Theory Integration: {{ filteredScales.length }} scales loaded</p>
+    </div>
+</div>

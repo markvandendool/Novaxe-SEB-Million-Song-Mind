@@ -27,6 +27,10 @@ import { EditorComponent } from './components/editor/editor.component';
 import { PianoComponent } from './components/piano/piano.component';
 import { FretboardComponent } from './components/fretboard/fretboard.component';
 
+// TIER 3: Core Music Components - NINJA ACCELERATION!
+import { MetroComponent } from './components/metro/metro.component';
+import { BrowseComponent } from './components/browse/browse.component';
+
 // MIGRATION STEP 1: Small components with minimal dependencies
 import { TestpageComponent } from './components/testpage/testpage.component';
 
@@ -65,6 +69,10 @@ import { NavbarComponent } from './components/navbar/navbar.component';
     EditorComponent,
     PianoComponent,
     FretboardComponent,
+
+    // TIER 3: Core Music Components - NINJA ACCELERATION! 🥷
+    MetroComponent,
+    BrowseComponent,
 
     // MIGRATION STEP 1: Small components with minimal dependencies
     TestpageComponent,

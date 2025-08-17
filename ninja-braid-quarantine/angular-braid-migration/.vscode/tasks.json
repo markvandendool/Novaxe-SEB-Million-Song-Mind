@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Production Build Test - Gate 6",
+			"type": "shell",
+			"command": "cd /Users/markvandendool/Novaxe-SEB-Million-Song-Mind/nuclear-angular && ng build --configuration production",
+			"group": "build"
+		}
+	]
+}

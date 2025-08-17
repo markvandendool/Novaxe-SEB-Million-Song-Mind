@@ -1,0 +1,16 @@
+<div class="countdown-container">
+    <h3>⏰ Countdown Component</h3>
+    <p><strong>Migration Status:</strong> ✅ Successfully migrated to Angular 20!</p>
+    <p><strong>Original Size:</strong> 29 lines</p>
+
+    <div class="countdown-display">
+        <div class="timer">{{ countdown }}</div>
+        <button (click)="start()" [disabled]="isActive" class="start-btn">
+            {{ isActive ? '⏳ Running...' : '🚀 Start Countdown' }}
+        </button>
+    </div>
+
+    <div class="status-indicator">
+        <span class="success">🟢 Component Active</span>
+    </div>
+</div>

@@ -1,0 +1,22 @@
+{
+  "rxjs_imports": {
+    "pattern": "Cannot find module 'rxjs/Subject'",
+    "fix": "import { Subject } from 'rxjs';",
+    "success_count": 0
+  },
+  "standalone_component": {
+    "pattern": "is not a directive, a component, or a pipe",
+    "fix": "Add 'standalone: false' to @Component decorator",
+    "success_count": 0
+  },
+  "typescript_implicit_any": {
+    "pattern": "Parameter .* implicitly has an 'any' type",
+    "fix": "Add explicit type annotation",
+    "success_count": 0
+  },
+  "openssl_legacy": {
+    "pattern": "error:0308010C:digital envelope routines::unsupported",
+    "fix": "NODE_OPTIONS=--openssl-legacy-provider",
+    "success_count": 0
+  }
+}
