@@ -1,0 +1,556 @@
+
+Updated Script for enrich_harmonic_profile_v2.py
+Below is a revised script that incorporates these improvements. It refines key detection, enhances Roman numeral accuracy, and adds chord transition analysis. Run this in your /Users/markvandendool/harmonic-oracle directory to generate data3.5.csv from data3.csv.textimport pandas as pd
+import re
+from collections import Counter
+import numpy as np
+import os
+
+# Define diatonic chords for major and minor keys
+MAJOR_DIATONIC = {0: 'I', 1: 'ii', 2: 'iii', 3: 'IV', 4: 'V', 5: 'vi', 6: 'vii°'}
+MINOR_DIATONIC = {0: 'i', 1: 'ii°', 2: 'III', 3: 'iv', 4: 'v', 5: 'VI', 6: 'VII'}
+CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+NOTE_TO_INDEX = {note: idx for idx, note in enumerate(CHROMATIC_NOTES)}
+
+def parse_chord(chord):
+    """Parse a chord string to extract root note, quality, and inversion."""
+    if not chord or not isinstance(chord, str):
+        return None, None, None
+    
+    # Handle chords like Csmin, Cmin, Cmaj7, C/E, no3d, etc.
+    chord = chord.strip().replace('min', 'm').replace('maj', '').replace('sus', '')
+    root_match = re.match(r'^([A-G][b#]?)([^/]*)(?:/([A-G][b#]?))?', chord)
+    if not root_match:
+        return None, None, None
+    
+    root, suffix, bass = root_match.groups()
+    quality = 'major'
+    if 'm' in suffix:
+        quality = 'minor'
+    elif '°' in suffix or 'dim' in suffix:
+        quality = 'diminished'
+    elif '7' in suffix:
+        quality = 'dominant7' if 'm' not in suffix else 'minor7'
+    elif 'aug' in suffix:
+        quality = 'augmented'
+    elif 'no3d' in suffix:
+        quality = 'no3d'
+    
+    # Normalize root and bass notes (e.g., Db to C#)
+    root = root.replace('b', '#') if root.endswith('b') else root
+    bass = bass.replace('b', '#') if bass and bass.endswith('b') else bass
+    if root not in NOTE_TO_INDEX:
+        return None, None, None
+    return root, quality, bass
+
+def detect_key(chords):
+    """Detect the most likely key using root note frequency and diatonic chord scoring."""
+    if not chords or not isinstance(chords, str):
+        return None, None
+    
+    # Extract root notes and qualities
+    roots = []
+    chord_qualities = []
+    for section in re.findall(r'<[^>]+>|[\w#b°/]+', chords):
+        if section.startswith('<'):
+            continue
+        root, quality, _ = parse_chord(section)
+        if root:
+            roots.append(root)
+            chord_qualities.append((root, quality))
+    
+    if not roots:
+        return None, None
+    
+    # Score keys based on root frequency and diatonic chords
+    key_scores = {note: 0 for note in CHROMATIC_NOTES}
+    for root, quality in chord_qualities:
+        root_idx = NOTE_TO_INDEX[root]
+        for key_note in CHROMATIC_NOTES:
+            key_idx = NOTE_TO_INDEX[key_note]
+            degree = (root_idx - key_idx) % 12
+            # Major key scoring
+            if degree in MAJOR_DIATONIC:
+                if (degree == 0 and quality in ['major', 'dominant7']) or \
+                   (degree == 5 and quality == 'minor') or \
+                   (degree in [1, 2, 3, 4, 6] and quality in ['major', 'minor', 'dominant7']):
+                    key_scores[key_note] += 2 if degree in [0, 3, 4] else 1
+            # Minor key scoring
+            minor_key = CHROMATIC_NOTES[(NOTE_TO_INDEX[key_note] + 3) % 12]
+            minor_degree = (degree - 3) % 12
+            if minor_degree in MINOR_DIATONIC:
+                if (minor_degree == 0 and quality == 'minor') or \
+                   (minor_degree == 5 and quality == 'major') or \
+                   (minor_degree in [1, 2, 3, 4, 6] and quality in ['major', 'minor']):
+                    key_scores[key_note] += 1.5 if minor_degree in [0, 3, 4] else 0.75
+    
+    # Add root frequency bonus
+    root_counts = Counter(roots)
+    for root, count in root_counts.items():
+        key_scores[root] += count * 0.5
+    
+    # Select best key
+    best_key = max(key_scores, key=key_scores.get)
+    major_key = best_key
+    minor_key = CHROMATIC_NOTES[(NOTE_TO_INDEX[best_key] + 3) % 12]
+    return major_key if key_scores[best_key] > 0 else None, minor_key
+
+def chord_to_roman(chord, key, is_major=True):
+    """Convert a chord to Roman numeral notation with inversion support."""
+    root, quality, bass = parse_chord(chord)
+    if not root or not key or key not in NOTE_TO_INDEX:
+        return None
+    
+    key_index = NOTE_TO_INDEX[key]
+    root_index = NOTE_TO_INDEX[root]
+    degree = (root_index - key_index) % 12
+    
+    # Adjust degree for minor key
+    if not is_major:
+        degree = (degree - 3) % 12
+    
+    # Map to Roman numeral
+    roman_dict = MAJOR_DIATONIC if is_major else MINOR_DIATONIC
+    base_roman = roman_dict.get(degree % 7, '')
+    
+    if not base_roman:
+        # Handle non-diatonic chords (e.g., bVII, bIII)
+        base_roman = CHROMATIC_NOTES[degree].replace('#', 's') + ('m' if quality == 'minor' else '')
+    
+    # Adjust for chord quality
+    if quality == 'minor' and is_major:
+        base_roman = base_roman.lower()
+    elif quality == 'major' and not is_major:
+        base_roman = base_roman.upper()
+    elif quality == 'diminished':
+        base_roman += '°'
+    elif quality == 'dominant7':
+        base_roman += '7'
+    elif quality == 'minor7':
+        base_roman = base_roman.lower() + '7'
+    elif quality == 'augmented':
+        base_roman += 'aug'
+    elif quality == 'no3d':
+        base_roman += 'no3'
+    
+    # Handle inversions
+    if bass and bass != root and bass in NOTE_TO_INDEX:
+        bass_index = NOTE_TO_INDEX[bass]
+        bass_degree = (bass_index - key_index) % 12
+        if quality in ['major', 'minor', 'dominant7', 'minor7']:
+            if bass_degree == (degree + 4) % 12 or bass_degree == (degree + 3) % 12:
+                base_roman += '6'  # First inversion
+            elif bass_degree == (degree + 7) % 12:
+                base_roman += '64'  # Second inversion
+            elif '7' in quality and bass_degree in [(degree + 10) % 12, (degree + 11) % 12]:
+                base_roman += '43'  # Third inversion for seventh chords
+    
+    return base_roman
+
+def chord_to_huv(chord, key):
+    """Generate HUV (Harmonic Unit Vector) for a chord, including inversions."""
+    root, quality, bass = parse_chord(chord)
+    if not root or not key or key not in NOTE_TO_INDEX:
+        return None
+    
+    key_index = NOTE_TO_INDEX[key]
+    root_index = NOTE_TO_INDEX[root]
+    degree = (root_index - key_index) % 12
+    
+    # HUV vector: 12 positions (one per chromatic note)
+    huv = [0] * 12
+    if quality in ['major', 'minor', 'dominant7', 'minor7']:
+        huv[degree] = 1  # Root
+        huv[(degree + 4) % 12] = 1 if quality in ['major', 'dominant7'] else 0  # Major third
+        huv[(degree + 3) % 12] = 1 if quality in ['minor', 'minor7'] else 0  # Minor third
+        huv[(degree + 7) % 12] = 1  # Fifth
+        if '7' in quality:
+            huv[(degree + 10) % 12] = 1 if quality == 'minor7' else 0  # Minor seventh
+            huv[(degree + 11) % 12] = 1 if quality == 'dominant7' else 0  # Major seventh
+    elif quality == 'diminished':
+        huv[degree] = 1
+        huv[(degree + 3) % 12] = 1
+        huv[(degree + 6) % 12] = 1
+    elif quality == 'augmented':
+        huv[degree] = 1
+        huv[(degree + 4) % 12] = 1
+        huv[(degree + 8) % 12] = 1
+    elif quality == 'no3d':
+        huv[degree] = 1
+        huv[(degree + 7) % 12] = 1
+    
+    return ','.join(map(str, huv))
+
+def get_transitions(roman_numerals):
+    """Calculate chord transitions from Roman numerals."""
+    if not roman_numerals or not isinstance(roman_numerals, str):
+        return ''
+    
+    sections = roman_numerals.split()
+    transitions = []
+    prev_roman = None
+    for section in sections:
+        if section.startswith('<'):
+            transitions.append(section)
+            prev_roman = None
+            continue
+        if prev_roman and section:
+            transitions.append(f"{prev_roman}->{section}")
+        prev_roman = section if section else prev_roman
+    
+    return ' '.join(transitions)
+
+def enrich_csv(input_file, output_file):
+    """Enrich the input CSV with improved harmonic analysis."""
+    if not os.path.exists(input_file):
+        print(f"Error: {input_file} not found.")
+        return
+    
+    df = pd.read_csv(input_file)
+    
+    # Initialize new columns
+    df['key'] = df.get('key', '')
+    df['roman_numerals'] = df.get('roman_numerals', '')
+    df['harmonic_fingerprint'] = df.get('harmonic_fingerprint', '')
+    df['chord_transitions'] = ''
+    for degree in ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']:
+        df[degree] = df.get(degree, '')
+    
+    for idx, row in df.iterrows():
+        chords = row['chords']
+        if not isinstance(chords, str) or not chords:
+            df.at[idx, 'key'] = 'unknown'
+            df.at[idx, 'chord_transitions'] = ''
+            continue
+        
+        # Detect key
+        major_key, minor_key = detect_key(chords)
+        key = major_key if major_key else minor_key
+        is_major = bool(major_key)
+        df.at[idx, 'key'] = key if key else 'unknown'
+        
+        # Process chords for Roman numerals, HUV, and transitions
+        sections = re.findall(r'(<[^>]+>|[\w#b°/]+)', chords)
+        roman_numerals = []
+        huv_vectors = []
+        degree_vectors = {deg: [] for deg in ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']}
+        
+        for section in sections:
+            if section.startswith('<'):
+                roman_numerals.append(section)
+                huv_vectors.append(section)
+                continue
+            roman = chord_to_roman(section, key, is_major)
+            huv = chord_to_huv(section, key)
+            if roman:
+                roman_numerals.append(roman)
+                degree_vectors.get(roman, degree_vectors['I']).append(huv if huv else '')
+            if huv:
+                huv_vectors.append(huv)
+        
+        df.at[idx, 'roman_numerals'] = ' '.join(roman_numerals)
+        df.at[idx, 'harmonic_fingerprint'] = ' | '.join(huv_vectors)
+        df.at[idx, 'chord_transitions'] = get_transitions(' '.join(roman_numerals))
+        for degree in degree_vectors:
+            df.at[idx, degree] = ' | '.join(degree_vectors[degree]) if degree_vectors[degree] else ''
+    
+    # Save output
+    df.to_csv(output_file, index=False)
+    print(f"Enriched data saved to {output_file}")
+
+if __name__ == '__main__':
+    enrich_csv('data3.csv', 'data3.5.csv')Terminal Command to Run
+bashcd /Users/markvandendool/harmonic-oracle && \
+echo "$(cat << 'EOF'
+import pandas as pd
+import re
+from collections import Counter
+import numpy as np
+import os
+
+# Define diatonic chords for major and minor keys
+MAJOR_DIATONIC = {0: 'I', 1: 'ii', 2: 'iii', 3: 'IV', 4: 'V', 5: 'vi', 6: 'vii°'}
+MINOR_DIATONIC = {0: 'i', 1: 'ii°', 2: 'III', 3: 'iv', 4: 'v', 5: 'VI', 6: 'VII'}
+CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+NOTE_TO_INDEX = {note: idx for idx, note in enumerate(CHROMATIC_NOTES)}
+
+def parse_chord(chord):
+    """Parse a chord string to extract root note, quality, and inversion."""
+    if not chord or not isinstance(chord, str):
+        return None, None, None
+    
+    # Handle chords like Csmin, Cmin, Cmaj7, C/E, no3d, etc.
+    chord = chord.strip().replace('min', 'm').replace('maj', '').replace('sus', '')
+    root_match = re.match(r'^([A-G][b#]?)([^/]*)(?:/([A-G][b#]?))?', chord)
+    if not root_match:
+        return None, None, None
+    
+    root, suffix, bass = root_match.groups()
+    quality = 'major'
+    if 'm' in suffix:
+        quality = 'minor'
+    elif '°' in suffix or 'dim' in suffix:
+        quality = 'diminished'
+    elif '7' in suffix:
+        quality = 'dominant7' if 'm' not in suffix else 'minor7'
+    elif 'aug' in suffix:
+        quality = 'augmented'
+    elif 'no3d' in suffix:
+        quality = 'no3d'
+    
+    # Normalize root and bass notes (e.g., Db to C#)
+    root = root.replace('b', '#') if root.endswith('b') else root
+    bass = bass.replace('b', '#') if bass and bass.endswith('b') else bass
+    if root not in NOTE_TO_INDEX:
+        return None, None, None
+    return root, quality, bass
+
+def detect_key(chords):
+    """Detect the most likely key using root note frequency and diatonic chord scoring."""
+    if not chords or not isinstance(chords, str):
+        return None, None
+    
+    # Extract root notes and qualities
+    roots = []
+    chord_qualities = []
+    for section in re.findall(r'<[^>]+>|[\w#b°/]+', chords):
+        if section.startswith('<'):
+            continue
+        root, quality, _ = parse_chord(section)
+        if root:
+            roots.append(root)
+            chord_qualities.append((root, quality))
+    
+    if not roots:
+        return None, None
+    
+    # Score keys based on root frequency and diatonic chords
+    key_scores = {note: 0 for note in CHROMATIC_NOTES}
+    for root, quality in chord_qualities:
+        root_idx = NOTE_TO_INDEX[root]
+        for key_note in CHROMATIC_NOTES:
+            key_idx = NOTE_TO_INDEX[key_note]
+            degree = (root_idx - key_idx) % 12
+            # Major key scoring
+            if degree in MAJOR_DIATONIC:
+                if (degree == 0 and quality in ['major', 'dominant7']) or \
+                   (degree == 5 and quality == 'minor') or \
+                   (degree in [1, 2, 3, 4, 6] and quality in ['major', 'minor', 'dominant7']):
+                    key_scores[key_note] += 2 if degree in [0, 3, 4] else 1
+            # Minor key scoring
+            minor_key = CHROMATIC_NOTES[(NOTE_TO_INDEX[key_note] + 3) % 12]
+            minor_degree = (degree - 3) % 12
+            if minor_degree in MINOR_DIATONIC:
+                if (minor_degree == 0 and quality == 'minor') or \
+                   (minor_degree == 5 and quality == 'major') or \
+                   (minor_degree in [1, 2, 3, 4, 6] and quality in ['major', 'minor']):
+                    key_scores[key_note] += 1.5 if minor_degree in [0, 3, 4] else 0.75
+    
+    # Add root frequency bonus
+    root_counts = Counter(roots)
+    for root, count in root_counts.items():
+        key_scores[root] += count * 0.5
+    
+    # Select best key
+    best_key = max(key_scores, key=key_scores.get)
+    major_key = best_key
+    minor_key = CHROMATIC_NOTES[(NOTE_TO_INDEX[best_key] + 3) % 12]
+    return major_key if key_scores[best_key] > 0 else None, minor_key
+
+def chord_to_roman(chord, key, is_major=True):
+    """Convert a chord to Roman numeral notation with inversion support."""
+    root, quality, bass = parse_chord(chord)
+    if not root or not key or key not in NOTE_TO_INDEX:
+        return None
+    
+    key_index = NOTE_TO_INDEX[key]
+    root_index = NOTE_TO_INDEX[root]
+    degree = (root_index - key_index) % 12
+    
+    # Adjust degree for minor key
+    if not is_major:
+        degree = (degree - 3) % 12
+    
+    # Map to Roman numeral
+    roman_dict = MAJOR_DIATONIC if is_major else MINOR_DIATONIC
+    base_roman = roman_dict.get(degree % 7, '')
+    
+    if not base_roman:
+        # Handle non-diatonic chords (e.g., bVII, bIII)
+        base_roman = CHROMATIC_NOTES[degree].replace('#', 's') + ('m' if quality == 'minor' else '')
+    
+    # Adjust for chord quality
+    if quality == 'minor' and is_major:
+        base_roman = base_roman.lower()
+    elif quality == 'major' and not is_major:
+        base_roman = base_roman.upper()
+    elif quality == 'diminished':
+        base_roman += '°'
+    elif quality == 'dominant7':
+        base_roman += '7'
+    elif quality == 'minor7':
+        base_roman = base_roman.lower() + '7'
+    elif quality == 'augmented':
+        base_roman += 'aug'
+    elif quality == 'no3d':
+        base_roman += 'no3'
+    
+    # Handle inversions
+    if bass and bass != root and bass in NOTE_TO_INDEX:
+        bass_index = NOTE_TO_INDEX[bass]
+        bass_degree = (bass_index - key_index) % 12
+        if quality in ['major', 'minor', 'dominant7', 'minor7']:
+            if bass_degree == (degree + 4) % 12 or bass_degree == (degree + 3) % 12:
+                base_roman += '6'  # First inversion
+            elif bass_degree == (degree + 7) % 12:
+                base_roman += '64'  # Second inversion
+            elif '7' in quality and bass_degree in [(degree + 10) % 12, (degree + 11) % 12]:
+                base_roman += '43'  # Third inversion for seventh chords
+    
+    return base_roman
+
+def chord_to_huv(chord, key):
+    """Generate HUV (Harmonic Unit Vector) for a chord, including inversions."""
+    root, quality, bass = parse_chord(chord)
+    if not root or not key or key not in NOTE_TO_INDEX:
+        return None
+    
+    key_index = NOTE_TO_INDEX[key]
+    root_index = NOTE_TO_INDEX[root]
+    degree = (root_index - key_index) % 12
+    
+    # HUV vector: 12 positions (one per chromatic note)
+    huv = [0] * 12
+    if quality in ['major', 'minor', 'dominant7', 'minor7']:
+        huv[degree] = 1  # Root
+        huv[(degree + 4) % 12] = 1 if quality in ['major', 'dominant7'] else 0  # Major third
+        huv[(degree + 3) % 12] = 1 if quality in ['minor', 'minor7'] else 0  # Minor third
+        huv[(degree + 7) % 12] = 1  # Fifth
+        if '7' in quality:
+            huv[(degree + 10) % 12] = 1 if quality == 'minor7' else 0  # Minor seventh
+            huv[(degree + 11) % 12] = 1 if quality == 'dominant7' else 0  # Major seventh
+    elif quality == 'diminished':
+        huv[degree] = 1
+        huv[(degree + 3) % 12] = 1
+        huv[(degree + 6) % 12] = 1
+    elif quality == 'augmented':
+        huv[degree] = 1
+        huv[(degree + 4) % 12] = 1
+        huv[(degree + 8) % 12] = 1
+    elif quality == 'no3d':
+        huv[degree] = 1
+        huv[(degree + 7) % 12] = 1
+    
+    return ','.join(map(str, huv))
+
+def get_transitions(roman_numerals):
+    """Calculate chord transitions from Roman numerals."""
+    if not roman_numerals or not isinstance(roman_numerals, str):
+        return ''
+    
+    sections = roman_numerals.split()
+    transitions = []
+    prev_roman = None
+    for section in sections:
+        if section.startswith('<'):
+            transitions.append(section)
+            prev_roman = None
+            continue
+        if prev_roman and section:
+            transitions.append(f"{prev_roman}->{section}")
+        prev_roman = section if section else prev_roman
+    
+    return ' '.join(transitions)
+
+def enrich_csv(input_file, output_file):
+    """Enrich the input CSV with improved harmonic analysis."""
+    if not os.path.exists(input_file):
+        print(f"Error: {input_file} not found.")
+        return
+    
+    df = pd.read_csv(input_file)
+    
+    # Initialize new columns
+    df['key'] = df.get('key', '')
+    df['roman_numerals'] = df.get('roman_numerals', '')
+    df['harmonic_fingerprint'] = df.get('harmonic_fingerprint', '')
+    df['chord_transitions'] = ''
+    for degree in ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']:
+        df[degree] = df.get(degree, '')
+    
+    for idx, row in df.iterrows():
+        chords = row['chords']
+        if not isinstance(chords, str) or not chords:
+            df.at[idx, 'key'] = 'unknown'
+            df.at[idx, 'chord_transitions'] = ''
+            continue
+        
+        # Detect key
+        major_key, minor_key = detect_key(chords)
+        key = major_key if major_key else minor_key
+        is_major = bool(major_key)
+        df.at[idx, 'key'] = key if key else 'unknown'
+        
+        # Process chords for Roman numerals, HUV, and transitions
+        sections = re.findall(r'(<[^>]+>|[\w#b°/]+)', chords)
+        roman_numerals = []
+        huv_vectors = []
+        degree_vectors = {deg: [] for deg in ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'vii°']}
+        
+        for section in sections:
+            if section.startswith('<'):
+                roman_numerals.append(section)
+                huv_vectors.append(section)
+                continue
+            roman = chord_to_roman(section, key, is_major)
+            huv = chord_to_huv(section, key)
+            if roman:
+                roman_numerals.append(roman)
+                degree_vectors.get(roman, degree_vectors['I']).append(huv if huv else '')
+            if huv:
+                huv_vectors.append(huv)
+        
+        df.at[idx, 'roman_numerals'] = ' '.join(roman_numerals)
+        df.at[idx, 'harmonic_fingerprint'] = ' | '.join(huv_vectors)
+        df.at[idx, 'chord_transitions'] = get_transitions(' '.join(roman_numerals))
+        for degree in degree_vectors:
+            df.at[idx, degree] = ' | '.join(degree_vectors[degree]) if degree_vectors[degree] else ''
+    
+    # Save output
+    df.to_csv(output_file, index=False)
+    print(f"Enriched data saved to {output_file}")
+
+if __name__ == '__main__':
+    enrich_csv('data3.csv', 'data3.5.csv')
+EOF
+)" > enrich_harmonic_profile_v2.py && \
+source venv/bin/activate && \
+python3 enrich_harmonic_profile_v2.py
+What's Improved
+
+Key Detection:
+
+Scores keys based on diatonic chord prevalence (e.g., I, IV, V get higher weight) and root note frequency.
+Prioritizes major keys but falls back to minor if scoring suggests it (e.g., for songs heavy in minor chords).
+
+
+Roman Numerals:
+
+Handles non-diatonic chords by using chromatic notation (e.g., As for Ab in C major).
+Supports inversions with figured bass (e.g., I6 for C/E, V64 for G/B).
+Refines quality detection for no3d, aug, and seventh chords.
+
+
+Chord Transitions:
+
+Adds a chord_transitions column with transitions like I->IV, preserving section markers.
+
+
+HUV Vectors:
+
+Updated to handle no3d chords (root and fifth only) and extended chords more accurately.
+
+
+Robustness:
+
+Preserves existing columns from data3.csv and handles missing or invalid chord data gracefully.

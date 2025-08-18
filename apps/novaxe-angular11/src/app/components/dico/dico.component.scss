@@ -1,0 +1,51 @@
+#dico{
+  
+  .name{
+
+  }
+  .symbol{
+
+  }
+  .type{
+
+  }
+  .interv{
+
+  }
+  .note{
+
+  }
+
+  .main_col{
+    overflow-y: auto;
+    max-height: 88vh;
+    padding-bottom: 80%;
+  }
+
+  a .fas{color: #fff;}
+  .fas{cursor: pointer; color: #fff;}
+  .fas:hover, .fa-piano:hover, a .fas:hover{color: var(--green_nvx);fill: var(--green_nvx);}
+  .fa-piano{width:16px; height:16px; margin: 6px; fill:white; cursor: pointer;}
+}
+
+.selected{
+  color:var(--yellow_nvx);
+}
+
+.card{
+  background-color: transparent;
+  padding:5px;
+  border-left:none;
+}
+.card .type{margin-bottom: 30px;}
+
+.under-piano{
+  flex-direction: column;
+  .row{flex-direction: row; flex-wrap: nowrap; margin: 0;}
+  .title{width:40%;}
+  .content{width:60%; margin-right: 15px; display:flex; justify-content:space-evenly;}
+}
+
+.nav-tabs {
+  border: none;
+}

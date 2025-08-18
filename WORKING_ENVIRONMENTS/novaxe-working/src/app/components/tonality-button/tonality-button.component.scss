@@ -1,0 +1,221 @@
+@font-face {
+    // font-family: 'music-font';
+    // src: url("../../../assets/font/Chord_Grid_v2.otf") format("opentype");
+     font-family: "nvxChord";
+  src: url("../../../assets/font/nvxFont.otf");
+}
+
+section#tonality-btn{
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+section#tonality-btn .back-circle{fill: #b4b4b4;stroke: black;stroke-width: 8px;}
+section#tonality-btn .back-circle-maj{fill: #cccccc;stroke: black;stroke-width: 5px;}
+section#tonality-btn .back-circle-min{fill: #dedede;stroke: black;stroke-width: 4px;}
+section#tonality-btn .back-circle-dim{fill: #ebebeb;stroke: black;stroke-width: 3px;}
+
+section#tonality-btn .tona-buttons{
+    position: absolute;
+    height: 20px;
+    width: 20px;
+}
+
+section#tonality-btn .main-button{
+    background-color: #ffffff85;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    border-radius: 100px;
+    justify-content: center;
+    align-items: center;
+    font-size: 3em;
+    z-index: 9999;
+    filter: drop-shadow(0px 20px 10px #000);
+    -webkit-filter: drop-shadow(0px 20px 10px #000);
+    opacity: 1;
+    cursor: pointer;
+    border: 2px solid;
+    font: inherit;
+    line-height: 1;
+    margin: 0.5em;
+    position:relative;
+    // transform: translate(-100px, 0px);
+}
+section#tonality-btn .main-button .mode{
+    position:absolute;
+    bottom: 10px;
+    font-size: 10px;
+    margin:auto;
+    color:var(--blue_nvx);
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+section#tonality-btn .main-button:hover, section#tonality-btn .main-button.bg-opacity{background-color: #ffffff;transform: translate(-102px, -121px);}
+
+section#tonality-btn .main-button.pulse:active, 
+section#tonality-btn .main-button.pulse:focus {
+  animation: pulse 0.25s;
+  box-shadow: 0 0 0 2em rgba(#fff,0);
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 var(--active); }
+}
+
+$colors: (
+  pulse: #ffffff, 
+);
+
+@each $button, $color in $colors {
+  .#{$button} {
+    --color: #{$color};
+    --active: #{adjust-hue($color, 45deg)};
+  }
+}
+section#tonality-btn .main-button {  
+  color: var(--color);
+  transition: 0.2s;
+  
+  &:active,
+  &:focus { 
+    border-color: var(--active);
+    color: #fff;
+  }
+}
+
+section#tonality-btn .c-obj{position:absolute;}
+
+section#tonality-btn .centerText{
+    // font-size: 0.7vw;
+  position: relative;
+  width: 30%;
+  left: 49%;
+  top: 37%;
+}
+
+section#tonality-btn #major, section#tonality-btn #minor{cursor: pointer;}
+section#tonality-btn #roman, section#tonality-btn #dim{cursor: default;}
+
+section#tonality-btn .active-tonality{fill: #0023ff;stroke: #0023ff;}
+
+////////// HIGHLIGHT DIFFERENT ACTIVE CHORDS 
+section#tonality-btn .dot.active-chord{
+    fill: var(--lightblue_nvx);
+    filter: drop-shadow(2px 4px 3px #0023ff) blur(6px) brightness(1.2);
+    -webkit-filter: drop-shadow(2px 4px 3px #0023ff) blur(6px) brightness(1.2);
+    stroke: #354ad2;
+    stroke-width: 10px;
+}
+section#tonality-btn .dot.active-midi-chord{
+    fill: var(--yellow_nvx);
+    filter: drop-shadow(2px 4px 3px #adab28) blur(6px) brightness(1.2);
+    -webkit-filter: drop-shadow(2px 4px 3px #adab28) blur(6px) brightness(1.2);
+    stroke: #adab28;
+    stroke-width: 10px;
+
+}
+section#tonality-btn .dot.active-chord.active-midi-chord{
+    fill: var(--yellow_nvx);
+    filter: drop-shadow(2px 4px 6px #ffb200) blur(2px) brightness(1);
+    -webkit-filter: drop-shadow(2px 4px 6px #ffb200) blur(2px) brightness(1);
+    stroke: #ffe100;
+    stroke-width: 10px;
+
+} 
+
+section#tonality-btn .diminished.active-chord.active-midi-chord,
+section#tonality-btn .diminished.active-midi-chord,
+section#tonality-btn .diminished.active-chord
+{
+    stroke-width: 11px;
+}   
+
+section#tonality-btn .roman.active-chord.active-midi-chord,
+section#tonality-btn .roman.active-midi-chord,
+section#tonality-btn .roman.active-chord
+{
+    stroke-width: 8px;
+}   
+
+section#tonality-btn{
+    font-family:"nvxChord";
+    font-feature-settings:normal;
+    font-variant-caps:normal;
+    font-variant-ligatures:normal;
+    font-variant-numeric:normal;
+    letter-spacing:0px;
+    line-height:0%;
+    stroke-width:1px;
+    word-spacing:0px;
+}
+section#tonality-btn .diminished{font-size:35px;}
+section#tonality-btn .diminished.double{font-size:25px;}
+section#tonality-btn .roman{font-size:25px;}
+section#tonality-btn .fifths{font-size:50px;}
+section#tonality-btn .fifths-m.double{transform: scale(0.75) translate(42px, 180px);}
+section#tonality-btn .fifths-m{font-size:40px;line-height:1.25;}
+
+section#tonality-btn .tonality-letter{
+    font-size: 35px;
+    font-family: "nvxChord";
+    line-height: 1.2em;
+    color: var(--blue_nvx);
+    display: flex;
+    padding-top: 5px;
+}
+
+section#tonality-btn .tonality-letter::selection{background-color: transparent !important;}
+
+section#tonality-btn .fas{
+    font-size: 15px;
+    vertical-align: super;
+}
+
+section#tonality-btn .slices{transform: scale(7.85) translate(-65.5px, -102px);}
+section#tonality-btn .slices .cut{
+    fill:none;
+    stroke:#000000;
+    stroke-width:0.16500001;
+    stroke-linecap:butt;
+    stroke-linejoin:miter;
+    stroke-miterlimit:4;
+    stroke-dasharray:none;
+    stroke-opacity:1;
+}
+
+section#tonality-btn .selection_background{
+    opacity: 0;
+    paint-order:markers fill stroke;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+    stroke-width:3;
+    stroke-opacity: 0.8;
+
+    &.active{
+        fill:var(--green_nvx);
+        stroke:var(--green_nvx);
+        opacity: 0.85;
+        filter: drop-shadow(0px 0px 6px var(--green_nvx));
+        -webkit-filter: drop-shadow(0px 0px 6px var(--green_nvx));
+    }
+    &.side-active{
+        fill:var(--green_nvx);
+        stroke:var(--green_nvx);
+        opacity: 0.65;
+        filter: drop-shadow(0px 0px 6px var(--green_nvx));
+        -webkit-filter: drop-shadow(0px 0px 6px var(--green_nvx));
+    }
+}
+
+section#tonality-btn .dot {
+    fill: transparent;
+    transform: translate(18px, -19px);
+    stroke: none;
+}
+section#tonality-btn .dot.d {
+    transform: translate(15px, -11px);
+}

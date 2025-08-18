@@ -87,18 +87,19 @@ Located in `credentials/` folder:
 
 ### 🔥 IMMEDIATE (15 minutes)
 1. `UNBREAKABLE_RULES/README.md` - Core protocols
-2. `systems-overview/FORENSIC_REPOSITORY_ANALYSIS.md` - Current state
-3. `reports/evening-reports/EVENING_REPORT_[latest].md` - Recent status
+2. `systems-overview/CoPilot System Map Summary.txt` - **MANDATORY** Complete architectural guide (830 lines)
+3. `systems-overview/FORENSIC_REPOSITORY_ANALYSIS.md` - Current state
+4. `reports/evening-reports/EVENING_REPORT_[latest].md` - Recent status
 
 ### 📖 CONTEXT (30 minutes)  
-4. `timeline-logs/ChronoLOG.md` - Complete project history
-5. `credentials/SUPABASE_SETUP_INSTRUCTIONS.md` - Database setup
-6. `systems-overview/ENTERPRISE_RESTRUCTURE_PLAN.md` - Architecture plan
+5. `timeline-logs/ChronoLOG.md` - Complete project history
+6. `credentials/SUPABASE_SETUP_INSTRUCTIONS.md` - Database setup
+7. `systems-overview/ENTERPRISE_RESTRUCTURE_PLAN.md` - Architecture plan
 
 ### 🔍 DEEP DIVE (As needed)
-7. `Angular Documentation OFFICIAL/` - Version-specific docs
-8. `agent-handoffs/` - Previous agent transition notes
-9. `reports/` - Full daily report history
+8. `Angular Documentation OFFICIAL/` - Version-specific docs
+9. `agent-handoffs/` - Previous agent transition notes
+10. `reports/` - Full daily report history
 
 ---
 

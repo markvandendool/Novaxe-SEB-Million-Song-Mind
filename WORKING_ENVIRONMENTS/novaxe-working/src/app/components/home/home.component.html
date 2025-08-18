@@ -1,0 +1,14 @@
+<div class="container mt-5">
+  <div class="jumbotron">
+    <h1 class="display-4">Novaxe Oracle</h1>
+    <p class="lead">Unified “Score Information” and MillionSongMind (MSM) analysis.</p>
+    <hr class="my-4">
+    <p>Quick links:</p>
+    <p class="mb-2">
+      <a class="btn btn-primary btn-lg mr-2" [routerLink]="['/score/new_score']" role="button">New Score</a>
+      <a class="btn btn-outline-success btn-lg mr-2" [routerLink]="['/stats', 'demo']" role="button">Score Information (Demo)</a>
+      <a class="btn btn-outline-info btn-lg mr-2" href="#" (click)="openMSMLanding()" role="button">Open MSM</a>
+    </p>
+  </div>
+  <app-browse [page]="'home'"></app-browse>
+</div>

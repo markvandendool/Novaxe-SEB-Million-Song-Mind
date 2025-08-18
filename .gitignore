@@ -35,3 +35,10 @@ documents/logs/
 chat-capture*.log
 *.log
 .vercel
+
+# Sensitive/Large Files
+Onboarding/
+*.csv
+*macpro_chordonomicon*
+Top\ 20\ Macros.txt
+*access*token*

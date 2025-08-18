@@ -1,0 +1,54 @@
+{
+  "name": "novaxe-oracle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Enterprise-grade musical software ecosystem combining Novaxe SEB and Million Song Mind",
+  "author": "Mark van den Dool",
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@9.6.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "stability-check": "./scripts/phase-0.5-stability-check.sh",
+    "preintegration": "npm run stability-check",
+    "build:novaxe": "cd novaxe-angular11 && npm i && npm run build",
+    "serve:novaxe": "cd novaxe-angular11 && npm run start",
+    "build:msm": "cd million-song-mind && npm i && npm run build",
+    "serve:msm": "cd million-song-mind && npm run dev",
+    "build:all": "npm run build:novaxe && npm run build:msm",
+    "serve:all": "concurrently \"npm run serve:novaxe\" \"npm run serve:msm\"",
+    "test:novaxe": "cd novaxe-angular11 && npm test",
+    "test:msm": "cd million-song-mind && npm test",
+    "test:shared": "cd packages/shared && npm test || echo 'Shared tests not configured yet'",
+    "test:all": "node scripts/test-all.js",
+    "lint:novaxe": "cd apps/novaxe && npm run lint",
+    "lint:msm": "cd apps/msm && npm run lint",
+    "lint": "npm run lint:novaxe && npm run lint:msm",
+    "format:check": "prettier --check '**/*.{ts,tsx,js,jsx,json,md}'",
+    "format": "prettier --write '**/*.{ts,tsx,js,jsx,json,md}'",
+    "smoke": "node scripts/smoke-check.js",
+    "analyze:bundle": "node scripts/analyze-bundle.js",
+    "test:integration": "node scripts/test-integration.js",
+    "test:performance": "node scripts/test-performance.js",
+    "clean": "rm -rf apps/novaxe/node_modules apps/msm/node_modules packages/*/node_modules",
+    "reset": "npm run clean && npm i",
+    "install:all": "cd apps/novaxe && npm install --legacy-peer-deps && cd ../msm && npm install",
+    "tag:snapshot": "git tag pre-phase1-$(date +%Y%m%d_%H%M%S) && git push --tags",
+    "ux:setup": "npx playwright install --with-deps",
+    "ux:test": "playwright test",
+    "ux:report": "playwright test --reporter=html",
+    "ux:open-report": "npx playwright show-report"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "@types/node": "^20.11.0",
+    "prettier": "^3.3.3",
+    "@playwright/test": "^1.46.1"
+  },
+  "engines": {
+    "node": ">=18.19.0",
+    "npm": ">=10.0.0"
+  }
+}

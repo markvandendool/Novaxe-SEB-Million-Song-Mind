@@ -1,0 +1,140 @@
+        this.part = {
+              id: "136",
+              song_id: "54",
+              number: "0",
+              title: "wait for the moment",
+              chords: `K:C
+    |C    E7    | Am    *    Gm    C7    * |F    Em    |D7    Gsus4    |
+    |C    E7    | Am    *    Gm    C7    * |F    Em    |D7    Gsus4    | 
+    `,
+              analysis: "  ",
+              abc:`%%stretchlast .7
+    %%staffsep       70
+    %%gchordfont  music-font 17
+    %%annotationfont   music-font 17
+    K:C
+    |"C" x "E7" x | "Am" x  x "Gm" x "C7" x  |"F" x "Em" x |"D7" x "Gsus4" x |
+    |"C" x "E7" x | "Am" x  x "Gm" x "C7" x  |"F" x "Em" x |"D7" x "Gsus4" x | 
+    `
+    }
+
+
+
+this.part = {
+              id: "136",
+              song_id: "54",
+              number: "0",
+              title: "folsom",
+              chords: `K:C
+|F  |F  |F  |F  |
+|Bb  |Bb  |F  |F  |
+|C  |C  |F  |F  |
+ 
+`,
+              analysis: "  ",
+              abc:`%%stretchlast .7
+%%staffsep       70
+%%gchordfont  music-font 17
+%%annotationfont   music-font 17
+K:C
+|"F" x |"F" x |"F" x |"F" x |
+|"Bb" x |"Bb" x |"F" x |"F" x |
+|"C" x |"C" x |"F" x |"F" x |
+`
+    }
+
+
+    this.part = {
+                  id: "136",
+                  song_id: "54",
+                  number: "0",
+                  title: "Hard Times",
+                  chords: `K:Eb
+    V:0 cleff=bass
+    |Eb *E,5  Ab A,,2|G *G,,5   D,2|Cm *C,4  Cm/B *=B,,4  |Eb/Bb *_B,,5  Eb/G *G,,2 |
+    |Ab *A,,4 Ao *=A,,4  |Eb/Bb *B,,4  Cm *C,4 |Cm/B *=B,,4    Bb:#5 *_B,,4  | Eb *E,4  Bb:#5 *B,,,4 |
+    `,
+                  analysis: "  ",
+                  abc:`%%stretchlast .7
+    %%staffsep       70
+    %%gchordfont  music-font 17
+    %%annotationfont   music-font 17
+    K:Eb
+    V:0 cleff=bass
+    |"Eb" E,5 x "Ab" A,,2|"G" G,,5 x  D,2|"Cm" C,4 x "Cm/B" =B,,4 x |"Eb/Bb" _B,,5 x "Eb/G" G,,2 |
+    |"Ab" A,,4 "Ao" =A,,4 x |"Eb/Bb" B,,4 x "Cm" C,4 |"Cm/B" =B,,4 x  x "Bb:#5" _B,,4 x | "Eb" E,4 x "Bb:#5" B,,,4 |
+    `
+        }
+
+
+||:B  | B  | F#m  |B  |
+|B  | B  | F#m  |B  |
+|B x |B:7 x | G x | B x |
+|B x |B:7 x | G x | B x |
+|B  | G#m  |G#m  | D#m  |D#m  |
+|G#m  |B  |F#m  | E    Eb  B  :||
+
+
+
+fat bot
+%%stretchlast .7
+K:A
+P:Intro
+| "D" "_I" x | "C" "_VIIb" x "G" "_IV" x | 
+| "D" "_I" x | "C" "_VIIb" x "A" "_V" x | 
+| "D" "_I" x | "G" "_IV" x | "D" "_I" x "A" "_V" x | "D" "_I" x | 
+P:Verse
+| "D" "_I" x | "D" "_I" x | "D" "_I" x | "A" "_V" x | 
+| "D" "_I" x | "G" "_IV" x | "D" "_I" x "A" "_V" x | "D" "_I" x "G" "_IV" x "F" "_IIIb" x | "D" "_I" x | 
+P:Chorus
+| "D" "_I" x | "C" "_VIIb" x "G/B" "_IV" x | 
+| "D" "_I" x | "C" "_VIIb" x "A" "_V" x | 
+| "D" "_I" x | "G" "_IV" x | "D" "_I" x "A" "_V" x | "D" "_I" x | 
+
+
+allDeead
+%%stretchlast .7
+P:Part 1
+| "Dm" x "A" x "Dm" x "Dm" x | 
+| "Dm" x "A" x "Dm" x "Dm" x | 
+| "Dm" x "C" x "F" x "F" x | 
+| "Gm" x "A" x "Dm" x "Dm" x | 
+P:Part 2
+| "C" x "F" x "Gm" x "F" x | 
+| "F" x "Bb" x "Bb" x "F" x | 
+| "F" x "C/E" x "Dm" x "C" x | 
+| "Bb" x "Bb/C" x "Bb/D" x "C/E" x | 
+| "F" x "Gm" x "F/A" x "F" x | 
+| "Bb" x "F" x | 
+| "F" x "A:7" x "Dm"  x | 
+| "Bb" x "F" x | 
+
+
+march
+%%stretchlast .7
+P:Couplet
+| "F#:7" x | "B" x | 
+| "F#:7" x | "B" x | 
+| "F#:7" x | "B" x | 
+| "F#:7" x | 
+P:Refrain
+| "Em" x | "B/D#" x | "C#:7" x | "C#m" x | "B" x | 
+
+
+%%stretchlast .7
+%%staffsep       70
+%%gchordfont  music-font 17
+%%annotationfont   music-font 17
+T:Pink cigarette  
+A:Mr.Bungles
+P:Verse Chorus Verse 
+Z:Laloutre
+P:Verse
+||:"B" x | "B" x | "F#m" x |"B" x |
+|"B" x | "B" x | "F#m" x |"B" x :||
+P:Verse:
+||:"B" x |"B:7" x | "G" x | "B" x |
+|"B" x |"B:7" x | "G" x | "B" x :||
+P:Chorus
+||:"B" x | "G#m" x |"G#m" x | "D#m" x |"D#m" x |
+|"G#m" x |"B" x |"F#m" x | "E" x  x "Eb" x "B" x :||

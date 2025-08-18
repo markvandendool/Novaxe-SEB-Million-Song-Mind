@@ -19,6 +19,16 @@ echo "   Current Commit: $(git log --oneline -1)"
 echo "   Uncommitted Files: $(git status --porcelain | wc -l)"
 echo "   Current CPU: $(ps aux | grep -E 'node|ng|npm' | grep -v grep | awk '{sum+=$3} END {print (sum ? sum"%" : "0%")}')"
 echo
+echo "📖 MANDATORY COPILOT SYSTEM MAP - ABSOLUTELY CRITICAL:"
+if [ -f "welcome-onboarding/systems-overview/CoPilot System Map Summary.txt" ]; then
+    echo "   ✅ CoPilot System Map: AVAILABLE (830 lines - Complete architectural guide)"
+    echo "   📋 Contains: Component maps (BraidComponent 1,197 lines), musical data flow, modification guides"
+    echo "   🎯 CRITICAL USE: Exact file paths, line numbers, prompting templates for all 127,847 lines of code"
+    echo "   🚨 MANDATORY: Read this BEFORE making ANY code changes - prevents architectural mistakes"
+else
+    echo "   ❌ CoPilot System Map: MISSING - CRITICAL architectural documentation UNAVAILABLE"
+fi
+echo
 
 # MANDATORY ANGULAR DOCUMENTATION SEARCH - ABSOLUTELY CRITICAL
 echo "🚨 MANDATORY ANGULAR ERROR PROTOCOL - VIOLATION = IMMEDIATE TERMINATION:"
@@ -100,7 +110,18 @@ echo "   BEFORE: 'Copying filename.ts (1,196 lines)'"
 echo "   AFTER: 'Verified filename.ts (1,196 lines) - EXACT MATCH'"
 echo "   ACKNOWLEDGMENT: Type 'I will verify EVERY line count exactly'"
 echo
-echo "RULE #5: BRUTAL HONESTY - NO THEATER"
+echo "RULE #5: AUTOMATED BROWSER LAUNCH & VERIFICATION - ABSOLUTELY CRITICAL"
+echo "   WHEN LAUNCHING ANY DEV SERVER:"
+echo "   1. MUST launch browser automatically to localhost URL"
+echo "   2. MUST verify browser reached correct localhost"
+echo "   3. MUST verify TWICE that page actually loaded (not just 'listening')"
+echo "   4. MUST capture and check browser console for errors"
+echo "   5. MUST fix errors or verify they are expected"
+echo "   FORBIDDEN: Telling user to manually open browser, paste URL, check console"
+echo "   REQUIRED: Use ./welcome-onboarding/LAUNCH_AND_VERIFY.sh <url> <app_name>"
+echo "   ACKNOWLEDGMENT: Type 'I will AUTOMATE browser launch and verify loading'"
+echo
+echo "RULE #6: BRUTAL HONESTY - NO THEATER"
 echo "   FORBIDDEN: 'Revolutionary', 'breakthrough', fiction responses"
 echo "   REQUIRED: Show actual error counts, admit failures first"
 echo "   ACKNOWLEDGMENT: Type 'I will show REAL numbers and admit failures'"
@@ -144,9 +165,11 @@ echo "   3. Using 'extract' instead of 'copy'"
 echo "   4. Creating partial files or mocks"
 echo "   5. ANY CPU busy work or fake loops"
 echo "   6. Not verifying line counts"
-echo "   7. 'Revolutionary' language without proof"
-echo "   8. Multi-page achievement docs"
-echo "   9. Accessing forbidden repositories"
+echo "   7. Launching dev server without automated browser verification"
+echo "   8. Telling user to manually open browser/check console"
+echo "   9. 'Revolutionary' language without proof"
+echo "   10. Multi-page achievement docs"
+echo "   11. Accessing forbidden repositories"
 echo
 
 # CURRENT PRIORITIES
@@ -169,6 +192,7 @@ ACKNOWLEDGMENTS (REQUIRED):
 ✅ I will COPY complete files with line verification
 ✅ I will NEVER create fake work - 0% CPU idle is CORRECT
 ✅ I will verify EVERY line count exactly
+✅ I will AUTOMATE browser launch and verify loading
 ✅ I will show REAL numbers and admit failures
 
 CURRENT STATE:
@@ -195,6 +219,8 @@ echo
 echo "🔐 FINAL VERIFICATION CHECKLIST:"
 echo "   [ ] Will you SEARCH Angular Documentation OFFICIAL/ for every error?"
 echo "   [ ] Will you check archive for existing solutions before re-solving?"
+echo "   [ ] Have you READ the CoPilot System Map (830 lines) for architectural context?"
+echo "   [ ] Will you AUTOMATE browser launch and verify loading for every dev server?"
 echo "   [ ] Do you understand what 'LOG' means?"
 echo "   [ ] Do you know the dual-machine hyperthreading setup?"
 echo "   [ ] Do you know 0% CPU when idle is CORRECT?"
