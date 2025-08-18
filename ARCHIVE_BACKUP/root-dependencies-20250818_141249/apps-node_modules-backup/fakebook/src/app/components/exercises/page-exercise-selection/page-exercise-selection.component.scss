@@ -1,0 +1,18 @@
+.app-page{
+	padding-top:100px;
+	max-height: 100vh;
+	overflow-y: scroll;
+}
+
+.bandeau{
+	width:100%;
+	justify-content: center;
+	// align-items: center;
+	display: flex;
+}
+.subtitle{
+	padding-left:10px;
+}
+.category-col{
+	max-width: 50%;
+}

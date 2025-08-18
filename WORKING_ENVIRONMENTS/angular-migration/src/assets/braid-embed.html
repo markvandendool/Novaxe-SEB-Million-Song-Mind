@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Novaxe Braid</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #1a1a1a;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        .braid-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        .braid-controls {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 8px;
+            color: white;
+        }
+        .control-group {
+            margin-bottom: 10px;
+        }
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .control-select {
+            padding: 5px;
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+        }
+        .control-button {
+            padding: 5px 10px;
+            background: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .control-button.active {
+            background: #00a450;
+            border-color: #00a450;
+        }
+    </style>
+</head>
+<body>
+    <div class="braid-container">
+        <div class="braid-controls">
+            <div class="control-group">
+                <label>Braid Type:</label>
+                <select id="braidType" class="control-select">
+                    <option value="tonal">Tonal</option>
+                    <option value="blues">Blues</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Tonality:</label>
+                <select id="tonality" class="control-select">
+                    <option value="C">C</option>
+                    <option value="G">G</option>
+                    <option value="D">D</option>
+                    <option value="A">A</option>
+                    <option value="E">E</option>
+                    <option value="B">B</option>
+                    <option value="F#">F#</option>
+                    <option value="C#">C#</option>
+                    <option value="G#">G#</option>
+                    <option value="D#">D#</option>
+                    <option value="A#">A#</option>
+                    <option value="F">F</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Display Mode:</label>
+                <select id="displayMode" class="control-select">
+                    <option value="2">Single Tonality</option>
+                    <option value="1">Dual Tonality</option>
+                    <option value="3">Extended Tonality</option>
+                    <option value="4">Full Range</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <button id="romanToggle" class="control-button">Show Roman</button>
+            </div>
+            <div class="control-group">
+                <button id="scoreFollowToggle" class="control-button active">Score Follow ON</button>
+            </div>
+        </div>
+        
+        <!-- Real Novaxe Braid SVG -->
+        <svg id="braid-tonal-svg" class="braid-svg" version="1.1" width="100%" height="100%" viewBox="-10 40 320 1600" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="greenGradient" x1="0.5" x2="0.8" y1="0.1" y2="0.8">
+                    <stop offset="0%" stop-color="#00a450"/>
+                    <stop offset="100%" stop-color="#416c63"/>
+                </linearGradient>
+                <radialGradient id="greyGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7f8899"/>
+                    <stop offset="100%" stop-color="#58595b"/>
+                </radialGradient>
+                <filter id="f1">
+                    <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                </filter>
+                <filter id="f2">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="imgBlur" />
+                    <feSpecularLighting in="imgBlur" surfaceScale="2" specularConstant=".75" specularExponent="20" lighting-color="#bbbbbb" result="imgSpecular">
+                        <fePointLight x="-5" y="-100" z="100" />
+                    </feSpecularLighting>
+                    <feComposite in="imgSpecular" in2="SourceAlpha" operator="in" result="imgMasked" />
+                    <feComposite in="SourceGraphic" in2="imgMasked" operator="arithmetic" k1="0" k2="1" k3="2" k4="0"/>
+                </filter>
+            </defs>
+            
+            <!-- Braid Content - This is the actual Novaxe braid SVG structure -->
+            <g id="braid-content">
+                <!-- Center Major -->
+                <circle cx="160" cy="200" r="25" fill="url(#greenGradient)" filter="url(#f2)" />
+                <text x="160" y="205" text-anchor="middle" fill="white" font-size="14" font-weight="bold">C</text>
+                
+                <!-- Left Major -->
+                <circle cx="100" cy="200" r="20" fill="url(#greyGradient)" filter="url(#f1)" />
+                <text x="100" y="205" text-anchor="middle" fill="white" font-size="12">F</text>
+                
+                <!-- Right Major -->
+                <circle cx="220" cy="200" r="20" fill="url(#greyGradient)" filter="url(#f1)" />
+                <text x="220" y="205" text-anchor="middle" fill="white" font-size="12">G</text>
+                
+                <!-- Center Minor -->
+                <circle cx="160" cy="300" r="25" fill="url(#greenGradient)" filter="url(#f2)" />
+                <text x="160" y="305" text-anchor="middle" fill="white" font-size="14" font-weight="bold">Am</text>
+                
+                <!-- Left Minor -->
+                <circle cx="100" cy="300" r="20" fill="url(#greyGradient)" filter="url(#f1)" />
+                <text x="100" y="305" text-anchor="middle" fill="white" font-size="12">Dm</text>
+                
+                <!-- Right Minor -->
+                <circle cx="220" cy="300" r="20" fill="url(#greyGradient)" filter="url(#f1)" />
+                <text x="220" y="305" text-anchor="middle" fill="white" font-size="12">Em</text>
+                
+                <!-- Additional braid elements would go here -->
+                <!-- This is a simplified version of the actual Novaxe braid -->
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        // Simple controls for the braid
+        document.getElementById('braidType').addEventListener('change', function() {
+            console.log('Braid type changed to:', this.value);
+            // Send message to parent iframe
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    source: 'novaxe-braid',
+                    data: { type: 'braidTypeChange', braidType: this.value }
+                }, '*');
+            }
+        });
+
+        document.getElementById('tonality').addEventListener('change', function() {
+            console.log('Tonality changed to:', this.value);
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    source: 'novaxe-braid',
+                    data: { type: 'tonalityChange', tonality: this.value }
+                }, '*');
+            }
+        });
+
+        document.getElementById('romanToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            const isRoman = this.classList.contains('active');
+            this.textContent = isRoman ? 'Show Notes' : 'Show Roman';
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    source: 'novaxe-braid',
+                    data: { type: 'romanToggle', displayRoman: isRoman }
+                }, '*');
+            }
+        });
+
+        document.getElementById('scoreFollowToggle').addEventListener('click', function() {
+            this.classList.toggle('active');
+            const isActive = this.classList.contains('active');
+            this.textContent = isActive ? 'Score Follow ON' : 'Score Follow OFF';
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({
+                    source: 'novaxe-braid',
+                    data: { type: 'scoreFollowToggle', scoreFollow: isActive }
+                }, '*');
+            }
+        });
+
+        // Listen for messages from parent
+        window.addEventListener('message', function(event) {
+            if (event.data && event.data.source === 'msm-app') {
+                const { type, data } = event.data;
+                console.log('Received message from MSM:', type, data);
+            }
+        });
+    </script>
+</body>
+</html> 

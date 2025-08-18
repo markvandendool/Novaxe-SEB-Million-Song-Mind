@@ -1,0 +1,27 @@
+
+<div  class="progression" *ngFor="let prog of exo.get_progressions(); let p = index">
+
+	<div class="title">Progression #{{p+1}}
+		<i class="fa fa-close" (click)="removeProgression(p)" aria-hidden="true"></i>
+	</div>
+
+	<div  class="chord" *ngFor="let chord of prog; let c = index">
+		<i class="fa fa-close" (click)="removeChord(p,c)" aria-hidden="true"></i>
+		<div>
+			<div>{{chord.fourths}}</div>
+			<div class="chord-font">{{chord.quality}}</div>
+		</div>
+	</div>
+
+	<div class="chord">
+		<i (click)="addChord(p)" class="fa fa-plus" aria-hidden="true"></i>
+		<input type="number" 	name="add_chord_fourths" id="add_fourths_{{p}}" placeholder="fourths">
+		<input type="text" 		name="add_chord_quality" id="add_quality_{{p}}" placeholder="quality">
+	</div>
+
+</div>
+
+<div (click)="addProgression()" class="chord add-progression">
+	<div>Add new progression</div>
+	<i class="fa fa-plus" aria-hidden="true"></i>
+</div>

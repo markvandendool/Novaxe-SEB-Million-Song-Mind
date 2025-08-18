@@ -1,0 +1,247 @@
+<section id="braid">
+	<div class="braid" style="width:100%;height:100%;">
+		<svg version="1.1" width="100%" viewBox="-10 50 320 1600" xmlns="http://www.w3.org/2000/svg">
+			
+			<defs>
+				<linearGradient id="greenGradient" x1="0.5" x2="0.8" y1="0.1" y2="0.8">
+					<stop offset="0%" stop-color="#00a450"/>
+					<stop offset="100%" stop-color="#416c63"/>
+				</linearGradient>
+
+				<radialGradient id="greyGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+					<stop offset="0%" stop-color="#7f8899ff"/>
+					<stop offset="100%" stop-color="#58595bff"/>
+				</radialGradient>
+
+				<linearGradient id="greenOrangeGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+					<stop offset="0%" stop-color="#979da2ff"/>
+					<stop offset="100%" stop-color="#f1ded7ff"/>
+				</linearGradient>
+
+				<filter id="f1">
+			      <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+			    </filter>
+
+				<filter id="f2">
+				    <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="imgBlur" />
+				    <feSpecularLighting in="imgBlur" surfaceScale="2" specularConstant=".75"
+				      specularExponent="20" lighting-color="#bbbbbb" result="imgSpecular">
+				     <fePointLight x="-5" y="-100" z="100" />
+				    </feSpecularLighting>
+				    <!-- Restrict the specular highlight to the object; this is necessary. -->
+				    <feComposite in="imgSpecular" in2="SourceAlpha" operator="in" result="imgMasked" />
+				    <feComposite in="SourceGraphic" in2="imgMasked"
+				      operator="arithmetic" k1="0" k2="1" k3="2" k4="0"/>
+			    </filter>
+
+
+				<!-- braid -->
+				<g id="leftCommaXL">
+					<path d="m-1.76-29.3c-.195 0-.394 0-.598.004-.199.004-.398.008-.602.0117-.199.004-.402.0117-.606.0195-.199.004-.402.0156-.606.0234-3.66.5-7.09 1.67-10.2 3.37-3.09 1.7-5.85 3.93-8.14 6.57-2.3 2.63-4.13 5.67-5.4 8.97-1.26 3.3-1.95 6.87-1.95 10.6 0 2.83.391 5.59 1.14 8.22.746 2.62 1.84 5.11 3.26 7.41 1.41 2.29 3.14 4.39 5.15 6.24 2.01 1.84 4.3 3.43 6.82 4.71-.242-.734-.453-1.48-.637-2.25-.184-.762-.336-1.54-.457-2.33-.125-.793-.215-1.6-.277-2.42s-.094-1.65-.094-2.49c0-2.36.285-4.59.852-6.68.57-2.09 1.42-4.04 2.55-5.85s2.54-3.48 4.23-5 3.66-2.9 5.9-4.13c1.73-.977 3.17-1.93 4.36-2.9 1.15-.945 2.12-2 2.9-3.21.673-.987 1.03-1.9 1.37-2.84l.133-.499c.328-1.28.473-2.69.473-4.28 0-1.75-.223-3.33-.652-4.71s-1.07-2.56-1.89-3.52c-.82-.965-1.83-1.71-3.01-2.21-1.18-.504-2.53-.766-4.03-.766"/>
+					<path style="fill:lightgrey" d="m -13.517625,26.927922 2.952426,-5.01 c 0,0 -7.08,-16.4000018 10.50000085,-25.8000018 5.21000045,-3.23 6.46000045,-6.6899982 7.24000045,-9.3099982 -1.958109,5.7598731 -7.31587592,8.2502205 -10.0486964,9.8354333 -2.164272,1.4428483 -8.1097589,4.6933824 -11.0748359,13.3365984 -1.317432,3.8403223 -1.532691,11.8092523 0.431105,16.9479683 z"/>
+				</g>
+
+				<g id="rightCommaXL">
+					<path d="m1.75 29.1h.598c.199 0 .398-.01.602-.012.199 0 .402-.012.606-.019.199 0 .402-.016.605-.023 3.66-.5 7.09-1.67 10.2-3.37s5.85-3.93 8.14-6.57c2.3-2.63 4.13-5.67 5.4-8.96 1.26-3.3 1.95-6.87 1.95-10.6 0-2.83-.391-5.59-1.14-8.22-.746-2.63-1.84-5.11-3.26-7.41-1.41-2.29-3.14-4.4-5.15-6.24s-4.3-3.43-6.82-4.71c.242.734.453 1.48.637 2.25.184.762.336 1.54.457 2.33.125.793.215 1.6.277 2.42s.094 1.65.094 2.49c0 2.36-.285 4.59-.852 6.68-.57 2.09-1.42 4.04-2.55 5.85-1.13 1.81-2.54 3.48-4.23 5s-3.66 2.9-5.9 4.13c-1.73.977-3.17 1.93-4.36 2.9-1.15.945-2.12 2-2.9 3.21-.673.987-1.03 1.9-1.37 2.84l-.133.499c-.328 1.28-.473 2.69-.473 4.28 0 1.75.223 3.33.652 4.71s1.07 2.56 1.89 3.52c.82.965 1.83 1.71 3.01 2.21 1.18.504 2.53.766 4.03.766"/>
+					<path style="fill:lightgrey" d="m 13.408077,-26.891487 -2.94843,5.012354 c 0,0 7.09308,16.3943488 -10.47942273,25.8083678 C -5.2272002,7.16339 -6.4744394,10.624385 -7.252351,13.245005 -5.2988358,7.4835723 0.05694507,4.9889523 2.7884993,3.4015597 4.9516204,1.9569847 10.894519,-1.2982911 13.852701,-9.9438691 15.16707,-13.78524 15.37597,-21.754338 13.408077,-26.891487 Z"/>
+				</g>
+
+				<g id="leftArrow">
+					<path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+					<path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+					<path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+					<path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+				</g>
+
+				<g id="leftCommaSM" style="transform: scale(1.3);">
+					<path d="m-1.23-19.5c-.13 0-.263 0-.399.003-.133.003-.266.005-.402.008-.133.003-.269.008-.404.013-.133.003-.269.0104-.404.0156-2.44.334-4.74 1.11-6.8 2.25-2.06 1.13-3.9 2.63-5.43 4.38-1.53 1.76-2.76 3.78-3.6 5.98-.842 2.2-1.3 4.58-1.3 7.05 0 1.89.261 3.73.759 5.48s1.23 3.41 2.18 4.95c.944 1.53 2.1 2.93 3.44 4.17 1.34 1.23 2.87 2.29 4.55 3.14-.162-.49-.302-.988-.425-1.5-.123-.508-.224-1.03-.305-1.56-.083-.529-.143-1.07-.185-1.61-.042-.548-.062-1.1-.062-1.66 0-1.58.19-3.07.568-4.46.381-1.4.949-2.7 1.7-3.91.756-1.21 1.7-2.32 2.83-3.34s2.44-1.94 3.94-2.76c1.15-.652 2.12-1.29 2.91-1.94.765-.631 1.41-1.34 1.94-2.14.449-.659.688-1.26.913-1.9l.089-.333c.219-.855.316-1.8.316-2.86 0-1.17-.149-2.22-.436-3.14s-.712-1.71-1.26-2.35c-.548-.644-1.22-1.14-2.01-1.47-.788-.336-1.69-.511-2.69-.511"/>
+					<path style="fill:lightgrey" d="m -8.9612787,18.056653 1.9840601,-3.34788 c 0,0 -4.8527764,-10.870406 7.19690477,-17.3133442 3.57103433,-2.213903 4.24424903,-5.014408 4.77887603,-6.8102049 -0.3742,0.374199 0.1652283,3.4645069 -6.810922,7.0995879 -1.6037118,1.0958687 -5.5618468,3.3655292 -7.4060128,8.7829612 -0.4996001,1.467637 -1.5244224,5.831796 0.2570939,11.58888 z"/>
+				</g>
+
+				<g id="rightCommaSM" style="transform: scale(1.3);">
+					<path d="m.67 19.4h.399c.133 0 .266 0 .402-.01.133 0 .269-.01.404-.013.133 0 .268-.01.404-.016 2.44-.334 4.74-1.11 6.8-2.25 2.07-1.14 3.9-2.63 5.43-4.38 1.53-1.76 2.76-3.78 3.6-5.98.842-2.2 1.3-4.58 1.3-7.05 0-1.89-.261-3.73-.759-5.48s-1.23-3.41-2.18-4.95c-.944-1.53-2.1-2.93-3.44-4.17-1.34-1.23-2.87-2.29-4.55-3.14.162.49.302.988.425 1.5.123.508.224 1.03.305 1.56.083.529.143 1.07.185 1.61.042.548.062 1.1.062 1.66 0 1.58-.19 3.07-.568 4.46-.381 1.4-.949 2.7-1.7 3.91-.756 1.21-1.7 2.32-2.83 3.34s-2.44 1.94-3.94 2.76c-1.15.652-2.12 1.28-2.91 1.94-.765.631-1.41 1.34-1.94 2.14-.449.659-.688 1.26-.913 1.9l-.089.333c-.219.855-.316 1.8-.316 2.86 0 1.17.149 2.22.436 3.14s.712 1.71 1.26 2.35c.548.644 1.22 1.14 2.01 1.47.788.336 1.69.511 2.69.511"/>
+					<path style="fill:lightgrey" d="m 8.3855802,-18.061642 -1.9255663,3.41445 c 0,0 4.8527731,10.8704088 -7.19690853,17.3133468 -3.57103227,2.213903 -4.33031507,5.014408 -4.86494207,6.810205 0.6081754,-0.6081744 -0.079161,-3.5035029 6.8969907,-7.1385839 1.603712,-1.095869 5.4643582,-3.32653392 7.3085243,-8.7439651 0.4996,-1.467637 1.6804027,-5.5864018 -0.2180981,-11.6554528 z"/>
+				</g>
+
+				<g id="rightArrow" transform="scale(-1 1)">
+					<path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+					<path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+					<path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+					<path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+				</g>
+
+				<g id="circle" transform="translate(-5 -25)">
+					<path d="m 78.22709,-48.600109 c -16.859,-19.371 -42.062,-31.906001 -70.3589995,-32.605001 -0.83203,-0.0234 -1.668,-0.0352 -2.5039,-0.0352 -0.83984,0 -1.6719,0.0117 -2.5039,0.0352 -56.2810045,1.3086 -101.6600005,46.688001 -102.9699905,102.97 0.69921,-28.2969983 13.237986,-53.499999 32.604986,-70.362999 15.613,-13.59 35.664,-21.762001 57.5310002,-21.762001 5.2304994,0 10.35200435,0.47265 15.3360043,1.3672 23.1329995,4.160201 43.2579995,17.562001 56.7969995,36.465001 11.324,15.82 18.043,35.4840007 18.043,56.796999 0,21.313 -6.7188,40.973 -18.043,56.793 18.898,-13.535 32.301,-33.66 36.461,-56.793 0.89453,-4.9844 1.3711,-10.105001 1.3711,-15.3359944 0,-21.8670036 -8.1758,-41.9180036 -21.766,-57.5310046 z"/>
+					<path transform="rotate(90) translate(19 -30)" d="m 78.22709,-48.600109 c -16.859,-19.371 -42.062,-31.906001 -70.3589995,-32.605001 -0.83203,-0.0234 -1.668,-0.0352 -2.5039,-0.0352 -0.83984,0 -1.6719,0.0117 -2.5039,0.0352 -56.2810045,1.3086 -101.6600005,46.688001 -102.9699905,102.97 0.69921,-28.2969983 13.237986,-53.499999 32.604986,-70.362999 15.613,-13.59 35.664,-21.762001 57.5310002,-21.762001 5.2304994,0 10.35200435,0.47265 15.3360043,1.3672 23.1329995,4.160201 43.2579995,17.562001 56.7969995,36.465001 11.324,15.82 18.043,35.4840007 18.043,56.796999 0,21.313 -6.7188,40.973 -18.043,56.793 18.898,-13.535 32.301,-33.66 36.461,-56.793 0.89453,-4.9844 1.3711,-10.105001 1.3711,-15.3359944 0,-21.8670036 -8.1758,-41.9180036 -21.766,-57.5310046 z"/>
+					<path transform="rotate(180) translate(-11 -49)" d="m 78.22709,-48.600109 c -16.859,-19.371 -42.062,-31.906001 -70.3589995,-32.605001 -0.83203,-0.0234 -1.668,-0.0352 -2.5039,-0.0352 -0.83984,0 -1.6719,0.0117 -2.5039,0.0352 -56.2810045,1.3086 -101.6600005,46.688001 -102.9699905,102.97 0.69921,-28.2969983 13.237986,-53.499999 32.604986,-70.362999 15.613,-13.59 35.664,-21.762001 57.5310002,-21.762001 5.2304994,0 10.35200435,0.47265 15.3360043,1.3672 23.1329995,4.160201 43.2579995,17.562001 56.7969995,36.465001 11.324,15.82 18.043,35.4840007 18.043,56.796999 0,21.313 -6.7188,40.973 -18.043,56.793 18.898,-13.535 32.301,-33.66 36.461,-56.793 0.89453,-4.9844 1.3711,-10.105001 1.3711,-15.3359944 0,-21.8670036 -8.1758,-41.9180036 -21.766,-57.5310046 z"/>
+					<path transform="rotate(-90) translate(-30 -19)" d="m 78.22709,-48.600109 c -16.859,-19.371 -42.062,-31.906001 -70.3589995,-32.605001 -0.83203,-0.0234 -1.668,-0.0352 -2.5039,-0.0352 -0.83984,0 -1.6719,0.0117 -2.5039,0.0352 -56.2810045,1.3086 -101.6600005,46.688001 -102.9699905,102.97 0.69921,-28.2969983 13.237986,-53.499999 32.604986,-70.362999 15.613,-13.59 35.664,-21.762001 57.5310002,-21.762001 5.2304994,0 10.35200435,0.47265 15.3360043,1.3672 23.1329995,4.160201 43.2579995,17.562001 56.7969995,36.465001 11.324,15.82 18.043,35.4840007 18.043,56.796999 0,21.313 -6.7188,40.973 -18.043,56.793 18.898,-13.535 32.301,-33.66 36.461,-56.793 0.89453,-4.9844 1.3711,-10.105001 1.3711,-15.3359944 0,-21.8670036 -8.1758,-41.9180036 -21.766,-57.5310046 z"/>
+				</g>
+
+				<g id="rectHleft">
+					<path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+				</g>
+
+				<g id="rectHright" transform="rotate(180)">
+					<path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+				</g>
+
+				<g id="rectV">
+					<path d="m-17-26s19.6 25.5 0 52c.631-.631 18.1-8.98 33.1-.312-.315 0-19.6-25.8 0-51.4 0-.315-16.6 9.22-33.1-.312z"/>
+				</g>
+
+				<g style="fill:rgb(69,75,129,1)" id="arrow">
+			      <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+			    </g>
+
+			    <g style="fill:rgb(69,75,129,1)" id="arrowL" transform="rotate(-90)">
+			      <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+			    </g>
+
+			    <g style="fill:rgb(69,75,129,1)" id="arrowR" transform="rotate(90)">
+			      <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+			    </g>
+				<!-- end of braid -->
+			</defs>
+			
+			<!-- <g transform="translate(50 0) scale(1.5)" anchor="middle" style="opacity:0.2;" class="cObj centerText"></g> -->
+			<g transform="translate(150 0) scale(0.9)">
+
+				<!-- background layer (circles)-->
+				<g *ngFor='let tona of tonas; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">
+					<use class="braidBack" *ngIf="i!=0 && i!=tonas.length-1" xlink:href="#circle"/>
+				</g>
+
+				<!-- intermediate layer (arrows and links) mostly the yellow part-->
+				<g *ngFor='let tona of tonas; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">
+					
+					<!-- links between bubbles -->
+					<use *ngIf="i!=tonas.length-1" style="fill:url(#greyGradient)" xlink:href="#rectV" transform="translate(0 45)"/>
+					<use style="fill:url(#greyGradient)" *ngIf="i!=0 && i!=tonas.length-1" xlink:href="#rectHright" transform="translate(50 0)"/>
+					<use style="fill:url(#greyGradient)" *ngIf="i!=0 && i!=tonas.length-1" xlink:href="#rectHleft" transform="translate(-50 0)"/>
+
+					<!-- big arrows inside links-->
+					<g class="arrowsR" *ngIf="i!=0 && i!=tonas.length-1">
+						<use xlink:href="#arrowR" transform="translate(65 0)"/>
+						<use xlink:href="#arrowR" transform="translate(50 0)"/>
+						<use xlink:href="#arrowR" transform="translate(35 0)"/>
+					</g>
+					<g class="arrowsL" *ngIf="i!=0 && i!=tonas.length-1">
+						<use xlink:href="#arrowL" transform="translate(-65 0)"/>
+						<use xlink:href="#arrowL" transform="translate(-50 0)"/>
+						<use xlink:href="#arrowL" transform="translate(-35 0)"/>
+					</g>
+					<g class="arrows" *ngIf="i!=tonas.length-1">
+						<use xlink:href="#arrow" transform="translate(0 30)"/>
+						<use xlink:href="#arrow" transform="translate(0 45)"/>
+						<use xlink:href="#arrow" transform="translate(0 60)"/>
+					</g>
+
+					<!-- green to green arrows -->
+					<g class="arrowsMidL" *ngIf="i!=0 && i<tonas.length-2" transform="scale(0.6)">
+						<use xlink:href="#arrow" transform="translate(-145 35)"/>
+						<use xlink:href="#arrow" transform="translate(-145 50)"/>
+						<use xlink:href="#arrow" transform="translate(-145 65)"/>
+						<use xlink:href="#arrow" transform="translate(-145 80)"/>
+						<use xlink:href="#arrow" transform="translate(-145 95)"/>
+						<use xlink:href="#arrow" transform="translate(-145 110)"/>
+					</g>
+					<g class="arrowsMidR" *ngIf="i!=0 && i<tonas.length-2" transform="scale(0.6)">
+						<use xlink:href="#arrow" transform="translate(145 35)"/>
+						<use xlink:href="#arrow" transform="translate(145 50)"/>
+						<use xlink:href="#arrow" transform="translate(145 65)"/>
+						<use xlink:href="#arrow" transform="translate(145 80)"/>
+						<use xlink:href="#arrow" transform="translate(145 95)"/>
+						<use xlink:href="#arrow" transform="translate(145 110)"/>
+					</g>
+
+					<!-- red to green arrows -->
+					<g class="arrowsExtRL" *ngIf="i!=0 && i<tonas.length-1" transform="scale(0.6) rotate(-30)">
+						<use xlink:href="#arrow" transform="translate(-125 -100)"/>
+						<use xlink:href="#arrow" transform="translate(-125 -115)"/>
+						<use xlink:href="#arrow" transform="translate(-125 -130)"/>
+					</g>
+					<g class="arrowsExtLR" *ngIf="i!=0 && i<tonas.length-1" transform="scale(0.6) rotate(30)">
+						<use xlink:href="#arrow" transform="translate(125 -100)"/>
+						<use xlink:href="#arrow" transform="translate(125 -115)"/>
+						<use xlink:href="#arrow" transform="translate(125 -130)"/>
+					</g>
+
+
+					<!-- green to red arrows-->
+					<g class="arrowsExtRR" *ngIf="i!=0 && i<tonas.length-2" transform="scale(0.6) rotate(-30)">
+						<use xlink:href="#arrow" transform="translate(125 100)"/>
+						<use xlink:href="#arrow" transform="translate(125 115)"/>
+						<use xlink:href="#arrow" transform="translate(125 130)"/>
+					</g>
+					<g class="arrowsExtLL" *ngIf="i!=0 && i<tonas.length-2" transform="scale(0.6) rotate(30)">
+						<use xlink:href="#arrow" transform="translate(-125 100)"/>
+						<use xlink:href="#arrow" transform="translate(-125 115)"/>
+						<use xlink:href="#arrow" transform="translate(-125 130)"/>
+					</g>
+				</g>
+
+
+					<!-- foreground layer (bubbles) -->
+				<g *ngFor='let tona of tonas; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">  
+					 
+					<!-- center bubble -->
+					<g class="medBubble">
+						<circle style="fill:red" r="25" class="largeCircle"/>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use xlink:href="#leftCommaXL" [attr.class]="(_chord.indexOf(tona.center.up) != -1)?'medBubble active':'medBubble'"/>
+							<!-- <text class="left" x="-5" y="-6" >{{Font_chords_eq[tonic[1]+tona.center.up]}}</text> -->
+						</g>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use xlink:href="#rightCommaXL" [attr.class]="(_chord.indexOf(tona.center.down) != -1)?'medBubble active':'medBubble'"/>
+							<!-- <text class="right" x="0" y="19" >{{Font_chords_eq[tonic[1]+tona.center.down]}}</text> -->
+						</g>
+					</g>
+
+					<!-- green bubbles close to center-->
+					<g *ngIf="i!=0 && i!=tonas.length-1" class="smallBubble" transform="translate(-90 0)">
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use  xlink:href="#leftCommaSM"/>
+							<text x="-18" y="-4" >{{tona.left.up}}</text>
+						</g>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use xlink:href="#rightCommaSM"/>
+							<text x="2" y="12" >{{tona.left.down}}</text>
+						</g>
+					</g>
+					<g *ngIf="i!=0 && i!=tonas.length-1" class="smallBubble"  transform="translate(90 0)">
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use xlink:href="#leftCommaSM"/>
+							<text x="-20" y="-4" >{{tona.right.up}}</text>
+						</g>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use xlink:href="#rightCommaSM"/>
+							<text x="-2" y="13" >{{tona.right.down}}</text>
+						</g>
+					</g>
+
+					<!-- red bubbles outer ones-->
+					<g [attr.id]="'outer_'+i" *ngIf="i!=tonas.length-2 && i!=tonas.length-1" class="smallBubble outer" transform="translate(-130 45)">
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use class="comma" xlink:href="#leftCommaSM" />
+							<text x="-18" y="-4" >{{tona.fifth_left.up}}</text>
+						</g>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use class="comma" xlink:href="#rightCommaSM"/>
+							<text x="2" y="12" >{{tona.fifth_left.down}}</text>
+						</g>
+					</g>
+					<g *ngIf="i!=tonas.length-2 && i!=tonas.length-1" class="smallBubble outer" transform="translate(130 45)">
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use class="comma" xlink:href="#leftCommaSM"/>
+							<text  x="-20" y="-4" >{{tona.fifth_right.up}}</text>
+						</g>
+						<g class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+							<use class="comma" xlink:href="#rightCommaSM"/>
+							<text x="-2" y="13" >{{tona.fifth_right.down}}</text>
+						</g>
+					</g>
+				</g>
+			</g>
+		</svg>
+	</div>
+</section>
