@@ -42,3 +42,16 @@ Onboarding/
 *macpro_chordonomicon*
 Top\ 20\ Macros.txt
 *access*token*
+
+# Credentials and Secrets Directory - NEVER COMMIT
+.credentials/
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+**/config/secrets/
+**/credentials/
+**/*secret*
+**/*token*
+**/*key*
+**/*password*
