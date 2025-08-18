@@ -1,0 +1,16 @@
+<div style="  padding-top: 100px; ">
+<p></p>
+<div class="moncontainer boder">
+  <div class="boder score">
+  <div id="scoreDiv" (window:resize)="onResize($event)"></div>
+  </div>
+  <div class="boder editeur">
+    <textarea [(ngModel)]='abcString' id="abcPaper" rows="4" cols="50"> </textarea>
+  </div>
+</div>
+
+
+<label for="transpose"></label>
+<input name="transpose" type="number" min="-12" max="12" [(ngModel)]="transpose" (change)="renderAbcInEditorWithOptions()"/> 
+
+</div>

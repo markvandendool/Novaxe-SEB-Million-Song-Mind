@@ -1,0 +1,126 @@
+<section id="browse">
+
+  <table style="width:100%; max-height: 300px;max-height: 75vh; overflow-y: auto;">
+    <tr [class.menu-list]="isList" [class.menu-card]="!isList">
+    <td class="clickable-row list-icons">
+      <a (click)="isList=true; cm.set_browse_dislplay_list(true)"><i class="fa fa-list" aria-hidden="true"></i></a>
+      <a (click)="isList=false; cm.set_browse_dislplay_list(false)"><i class="fa fa-table" aria-hidden="true"></i></a>
+    </td>
+    <td><input id="title_input" type="text" [(ngModel)]="searchPattrn.title" placeholder="Search Title" (ngModelChange)="search()" [disabled]="page=='title'"/></td>
+    <td><input id="artist_input" type="text" [(ngModel)]="searchPattrn.artist" placeholder="Search Artist" (ngModelChange)="search()" [disabled]="page=='artist'"/></td>
+    <td><input id="album_input" type="text" [(ngModel)]="searchPattrn.album" placeholder="Search Album" (ngModelChange)="search()" [disabled]="page=='album'"/></td>
+    <td><input id="style_input" type="text" [(ngModel)]="searchPattrn.style" placeholder="Search Style" (ngModelChange)="search()" [disabled]="page=='style'"/></td>
+    <td><input id="author_input" type="text" [(ngModel)]="searchPattrn.author" placeholder="Search Author" (ngModelChange)="search()" [disabled]="page=='author'"/></td>
+    <td><input id="tonality_input" type="text" [(ngModel)]="searchPattrn.tonality" placeholder="Search Key" (ngModelChange)="search()" [disabled]="page=='key'"/></td>
+    <td><input id="chords_input" type="text" [(ngModel)]="searchPattrn.chords" placeholder="Search Chords" (ngModelChange)="search()"/></td>
+    <!-- <td><input type="text" [(ngModel)]="searchPattrn.analysis" placeholder="Search Analysis" (ngModelChange)="search()"/></td> -->
+    <td class="cross"><a (click)="cleanSearch()"><i class="fa fa-times" aria-hidden="true"></i></a></td>
+    </tr>
+
+    <tr [hidden]="!isList">
+      <th></th>
+      <th>Title</th>
+      <th>Artist</th> 
+      <th>Album</th>
+      <th>Style</th>
+      <th>Author</th>
+      <th>Key</th>
+      <!-- <th>Analysis</th> -->
+    </tr>
+
+
+    <tr [hidden]="!isList" *ngFor="let score of list; index as i" class="song clickable-row" [ngClass]="{'pair':i%2==0}" [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()">
+        <!-- ********************STORE TODO:DISPLAY***************** -->
+        <!-- <a class="clickable-row" [hidden]="score.price <= 0">
+          <i class="fa fa-lock" aria-hidden="true" style="color:var(--red_nvx); padding: 5px; font-size: 10px;"></i>
+        </a> -->
+      <td class="clickable-row" [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()">
+        <img class="song-img" src="{{score.img}}" onerror="this.src='../../assets/img/empty_score.png'" alt="Album image">
+      </td>
+      <td>
+        <a class="clickable-row" tabindex="1" [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()">{{score.title}}</a>
+      </td>
+      <td><a class="clickable-row" [routerLink]="['/artist/'+score.artist]" (click)="$event.stopPropagation()">{{score.artist}}</a></td>
+      <td><a class="clickable-row" [routerLink]="['/album/'+score.album]" (click)="$event.stopPropagation()">{{score.album}}</a></td>
+      <td><a class="clickable-row" [routerLink]="['/style/'+score.style]" (click)="$event.stopPropagation()">{{score.style}}</a></td>
+      <td><a class="clickable-row" [routerLink]="['/author/'+score.author]" (click)="$event.stopPropagation()">{{score.author}}</a></td>
+      <td><a class="clickable-row" [routerLink]="['/key/'+score.tonality]" (click)="$event.stopPropagation()">{{score.tonality}}</a></td>
+      <td class="icons">
+        <a class="clickable-row" [routerLink]="['/stats/'+score.id]" (click)="$event.stopPropagation()">
+          <i class="fa fa-chart-bar" aria-hidden="true"></i>
+        </a>
+        <a class="clickable-row" [hidden]="score.author != user.get_nick()" (click)="openDeleteModal(i)">
+          <i class="fa fa-trash" aria-hidden="true"></i>
+        </a>
+      </td>
+      <td></td>
+    </tr>
+
+  </table>
+
+
+  <div [hidden]="isList" class="container-fluid blocks-list">
+      <div class="row justify-content-center" >
+          <ng-container class="col-md-6 col-lg-4 col-12" *ngFor="let score of list; index as i">
+              <div class="card-deck">
+                  <div class="card mb-4">
+                    <a class="clickable-row" [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()">
+                      <img class="card-img-top img-fluid" src="{{score.img}}" onerror="this.src='../assets/img/empty_score.png'" alt="Album image">
+                    </a>
+                    <div class="card-body">
+                      <h5 [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()" class="card-title clickable-row">{{score.title}}</h5>
+                      <p [routerLink]="['/artist/'+score.artist]" (click)="$event.stopPropagation()" class="clickable-row">Artist: {{score.artist}}</p>
+                      <p [routerLink]="['/album/'+score.album]" (click)="$event.stopPropagation()" class="clickable-row">Album: {{score.album}}</p>
+                      <p [routerLink]="['/key/'+score.tonality]" (click)="$event.stopPropagation()" class="clickable-row">Tonality : {{score.tonality}}</p>
+                      <p [routerLink]="['/author/'+score.author]" (click)="$event.stopPropagation()" class="clickable-row" style="margin-bottom: 0"><i>Transcription by {{score.author}}</i></p>
+                    </div>
+                    <td class="icons">
+                      <a class="clickable-row" [hidden]="score.price <= 0">
+                        <i class="fa fa-lock" aria-hidden="true" style="color:var(--red_nvx);"></i>
+                      </a>
+                      <a class="clickable-row" [routerLink]="['/stats/'+score.id]" (click)="$event.stopPropagation()">
+                        <i class="fa fa-chart-bar" aria-hidden="true"></i>
+                      </a>
+                      <a class="clickable-row" [hidden]="score.author != user.get_nick()" (click)="openDeleteModal(i)">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                      </a>
+                    </td>
+            <div class="card-footer score-button">
+              <a *ngIf="score.price <= 0" [routerLink]="['/score/'+score.id]" (click)="$event.stopPropagation()" class="card-link clickable-row">
+                <button class="btn btn-success" [class.lock]="score.price > 0">See score</button>
+              </a>
+
+              <a *ngIf="score.price > 0" href="#" (click)="$event.stopPropagation()" class="card-link clickable-row">
+                <button class="btn btn-success">Buy score</button>
+              </a>
+
+            </div>
+                  </div>
+              </div>
+          </ng-container>
+      </div>
+  </div>
+
+
+  <!-- Modal -->
+  <div class="fakebook-modal modal" [hidden]="modalInfos.hide" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Delete score</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalInfos.hide=true;">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to delete the score : {{modalInfos.title}} ?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="modalInfos.hide=true" data-dismiss="modal">Cancel</button>
+          <button type="button" (click)="deleteScore()" class="btn btn-primary">Ok</button>
+        </div>
+      </div>
+    </div>
+  </div> <!-- Modal -->
+
+</section>

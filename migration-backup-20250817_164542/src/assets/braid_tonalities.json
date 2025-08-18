@@ -1,0 +1,214 @@
+{
+    "tonalities": [
+        {
+            "name": "C Major",
+            "key": "C",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 0
+        },
+        {
+            "name": "G Major",
+            "key": "G",
+            "mode": "major",
+            "sharps": 1,
+            "flats": 0
+        },
+        {
+            "name": "D Major",
+            "key": "D",
+            "mode": "major",
+            "sharps": 2,
+            "flats": 0
+        },
+        {
+            "name": "A Major",
+            "key": "A",
+            "mode": "major",
+            "sharps": 3,
+            "flats": 0
+        },
+        {
+            "name": "E Major",
+            "key": "E",
+            "mode": "major",
+            "sharps": 4,
+            "flats": 0
+        },
+        {
+            "name": "B Major",
+            "key": "B",
+            "mode": "major",
+            "sharps": 5,
+            "flats": 0
+        },
+        {
+            "name": "F# Major",
+            "key": "F#",
+            "mode": "major",
+            "sharps": 6,
+            "flats": 0
+        },
+        {
+            "name": "C# Major",
+            "key": "C#",
+            "mode": "major",
+            "sharps": 7,
+            "flats": 0
+        },
+        {
+            "name": "F Major",
+            "key": "F",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 1
+        },
+        {
+            "name": "Bb Major",
+            "key": "Bb",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 2
+        },
+        {
+            "name": "Eb Major",
+            "key": "Eb",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 3
+        },
+        {
+            "name": "Ab Major",
+            "key": "Ab",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 4
+        },
+        {
+            "name": "Db Major",
+            "key": "Db",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 5
+        },
+        {
+            "name": "Gb Major",
+            "key": "Gb",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 6
+        },
+        {
+            "name": "Cb Major",
+            "key": "Cb",
+            "mode": "major",
+            "sharps": 0,
+            "flats": 7
+        },
+        {
+            "name": "A Minor",
+            "key": "A",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 0
+        },
+        {
+            "name": "E Minor",
+            "key": "E",
+            "mode": "minor",
+            "sharps": 1,
+            "flats": 0
+        },
+        {
+            "name": "B Minor",
+            "key": "B",
+            "mode": "minor",
+            "sharps": 2,
+            "flats": 0
+        },
+        {
+            "name": "F# Minor",
+            "key": "F#",
+            "mode": "minor",
+            "sharps": 3,
+            "flats": 0
+        },
+        {
+            "name": "C# Minor",
+            "key": "C#",
+            "mode": "minor",
+            "sharps": 4,
+            "flats": 0
+        },
+        {
+            "name": "G# Minor",
+            "key": "G#",
+            "mode": "minor",
+            "sharps": 5,
+            "flats": 0
+        },
+        {
+            "name": "D# Minor",
+            "key": "D#",
+            "mode": "minor",
+            "sharps": 6,
+            "flats": 0
+        },
+        {
+            "name": "A# Minor",
+            "key": "A#",
+            "mode": "minor",
+            "sharps": 7,
+            "flats": 0
+        },
+        {
+            "name": "D Minor",
+            "key": "D",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 1
+        },
+        {
+            "name": "G Minor",
+            "key": "G",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 2
+        },
+        {
+            "name": "C Minor",
+            "key": "C",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 3
+        },
+        {
+            "name": "F Minor",
+            "key": "F",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 4
+        },
+        {
+            "name": "Bb Minor",
+            "key": "Bb",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 5
+        },
+        {
+            "name": "Eb Minor",
+            "key": "Eb",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 6
+        },
+        {
+            "name": "Ab Minor",
+            "key": "Ab",
+            "mode": "minor",
+            "sharps": 0,
+            "flats": 7
+        }
+    ]
+}

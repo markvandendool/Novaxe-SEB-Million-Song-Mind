@@ -114,7 +114,9 @@ export class MetroComponent implements OnInit, OnDestroy {
 
         if (this.beat === 0 && this.subBeat === 0) {
             console.log('🔊 ACCENT tick (measure start)');
-        } else if (this.subBeat === 0) {
+        } else {
+    i
+}f (this.subBeat === 0) {
             console.log('🔊 Beat tick');
         } else {
             console.log('🔊 Sub-beat tick');

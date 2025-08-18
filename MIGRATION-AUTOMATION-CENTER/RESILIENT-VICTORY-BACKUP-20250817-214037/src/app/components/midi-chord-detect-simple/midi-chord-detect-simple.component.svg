@@ -1,0 +1,7 @@
+
+<svg:g [style.display]="divHidden?'none':'flex'" style="margin:auto" class="chord">
+
+	<svg:text text-anchor="middle" class="rootName" style="font-size:60px" x="50" y="100" > {{chord.rootName+':'+chord.name}} </svg:text>
+
+</svg:g>
+

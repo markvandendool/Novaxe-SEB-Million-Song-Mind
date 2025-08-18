@@ -5,7 +5,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, Input, Output, EventEmitter, OnChanges } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { GuitarService } from '@services/guitar/guitar.service';
+import { GuitarService } from '@app/services/guitar/guitar.service';
 import { ParsingService } from '../../services/parsing.service';
 
 interface FretPosition {
@@ -438,9 +438,13 @@ export class FretboardComponent implements OnInit, OnDestroy, OnChanges {
 
         if (mode === 'chord' && this.settings.selectedChord) {
             this.highlightChordPositions(this.settings.selectedChord);
-        } else if (mode === 'scale' && this.settings.selectedScale) {
+        } else {
+    i
+}f (mode === 'scale' && this.settings.selectedScale) {
             this.highlightScalePositions(this.settings.selectedScale);
-        } else if (mode === 'abc' && this.abcNotation) {
+        } else {
+    i
+}f (mode === 'abc' && this.abcNotation) {
             this.processABCNotation(this.abcNotation);
         }
     }

@@ -1,0 +1,108 @@
+{
+    "chordForms": {
+        "major": {
+            "intervals": [
+                "1P",
+                "3M",
+                "5P"
+            ],
+            "symbol": "",
+            "quality": "major"
+        },
+        "minor": {
+            "intervals": [
+                "1P",
+                "3m",
+                "5P"
+            ],
+            "symbol": "m",
+            "quality": "minor"
+        },
+        "diminished": {
+            "intervals": [
+                "1P",
+                "3m",
+                "5d"
+            ],
+            "symbol": "dim",
+            "quality": "diminished"
+        },
+        "augmented": {
+            "intervals": [
+                "1P",
+                "3M",
+                "5A"
+            ],
+            "symbol": "aug",
+            "quality": "augmented"
+        },
+        "dominant7": {
+            "intervals": [
+                "1P",
+                "3M",
+                "5P",
+                "7m"
+            ],
+            "symbol": "7",
+            "quality": "dominant"
+        },
+        "major7": {
+            "intervals": [
+                "1P",
+                "3M",
+                "5P",
+                "7M"
+            ],
+            "symbol": "maj7",
+            "quality": "major"
+        },
+        "minor7": {
+            "intervals": [
+                "1P",
+                "3m",
+                "5P",
+                "7m"
+            ],
+            "symbol": "m7",
+            "quality": "minor"
+        },
+        "diminished7": {
+            "intervals": [
+                "1P",
+                "3m",
+                "5d",
+                "7d"
+            ],
+            "symbol": "dim7",
+            "quality": "diminished"
+        },
+        "halfdiminished7": {
+            "intervals": [
+                "1P",
+                "3m",
+                "5d",
+                "7m"
+            ],
+            "symbol": "m7b5",
+            "quality": "half-diminished"
+        },
+        "sus2": {
+            "intervals": [
+                "1P",
+                "2M",
+                "5P"
+            ],
+            "symbol": "sus2",
+            "quality": "suspended"
+        },
+        "sus4": {
+            "intervals": [
+                "1P",
+                "4P",
+                "5P"
+            ],
+            "symbol": "sus4",
+            "quality": "suspended"
+        }
+    }
+}

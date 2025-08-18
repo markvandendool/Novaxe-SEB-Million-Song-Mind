@@ -1,0 +1,12 @@
+{
+"Maj7":{"scales":[{"name":"major","idx":0},{"name":"harmonic-minor","idx":5},{"name":"augmented","idx":0},{"name":"harmonic-major","idx":0}]},
+"m7":{"scales":[{"name":"major","idx":1},{"name":"major","idx":2},{"name":"major","idx":5},{"name":"harmonic-minor","idx":3},{"name":"melodic-minor","idx":1},{"name":"harmonic-major","idx":2}]},
+"7":{"scales":[{"name":"major","idx":4},{"name":"harmonic-minor","idx":4},{"name":"diminished","idx":1},{"name":"melodic-minor","idx":3},{"name":"melodic-minor","idx":4},{"name":"harmonic-major","idx":2},{"name":"harmonic-major","idx":4}]},
+"m7b5":{"scales":[{"name":"major","idx":6},{"name":"harmonic-minor","idx":1},{"name":"melodic-minor","idx":5},{"name":"melodic-minor","idx":6},{"name":"harmonic-major","idx":1}]},
+"mMaj7":{"scales":[{"name":"harmonic-minor","idx":0},{"name":"melodic-minor","idx":0},{"name":"harmonic-major","idx":3}]},
+"Maj7#5":{"scales":[{"name":"melodic-minor","idx":2},{"name":"harmonic-major","idx":5}]},
+"dim7":{"scales":[{"name":"harmonic-minor","idx":6},{"name":"diminished","idx":0},{"name":"harmonic-major","idx":5},{"name":"harmonic-major","idx":6}]},
+"6#5":{"scales":[{"name":"augmented","idx":1}]},
+"7alt":{"scales":[{"name":"melodic-minor","idx":6}]},
+"7b5#5 ":{"scales":[{"name":"whole-tone","idx":0}]}
+}

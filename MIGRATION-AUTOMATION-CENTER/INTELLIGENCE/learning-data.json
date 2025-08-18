@@ -1,0 +1,29 @@
+{
+  "version": "1.0",
+  "initialized": "$(date -Iseconds)",
+  "total_cycles": 0,
+  "patterns": {},
+  "success_rates": {},
+  "file_analysis": {},
+  "adaptive_weights": {
+    "syntax_fixes": 1.0,
+    "import_optimization": 1.0,
+    "lifecycle_improvements": 1.0,
+    "type_annotations": 1.0,
+    "rxjs_modernization": 1.0
+  },
+  "source_analysis": {
+    "total_files": 199,
+    "total_lines": 22870,
+    "braid_lines": 1025,
+    "midi_lines": 272,
+    "analysis_time": 1
+  },
+  "last_updated": "2025-08-17T22:15:36-06:00",
+  "overnight_complete": {
+    "cycles": 0,
+    "files_processed": 0,
+    "improvements": 0,
+    "success_rate": 0
+  }
+}

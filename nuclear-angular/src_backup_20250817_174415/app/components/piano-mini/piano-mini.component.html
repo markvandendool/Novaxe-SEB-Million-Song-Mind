@@ -1,0 +1,51 @@
+<div class="piano-mini-container">
+    <h3>🎹 Piano Mini</h3>
+
+    <!-- Octave Controls -->
+    <div class="octave-controls">
+        <button class="octave-btn" (click)="changeOctave(-1)" [disabled]="octave <= 1">
+            ◀ Oct
+        </button>
+        <span class="octave-display">Octave {{ octave }}</span>
+        <button class="octave-btn" (click)="changeOctave(1)" [disabled]="octave >= 7">
+            Oct ▶
+        </button>
+    </div>
+
+    <!-- Mini Piano Keyboard -->
+    <div class="keyboard-container">
+        <!-- White Keys -->
+        <div class="white-keys">
+            <div *ngFor="let key of whiteKeys" class="white-key" [class.active]="selectedNote === key.note"
+                (click)="playNote(key.note, key.name)">
+                <span class="key-label">{{ key.name }}</span>
+                <span class="midi-number">{{ key.note }}</span>
+            </div>
+        </div>
+
+        <!-- Black Keys -->
+        <div class="black-keys">
+            <div *ngFor="let key of blackKeys" class="black-key" [style.left.%]="(key.position * 14.28) - 1"
+                [class.active]="selectedNote === key.note" (click)="playNote(key.note, key.name)">
+                <span class="key-label">{{ key.name }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Display -->
+    <div class="status-display">
+        <p class="current-note">
+            <strong>Current:</strong>
+            <span [class.playing]="isPlaying">{{ selectedNote }}</span>
+        </p>
+        <p class="velocity-display">
+            <strong>Velocity:</strong> {{ velocity }}
+        </p>
+    </div>
+
+    <!-- Migration Status -->
+    <div class="migration-status">
+        <p>✅ Batch 2 Migration: PianoMini Component Active</p>
+        <p>🔗 WebAudioFont Integration: Ready</p>
+    </div>
+</div>

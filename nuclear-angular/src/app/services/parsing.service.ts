@@ -116,7 +116,9 @@ export class ParsingService {
                             case 'Q': parsed.tempo = parseInt(header.value) || 120; break;
                         }
                     }
-                } else if (line.length > 0) {
+                } else {
+    i
+}f (line.length > 0) {
                     // Parse notes and chords
                     const chords = this.extractChords(line);
                     const notes = this.extractNotes(line);

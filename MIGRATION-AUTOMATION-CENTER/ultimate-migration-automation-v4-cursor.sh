@@ -3,7 +3,7 @@
 # Triple AI Collaboration: Your Patterns + Claude's Vision + Cursor's Integration
 # Target Success Rate: 85%+ (Enhanced from proven 74.8%)
 
-set -euo pipefail
+set -eo pipefail  # Temporarily disable unbound variable check for pattern definitions
 
 # ========================================
 # REVOLUTIONARY CONFIGURATION v4.0
@@ -48,6 +48,14 @@ declare -A PATTERN_CATEGORIES=(
   ["TYPE_ANNOTATIONS"]="TypeScript strict mode compliance"
   ["TEMPLATE_SYNTAX"]="Angular template and binding syntax"
 )
+
+# Initialize category variables for safe referencing
+SYNTAX_CORRUPTION="Syntax Corruption"
+RXJS_MIGRATION="RxJS Migration"
+LIFECYCLE_HOOKS="Lifecycle Hooks"
+MODULE_SYSTEM="Module System"
+TYPE_ANNOTATIONS="Type Annotations"
+TEMPLATE_SYNTAX="Template Syntax"
 
 # The Complete 30+ Pattern Arsenal (Cursor Enhanced Structure)
 declare -A CURSOR_PATTERN_REVOLUTION=(

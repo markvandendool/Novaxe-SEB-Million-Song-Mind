@@ -1,0 +1,184 @@
+{
+  "TEMPLATE": "LEVEL_1_0",
+  "HIDE_CHORD": false,
+  "HIDE_FUNCTION": false,
+  "DEBUG_MODE": false,
+  "json_generated": {
+    "templates": []
+  },
+  "voices_params":{
+    "left_hand":{
+      "clef":"F",
+      "proba_rest":0.5,
+      "proba_note":0.5,
+      "proba_interv":0.5,
+      "proba_chord":0.5
+    },
+    "right_hand":{
+      "clef":"G",
+      "proba_rest":0,
+      "proba_note":0,
+      "proba_interv":0,
+      "proba_chord":0
+    }
+  },
+  "rhythm_params":{
+
+    "right_hand":[
+
+      {"name":"whole", "duration":3840, "proba":50},
+
+      {"name":"half half", "duration":3840, "proba":0},
+
+      {"name":"quarter quarter quarter quarter", "duration":3840, "proba":0},
+
+      {"name":"quarter quarter half", "duration":3840, "proba":0},
+      {"name":"quarter half quarter", "duration":3840, "proba":0},
+      {"name":"half quarter quarter", "duration":3840, "proba":0},
+
+      {"name":"quarter d_half", "duration":3840, "proba":0},
+      {"name":"d_half quarter", "duration":3840, "proba":0},
+
+      {"name":"half", "duration":1920, "proba":0},
+
+      {"name":"quarter quarter", "duration":1920, "proba":0},
+      {"name":"eights eights eights eights", "duration":1920, "proba":0},
+      {"name":"eights eights quarter", "duration":1920, "proba":0},
+      {"name":"eights quarter eights", "duration":1920, "proba":0},
+      {"name":"quarter eights eights", "duration":1920, "proba":0},
+
+      {"name":"eights d_quarter", "duration":1920, "proba":0},
+      {"name":"d_quarter eights", "duration":1920, "proba":0},
+
+      {"name":"quarter", "duration":960, "proba":0},
+      {"name":"eights eights", "duration":960, "proba":0},
+
+      {"name":"sixteenth sixteenth sixteenth sixteenth", "duration":960, "proba":0},
+      {"name":"sixteenth sixteenth eights", "duration":960, "proba":0},
+      {"name":"sixteenth eights sixteenth", "duration":960, "proba":0},
+      {"name":"eights sixteenth sixteenth", "duration":960, "proba":0},
+      {"name":"sixteenth d_eights", "duration":960, "proba":0},
+      {"name":"d_eights sixteenth", "duration":960, "proba":0}
+    ],
+
+
+    "left_hand":[
+      {"name":"whole", "duration":3840, "proba":0},
+      {"name":"half half", "duration":3840, "proba":0},
+      {"name":"quarter quarter quarter quarter", "duration":3840, "proba":0},
+      {"name":"quarter quarter half", "duration":3840, "proba":0},
+      {"name":"quarter half quarter", "duration":3840, "proba":0},
+      {"name":"half quarter quarter", "duration":3840, "proba":0},
+
+      {"name":"quarter d_half", "duration":3840, "proba":0},
+      {"name":"d_half quarter", "duration":3840, "proba":0},
+
+      {"name":"half", "duration":1920, "proba":0},
+      {"name":"quarter quarter", "duration":1920, "proba":0},
+      {"name":"eights eights eights eights", "duration":1920, "proba":0},
+      {"name":"eights eights quarter", "duration":1920, "proba":0},
+      {"name":"eights quarter eights", "duration":1920, "proba":0},
+      {"name":"quarter eights eights", "duration":1920, "proba":0},
+      {"name":"eights d_quarter", "duration":1920, "proba":0},
+      {"name":"d_quarter eights", "duration":1920, "proba":0},
+      {"name":"quarter", "duration":960, "proba":0},
+      {"name":"eights eights", "duration":960, "proba":0},
+      {"name":"sixteenth sixteenth sixteenth sixteenth", "duration":960, "proba":0},
+      {"name":"sixteenth sixteenth eights", "duration":960, "proba":0},
+      {"name":"sixteenth eights sixteenth", "duration":960, "proba":0},
+      {"name":"eights sixteenth sixteenth", "duration":960, "proba":0},
+      {"name":"sixteenth d_eights", "duration":960, "proba":0},
+      {"name":"d_eights sixteenth", "duration":960, "proba":0}
+    ]
+  },
+  "global_gen_params": {
+    "duration": 3,
+    "measures": 4,
+    "meter": "4/4",
+    "clef_G": true,
+    "clef_F": true,
+    "clef_OR": false,
+    "tempo": -1,
+    "sound": true,
+    "timed": false
+  },
+  "measure_types_selected": {
+    "simple_notes_right_hand": true,
+    "simple_notes_left_hand": false,
+    "simple_notes_both_hands": false,
+    "chords_first_beat_lh_and_notes_rh": false,
+    "intervals": false
+  },
+  "tonalities_selected": {
+    "C": true,
+    "D": false,
+    "E": false,
+    "F": false,
+    "G": false,
+    "Bb": false
+  },
+  "modes_selected": {
+    "major": true,
+    "h_minor": false,
+    "n_minor": false,
+    "m_minor": false
+  },
+  "exercise_types_selected": {
+    "reading_untimed": true,
+    "reading_timed": false,
+    "hearing": false
+  },
+  "chords_gen_params": {
+    "inversions": {
+      "_one": true,
+      "_two": false,
+      "_three": false,
+      "_four": false
+    },
+    "chord_types_major": {
+      "major": true,
+      "minor": true,
+      "dominant": false,
+      "minor7": true,
+      "maj7": true,
+      "dim": false,
+      "hdim": false
+    },
+    "chord_types_h_minor": {
+      "major": false,
+      "minor": false,
+      "dominant": false,
+      "minor7": false,
+      "maj7": false,
+      "dim": false,
+      "dim7": false,
+      "hdim": false,
+      "aug": false,
+      "mMaj7": false,
+      "augMaj7": false
+    },
+    "chord_types_n_minor": {
+      "major": false,
+      "minor7": false,
+      "dominant": false,
+      "minor": false,
+      "maj7": false,
+      "dim": false
+    },
+    "chord_types_m_minor": {
+      "dim": false,
+      "major": false,
+      "minor": false,
+      "aug": false,
+      "mMaj7": false,
+      "minor7": false,
+      "augMaj7": false,
+      "dominant": false,
+      "hdim": false
+    }
+  },
+  "notes_gen_params": {
+    "arpeggios": false,
+    "one_by_one": false
+  }
+}

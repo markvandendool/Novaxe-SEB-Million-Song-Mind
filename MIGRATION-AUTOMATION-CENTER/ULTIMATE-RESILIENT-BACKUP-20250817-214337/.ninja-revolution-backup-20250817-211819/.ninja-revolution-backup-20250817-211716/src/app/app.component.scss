@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'music-font';
+    src: url("../assets/font/Chord_Grid_v2.otf") format("opentype");
+}
+
+.chord-font {
+  font-family: 'music-font';
+  /*white-space: pre-wrap;*/
+}

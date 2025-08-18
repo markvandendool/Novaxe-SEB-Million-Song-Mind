@@ -1,0 +1,139 @@
+<div class="metro-container">
+    <div class="metro-header">
+        <h3>🥁 Metronome</h3>
+        <div class="display-toggle">
+            <button class="toggle-btn" [class.active]="display === 'circle'" (click)="setDisplay('circle')">
+                Circle
+            </button>
+            <button class="toggle-btn" [class.active]="display === 'line'" (click)="setDisplay('line')">
+                Line
+            </button>
+        </div>
+    </div>
+
+    <!-- BPM Display and Controls -->
+    <div class="bpm-section">
+        <div class="bpm-display">
+            <span class="bpm-value">{{ bpm }}</span>
+            <span class="bpm-label">BPM</span>
+        </div>
+
+        <div class="bpm-controls">
+            <button class="bpm-btn" (click)="onBpmChange(bpm - 5)">-5</button>
+            <button class="bpm-btn" (click)="onBpmChange(bpm - 1)">-1</button>
+            <input type="range" [value]="bpm" min="40" max="200" step="1"
+                (input)="onBpmChange(+$any($event.target).value)" class="bpm-slider">
+            <button class="bpm-btn" (click)="onBpmChange(bpm + 1)">+1</button>
+            <button class="bpm-btn" (click)="onBpmChange(bpm + 5)">+5</button>
+        </div>
+    </div>
+
+    <!-- Beat Display -->
+    <div class="beat-display-section">
+        <div class="count-selector">
+            <label>Display:</label>
+            <select [(ngModel)]="count_display" (change)="setCountDisplay(count_display)">
+                <option value="beat">Beat</option>
+                <option value="measure">Measure.Beat</option>
+                <option value="subBeat">Sub-beat</option>
+                <option value="measure_only">Measure Only</option>
+            </select>
+        </div>
+
+        <div class="current-count">
+            <span class="count-value">{{ getCurrentBeatDisplay() }}</span>
+        </div>
+    </div>
+
+    <!-- Visual Metronome -->
+    <div class="visual-metronome" [class.playing]="isPlaying">
+        @if (display === 'circle') {
+        <div class="circle-display">
+            <svg viewBox="0 0 200 200" class="metro-circle">
+                <!-- Background circle -->
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#e0e0e0" stroke-width="4" />
+
+                <!-- Beat markers -->
+                @for (beat of [].constructor(nb_beat_per_measure); track $index; let i = $index) {
+                <circle [attr.cx]="100 + 70 * Math.cos((i * 360 / nb_beat_per_measure - 90) * Math.PI / 180)"
+                    [attr.cy]="100 + 70 * Math.sin((i * 360 / nb_beat_per_measure - 90) * Math.PI / 180)" r="6"
+                    [class.active-beat]="i === beat" [class.accent-beat]="i === 0" class="beat-marker" />
+                }
+
+                <!-- Current beat indicator -->
+                <line x1="100" y1="100" [attr.x2]="100 + 60 * Math.cos((getBeatPosition() - 90) * Math.PI / 180)"
+                    [attr.y2]="100 + 60 * Math.sin((getBeatPosition() - 90) * Math.PI / 180)" stroke="#2196f3"
+                    stroke-width="3" class="beat-hand" />
+            </svg>
+        </div>
+        } @else {
+        <div class="line-display">
+            <div class="beat-line">
+                @for (beat of [].constructor(nb_beat_per_measure); track $index; let i = $index) {
+                <div class="beat-dot" [class.active-beat]="i === beat" [class.accent-beat]="i === 0">
+                    {{ i + 1 }}
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+
+    <!-- Transport Controls -->
+    <div class="transport-controls">
+        <button class="control-btn play-pause" [class.playing]="isPlaying" (click)="onPlayPause()">
+            @if (isPlaying) {
+            <i class="fa fa-pause"></i> Pause
+            } @else {
+            <i class="fa fa-play"></i> Play
+            }
+        </button>
+
+        <button class="control-btn stop" (click)="onStop()">
+            <i class="fa fa-stop"></i> Stop
+        </button>
+    </div>
+
+    <!-- Time Signature -->
+    <div class="time-signature-section">
+        <h4>Time Signature</h4>
+        <div class="signature-controls">
+            <label>Beats per measure:</label>
+            <select [(ngModel)]="nb_beat_per_measure" (change)="onTimeSignatureChange(nb_beat_per_measure)">
+                <option [value]="2">2</option>
+                <option [value]="3">3</option>
+                <option [value]="4">4</option>
+                <option [value]="5">5</option>
+                <option [value]="6">6</option>
+                <option [value]="7">7</option>
+                <option [value]="8">8</option>
+            </select>
+        </div>
+
+        <div class="signature-controls">
+            <label>Subdivisions:</label>
+            <select [(ngModel)]="nb_subbeat_per_beat">
+                <option [value]="1">1 (quarter notes)</option>
+                <option [value]="2">2 (eighth notes)</option>
+                <option [value]="3">3 (triplets)</option>
+                <option [value]="4">4 (sixteenth notes)</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Volume Control -->
+    <div class="volume-section">
+        <label>Volume:</label>
+        <input type="range" [value]="volume" min="0" max="1" step="0.1" (input)="volume = +$any($event.target).value"
+            class="volume-slider">
+        <span class="volume-display">{{ (volume * 100) | number:'1.0-0' }}%</span>
+    </div>
+
+    <!-- Animation Toggle -->
+    <div class="animation-section">
+        <label class="animation-toggle">
+            <input type="checkbox" [(ngModel)]="animation" (change)="toggleAnimation()">
+            Enable Animations
+        </label>
+    </div>
+</div>

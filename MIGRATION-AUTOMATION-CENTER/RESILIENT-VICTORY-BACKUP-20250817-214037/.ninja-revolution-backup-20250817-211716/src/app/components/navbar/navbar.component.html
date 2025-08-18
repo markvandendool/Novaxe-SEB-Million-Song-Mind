@@ -1,0 +1,194 @@
+<section id="nvx-nav">
+  <nav class="navbar navbar-expand-lg fixed-top navbar-dark bg-dark">
+
+  <a class="navbar-brand logo" [routerLink]="['/home']">
+    <img src="assets/img/music-placeholder-glowtitled.png">
+  </a>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo03" aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
+
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <li class="nav-item" *ngIf="!user.user_is_logged.value">
+        <a class="nav-link" (click)="show_pass=false" href="#" data-toggle="modal" data-target="#login-modal" >Login</a>
+      </li>
+
+      <li class="nav-item" *ngIf="!user.user_is_logged.value">
+        <a class="nav-link" (click)="show_pass=false" href="#" data-toggle="modal" data-target="#sign-up-modal" >Sign up</a>
+      </li>
+
+      <li class="nav-item" *ngIf="user.user_is_logged.value">
+        <a class="nav-link disabled" href="#">Welcome {{user.user_nick}}</a>
+      </li>
+
+      <li class="nav-item" *ngIf="user.user_is_logged.value">
+        <a class="nav-link" href="#" [routerLink]="['/'+newScoreLink]">New score</a>
+      </li>
+
+      <li style="display:none;" class="nav-item"> <!-- ********************STORE TODO:DISPLAY***************** -->
+        <a class="nav-link" href="#" [routerLink]="['/'+storeLink]">Store</a>
+      </li>
+
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Tools
+        </a>
+        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+          <a class="dropdown-item" [routerLink]="['/metronome']" href="#">Metronome</a>
+          <a class="dropdown-item" [routerLink]="['/fifths']" href="#">Fifths circle</a>
+          <a class="dropdown-item" [routerLink]="['/draft']" href="#">Draft</a>
+          <div class="dropdown-divider"></div>
+          <a class="dropdown-item" [routerLink]="['/select-exercise']" href="#">Exercises</a>
+          <!-- <a class="dropdown-item" href="/create-exercise?level=1">Level 1</a> -->
+          <!-- <a class="dropdown-item" [routerLink]="['/create-exercise']" [queryParams]="{level: 1}" href="#">Level 1</a> -->
+          <div [hidden]="!user.is_logged().value" class="dropdown-divider"></div>
+          <a [hidden]="!user.is_logged().value" class="dropdown-item" (click)="logout()" [routerLink]="['/home']" href="#">Logout</a>
+        </div>
+
+      </li>
+    </ul>
+
+
+
+    <form class="form-inline my-2 my-lg-0 global-search">
+      <div>
+        <input class="form-control mr-sm-2" type="search" autocomplete="off" [(ngModel)]="searchPattrn" (ngModelChange)="search()" placeholder="Search" name="searchBar" aria-label="Search">
+        <!-- <div *ngIf="hits.length === 0">
+          No results have been found for {{ results.query }}.
+        </div>
+        <div *ngFor="let hit of hits">Hit: {{ hit.objectID }}</div> -->
+        <div class="search-results" [hidden]="searchPattrn==''">
+          <dl>
+            <dt [hidden]="searchResults1.length != 0 || 
+                          searchResults2.length != 0 || 
+                          searchResults3.length != 0 ||
+                          searchResults4.length != 0 || 
+                          searchResults5.length != 0 || 
+                          searchResults6.length != 0 ||
+                          searchResults7.length != 0">
+                          No results have been found
+            </dt>
+
+            <dt [hidden]="searchResults1.length == 0">Title</dt>
+            <dd *ngFor="let sr1 of searchResults1"><a (click)="redirect('/score/'+sr1.id)" class="fake-link">{{sr1.name}}</a></dd>
+            <dt [hidden]="searchResults2.length == 0">Artist</dt>
+            <dd *ngFor="let sr2 of searchResults2"><a [routerLink]="['/artist/'+sr2.name]" (click)="searchPattrn=''">{{sr2.name}}</a></dd>
+            <dt [hidden]="searchResults3.length == 0">Album</dt>
+            <dd *ngFor="let sr3 of searchResults3"><a [routerLink]="['/album/'+sr3.name]" (click)="searchPattrn=''">{{sr3.name}}</a></dd>
+            <dt [hidden]="searchResults4.length == 0">Author</dt>
+            <dd *ngFor="let sr4 of searchResults4"><a [routerLink]="['/author/'+sr4.name]" (click)="searchPattrn=''">{{sr4.name}}</a></dd>
+            <dt [hidden]="searchResults5.length == 0">Key</dt>
+            <dd *ngFor="let sr5 of searchResults5"><a [routerLink]="['/score/'+sr5.id]" (click)="searchPattrn=''">{{sr5.name}}</a></dd>
+            <dt [hidden]="searchResults6.length == 0">Style</dt>
+            <dd *ngFor="let sr6 of searchResults6"><a [routerLink]="['/style/'+sr6.name]" (click)="searchPattrn=''">{{sr6.name}}</a></dd>
+            <dt [hidden]="searchResults7.length == 0">Chords</dt>
+            <dd *ngFor="let sr7 of searchResults7"><a [routerLink]="['/score/'+sr7.id]" (click)="searchPattrn=''">{{sr7.name}}</a></dd>
+          </dl>
+        </div>
+      </div>
+      <!-- <a class="btn btn-md btn-outline-success my-2 my-sm-2" type="submit">Search</a> -->
+    </form>
+
+
+    <app-donate style="color: white;"></app-donate>
+  </div>
+</nav>
+
+ <!-- login modal -->
+  <form ngNativeValidate class="modal fade" id="login-modal" data-backdrop="static" (ngSubmit)="login()" role="form">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Log in</h5>
+          <button type="button" class="close" (click)="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+
+          <input id="li_email" name="li_email" type="email" placeholder="email" [(ngModel)]="user_email" title="Must contain @" required pattern="[^ @]*@[^ @]*">
+          <input id="li_psw" name="li_psw" [type]="show_pass?'text':'password'" placeholder="password" [(ngModel)]="user_pass" required>
+          <!-- An element to toggle between password visibility -->
+          <div class="chkpass">
+            <input class="toggle_pass" type="checkbox" (click)="showPass()">
+            <span>Show Password</span>
+            <a style="padding-left: 50px;" href="#" (click)="closeModal()" data-toggle="modal" data-target="#forgot-modal">Forgot password</a>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Login</button>
+        </div>
+      </div>
+      
+    </div>
+  </form>
+  <!-- end of login modal -->
+
+
+ <!-- sign up modal -->
+  <form ngNativeValidate class="modal fade" id="sign-up-modal" data-backdrop="static" (ngSubmit)="signUp()" role="form">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Sign up !</h5>
+          <button type="button" class="close" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <input name="su_email" id="su_email" type="email" placeholder="email" [(ngModel)]="user_email" title="Must contain @" required pattern="[^ @]*@[^ @]*">
+
+          <input name="su_psw" id="su_psw" [type]="show_pass?'text':'password'" placeholder="password" [(ngModel)]="user_pass" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+          <input name="su_psw2" id="su_psw2" [type]="show_pass?'text':'password'" placeholder="password again" [(ngModel)]="passverif" pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" title="Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more characters" required>
+
+          <div class="chkpass">
+            <input class="toggle_pass" type="checkbox" (click)="showPass()">
+            <span>Show Passwords</span>
+            <span style="color: red;" [hidden]="passverif == user_pass">Passwords are differents</span>
+          </div>
+
+          <input name="su_nick" id="su_nick" type="text" placeholder="nickname" [(ngModel)]="user_nick" required>
+        </div>
+
+        <div class="modal-footer">
+          <h6 style="color: red;" id="su_infos" [hidden]="!show_signupInfos"></h6>
+          <button type="submit" class="btn btn-primary">Sign up</button>
+        </div>
+      </div>
+      
+    </div>
+  </form>
+  <!-- end of sign up modal -->
+
+
+  <!-- forgot pass modal -->
+  <form ngNativeValidate class="modal" id="forgot-modal" data-backdrop="static" (ngSubmit)="resetPass()" role="form">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Forgot password ?</h5>
+          <button type="button" class="close" (click)="closeModal()">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <h6 style="color: var(--darkgray_nvx);">Please enter the email used for Novaxe.<br>We will send you a link to reset your password.</h6>
+          <input id="fp_email" name="fp_email" type="email" placeholder="email" [(ngModel)]="user_email" title="Must contain @" required pattern="[^ @]*@[^ @]*">
+          <h6 style="color: red;" id="fp_infos" [hidden]="!show_resetInfos"></h6>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Send</button>
+        </div>
+      </div>
+      
+    </div>
+  </form>
+  <!-- end of forgot pass modal -->
+</section>
+
