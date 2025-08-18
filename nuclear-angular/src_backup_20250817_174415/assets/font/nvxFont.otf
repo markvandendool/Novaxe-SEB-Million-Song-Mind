@@ -1,8 +1,0 @@
-/* Placeholder font file for Angular 20 compatibility */
-/* TODO: Replace with actual Novaxe font when available */
-@font-face {
-  font-family: 'nvxFont';
-  src: url('data:application/font-woff;charset=utf-8;base64,') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}

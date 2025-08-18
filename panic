@@ -1,6 +1,0 @@
-#!/bin/bash
-# PANIC BUTTON - Ultimate Emergency Script
-# Simple command: just type "panic" to trigger all kill switches
-
-echo "🚨🚨🚨 PANIC BUTTON ACTIVATED 🚨🚨🚨"
-/Users/markvandendool/Novaxe-SEB-Million-Song-Mind/emergency-kill-switch.sh ~

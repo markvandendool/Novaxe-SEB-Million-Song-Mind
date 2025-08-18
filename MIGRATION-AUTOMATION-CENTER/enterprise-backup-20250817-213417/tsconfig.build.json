@@ -1,9 +1,0 @@
-{
-  "extends": "./tsconfig.app.json",
-  "compilerOptions": {
-    "skipLibCheck": true
-  },
-  "exclude": [
-    "node_modules/abcjs/types/**/*.d.ts"
-  ]
-}
