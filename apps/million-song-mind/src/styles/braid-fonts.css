@@ -2,7 +2,23 @@
 
 @font-face {
     font-family: "nvxChord";
-    src: url("/fonts/nvxFont.otf") format("opentype");
+    src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "NovaxeSDCT";
+    src: url("/fonts/NovaxeSDCTFont.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "MainComma";
+    src: url("/fonts/main_comma.otf") format("opentype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
