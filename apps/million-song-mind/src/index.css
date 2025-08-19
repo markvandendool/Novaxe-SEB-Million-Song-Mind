@@ -216,10 +216,10 @@
   100% { transform: skew(-12deg, 0deg) scale(1.15, 1.05); }
 }
 
-/* Fontdec13 Professional Font Integration */
+/* Chord_Grid_v2 Professional Font Integration */
 @font-face {
   font-family: 'Fontdec13';
-  src: url('/fonts/Fontdec13.otf') format('opentype');
+  src: url('/fonts/Chord_Grid_v2.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -227,7 +227,7 @@
 
 /* Premium Fontdec13 styling for harmonic visualization */
 .font-fontdec13 {
-  font-family: 'Fontdec13', 'nvxChord', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
+  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
   font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
   font-variant-ligatures: discretionary-ligatures contextual;
   text-rendering: optimizeLegibility;
@@ -284,7 +284,7 @@ svg .harmonic-bar.selected {
 svg text { pointer-events: none; }
 /* Ensure braid labels render musical glyphs (♯, ♭, °, Δ, ø) reliably */
 #braid-tonal svg text {
-  font-family: 'Fontdec13', 'nvxChord', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
+  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
   font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
   font-variant-ligatures: discretionary-ligatures contextual;
   text-rendering: optimizeLegibility;
