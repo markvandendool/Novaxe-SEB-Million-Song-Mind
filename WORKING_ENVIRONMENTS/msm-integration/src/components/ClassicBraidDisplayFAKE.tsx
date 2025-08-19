@@ -10,7 +10,7 @@ interface ClassicBraidDisplayFAKEProps {
 
 const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
   currentChord,
-  chordsInScore, 
+  chordsInScore,
   tonality,
   zoom,
   onChordSelect
@@ -21,57 +21,57 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
   const getBubbleClass = (chord: string) => {
     const isActive = currentChord.includes(chord);
     const isInScore = chordsInScore.includes(chord);
-    
+
     if (isActive) return 'bubble active';
     if (isInScore) return 'bubble inScore';
     return 'bubble';
   };
-  
+
   const getAdjacentChord = (baseChord: string, position: string): string => {
     const circleOfFifths = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F'];
     const minorCircle = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
-    
+
     const majorIndex = circleOfFifths.indexOf(baseChord);
     const minorIndex = minorCircle.indexOf(baseChord);
     const index = majorIndex >= 0 ? majorIndex : minorIndex;
     const isMinor = minorIndex >= 0;
-    
+
     if (index === -1) return baseChord;
-    
+
     switch (position) {
       case 'left_up':
       case 'right_up':
-        return isMinor ? minorCircle[(index - 1 + minorCircle.length) % minorCircle.length] 
-                      : circleOfFifths[(index - 1 + circleOfFifths.length) % circleOfFifths.length];
+        return isMinor ? minorCircle[(index - 1 + minorCircle.length) % minorCircle.length]
+          : circleOfFifths[(index - 1 + circleOfFifths.length) % circleOfFifths.length];
       case 'left_down':
       case 'right_down':
         return isMinor ? circleOfFifths[(index + 1) % circleOfFifths.length]
-                      : minorCircle[(index + 1) % minorCircle.length];
+          : minorCircle[(index + 1) % minorCircle.length];
       default:
         return baseChord;
     }
   };
-  
+
   const getFifthChord = (baseChord: string, position: string): string => {
     const circleOfFifths = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F'];
     const minorCircle = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
-    
+
     const majorIndex = circleOfFifths.indexOf(baseChord);
     const minorIndex = minorCircle.indexOf(baseChord);
     const index = majorIndex >= 0 ? majorIndex : minorIndex;
     const isMinor = minorIndex >= 0;
-    
+
     if (index === -1) return baseChord;
-    
+
     switch (position) {
       case 'fifth_left_up':
       case 'fifth_right_up':
         return isMinor ? minorCircle[(index - 2 + minorCircle.length) % minorCircle.length]
-                      : circleOfFifths[(index - 2 + circleOfFifths.length) % circleOfFifths.length];
+          : circleOfFifths[(index - 2 + circleOfFifths.length) % circleOfFifths.length];
       case 'fifth_left_down':
       case 'fifth_right_down':
         return isMinor ? circleOfFifths[(index + 2) % circleOfFifths.length]
-                      : minorCircle[(index + 2) % minorCircle.length];
+          : minorCircle[(index + 2) % minorCircle.length];
       default:
         return baseChord;
     }
@@ -82,9 +82,9 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
     // Real Angular tonal braid data - the honeycomb layout you want
     const centerLeft = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F'];
     const centerRight = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
-    
+
     let bubbleContent = '';
-    
+
     // Generate the tonal braid bubbles (the real classic layout)
     for (let i = 0; i < centerLeft.length; i++) {
       const leftChord = centerLeft[i];
@@ -92,7 +92,7 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
       const leftActive = currentChord.includes(leftChord);
       const rightActive = currentChord.includes(rightChord);
       const yPos = (i + 1) * 90;
-      
+
       // Background circles (only for middle elements)
       if (i !== 0 && i !== centerLeft.length - 1) {
         const isActive = leftActive || rightActive;
@@ -102,7 +102,7 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
           </g>
         `;
       }
-      
+
       // Center major/minor bubble pair
       bubbleContent += `
         <g transform="translate(0 ${yPos})">
@@ -172,7 +172,7 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
         </g>
       `;
     }
-    
+
     return `
     <svg version="1.1" width="100%" viewBox="-10 40 320 1600" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -315,7 +315,7 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
   const handleChordClick = useCallback((event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     const bubbleElement = target.closest('[data-chord]');
-    
+
     if (bubbleElement) {
       const chord = bubbleElement.getAttribute('data-chord');
       if (chord && onChordSelect) {
@@ -331,12 +331,12 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
   }, [currentChord, chordsInScore, tonality, zoom]);
 
   return (
-    <div 
+    <div
       className="classic-braid-display-fake relative w-full h-full overflow-hidden"
       style={{ background: '#1a1a1a', color: 'white' }}
     >
       {/* Real Angular CSS for tonal braid styling - embedded in SVG */}
-      <div 
+      <div
         className="w-full h-full flex items-center justify-center"
         onClick={handleChordClick}
         dangerouslySetInnerHTML={{ __html: svgContent }}
@@ -344,7 +344,7 @@ const ClassicBraidDisplayFAKE: React.FC<ClassicBraidDisplayFAKEProps> = ({
           // Add any additional styles here if needed
         }}
       />
-      
+
       {/* Debug info */}
       <div className="absolute top-2 left-2 text-xs text-slate-400 bg-black/50 px-2 py-1 rounded">
         Classic Tonal Braid (Real Angular "tonal" section) | Current: {currentChord.join(', ')} | Zoom: {(zoom * 100).toFixed(0)}%

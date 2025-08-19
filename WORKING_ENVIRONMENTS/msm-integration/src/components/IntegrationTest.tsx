@@ -12,7 +12,7 @@ const IntegrationTest: React.FC = () => {
   const [zoom, setZoom] = useState([1.2]);
   const [autoPlay, setAutoPlay] = useState(false);
   const [selectedChords, setSelectedChords] = useState<string[]>(['C']);
-  
+
   // Braid controls as shown in screenshot
   const [skin, setSkin] = useState('Classic');
   const [showGrid, setShowGrid] = useState(false);
@@ -21,11 +21,11 @@ const IntegrationTest: React.FC = () => {
   const [scoreChords, setScoreChords] = useState(true);
   const [diatonicScale, setDiatonicScale] = useState(true);
   const [oneTone, setOneTone] = useState(true);
-  
+
   // Use the braid text switching hook
   const { mode: braidTextMode, toggleMode: toggleBraidTextMode } = useBraidTextSwitching();
   const displayRoman = braidTextMode === 'roman';
-  
+
   const intervalRef = useRef<NodeJS.Timeout>();
 
   const testKeys = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
@@ -70,11 +70,11 @@ const IntegrationTest: React.FC = () => {
 
   return (
     <div className="integration-test bg-gray-900 min-h-screen text-white">
-      
+
       {/* Top Control Panel - Like in the screenshot */}
       <div className="bg-gray-800 p-4 border-b border-gray-600">
         <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-          
+
           {/* Left side - Braid name and basic info */}
           <div className="flex items-center gap-4">
             <div className="text-lg font-bold text-green-400">
@@ -84,18 +84,18 @@ const IntegrationTest: React.FC = () => {
               Key: {focusKey} | Selected: {selectedChords.join(', ') || 'None'}
             </div>
           </div>
-          
+
           {/* Right side - Main controls in rows */}
           <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-4">
-            
+
             {/* SKIN Controls */}
             <Card className="bg-gray-700 border-gray-600">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm text-gray-300">SKIN</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <select 
-                  value={skin} 
+                <select
+                  value={skin}
                   onChange={(e) => setSkin(e.target.value)}
                   className="w-full bg-gray-600 border border-gray-500 rounded px-2 py-1 text-sm"
                 >
@@ -152,12 +152,12 @@ const IntegrationTest: React.FC = () => {
 
         {/* Second row - Key selector, zoom, and text mode */}
         <div className="mt-4 flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-          
+
           {/* Key Selection */}
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-400">Focus Key:</label>
-            <select 
-              value={focusKey} 
+            <select
+              value={focusKey}
               onChange={(e) => setFocusKey(e.target.value)}
               className="bg-gray-600 border border-gray-500 rounded px-2 py-1 text-sm"
             >
@@ -186,8 +186,8 @@ const IntegrationTest: React.FC = () => {
           {/* Text Mode Switcher */}
           <div className="flex items-center gap-2">
             <label className="text-sm text-gray-400">Text:</label>
-            <BraidTextSwitcher 
-              mode={braidTextMode} 
+            <BraidTextSwitcher
+              mode={braidTextMode}
               onModeChange={toggleBraidTextMode}
               compact={true}
             />

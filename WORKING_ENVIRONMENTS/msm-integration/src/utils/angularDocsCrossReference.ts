@@ -377,7 +377,7 @@ const ExampleComponent: React.FC = () => {
   ): ValidationResult[] {
     const key = `${componentName}_${method}`;
     const angularRef = this.documentationDatabase.get(key);
-    
+
     if (!angularRef) {
       return [{
         passed: false,
@@ -388,18 +388,18 @@ const ExampleComponent: React.FC = () => {
     }
 
     const results: ValidationResult[] = [];
-    
+
     for (const rule of angularRef.validationRules) {
       try {
         const result = rule.test(reactImplementation, angularRef);
         results.push(result);
-        
+
         diagnosticLogger.log({
           level: result.passed ? 'DEBUG' : 'WARN',
           category: 'ANGULAR_MIGRATION',
           message: `Validation ${rule.name}: ${result.message}`,
-          context: { 
-            rule: rule.name, 
+          context: {
+            rule: rule.name,
             passed: result.passed,
             componentName,
             method
@@ -485,7 +485,7 @@ const ExampleComponent: React.FC = () => {
 
   // Validation Rule Implementations
   private validateInitializationTiming = (
-    reactImpl: any, 
+    reactImpl: any,
     angularRef: AngularDocumentationReference
   ): ValidationResult => {
     // Mock validation - in real implementation, this would test actual timing

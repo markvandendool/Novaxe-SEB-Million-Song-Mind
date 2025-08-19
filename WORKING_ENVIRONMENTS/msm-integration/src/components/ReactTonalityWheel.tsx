@@ -34,22 +34,22 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
   const [activeMidiChord, setActiveMidiChord] = useState<string>('');
   const [isLocked, setIsLocked] = useState<boolean>(locked);
   const [mode, setMode] = useState<'major' | 'minor' | ''>('');
-  
+
   const wheelRef = useRef<HTMLDivElement>(null);
 
   // Circle of fifths data (from Angular analysis)
-  const fifths = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
-  const fifthsSharp = ['C','G','D','A','E','B','F#','C#','G#','D#','A#','F'];
-  const minorFifths = ['Am','Em','Bm','F#m','C#m','G#m','Ebm','Bbm','Fm','Cm','Gm','Dm'];
-  const romanNumerals = ['IV','I','V','II','VI','III','VII','Tri','','bVI','bIII','bVII'];
-  const diminished = ['Bo','F#o','C#o','G#o','D#o','A#o','E#o','Fo','Co','Go','Do','Ao','Eo'];
-  
+  const fifths = ['C', 'G', 'D', 'A', 'E', 'B', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+  const fifthsSharp = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'G#', 'D#', 'A#', 'F'];
+  const minorFifths = ['Am', 'Em', 'Bm', 'F#m', 'C#m', 'G#m', 'Ebm', 'Bbm', 'Fm', 'Cm', 'Gm', 'Dm'];
+  const romanNumerals = ['IV', 'I', 'V', 'II', 'VI', 'III', 'VII', 'Tri', '', 'bVI', 'bIII', 'bVII'];
+  const diminished = ['Bo', 'F#o', 'C#o', 'G#o', 'D#o', 'A#o', 'E#o', 'Fo', 'Co', 'Go', 'Do', 'Ao', 'Eo'];
+
   // Position mappings from Angular component
   const chordsFPositions: Record<string, number> = {
     'C': 0, 'G': 1, 'D': 2, 'A': 3, 'E': 4, 'B': 5,
     'Gb': 6, 'F#': 6, 'Db': 7, 'Ab': 8, 'Eb': 9, 'Bb': 10, 'F': 11
   };
-  
+
   const chordsMFPositions: Record<string, number> = {
     'Am': 0, 'Em': 1, 'Bm': 2, 'F#m': 3, 'C#m': 4, 'G#m': 5,
     'Ebm': 6, 'D#m': 6, 'Bbm': 7, 'Fm': 8, 'Cm': 9, 'Gm': 10, 'Dm': 11
@@ -62,7 +62,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
   // Generate tonality positions
   const generateTonalityPositions = useCallback((): TonalityPosition[] => {
     const positions: TonalityPosition[] = [];
-    
+
     fifths.forEach((chord, index) => {
       positions.push({
         x: xRoman[index] + 250, // Offset for center positioning
@@ -72,20 +72,20 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
         position: index
       });
     });
-    
+
     return positions;
   }, []);
 
   const generateMinorTonalityPositions = useCallback((): TonalityPosition[] => {
     const positions: TonalityPosition[] = [];
-    
+
     minorFifths.forEach((chord, index) => {
       // Inner circle positioning for minor chords
       const centerX = 250;
       const centerY = 300;
       const radius = 120;
       const angle = (index * 30 - 90) * Math.PI / 180;
-      
+
       positions.push({
         x: centerX + radius * Math.cos(angle),
         y: centerY + radius * Math.sin(angle),
@@ -94,7 +94,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
         position: index
       });
     });
-    
+
     return positions;
   }, []);
 
@@ -109,14 +109,14 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
   // Tonality selection handler
   const handleTonalitySelect = (chord: string) => {
     if (isLocked) return;
-    
+
     setSelectedTonality(chord);
     setSelectedGreen(chord);
-    
+
     const chordType = detectChordType(chord);
     const tonalityMode = chordType === 'minor' ? 'minor' : 'major';
     setMode(tonalityMode);
-    
+
     onTonalityChange?.(chord, tonalityMode);
     onChordSelect?.(chord);
   };
@@ -151,7 +151,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
   return (
     <Card className="absolute z-50 w-96 h-96 shadow-lg">
       <CardContent className="p-4">
-        <div 
+        <div
           ref={wheelRef}
           className="relative w-full h-full overflow-hidden rounded-lg bg-gradient-to-br from-blue-50 to-purple-50"
         >
@@ -171,7 +171,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
               strokeWidth="2"
               opacity="0.5"
             />
-            
+
             <circle
               cx="250"
               cy="300"
@@ -186,7 +186,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
             {majorPositions.map((position, index) => {
               const isSelected = position.chord === selectedGreen;
               const isCurrent = position.chord === selectedTonality;
-              
+
               return (
                 <g key={`major-${index}`}>
                   <circle
@@ -195,18 +195,17 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
                     r="20"
                     fill={
                       isSelected ? '#10b981' :
-                      isCurrent ? '#3b82f6' :
-                      '#6b7280'
+                        isCurrent ? '#3b82f6' :
+                          '#6b7280'
                     }
                     fillOpacity={isSelected ? 1 : 0.7}
                     stroke="#1f2937"
                     strokeWidth="2"
-                    className={`cursor-pointer transition-all hover:fill-opacity-100 ${
-                      isLocked ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
+                    className={`cursor-pointer transition-all hover:fill-opacity-100 ${isLocked ? 'cursor-not-allowed opacity-50' : ''
+                      }`}
                     onClick={() => !isLocked && handleTonalitySelect(position.chord)}
                   />
-                  
+
                   <text
                     x={position.x}
                     y={position.y + 4}
@@ -218,7 +217,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
                   >
                     {position.chord}
                   </text>
-                  
+
                   {/* Roman numeral label */}
                   <text
                     x={position.x}
@@ -238,7 +237,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
             {minorPositions.map((position, index) => {
               const isSelected = position.chord === selectedGreen;
               const isCurrent = position.chord === selectedTonality;
-              
+
               return (
                 <g key={`minor-${index}`}>
                   <circle
@@ -247,18 +246,17 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
                     r="15"
                     fill={
                       isSelected ? '#8b5cf6' :
-                      isCurrent ? '#6366f1' :
-                      '#9ca3af'
+                        isCurrent ? '#6366f1' :
+                          '#9ca3af'
                     }
                     fillOpacity={isSelected ? 1 : 0.7}
                     stroke="#1f2937"
                     strokeWidth="1"
-                    className={`cursor-pointer transition-all hover:fill-opacity-100 ${
-                      isLocked ? 'cursor-not-allowed opacity-50' : ''
-                    }`}
+                    className={`cursor-pointer transition-all hover:fill-opacity-100 ${isLocked ? 'cursor-not-allowed opacity-50' : ''
+                      }`}
                     onClick={() => !isLocked && handleTonalitySelect(position.chord)}
                   />
-                  
+
                   <text
                     x={position.x}
                     y={position.y + 3}
@@ -282,7 +280,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
               fill="#1f2937"
               fillOpacity="0.9"
             />
-            
+
             <text
               x="250"
               y="295"
@@ -294,7 +292,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
             >
               {selectedTonality}
             </text>
-            
+
             <text
               x="250"
               y="310"
@@ -305,7 +303,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
             >
               {mode}
             </text>
-            
+
             {/* Lock indicator */}
             {isLocked && (
               <g>
@@ -330,7 +328,7 @@ const ReactTonalityWheel: React.FC<TonalityWheelProps> = ({
               </g>
             )}
           </svg>
-          
+
           {/* Close button */}
           <button
             onClick={hideWheel}

@@ -78,7 +78,7 @@ export const BridgeProvider: React.FC<BridgeProviderProps> = ({
   const [isConnected, setIsConnected] = useState<boolean>(false);
   const [msmReady, setMsmReady] = useState<boolean>(false);
   const [currentKey, setCurrentKey] = useState<KeyPayload | null>(null);
-  
+
   const msmWindowRef = useRef<Window | null>(null);
   const targetOriginRef = useRef<string>('*');
   const allowedOriginsRef = useRef<string[]>(['http://localhost:8080', 'http://localhost:3000', 'http://localhost:5173']);
@@ -191,14 +191,14 @@ export const BridgeProvider: React.FC<BridgeProviderProps> = ({
   useEffect(() => {
     const messageHandler = (event: MessageEvent) => {
       if (!isFromAllowedOrigin(event.origin)) return;
-      
+
       const data = event.data;
       if (!isBridgeEnvelope(data)) return;
-      
+
       if (data.version !== BRIDGE_VERSION) {
         console.warn('[BRIDGE] Version mismatch:', data.version, 'expected:', BRIDGE_VERSION);
       }
-      
+
       handleIncomingMessage(data);
     };
 
@@ -210,7 +210,7 @@ export const BridgeProvider: React.FC<BridgeProviderProps> = ({
   const attachToMsm = (msmWindow: Window, origin: string): void => {
     msmWindowRef.current = msmWindow;
     targetOriginRef.current = origin || '*';
-    
+
     // Send initial handshake
     sendMessage({
       type: 'NOVAXE_TO_MSM',
@@ -220,7 +220,7 @@ export const BridgeProvider: React.FC<BridgeProviderProps> = ({
       version: BRIDGE_VERSION,
       payload: { hello: 'from-novaxe' }
     });
-    
+
     startHeartbeat();
   };
 

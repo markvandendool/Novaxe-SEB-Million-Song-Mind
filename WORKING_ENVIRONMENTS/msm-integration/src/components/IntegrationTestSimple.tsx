@@ -9,7 +9,7 @@ import BraidTextSwitcher from '@/components/braid/BraidTextSwitcher';
 export default function IntegrationTestSimple() {
   // Control states
   const [skinEnabled, setSkinEnabled] = useState(true);
-  const [displayEnabled, setDisplayEnabled] = useState(true); 
+  const [displayEnabled, setDisplayEnabled] = useState(true);
   const [emphasisEnabled, setEmphasisEnabled] = useState(false);
   const [zoom, setZoom] = useState([1.0]);
   const [selectedKey, setSelectedKey] = useState('C');
@@ -26,7 +26,7 @@ export default function IntegrationTestSimple() {
 
         {/* Control Panels */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          
+
           {/* SKIN Panel */}
           <Card className="bg-gray-800 border-gray-700">
             <CardHeader>
@@ -113,15 +113,15 @@ export default function IntegrationTestSimple() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div 
+            <div
               className="flex justify-center items-center overflow-auto"
-              style={{ 
+              style={{
                 height: '80vh',
                 transform: `scale(${zoom[0]})`,
                 transformOrigin: 'center center'
               }}
             >
-              <BraidTonal 
+              <BraidTonal
                 focusKey={selectedKey}
                 zoom={zoom[0]}
                 displayRoman={useRoman}

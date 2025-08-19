@@ -1,2 +1,3 @@
 LOG_20250818_083956|Mon Aug 18 08:39:56 MDT 2025|DEMO: How to preserve trial-and-error context - within 11 errors of success|welcome-onboarding/forensic-logs/session-archives/LOG_20250818_083956/FORENSIC_SESSION_SUMMARY.md|pending
 LOG_20250818_084617|Mon Aug 18 08:46:17 MDT 2025|VERIFICATION TEST - CPU metrics and exact results|welcome-onboarding/forensic-logs/session-archives/LOG_20250818_084617/FORENSIC_SESSION_SUMMARY.md|pending
+LOG_20250818_173334|Mon Aug 18 17:33:35 MDT 2025|CRITICAL_PROTOCOL_VIOLATION_pristine_contamination_20250818_173334|welcome-onboarding/forensic-logs/session-archives/LOG_20250818_173334/FORENSIC_SESSION_SUMMARY.md|pending

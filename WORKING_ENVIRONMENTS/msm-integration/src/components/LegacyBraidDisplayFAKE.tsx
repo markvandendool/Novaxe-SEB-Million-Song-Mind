@@ -99,11 +99,11 @@ export const LegacyBraidDisplayFAKE: React.FC<LegacyBraidDisplayProps> = ({
       if (svgElement) {
         // This is the exact zoom logic from the real Angular component
         svgElement.style.transform = `scale(${zoom})`;
-        
+
         // Calculate top offset based on real Angular zoom logic
         let top = 0;
         const zoomStr = zoom.toString();
-        switch(zoomStr) {
+        switch (zoomStr) {
           case '0.4': top = -760; break;
           case '0.5': top = -630; break;
           case '0.6': top = -510; break;
@@ -120,9 +120,9 @@ export const LegacyBraidDisplayFAKE: React.FC<LegacyBraidDisplayProps> = ({
           case '1.7': top = 860; break;
           default: top = 0;
         }
-        
+
         svgElement.style.marginTop = `${top}px`;
-        
+
         diagnosticLogger.log({
           level: 'DEBUG',
           category: 'PERFORMANCE',
@@ -189,7 +189,7 @@ export const LegacyBraidDisplayFAKE: React.FC<LegacyBraidDisplayProps> = ({
       </div>
 
       <div className="legacy-braid-container">
-        <div 
+        <div
           ref={svgRef}
           className="braid-svg-container"
           onClick={handleChordClick}
@@ -204,7 +204,7 @@ export const LegacyBraidDisplayFAKE: React.FC<LegacyBraidDisplayProps> = ({
           }}
         >
           {realLegacyAssets.braid3svg && (
-            <div 
+            <div
               dangerouslySetInnerHTML={{ __html: realLegacyAssets.braid3svg }}
               style={{
                 width: '100%',
@@ -218,11 +218,11 @@ export const LegacyBraidDisplayFAKE: React.FC<LegacyBraidDisplayProps> = ({
         <div className="legacy-controls">
           <div className="zoom-controls">
             <label>Zoom (Real Angular Logic):</label>
-            <input 
-              type="range" 
-              min="0.4" 
-              max="1.7" 
-              step="0.1" 
+            <input
+              type="range"
+              min="0.4"
+              max="1.7"
+              step="0.1"
               value={zoom}
               onChange={(e) => {
                 // This would trigger parent component zoom change

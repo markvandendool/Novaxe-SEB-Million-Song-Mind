@@ -47,7 +47,7 @@ class ComprehensiveDiagnosticLogger {
   private errorPatterns: Map<string, ErrorPattern> = new Map();
   private angularDocReferences: AngularDocReference[] = [];
   private performanceBaseline: Map<string, number> = new Map();
-  
+
   constructor() {
     this.initializeAngularDocReferences();
     this.setupPerformanceBaselines();
@@ -117,7 +117,7 @@ class ComprehensiveDiagnosticLogger {
     };
 
     this.logs.push(logEntry);
-    
+
     // Pattern recognition for errors
     if (entry.level === 'ERROR' || entry.level === 'CRITICAL') {
       this.analyzeErrorPattern(logEntry);
@@ -137,7 +137,7 @@ class ComprehensiveDiagnosticLogger {
    */
   private analyzeErrorPattern(entry: DiagnosticLogEntry): void {
     const patternKey = this.extractErrorPattern(entry.message);
-    
+
     if (this.errorPatterns.has(patternKey)) {
       const pattern = this.errorPatterns.get(patternKey)!;
       pattern.occurrences++;
@@ -216,7 +216,7 @@ class ComprehensiveDiagnosticLogger {
     if (!entry.performanceMetrics) return;
 
     const { executionTime, memoryUsage, renderTime } = entry.performanceMetrics;
-    
+
     // Check against performance baselines
     const operations = [
       { name: 'execution', value: executionTime, baseline: 'component_init' },
@@ -253,21 +253,21 @@ class ComprehensiveDiagnosticLogger {
 
     const reset = '\x1b[0m';
     const color = colors[entry.level];
-    
+
     console.log(`${color}[${entry.timestamp}] ${entry.level} [${entry.category}]${reset} ${entry.message}`);
-    
+
     if (entry.context) {
       console.log(`${color}  Context:${reset}`, entry.context);
     }
-    
+
     if (entry.angularDocReference) {
       console.log(`${color}  📚 Angular Docs:${reset} ${entry.angularDocReference}`);
     }
-    
+
     if (entry.performanceMetrics) {
       console.log(`${color}  ⚡ Performance:${reset}`, entry.performanceMetrics);
     }
-    
+
     if (entry.stackTrace) {
       console.log(`${color}  🔍 Stack:${reset}\n${entry.stackTrace}`);
     }
@@ -327,8 +327,8 @@ class ComprehensiveDiagnosticLogger {
     const warnings = this.getLogs({ level: 'WARN' });
     const critical = this.getLogs({ level: 'CRITICAL' });
     const migrationIssues = this.getLogs({ category: 'ANGULAR_MIGRATION' });
-    const performanceIssues = this.logs.filter(log => 
-      log.performanceMetrics && 
+    const performanceIssues = this.logs.filter(log =>
+      log.performanceMetrics &&
       (log.level === 'WARN' || log.level === 'ERROR')
     );
 
@@ -398,7 +398,7 @@ export const diagnosticLogger = new ComprehensiveDiagnosticLogger();
 
 // Utility functions for common logging scenarios
 export const logAngularMigration = (
-  message: string, 
+  message: string,
   context?: Record<string, any>,
   angularDocRef?: string
 ) => {

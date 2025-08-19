@@ -26,11 +26,10 @@ export default function BraidTextSwitcher({ onRomanChange }: BraidTextSwitcherPr
             variant="outline"
             size="sm"
             onClick={handleToggle}
-            className={`px-4 py-2 transition-colors ${
-              useRoman 
-                ? 'bg-blue-600 text-white border-blue-600' 
+            className={`px-4 py-2 transition-colors ${useRoman
+                ? 'bg-blue-600 text-white border-blue-600'
                 : 'bg-gray-700 text-gray-300 border-gray-600'
-            }`}
+              }`}
           >
             Toggle
           </Button>

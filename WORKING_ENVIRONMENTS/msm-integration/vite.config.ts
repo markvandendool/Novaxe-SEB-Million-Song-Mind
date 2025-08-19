@@ -58,6 +58,9 @@ export default defineConfig(({ mode }) => ({
     host: 'localhost',
     port: 8080,
     strictPort: true,
+    fs: {
+      deny: ['**/ARCHIVE_BACKUP/**'],
+    },
   },
   plugins: [
     react(),
@@ -71,6 +74,21 @@ export default defineConfig(({ mode }) => ({
   },
   // Exclude problematic archive paths from optimization
   optimizeDeps: {
-    exclude: ['karma', 'webpack'],
+    exclude: ['karma', 'webpack', '_karma_webpack_'],
+    include: [],
+  },
+  build: {
+    rollupOptions: {
+      external: (id) => {
+        // Exclude any ARCHIVE_BACKUP references completely
+        if (id.includes('ARCHIVE_BACKUP') ||
+          id.includes('_karma_webpack_') ||
+          id.includes('karma-debug.html') ||
+          id.includes('@angular-devkit')) {
+          return true;
+        }
+        return false;
+      },
+    },
   },
 }));

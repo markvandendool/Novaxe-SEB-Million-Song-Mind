@@ -15,6 +15,10 @@ import BraidNew2Page from "./pages/BraidNew2Page";
 import BraidLiveMetricsPage from "./pages/BraidLiveMetricsPage";
 // import IntegrationTestPage from "./components/IntegrationTest";
 import IntegrationTestSimple from "./components/IntegrationTestSimple";
+import IntegrationTestSimpleClean from "./components/IntegrationTestSimpleClean";
+import IntegrationTestMSM from "./components/IntegrationTestMSM";
+import SimpleIntegrationTest from "./components/SimpleIntegrationTest";
+import DiagnosticTest from "./components/DiagnosticTest";
 import { BraidGeometryProvider } from "@/state/braidGeometryStore";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import TopNav from "@/components/layout/TopNav";
@@ -76,7 +80,11 @@ const App = () => (
           <GlobalKeyProvider>
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<MillionSongMind />} />
+                <Route path="/" element={<IntegrationTestMSM />} />
+                <Route path="/msm" element={<IntegrationTestMSM />} />
+                <Route path="/clean" element={<IntegrationTestSimpleClean />} />
+                <Route path="/diagnostic" element={<DiagnosticTest />} />
+                <Route path="/simple" element={<SimpleIntegrationTest />} />
                 <Route path="/integration-test" element={<IntegrationTestSimple />} />
                 <Route path="/integration-simple" element={<IntegrationTestSimple />} />
                 <Route path="/calibrate-braid" element={<BraidCalibration />} />

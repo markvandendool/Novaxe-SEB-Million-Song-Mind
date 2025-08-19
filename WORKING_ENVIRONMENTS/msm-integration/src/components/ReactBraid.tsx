@@ -39,14 +39,14 @@ const ReactBraid: React.FC<BraidProps> = ({
   const [chordsInEmphasis, setChordsInEmphasis] = useState<string[]>(['Am']);
   const [braidType, setBraidType] = useState<string>('default');
   const [tonasDisplayed, setTonasDisplayed] = useState<number[]>([8]);
-  
+
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Chord categorization (from Angular analysis)
-  const majChords = ['','M','maj7','5','maj9','maj11','maj13','6','Maj7','Maj9','M11','M13','maj9no5','M9sus4','Madd9','sus2','69'];
-  const minChords = ['m','m7','m#5','mMa7', 'm6', 'm9','m11','m7no5','m9no5','m11no5','madd9'];
+  const majChords = ['', 'M', 'maj7', '5', 'maj9', 'maj11', 'maj13', '6', 'Maj7', 'Maj9', 'M11', 'M13', 'maj9no5', 'M9sus4', 'Madd9', 'sus2', '69'];
+  const minChords = ['m', 'm7', 'm#5', 'mMa7', 'm6', 'm9', 'm11', 'm7no5', 'm9no5', 'm11no5', 'madd9'];
   const halfDimChords = ['m7b5'];
-  const sevenChords = ['7','9','11','13','7no5','9no5','13no5','13sus4','7add13'];
+  const sevenChords = ['7', '9', '11', '13', '7no5', '9no5', '13no5', '13sus4', '7add13'];
   const m69 = ['m69'];
   const german = ['german'];
   const sevenb5 = ['7b5'];
@@ -58,13 +58,13 @@ const ReactBraid: React.FC<BraidProps> = ({
     // Extract root and quality from chord
     const chordParts = chord.match(/^([A-G][#b]?)(.*)$/);
     if (!chordParts) return chord;
-    
+
     const [, root, quality] = chordParts;
     const fontMapping = fontChordsEq as Record<string, string>;
-    
+
     // Get font character for chord quality
     const fontChar = fontMapping[quality] || quality;
-    
+
     return isRoman ? convertToRoman(chord) : `${root}${fontChar}`;
   }, [isRoman]);
 
@@ -91,28 +91,28 @@ const ReactBraid: React.FC<BraidProps> = ({
     const centerX = 300;
     const centerY = 300;
     const radius = 200;
-    
+
     // Generate positions based on circle of fifths
-    const fifths = ['C','G','D','A','E','B','Gb','Db','Ab','Eb','Bb','F'];
-    
+    const fifths = ['C', 'G', 'D', 'A', 'E', 'B', 'Gb', 'Db', 'Ab', 'Eb', 'Bb', 'F'];
+
     fifths.forEach((chordRoot, index) => {
       const angle = (index * 30 - 90) * Math.PI / 180; // 30 degrees per step, start at top
       const x = centerX + radius * Math.cos(angle);
       const y = centerY + radius * Math.sin(angle);
-      
+
       positions.push({
         x,
         y,
         chord: chordRoot,
         type: determineChordType(chordRoot)
       });
-      
+
       // Add minor chord inner circle
       const minorRadius = 140;
       const minorX = centerX + minorRadius * Math.cos(angle);
       const minorY = centerY + minorRadius * Math.sin(angle);
       const minorChord = chordRoot + 'm';
-      
+
       positions.push({
         x: minorX,
         y: minorY,
@@ -120,7 +120,7 @@ const ReactBraid: React.FC<BraidProps> = ({
         type: 'minor'
       });
     });
-    
+
     return positions;
   }, []);
 
@@ -148,7 +148,7 @@ const ReactBraid: React.FC<BraidProps> = ({
   }, [braidModel]);
 
   useEffect(() => {
-    switch(oneTonalityMode) {
+    switch (oneTonalityMode) {
       case 1:
         setTonasDisplayed([7, 8]);
         break;
@@ -190,7 +190,7 @@ const ReactBraid: React.FC<BraidProps> = ({
               stroke="#e5e7eb"
               strokeWidth="2"
             />
-            
+
             {/* Inner circle */}
             <circle
               cx="300"
@@ -206,7 +206,7 @@ const ReactBraid: React.FC<BraidProps> = ({
               const isInScore = isChordInScore(position.chord);
               const isCurrent = isChordCurrent(position.chord);
               const symbol = getChordSymbol(position.chord);
-              
+
               return (
                 <g key={index}>
                   {/* Chord circle */}
@@ -216,12 +216,12 @@ const ReactBraid: React.FC<BraidProps> = ({
                     r="25"
                     fill={
                       isCurrent ? '#ef4444' :
-                      isInScore ? '#10b981' :
-                      position.type === 'minor' ? '#6366f1' :
-                      position.type === 'diminished' ? '#f59e0b' :
-                      position.type === 'half-diminished' ? '#d97706' :
-                      position.type === 'dominant' ? '#8b5cf6' :
-                      '#3b82f6'
+                        isInScore ? '#10b981' :
+                          position.type === 'minor' ? '#6366f1' :
+                            position.type === 'diminished' ? '#f59e0b' :
+                              position.type === 'half-diminished' ? '#d97706' :
+                                position.type === 'dominant' ? '#8b5cf6' :
+                                  '#3b82f6'
                     }
                     fillOpacity={isCurrent ? 1 : isInScore ? 0.8 : 0.6}
                     stroke="#1f2937"
@@ -229,7 +229,7 @@ const ReactBraid: React.FC<BraidProps> = ({
                     className="cursor-pointer hover:fillOpacity-100 transition-all"
                     onClick={() => onAskChordsInScore?.(position.chord)}
                   />
-                  
+
                   {/* Chord text */}
                   <text
                     x={position.x}
@@ -245,7 +245,7 @@ const ReactBraid: React.FC<BraidProps> = ({
                 </g>
               );
             })}
-            
+
             {/* Center information */}
             <text
               x="300"

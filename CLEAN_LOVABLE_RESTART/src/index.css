@@ -1,0 +1,261 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Million Song Mind - Premium Dark Design System */
+
+@layer base {
+  :root {
+    /* Premium Dark Theme - Deeper, cleaner */
+    --background: 218 27% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 218 25% 6%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 218 25% 6%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Harmonic Blue Primary - More refined */
+    --primary: 217 91% 59%;
+    --primary-foreground: 218 27% 4%;
+
+    /* Professional Gray Secondary - Better contrast */
+    --secondary: 218 20% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 218 20% 8%;
+    --muted-foreground: 215 25% 70%;
+
+    /* Audio Engineering Accent - Softer green */
+    --accent: 142 65% 50%;
+    --accent-foreground: 218 27% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 218 20% 12%;
+    --input: 218 20% 8%;
+    --ring: 217 91% 59%;
+
+    --radius: 0.5rem;
+
+    /* Premium typography scale */
+    --text-scale-xs: 0.75rem;
+    --text-scale-sm: 0.875rem;
+    --text-scale-base: 1rem;
+    --text-scale-lg: 1.125rem;
+    --text-scale-xl: 1.25rem;
+    --text-scale-2xl: 1.5rem;
+    --text-scale-3xl: 1.875rem;
+    --text-scale-4xl: 2.25rem;
+
+    /* Custom Harmonic Analysis Colors - Refined palette */
+    --harmonic-root: 142 65% 50%;
+    --harmonic-first: 0 75% 58%;
+    --harmonic-second: 217 91% 59%;
+    --harmonic-third: 215 25% 60%;
+    
+    /* Professional Gradients - Subtler, more premium */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(217 91% 70% / 0.6));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--card)), hsl(218 25% 4%));
+    --gradient-accent: linear-gradient(90deg, hsl(var(--accent) / 0.1), hsl(142 65% 55% / 0.05));
+    
+    /* Precise Shadows - More depth */
+    --shadow-professional: 0 20px 60px -15px hsl(218 27% 2% / 0.7);
+    --shadow-card: 0 8px 30px -8px hsl(218 27% 2% / 0.4);
+    --shadow-chart: 0 4px 20px hsl(217 91% 59% / 0.15);
+    
+    /* Smooth Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-chart: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Search interface enhancements */
+    --search-background: hsl(218 20% 10%);
+    --search-border: hsl(218 20% 15%);
+    --search-focus: hsl(217 91% 59% / 0.3);
+    
+    /* Harmonic Chart Animations */
+    --glow-primary: 0 0 20px hsl(var(--primary) / 0.6);
+    --glow-accent: 0 0 15px hsl(var(--accent) / 0.5);
+    --glow-intense: 0 0 30px hsl(var(--primary) / 0.8), 0 0 60px hsl(var(--accent) / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Keyframes for Harmonic Chart */
+@keyframes bar-rise {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.5));
+  }
+  50% {
+    filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.8)) drop-shadow(0 0 25px hsl(var(--accent) / 0.4));
+  }
+}
+
+@keyframes chord-highlight {
+  0% {
+    background-color: hsl(var(--background));
+  }
+  50% {
+    background-color: hsl(var(--primary) / 0.1);
+  }
+  100% {
+    background-color: hsl(var(--background));
+  }
+}
+
+@keyframes flame-flicker {
+  0%, 100% { 
+    opacity: 0.8; 
+    transform: translateY(0) scale(1);
+  }
+  25% { 
+    opacity: 1; 
+    transform: translateY(-2px) scale(1.05);
+  }
+  50% { 
+    opacity: 0.9; 
+    transform: translateY(-1px) scale(0.98);
+  }
+  75% { 
+    opacity: 1; 
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+/* Custom font for chord labels - Prefer Fontdec13 if available, fallback to JetBrains Mono */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+@font-face {
+  font-family: 'Fontdec13';
+  src: local('Fontdec13');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Harmonic Chart Enhancements */
+.harmonic-bar {
+  animation: bar-rise 0.8s ease-out;
+  transform-origin: bottom;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.harmonic-bar:hover {
+  filter: brightness(1.2) drop-shadow(var(--glow-primary));
+  transform: translateY(-2px);
+}
+
+.harmonic-bar.selected {
+  filter: brightness(1.4) drop-shadow(var(--glow-intense));
+  transform: translateY(-4px) scale(1.02);
+}
+
+.chord-label-custom {
+  font-family: 'Fontdec13', 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
+}
+
+.flame-effect {
+  animation: flame-flicker 2s ease-in-out infinite;
+}
+
+/* Inversion bar glow effect */
+.inversion-bar {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.inversion-bar::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -1px;
+  right: -1px;
+  bottom: -2px;
+  background: inherit;
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.harmonic-bar:hover .inversion-bar::after {
+  opacity: 0.6;
+}
