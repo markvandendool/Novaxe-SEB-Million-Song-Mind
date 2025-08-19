@@ -22,7 +22,7 @@ export const BraidTextSwitcher: React.FC<BraidTextSwitcherProps> = ({
       variant="outline"
       size={compact ? "sm" : "default"}
       onClick={handleToggle}
-      className={`font-mono transition-all duration-200 ${
+      className={` transition-all duration-200 ${
         compact 
           ? "text-xs px-2 py-1 h-6" 
           : "text-sm px-3 py-2"

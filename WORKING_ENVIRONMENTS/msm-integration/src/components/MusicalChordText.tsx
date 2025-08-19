@@ -13,7 +13,7 @@ export const MusicalChordText: React.FC<MusicalChordTextProps> = ({
   variant = 'chord',
   size = 'base'
 }) => {
-  const baseClasses = 'font-fontdec13 braid-label';
+  const baseClasses = 'font-mono braid-label';
   
   const sizeClasses = {
     xs: 'text-xs',

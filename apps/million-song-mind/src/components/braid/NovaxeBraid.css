@@ -155,7 +155,7 @@
 
 /* Text Styles */
 text {
-  font-family: 'Arial', sans-serif;
+  font-family: 'Fontdec13', monospace;
   font-size: 12px;
   font-weight: bold;
   text-anchor: middle;
@@ -216,17 +216,17 @@ text.right.duo.roman {
     flex-direction: column;
     gap: 5px;
   }
-  
+
   .tonality-select,
   .roman-toggle {
     font-size: 12px;
     padding: 3px 8px;
   }
-  
+
   text {
     font-size: 10px;
   }
-  
+
   text.duo {
     font-size: 8px;
   }
@@ -234,15 +234,16 @@ text.right.duo.roman {
 
 /* Dark Mode Support */
 @media (prefers-color-scheme: dark) {
+
   .tonality-select,
   .roman-toggle {
     background: #2a2a2a;
     color: #ffffff;
     border-color: #555;
   }
-  
+
   .tonality-select:hover,
   .roman-toggle:hover {
     background: #3a3a3a;
   }
-} 
+}

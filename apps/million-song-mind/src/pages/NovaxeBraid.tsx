@@ -38,7 +38,7 @@ const NovaxeBraidPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-mono font-bold">Novaxe Braid</h1>
+        <h1 className="text-2xl  font-bold">Novaxe Braid</h1>
         <div className="flex items-center gap-3">
           <Button onClick={downloadSVG} variant="harmonic">Download SVG</Button>
         </div>

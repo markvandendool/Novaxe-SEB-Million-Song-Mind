@@ -172,7 +172,7 @@ class AgentCheckInSystem {
       'iMac Name Backfill (P0)', 
       'Braid Live Metrics (P0)',
       'Guardrails Merge (P1)',
-      'Fontdec13 Integration (P1)'
+      'Arial Integration (P1)'
     ];
   }
 

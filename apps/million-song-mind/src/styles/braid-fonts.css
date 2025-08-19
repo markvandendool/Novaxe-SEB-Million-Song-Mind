@@ -1,32 +1,18 @@
-/* Braid Font System - nvxFont integration */
+/* Braid Font System - Fontdec13 with enhanced browser compatibility */
 
 @font-face {
-    font-family: "nvxChord";
-    src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+    font-family: "Fontdec13";
+    src: url("/fonts/Fontdec13.otf") format("opentype"),
+        url("/fonts/Fontdec13.otf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+    unicode-range: U+0020-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
-@font-face {
-    font-family: "NovaxeSDCT";
-    src: url("/fonts/NovaxeSDCTFont.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: "MainComma";
-    src: url("/fonts/main_comma.otf") format("opentype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-/* Base braid chord text styling */
+/* Base braid chord text styling - matches original Angular */
 .braid-chord-text {
-    font-family: "nvxChord", "Courier New", monospace;
+    font-family: "Fontdec13", "Monaco", "Menlo", "Consolas", monospace;
     font-size: 18px;
     font-weight: normal;
     line-height: 1;
@@ -34,22 +20,13 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* Chord root note styling */
-.braid-root-note {
-    font-family: "Inter", sans-serif;
-    font-size: 16px;
-    font-weight: 600;
-    color: #e5e7eb;
-}
-
-/* Chord quality (font character) styling */
-.braid-chord-quality {
-    font-family: "nvxChord", monospace;
-    font-size: 14px;
-    color: #9ca3af;
-    margin-left: 2px;
+/* Force font loading for all text elements */
+.fontdec13-force-load {
+    font-family: "Fontdec13", monospace !important;
+    font-display: swap;
 }
 
 /* Container for chord display */
@@ -67,123 +44,4 @@
 
 .braid-position-relative {
     position: relative;
-}
-
-/* Chord hover effects */
-.braid-chord-container:hover .braid-root-note {
-    color: #ffffff;
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
-}
-
-.braid-chord-container:hover .braid-chord-quality {
-    color: #d1d5db;
-}
-
-/* Chord classification color coding */
-.braid-chord-major {
-    --chord-color: #10b981;
-    /* green */
-}
-
-.braid-chord-minor {
-    --chord-color: #3b82f6;
-    /* blue */
-}
-
-.braid-chord-dominant {
-    --chord-color: #f59e0b;
-    /* amber */
-}
-
-.braid-chord-diminished {
-    --chord-color: #ef4444;
-    /* red */
-}
-
-.braid-chord-halfDiminished {
-    --chord-color: #f97316;
-    /* orange */
-}
-
-.braid-chord-container[data-chord-type="major"] .braid-root-note {
-    color: var(--chord-color);
-}
-
-.braid-chord-container[data-chord-type="minor"] .braid-root-note {
-    color: var(--chord-color);
-}
-
-.braid-chord-container[data-chord-type="dominant"] .braid-root-note {
-    color: var(--chord-color);
-}
-
-.braid-chord-container[data-chord-type="diminished"] .braid-root-note {
-    color: var(--chord-color);
-}
-
-.braid-chord-container[data-chord-type="halfDiminished"] .braid-root-note {
-    color: var(--chord-color);
-}
-
-/* Active/focused chord styling */
-.braid-chord-active {
-    transform: scale(1.1);
-    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
-    z-index: 10;
-}
-
-.braid-chord-active .braid-root-note {
-    color: #ffffff !important;
-    text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
-}
-
-.braid-chord-active .braid-chord-quality {
-    color: #ffffff !important;
-}
-
-/* Transition animations */
-.braid-chord-container {
-    transition: all 0.25s ease;
-}
-
-.braid-root-note,
-.braid-chord-quality {
-    transition: all 0.2s ease;
-}
-
-/* Responsive sizing */
-@media (max-width: 768px) {
-    .braid-chord-text {
-        font-size: 16px;
-    }
-
-    .braid-root-note {
-        font-size: 14px;
-    }
-
-    .braid-chord-quality {
-        font-size: 12px;
-    }
-}
-
-/* Debug helper - shows original chord on hover */
-.braid-chord-container[data-debug="true"]::after {
-    content: attr(data-original-chord);
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0, 0, 0, 0.8);
-    color: white;
-    padding: 2px 6px;
-    border-radius: 3px;
-    font-size: 10px;
-    white-space: nowrap;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-}
-
-.braid-chord-container[data-debug="true"]:hover::after {
-    opacity: 1;
 }

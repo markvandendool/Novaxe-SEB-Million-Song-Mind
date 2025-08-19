@@ -51,7 +51,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ logs, isOpen, onClose, o
       <Card className="bg-background/95 backdrop-blur-sm border-border shadow-lg">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm font-mono text-foreground">
+            <CardTitle className="text-sm  text-foreground">
               DEBUG PANEL
             </CardTitle>
             <div className="flex items-center space-x-2">
@@ -119,7 +119,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ logs, isOpen, onClose, o
                       <Badge className={getTypeColor(log.type)}>
                         {log.type.toUpperCase()}
                       </Badge>
-                      <span className="text-muted-foreground font-mono text-[10px]">
+                      <span className="text-muted-foreground  text-[10px]">
                         {log.timestamp}
                       </span>
                     </div>
@@ -146,7 +146,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ logs, isOpen, onClose, o
                     <div className="text-foreground">{log.message}</div>
                     
                     {log.details && (
-                      <div className="text-muted-foreground bg-muted/50 p-1 rounded text-[10px] font-mono">
+                      <div className="text-muted-foreground bg-muted/50 p-1 rounded text-[10px] ">
                         {log.details}
                       </div>
                     )}
@@ -159,7 +159,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({ logs, isOpen, onClose, o
                   </div>
                 ))
               ) : (
-                <pre className="text-[10px] font-mono text-foreground bg-muted/50 p-2 rounded overflow-x-auto">
+                <pre className="text-[10px]  text-foreground bg-muted/50 p-2 rounded overflow-x-auto">
                   {JSON.stringify(logs, null, 2)}
                 </pre>
               )}

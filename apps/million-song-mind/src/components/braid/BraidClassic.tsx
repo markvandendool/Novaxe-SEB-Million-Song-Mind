@@ -27,7 +27,7 @@ function rotate<T>(arr: T[], n: number): T[] {
   return a.slice(k).concat(a.slice(0, k));
 }
 
-const KEYS_FALLBACK = ['C','G','D','A','E','B','F#','C#','F','Bb','Eb','Ab','Db','Gb','Cb'];
+const KEYS_FALLBACK = ['C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb'];
 
 const Select: React.FC<{
   value: string;
@@ -77,10 +77,10 @@ const BraidClassic: React.FC = () => {
 
   const braidData = useMemo(() => {
     if (!tonalities) return null;
-    
+
     const currentSet = tonalities[keySel] as TonalSet;
     const romanSet = tonalities.roman as TonalSet;
-    
+
     if (!currentSet || !romanSet) return null;
 
     const getInUse = (noteArr: string[], romanArr: string[], rotation = 0) => {
@@ -106,10 +106,10 @@ const BraidClassic: React.FC = () => {
   }, [tonalities, keySel, displayRoman]);
 
   // Bubble component
-  const BraidBubble: React.FC<{ 
-    x: number; 
-    y: number; 
-    label: string; 
+  const BraidBubble: React.FC<{
+    x: number;
+    y: number;
+    label: string;
     isActive?: boolean;
     size?: number;
   }> = ({ x, y, label, isActive = false, size = 28 }) => (
@@ -125,7 +125,7 @@ const BraidClassic: React.FC = () => {
         x="0"
         y="5"
         textAnchor="middle"
-        className="font-fontdec13 text-sm fill-foreground pointer-events-none"
+        className=" text-sm fill-foreground pointer-events-none"
       >
         {label}
       </text>
@@ -135,13 +135,13 @@ const BraidClassic: React.FC = () => {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-fontdec13 font-semibold">Classic Braid (nvx_braid_fixes2)</h2>
+        <h2 className="text-lg  font-semibold">Classic Braid (nvx_braid_fixes2)</h2>
         <div className="flex items-center gap-3 flex-wrap">
           <Button
             variant={displayRoman ? "default" : "outline"}
             size="sm"
             onClick={() => setDisplayRoman(!displayRoman)}
-            className="font-fontdec13"
+            className=""
           >
             {displayRoman ? 'Roman' : 'Notes'}
           </Button>
@@ -171,7 +171,7 @@ const BraidClassic: React.FC = () => {
                   <stop offset="0%" stopColor="hsl(var(--muted) / 0.1)" />
                   <stop offset="100%" stopColor="hsl(var(--muted) / 0.05)" />
                 </radialGradient>
-                
+
                 {/* Connection lines gradient */}
                 <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="hsl(var(--border) / 0.3)" />
@@ -335,11 +335,11 @@ const BraidClassic: React.FC = () => {
               <g opacity="0.4">
                 {/* Center connections */}
                 <path d="M 540 400 Q 600 380 660 400" stroke="hsl(var(--primary))" strokeWidth="2" fill="none" markerEnd="url(#arrowhead)" />
-                
+
                 {/* Left side connections */}
                 <path d="M 380 300 Q 450 280 500 300" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" fill="none" />
                 <path d="M 260 350 Q 330 330 380 350" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" fill="none" />
-                
+
                 {/* Right side connections */}
                 <path d="M 700 300 Q 750 280 820 300" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" fill="none" />
                 <path d="M 820 350 Q 880 330 980 350" stroke="hsl(var(--muted-foreground))" strokeWidth="1.5" fill="none" />

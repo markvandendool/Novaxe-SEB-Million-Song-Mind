@@ -147,7 +147,7 @@ export const SongDetailPanel: React.FC<SongDetailPanelProps> = ({ song, isVisibl
               <div className="space-y-2">
                 <h5 className="font-medium text-sm">Original Chords</h5>
                 <div className="bg-muted p-3 rounded-lg">
-                  <code className="text-sm font-mono break-all">
+                  <code className="text-sm  break-all">
                     {song.chords || 'No chord data available'}
                   </code>
                 </div>
@@ -156,7 +156,7 @@ export const SongDetailPanel: React.FC<SongDetailPanelProps> = ({ song, isVisibl
               <div className="space-y-2">
                 <h5 className="font-medium text-sm">Roman Numerals</h5>
                 <div className="bg-muted p-3 rounded-lg">
-                  <code className="text-sm font-mono break-all">
+                  <code className="text-sm  break-all">
                     {song.roman_numerals || 'No Roman numeral analysis available'}
                   </code>
                 </div>
@@ -168,7 +168,7 @@ export const SongDetailPanel: React.FC<SongDetailPanelProps> = ({ song, isVisibl
               <div className="space-y-2">
                 <h5 className="font-medium text-sm">TRUE HUV Fingerprint</h5>
                 <div className="bg-muted p-3 rounded-lg">
-                  <code className="text-sm font-mono break-all">
+                  <code className="text-sm  break-all">
                     {song.harmonic_fingerprint}
                   </code>
                 </div>

@@ -13,21 +13,21 @@ export const MusicalChordText: React.FC<MusicalChordTextProps> = ({
   variant = 'chord',
   size = 'base'
 }) => {
-  const baseClasses = 'font-fontdec13 braid-label';
-  
+  const baseClasses = ' braid-label';
+
   const sizeClasses = {
     xs: 'text-xs',
-    sm: 'text-sm', 
+    sm: 'text-sm',
     base: 'text-base',
     lg: 'text-lg',
     xl: 'text-xl'
   };
 
   const variantClasses = {
-    chord: 'font-mono tracking-wider',
+    chord: ' tracking-wider',
     label: 'tracking-wide',
     roman: 'font-serif tracking-wide',
-    note: 'font-mono tracking-widest'
+    note: ' tracking-widest'
   };
 
   const combinedClasses = [

@@ -43,7 +43,7 @@ const NovaxeBraidPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <header className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-mono font-bold">Novaxe Braid</h1>
+          <h1 className="text-2xl  font-bold">Novaxe Braid</h1>
           <p className="text-muted-foreground mt-2">
             Exact Novaxe braid implementation with all mappings and interactive features
           </p>

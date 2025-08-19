@@ -1,5 +1,5 @@
 import React from 'react';
-import { parseChordForDisplay, classifyChord } from '@/utils/ChordFontMapper';
+import { translateChordToFont, classifyChord } from '@/utils/ChordFontMapper';
 import '@/styles/braid-fonts.css';
 
 interface BraidChordProps {
@@ -13,8 +13,8 @@ interface BraidChordProps {
 }
 
 /**
- * BraidChord - Renders a chord using the nvxFont system
- * Integrates the legacy Angular braid font rendering into React
+ * BraidChord - Renders a chord using the original nvxChord font system
+ * Matches the legacy Angular braid font rendering (single font, no separation)
  */
 export const BraidChord: React.FC<BraidChordProps> = ({
     chord,
@@ -27,7 +27,7 @@ export const BraidChord: React.FC<BraidChordProps> = ({
 }) => {
     if (!chord) return null;
 
-    const { root, fontChar, original } = parseChordForDisplay(chord);
+    const fontChar = translateChordToFont(chord);
     const chordType = classifyChord(chord);
 
     const handleClick = () => {
@@ -50,17 +50,14 @@ export const BraidChord: React.FC<BraidChordProps> = ({
         ${className}
       `.trim()}
             data-chord-type={chordType}
-            data-original-chord={original}
+            data-original-chord={chord}
             data-debug={debug}
             style={containerStyle}
             onClick={handleClick}
             role={onClick ? "button" : undefined}
             tabIndex={onClick ? 0 : undefined}
         >
-            <span className="braid-root-note">
-                {root}
-            </span>
-            <span className="braid-chord-quality">
+            <span className="braid-chord-text">
                 {fontChar}
             </span>
         </div>

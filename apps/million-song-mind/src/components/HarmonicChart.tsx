@@ -40,14 +40,14 @@ function formatChordLabel(label: string): string {
 
 export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect, selectedChords = [] }: HarmonicChartProps) {
   const animationTriggered = useRef(new Set<string>());
-  
+
   // Find highest percentage chords for special styling
   const maxPercentage = Math.max(...data.map(d => d.percent));
   const highestChords = data.filter(d => d.percent === maxPercentage && d.percent > 0).map(d => d.chord);
-  
+
   // Show empty state if no data
   if (!data || data.length === 0) {
-    try { fetch('/__log', { method: 'POST', body: JSON.stringify({ ts: Date.now(), stage: 'chart:empty' }), keepalive: true }).catch(() => {}); } catch {}
+    try { fetch('/__log', { method: 'POST', body: JSON.stringify({ ts: Date.now(), stage: 'chart:empty' }), keepalive: true }).catch(() => { }); } catch { }
     return (
       <div className="flex items-center justify-center h-96 text-center">
         <div className="space-y-4">
@@ -74,7 +74,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
       const compressionFactor = 1 - Math.pow(extra / 60, 1.5) * 0.4;
       return 40 + extra * compressionFactor;
     };
-    
+
     // Normalize by the maximum compressed value (100%)
     const maxCompressed = getRawCompression(100);
     return getRawCompression(value) / maxCompressed;
@@ -117,8 +117,8 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
   };
   try {
     const summary = Object.fromEntries(data.slice(0, 10).map(d => [d.chord, d.percent]));
-    fetch('/__log', { method: 'POST', body: JSON.stringify({ ts: Date.now(), stage: 'chart:data', count: data.length, summary }), keepalive: true }).catch(() => {});
-  } catch {}
+    fetch('/__log', { method: 'POST', body: JSON.stringify({ ts: Date.now(), stage: 'chart:data', count: data.length, summary }), keepalive: true }).catch(() => { });
+  } catch { }
   const SECTION_KEY_MAP: Record<string, keyof typeof CHORD_GROUPS> = { Applied: 'Applied' };
   let currentX = 60;
   const sectionData: {
@@ -134,7 +134,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
       const chordData = data.find(d => d.chord === chord);
       return sum + (chordData?.percent || 0);
     }, 0);
-    
+
     const sectionWidth = Math.max(0, (chords as readonly string[]).length * (BAR_WIDTH + BAR_SPACING) - BAR_SPACING);
     const sectionInfo = {
       name: sectionName,
@@ -149,7 +149,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
         return { ...chordData, x } as ChordData & { x: number };
       })
     };
-    
+
     currentX += sectionWidth + SECTION_SPACING;
     return sectionInfo;
   });
@@ -170,11 +170,11 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
   return (
     <div className="flex justify-center w-full">
       <div className="relative animate-fade-in" style={{ width: Math.max(chartWidth * 2.1, 1800), height: CHART_HEIGHT + 200 }}>
-        
+
         {/* Y-Axis Labels with Compression - 100% anchored 10px from top */}
         <div className="absolute left-0 top-0 h-full">
           {getYAxisLabels().map((label) => (
-            <div 
+            <div
               key={label.value}
               className="absolute flex items-center text-foreground text-sm font-mono font-bold"
               style={{ bottom: 140 + label.compressed * (CHART_HEIGHT - 10) }}
@@ -185,7 +185,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
           ))}
         </div>
 
-                {/* Professional Grid Lines with Compression */}
+        {/* Professional Grid Lines with Compression */}
         <div
           className="absolute"
           style={{
@@ -197,7 +197,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
         >
           {/* Major grid lines at 10% intervals */}
           {getYAxisLabels().filter(l => l.value > 0).map(label => (
-            <div 
+            <div
               key={`major-${label.value}`}
               className="absolute w-full border-t border-foreground opacity-30"
               style={{ bottom: label.compressed * (CHART_HEIGHT - 10) }}
@@ -206,7 +206,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
 
           {/* Faint grid lines at 5% intervals for alignment */}
           {getGridLines().filter(l => l.value > 0 && l.value % 10 !== 0).map(label => (
-            <div 
+            <div
               key={`minor-${label.value}`}
               className="absolute w-full border-t border-muted-foreground opacity-10"
               style={{ bottom: label.compressed * (CHART_HEIGHT - 10) }}
@@ -224,7 +224,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
           const chordsInSection = CHORD_ORDER[section.name as keyof typeof CHORD_ORDER] || [];
           const usedChords = section.chords.filter(chord => chord.percent > 0).length;
           const totalChords = chordsInSection.length;
-          
+
           return (
             <div key={`${section.name}-aggregate-container`}>
               <div
@@ -236,10 +236,10 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                   bottom: 140
                 }}
               />
-              
+
               {['Major', 'Applied', 'Minor'].includes(section.name) && (() => {
                 const usagePercent = (usedChords / totalChords) * 100;
-                
+
                 // Play celebration sound for 100% usage (once per section)
                 useEffect(() => {
                   if (usagePercent === 100 && !animationTriggered.current.has(`celebration-${section.name}`)) {
@@ -249,7 +249,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     }, Math.random() * 300);
                   }
                 }, [usagePercent, section.name]);
-                
+
                 return (
                   <div
                     className={`absolute text-center pointer-events-none ${fractionUsageClass(usagePercent)}`}
@@ -259,10 +259,10 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                       bottom: (0.75 * CHART_HEIGHT) + 160 // Fixed at 75% Y value to avoid data overlap
                     }}
                   >
-                    <div 
+                    <div
                       className="fraction-text text-white font-bold tracking-wider"
                       style={{
-                        fontFamily: "'Orbitron', 'Exo 2', 'Arial Black', sans-serif",
+                        fontFamily: "'Fontdec13', monospace",
                         fontStyle: 'italic',
                         fontWeight: '900',
                         color: '#E6F3FF',
@@ -280,10 +280,10 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     >
                       {usedChords}/{totalChords}
                     </div>
-                    <div 
+                    <div
                       className="fraction-subtitle text-white text-xs mt-1 font-bold tracking-widest"
                       style={{
-                        fontFamily: "'Orbitron', 'Exo 2', sans-serif",
+                        fontFamily: "'Fontdec13', monospace",
                         fontStyle: 'italic',
                         fontWeight: '700',
                         color: '#E6F3FF',
@@ -299,7 +299,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                   </div>
                 );
               })()}
-              
+
               {/* Section Total Percentage */}
               {section.total > 0 && ['Major', 'Applied', 'Minor'].includes(section.name) && (
                 <div
@@ -318,14 +318,14 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
         })}
 
         {/* Individual Chord Bars - PERFECTLY ANCHORED */}
-        {sectionData.map(section => 
+        {sectionData.map(section =>
           section.chords.map(chord => {
             const compressedPercent = compressPercent(chord.percent);
             const barHeight = compressedPercent * (CHART_HEIGHT - 10);
             const inversionValues: number[] = [chord.root, chord.first, chord.second, chord.third];
             const totalInversions = inversionValues.reduce((a, b) => a + b, 0);
             const isSelected = selectedChords.includes(chord.chord) || selectedChords.includes(mapRomanToHarmonicSlot(chord.chord, focusedKey) || '');
-            
+
             const handleChordClick = (e: React.MouseEvent) => {
               e.preventDefault();
               // Play appropriate sound
@@ -337,7 +337,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
               // Toggle selection on regular click; Cmd/Ctrl also toggles
               onChordSelect?.(chord.chord, !isSelected);
             };
-            
+
             // Trigger animation sound once when bar appears
             useEffect(() => {
               if (chord.percent > 0 && !animationTriggered.current.has(chord.chord)) {
@@ -347,18 +347,17 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                 }, Math.random() * 800); // Stagger the sounds
               }
             }, [chord.percent, chord.chord]);
-            
+
             const isHighestChord = highestChords.includes(chord.chord);
-            
+
             // Unique key prevents unnecessary re-renders
             const uniqueKey = `${section.name}-${chord.chord}`;
-            
+
             return (
-              <div 
+              <div
                 key={uniqueKey}
-                className={`absolute transition-all duration-300 cursor-pointer ${
-                  isSelected ? 'z-10 ring-2 ring-primary/60 rounded-sm' : 'z-0'
-                }`}
+                className={`absolute transition-all duration-300 cursor-pointer ${isSelected ? 'z-10 ring-2 ring-primary/60 rounded-sm' : 'z-0'
+                  }`}
                 style={{
                   left: chord.x,
                   width: BAR_WIDTH,
@@ -366,7 +365,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                   bottom: 100
                 }}
                 onClick={handleChordClick}
-                 title={`${chord.chord} (${noteMap[chord.chord] || ''}) - Click to select, ⌘/Ctrl+click for multi-select`}
+                title={`${chord.chord} (${noteMap[chord.chord] || ''}) - Click to select, ⌘/Ctrl+click for multi-select`}
               >
                 {/* Percentage Label - Static positioning to prevent flicker */}
                 {chord.percent > 0 && (
@@ -385,46 +384,44 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                 {/* Main Bar - ANCHORED TO BOTTOM X-AXIS */}
                 {chord.percent > 0 && (
                   <div
-                    className={`absolute flex rounded-t harmonic-bar ${
-                      isSelected ? 'selected' : ''
-                    } ${chord.percent > 20 ? 'flame-effect' : ''} ${
-                      isHighestChord ? 'highest-chord-glow animate-pulse-glow' : ''
-                    }`}
+                    className={`absolute flex rounded-t harmonic-bar ${isSelected ? 'selected' : ''
+                      } ${chord.percent > 20 ? 'flame-effect' : ''} ${isHighestChord ? 'highest-chord-glow animate-pulse-glow' : ''
+                      }`}
                     style={{
                       left: 0,
                       width: BAR_WIDTH,
                       height: barHeight,
                       bottom: 40,
-                      background: isSelected 
+                      background: isSelected
                         ? 'linear-gradient(180deg, hsl(var(--primary)), hsl(var(--primary) / 0.7))'
                         : 'linear-gradient(180deg, hsl(var(--foreground)), hsl(var(--foreground) / 0.8))',
-                      boxShadow: isSelected 
-                        ? 'var(--glow-intense)' 
-                        : chord.percent > 15 
-                          ? 'var(--glow-primary)' 
+                      boxShadow: isSelected
+                        ? 'var(--glow-intense)'
+                        : chord.percent > 15
+                          ? 'var(--glow-primary)'
                           : 'var(--shadow-chart)'
                     }}
                   >
-                     {/* Inversion Sub-bars with Harmonic Colors */}
-                     {inversionValues.map((value, idx) => {
-                       const invHeight = totalInversions > 0 ? (value / totalInversions) * barHeight : 0;
-                       const colors = ['hsl(var(--harmonic-root))', 'hsl(var(--harmonic-first))', 'hsl(var(--harmonic-second))', 'hsl(var(--harmonic-third))'];
-                       
-                       return (
-                         <div key={`inv-${idx}`} className="relative" style={{ width: 8 }}>
-                           <div
-                             className="absolute bottom-0 transition-all duration-300"
-                             style={{
-                               width: 8,
-                               height: invHeight,
-                               backgroundColor: colors[idx],
-                               borderRadius: idx === 0 ? '2px 0 0 0' : idx === 3 ? '0 2px 0 0' : '0',
-                               animationDelay: `${idx * 0.1}s`
-                             }}
-                           />
-                         </div>
-                       );
-                     })}
+                    {/* Inversion Sub-bars with Harmonic Colors */}
+                    {inversionValues.map((value, idx) => {
+                      const invHeight = totalInversions > 0 ? (value / totalInversions) * barHeight : 0;
+                      const colors = ['hsl(var(--harmonic-root))', 'hsl(var(--harmonic-first))', 'hsl(var(--harmonic-second))', 'hsl(var(--harmonic-third))'];
+
+                      return (
+                        <div key={`inv-${idx}`} className="relative" style={{ width: 8 }}>
+                          <div
+                            className="absolute bottom-0 transition-all duration-300"
+                            style={{
+                              width: 8,
+                              height: invHeight,
+                              backgroundColor: colors[idx],
+                              borderRadius: idx === 0 ? '2px 0 0 0' : idx === 3 ? '0 2px 0 0' : '0',
+                              animationDelay: `${idx * 0.1}s`
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -437,17 +434,17 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     bottom: -15
                   }}
                 >
-                   <div 
-                    className={`font-bold leading-tight mb-1 chord-label-custom font-fontdec13 ${isSelected ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.75)]' : 'text-foreground'}`} 
-                    style={{ 
+                  <div
+                    className={`font-bold leading-tight mb-1 chord-label-custom font-fontdec13 ${isSelected ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.75)]' : 'text-foreground'}`}
+                    style={{
                       fontFeatureSettings: '"liga" 1, "kern" 1, "dlig" 1, "clig" 1'
                     }}
                   >
                     {formatChordLabel(chord.chord)}
                   </div>
-                   <div 
-                    className={`leading-none chord-label-custom font-fontdec13 ${isSelected ? 'text-primary/80' : 'text-muted-foreground'}`} 
-                    style={{ 
+                  <div
+                    className={`leading-none chord-label-custom font-fontdec13 ${isSelected ? 'text-primary/80' : 'text-muted-foreground'}`}
+                    style={{
                       fontFeatureSettings: '"liga" 1, "kern" 1, "dlig" 1, "clig" 1'
                     }}
                   >
@@ -489,7 +486,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
         ))}
 
         {/* Professional Legend */}
-        <div 
+        <div
           className="absolute flex items-center justify-center space-x-8 text-foreground font-mono text-sm"
           style={{ bottom: 0, left: 0, right: 0 }}
         >

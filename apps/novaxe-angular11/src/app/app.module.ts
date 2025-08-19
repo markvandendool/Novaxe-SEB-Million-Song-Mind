@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import abcjs from 'abcjs';
 declare global {
-  var ABC:any;
+  var ABC: any;
 }
 export const ABC: any = abcjs;
 
@@ -112,7 +112,7 @@ import { MidiChordDisplayComponent } from './components/midi-chord-display/midi-
 import { CurChordModel } from '@models/songmodel/cur-chord-model';
 import { WelcomeComponent } from './pages/welcome/welcome.component';
 import { MsmLandingComponent } from './pages/msm-landing/msm-landing.component';
-import { BraidStandaloneComponent } from './pages/braid-standalone/braid-standalone.component';
+// import { BraidStandaloneComponent } from './pages/braid-standalone/braid-standalone.component';
 import { BraidPageComponent } from './pages/braid-page/braid-page.component';
 
 
@@ -191,7 +191,7 @@ import { BraidPageComponent } from './pages/braid-page/braid-page.component';
     Songmodel,
     SongInfo,
     Statsmodel,
-    StorageService, 
+    StorageService,
     ExoGenService,
     SynthService,
     ExerciseResultsService,
@@ -212,7 +212,7 @@ import { BraidPageComponent } from './pages/braid-page/braid-page.component';
     SpotifyService,
     CurTonalityModel,
     CurChordModel
-    ],
+  ],
 
   bootstrap: [AppComponent],
   // entryComponents: [ChordComponent]

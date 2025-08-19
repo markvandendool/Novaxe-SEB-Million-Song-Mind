@@ -67,8 +67,8 @@ export const MusicVizFileUploader: React.FC<MusicVizFileUploaderProps> = ({
         onClick={handleButtonClick}
         disabled={isLoading}
         className={compact 
-          ? "bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-xs tracking-wider px-3 py-1 h-6 rounded transition-all duration-300"
-          : "bg-primary hover:bg-primary/90 text-primary-foreground font-mono text-sm tracking-wider px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
+          ? "bg-primary hover:bg-primary/90 text-primary-foreground  text-xs tracking-wider px-3 py-1 h-6 rounded transition-all duration-300"
+          : "bg-primary hover:bg-primary/90 text-primary-foreground  text-sm tracking-wider px-8 py-3 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl"
         }
       >
         <FolderOpen className={compact ? "w-3 h-3 mr-1" : "w-5 h-5 mr-3"} />

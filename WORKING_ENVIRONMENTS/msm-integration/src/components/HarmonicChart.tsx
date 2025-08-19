@@ -438,7 +438,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                   }}
                 >
                    <div 
-                    className={`font-bold leading-tight mb-1 chord-label-custom font-fontdec13 ${isSelected ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.75)]' : 'text-foreground'}`} 
+                    className={`font-bold leading-tight mb-1 chord-label-custom font-mono ${isSelected ? 'text-primary drop-shadow-[0_0_8px_rgba(59,130,246,0.75)]' : 'text-foreground'}`} 
                     style={{ 
                       fontFeatureSettings: '"liga" 1, "kern" 1, "dlig" 1, "clig" 1'
                     }}
@@ -446,7 +446,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     {formatChordLabel(chord.chord)}
                   </div>
                    <div 
-                    className={`leading-none chord-label-custom font-fontdec13 ${isSelected ? 'text-primary/80' : 'text-muted-foreground'}`} 
+                    className={`leading-none chord-label-custom font-mono ${isSelected ? 'text-primary/80' : 'text-muted-foreground'}`} 
                     style={{ 
                       fontFeatureSettings: '"liga" 1, "kern" 1, "dlig" 1, "clig" 1'
                     }}

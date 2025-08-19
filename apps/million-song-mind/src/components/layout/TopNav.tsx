@@ -8,7 +8,7 @@ const TopNav: React.FC = () => {
         <div className="flex items-center justify-between">
           <Link 
             to="/" 
-            className="text-lg font-mono font-bold text-foreground hover:text-primary transition-colors"
+            className="text-lg  font-bold text-foreground hover:text-primary transition-colors"
           >
             MillionSongMind
           </Link>

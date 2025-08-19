@@ -1,6 +1,4 @@
-/* Enhanced fontdec13 integration - Share Tech Mono as Fontdec13 alternative */
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+/* Original nvxChord font system only */
 
 @tailwind base;
 @tailwind components;
@@ -59,17 +57,17 @@
     --harmonic-first: 0 75% 58%;
     --harmonic-second: 217 91% 59%;
     --harmonic-third: 215 25% 60%;
-    
+
     /* Professional Gradients - Subtler, more premium */
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(217 91% 70% / 0.6));
     --gradient-surface: linear-gradient(180deg, hsl(var(--card)), hsl(218 25% 4%));
     --gradient-accent: linear-gradient(90deg, hsl(var(--accent) / 0.1), hsl(142 65% 55% / 0.05));
-    
+
     /* Precise Shadows - More depth */
     --shadow-professional: 0 20px 60px -15px hsl(218 27% 2% / 0.7);
     --shadow-card: 0 8px 30px -8px hsl(218 27% 2% / 0.4);
     --shadow-chart: 0 4px 20px hsl(217 91% 59% / 0.15);
-    
+
     /* Smooth Transitions */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-chart: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -78,7 +76,7 @@
     --search-background: hsl(218 20% 10%);
     --search-border: hsl(218 20% 15%);
     --search-focus: hsl(217 91% 59% / 0.3);
-    
+
     /* Harmonic Chart Animations */
     --glow-primary: 0 0 20px hsl(var(--primary) / 0.6);
     --glow-accent: 0 0 15px hsl(var(--accent) / 0.5);
@@ -161,9 +159,11 @@
     transform: scaleY(0);
     opacity: 0;
   }
+
   50% {
     opacity: 0.8;
   }
+
   100% {
     transform: scaleY(1);
     opacity: 1;
@@ -171,9 +171,12 @@
 }
 
 @keyframes glow-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.5));
   }
+
   50% {
     filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.8)) drop-shadow(0 0 25px hsl(var(--accent) / 0.4));
   }
@@ -183,64 +186,49 @@
   0% {
     background-color: hsl(var(--background));
   }
+
   50% {
     background-color: hsl(var(--primary) / 0.1);
   }
+
   100% {
     background-color: hsl(var(--background));
   }
 }
 
 @keyframes flame-flicker {
-  0%, 100% { 
-    opacity: 0.8; 
+
+  0%,
+  100% {
+    opacity: 0.8;
     transform: translateY(0) scale(1);
   }
-  25% { 
-    opacity: 1; 
+
+  25% {
+    opacity: 1;
     transform: translateY(-2px) scale(1.05);
   }
-  50% { 
-    opacity: 0.9; 
+
+  50% {
+    opacity: 0.9;
     transform: translateY(-1px) scale(0.98);
   }
-  75% { 
-    opacity: 1; 
+
+  75% {
+    opacity: 1;
     transform: translateY(-3px) scale(1.02);
   }
 }
 
 /* Game-like pulsing animation for chord counters */
 @keyframes pulse {
-  0% { transform: skew(-12deg, 0deg) scale(1.1, 1); }
-  100% { transform: skew(-12deg, 0deg) scale(1.15, 1.05); }
-}
+  0% {
+    transform: skew(-12deg, 0deg) scale(1.1, 1);
+  }
 
-/* Chord_Grid_v2 Professional Font Integration */
-@font-face {
-  font-family: 'Fontdec13';
-  src: url('/fonts/Chord_Grid_v2.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-/* Premium Fontdec13 styling for harmonic visualization */
-.font-fontdec13 {
-  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
-  font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
-  font-variant-ligatures: discretionary-ligatures contextual;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Braid label typography */
-.braid-label {
-  font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
-  font-variant-ligatures: discretionary-ligatures contextual;
-  text-rendering: optimizeLegibility;
-  letter-spacing: 0.01em;
+  100% {
+    transform: skew(-12deg, 0deg) scale(1.15, 1.05);
+  }
 }
 
 /* Harmonic Chart Enhancements */
@@ -248,7 +236,8 @@
   animation: bar-rise 0.8s ease-out;
   transform-origin: bottom;
   transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  cursor: pointer; /* clickable across chart and braid */
+  cursor: pointer;
+  /* clickable across chart and braid */
 }
 
 .harmonic-bar:hover {
@@ -270,38 +259,67 @@ svg .harmonic-bar {
   transform: none !important;
   transition: none !important;
 }
+
 svg .harmonic-bar:hover {
   transform: none !important;
   stroke: hsl(var(--primary));
   filter: drop-shadow(var(--glow-primary));
 }
+
 svg .harmonic-bar.selected {
   transform: none !important;
   stroke: hsl(var(--primary));
   filter: drop-shadow(var(--glow-primary));
 }
+
 /* Ensure text labels don't block clicks inside SVG */
-svg text { pointer-events: none; }
-/* Ensure braid labels render musical glyphs (♯, ♭, °, Δ, ø) reliably */
-#braid-tonal svg text {
-  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
-  font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
-  font-variant-ligatures: discretionary-ligatures contextual;
-  text-rendering: optimizeLegibility;
+svg text {
+  pointer-events: none;
 }
+
+/* Ensure braid labels render musical glyphs using Fontdec13 font */
+#braid-tonal svg text {
+  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* Comprehensive font protection for all braid elements */
+#braid-tonal svg text,
+#braid-tonal .smallBubble text,
+#braid-tonal .medBubble text {
+  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+}
+
 #braid-tonal svg text.braid-label {
   stroke: hsl(var(--background) / 0.55);
   stroke-width: 0.65px;
   paint-order: stroke fill;
 }
-#braid-tonal svg text.label-right { text-anchor: start; }
-#braid-tonal svg text.label-left { text-anchor: end; }
+
+#braid-tonal svg text.label-right {
+  text-anchor: start;
+}
+
+#braid-tonal svg text.label-left {
+  text-anchor: end;
+}
 
 .chord-label-custom {
-  font-family: 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', monospace;
-  font-feature-settings: 'liga' 1, 'kern' 1;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+  font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* High specificity protection for chart x-axis labels */
+.chord-label-custom,
+div .chord-label-custom {
+  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+}
+
+/* Additional protection for HarmonicChart fraction text */
+.fraction-text,
+.fraction-subtitle {
+  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
 }
 
 .flame-effect {
@@ -334,50 +352,103 @@ svg text { pointer-events: none; }
 
 /* Fraction Usage Animations for HarmonicChart */
 @keyframes fraction-throb-soft {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-@keyframes fraction-throb-medium {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
-@keyframes fraction-throb-strong {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
-}
-@keyframes fraction-combo-celebrate {
-  0% { transform: scale(1); text-shadow: 0 0 6px hsl(var(--primary)); }
-  25% { transform: scale(1.15); text-shadow: 0 0 10px hsl(var(--accent)); }
-  50% { transform: scale(1.08); text-shadow: 0 0 14px hsl(var(--primary)); }
-  75% { transform: scale(1.18); text-shadow: 0 0 16px hsl(var(--accent)), 0 0 10px hsl(var(--primary)); }
-  100% { transform: scale(1); }
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
 }
 
-.fraction-usage-zero .fraction-text, .fraction-usage-zero .fraction-subtitle {
+@keyframes fraction-throb-medium {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fraction-throb-strong {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes fraction-combo-celebrate {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 6px hsl(var(--primary));
+  }
+
+  25% {
+    transform: scale(1.15);
+    text-shadow: 0 0 10px hsl(var(--accent));
+  }
+
+  50% {
+    transform: scale(1.08);
+    text-shadow: 0 0 14px hsl(var(--primary));
+  }
+
+  75% {
+    transform: scale(1.18);
+    text-shadow: 0 0 16px hsl(var(--accent)), 0 0 10px hsl(var(--primary));
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fraction-usage-zero .fraction-text,
+.fraction-usage-zero .fraction-subtitle {
   opacity: 0.2;
   filter: drop-shadow(0 0 2px hsl(var(--muted-foreground) / 0.2));
 }
-.fraction-usage-low .fraction-text, .fraction-usage-low .fraction-subtitle {
+
+.fraction-usage-low .fraction-text,
+.fraction-usage-low .fraction-subtitle {
   opacity: 0.6;
   animation: fraction-throb-soft 2.2s ease-in-out infinite;
   filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.4));
 }
-.fraction-usage-med .fraction-text, .fraction-usage-med .fraction-subtitle {
+
+.fraction-usage-med .fraction-text,
+.fraction-usage-med .fraction-subtitle {
   opacity: 0.8;
   animation: fraction-throb-soft 1.8s ease-in-out infinite;
   filter: drop-shadow(0 0 8px hsl(var(--accent) / 0.5));
 }
-.fraction-usage-high .fraction-text, .fraction-usage-high .fraction-subtitle {
+
+.fraction-usage-high .fraction-text,
+.fraction-usage-high .fraction-subtitle {
   opacity: 0.95;
   animation: fraction-throb-medium 1.4s ease-in-out infinite;
   filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.7)) drop-shadow(0 0 6px hsl(var(--accent) / 0.4));
 }
-.fraction-usage-hype .fraction-text, .fraction-usage-hype .fraction-subtitle {
+
+.fraction-usage-hype .fraction-text,
+.fraction-usage-hype .fraction-subtitle {
   opacity: 1;
   animation: fraction-throb-strong 1.1s ease-in-out infinite;
   filter: drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 8px hsl(var(--accent)));
 }
-.fraction-usage-max .fraction-text, .fraction-usage-max .fraction-subtitle {
+
+.fraction-usage-max .fraction-text,
+.fraction-usage-max .fraction-subtitle {
   opacity: 1;
   animation: fraction-combo-celebrate 1.2s ease-in-out infinite;
   filter: drop-shadow(0 0 14px hsl(var(--primary))) drop-shadow(0 0 10px hsl(var(--accent)));
@@ -390,11 +461,14 @@ svg text { pointer-events: none; }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { 
+
+  0%,
+  100% {
     filter: drop-shadow(0 0 12px hsl(0 0% 100% / 0.8));
     box-shadow: 0 0 20px hsl(0 0% 100% / 0.6), inset 0 0 10px hsl(0 0% 100% / 0.2);
   }
-  50% { 
+
+  50% {
     filter: drop-shadow(0 0 20px hsl(0 0% 100% / 1));
     box-shadow: 0 0 30px hsl(0 0% 100% / 0.9), inset 0 0 15px hsl(0 0% 100% / 0.3);
   }

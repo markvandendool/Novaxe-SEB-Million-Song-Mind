@@ -36,7 +36,7 @@ const BraidCalibration: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-mono font-bold">Braid Calibration</h1>
+        <h1 className="text-2xl  font-bold">Braid Calibration</h1>
         <div className="flex items-center gap-3">
           <input type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0] || undefined)} />
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={difference} onChange={(e) => setDifference(e.target.checked)} /> Difference</label>

@@ -33,7 +33,7 @@ export function SongStructureVisualizer({ song, selectedSongId, onSongSelect }: 
       <div key={`${section.fullLabel}-${index}`} className="mb-4">
         <div className={`p-3 rounded-lg border-2 ${colorClass} transition-all duration-200`}>
           <div className="flex items-center justify-between mb-2">
-            <Badge variant="secondary" className="font-mono text-xs">
+            <Badge variant="secondary" className=" text-xs">
               {section.fullLabel}
             </Badge>
             <span className="text-xs text-muted-foreground">
@@ -45,7 +45,7 @@ export function SongStructureVisualizer({ song, selectedSongId, onSongSelect }: 
             {section.chords.map((chord, chordIndex) => (
               <div
                 key={`${chord}-${chordIndex}`}
-                className="bg-background/80 px-2 py-1 rounded text-center text-sm font-mono border"
+                className="bg-background/80 px-2 py-1 rounded text-center text-sm  border"
               >
                 {chord}
               </div>

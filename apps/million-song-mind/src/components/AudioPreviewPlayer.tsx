@@ -143,7 +143,7 @@ const togglePlay = async () => {
 ) : (
   <div className="text-center py-8">
     <div className="text-muted-foreground mb-4">
-      <p className="font-mono text-sm">🎵 Spotify Preview</p>
+      <p className=" text-sm">🎵 Spotify Preview</p>
       <p className="text-xs mt-2">Preview URLs require Spotify API access</p>
     </div>
     <Button 
@@ -152,7 +152,7 @@ const togglePlay = async () => {
         e.stopPropagation();
         window.open(`https://open.spotify.com/track/${spotifySongId}`, '_blank');
       }}
-      className="font-mono text-xs tracking-wide"
+      className=" text-xs tracking-wide"
     >
       Open in Spotify
     </Button>

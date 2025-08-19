@@ -18,8 +18,8 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        professional: "bg-gradient-primary text-primary-foreground hover:shadow-chart shadow-professional font-mono tracking-wider",
-        harmonic: "bg-gradient-accent text-accent-foreground hover:animate-pulse-glow font-mono uppercase tracking-wider",
+        professional: "bg-gradient-primary text-primary-foreground hover:shadow-chart shadow-professional  tracking-wider",
+        harmonic: "bg-gradient-accent text-accent-foreground hover:animate-pulse-glow  uppercase tracking-wider",
         chart: "bg-card text-card-foreground border border-border hover:bg-secondary hover:shadow-chart",
       },
       size: {

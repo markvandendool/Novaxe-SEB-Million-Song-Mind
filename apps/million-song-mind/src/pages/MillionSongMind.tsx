@@ -829,10 +829,10 @@ const MillionSongMind = () => {
         <div className="max-w-[120rem] mx-auto px-4 md:px-8 py-6 md:py-8">
           <div className="flex items-center justify-between">
             <div className="space-y-3">
-              <h1 className="text-3xl md:text-5xl font-mono font-bold text-foreground tracking-[0.12em] md:tracking-[0.15em] leading-none">
+              <h1 className="text-3xl md:text-5xl  font-bold text-foreground tracking-[0.12em] md:tracking-[0.15em] leading-none">
                 MILLION SONG MIND
               </h1>
-              <p className="text-muted-foreground font-mono text-xs md:text-sm tracking-[0.08em] md:tracking-[0.1em] uppercase">
+              <p className="text-muted-foreground  text-xs md:text-sm tracking-[0.08em] md:tracking-[0.1em] uppercase">
                 Professional Music Analysis Tool • Industrial Scale Ready • Forensic Grade Precision
               </p>
             </div>
@@ -841,17 +841,17 @@ const MillionSongMind = () => {
               {parseResult && (
                 <div className="flex items-center space-x-3">
                   <div className="text-right">
-                    <div className="text-2xl font-mono font-bold text-primary">
+                    <div className="text-2xl  font-bold text-primary">
                       {parseResult.successfulRows.toLocaleString()}
                     </div>
-                    <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                    <div className="text-xs text-muted-foreground  uppercase tracking-wider">
                       of {parseResult.totalRows.toLocaleString()} songs
                     </div>
-                    <div className="text-xs text-accent font-mono">
+                    <div className="text-xs text-accent ">
                       {((parseResult.successfulRows / parseResult.totalRows) * 100).toFixed(1)}% of database
                     </div>
                   </div>
-                  <Badge variant="secondary" className="font-mono text-xs">
+                  <Badge variant="secondary" className=" text-xs">
                     {parseResult.format.toUpperCase()}
                   </Badge>
                 </div>
@@ -865,7 +865,7 @@ const MillionSongMind = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setDebugPanelOpen(!debugPanelOpen)}
-                    className="font-mono text-xs tracking-wider h-4 py-0 px-2"
+                    className=" text-xs tracking-wider h-4 py-0 px-2"
                   >
                     <FileText className="w-3 h-3 mr-1" />
                     DEBUG
@@ -875,7 +875,7 @@ const MillionSongMind = () => {
                     variant="secondary"
                     onClick={resetToEmpty}
                     disabled={isLoading}
-                    className="font-mono text-xs tracking-wider bg-gradient-accent h-4 py-0 px-2"
+                    className=" text-xs tracking-wider bg-gradient-accent h-4 py-0 px-2"
                   >
                     ⚡ RESET
                   </Button>
@@ -890,7 +890,7 @@ const MillionSongMind = () => {
 
       {/* BRAID FONT TEST SECTION */}
       <section className="bg-slate-900 border border-slate-700 rounded-lg p-6 mx-4 md:mx-8 mt-4">
-        <h3 className="text-lg font-mono text-white mb-4">🧪 BRAID FONT SYSTEM TEST</h3>
+        <h3 className="text-lg  text-white mb-4">🧪 BRAID FONT SYSTEM TEST</h3>
         <div className="space-y-4">
           <div className="text-sm text-slate-400 mb-2">Testing nvxFont integration:</div>
           <BraidChordSequence
@@ -909,7 +909,7 @@ const MillionSongMind = () => {
 
           <Card style={{ boxShadow: 'var(--shadow-card)' }}>
             <CardContent className="pt-3 pb-3 relative">
-              <h2 className="text-xl font-mono tracking-[0.2em] text-foreground mb-3">HARMONIC PROFILE</h2>
+              <h2 className="text-xl  tracking-[0.2em] text-foreground mb-3">HARMONIC PROFILE</h2>
 
               {/* Dynamic harmonic profile based on SELECTED SONGS */}
               <HarmonicChart key={focusedKey}
@@ -986,7 +986,7 @@ const MillionSongMind = () => {
 
               {/* Small reset button in bottom-right of chart card */}
               <div className="absolute right-3 bottom-3">
-                <Button size="sm" variant="outline" className="font-mono text-xs" onClick={resetSelections}>
+                <Button size="sm" variant="outline" className=" text-xs" onClick={resetSelections}>
                   reset selection
                 </Button>
               </div>
@@ -999,21 +999,21 @@ const MillionSongMind = () => {
           <Card>
             <CardContent className="pt-3 pb-3">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl font-mono tracking-[0.2em] text-foreground">BRAID</h2>
+                <h2 className="text-xl  tracking-[0.2em] text-foreground">BRAID</h2>
                 <div className="flex items-center gap-3">
                   <BraidTextSwitcher
                     mode={braidTextMode}
                     onModeChange={setBraidTextMode}
                     compact
                   />
-                  <span className="text-sm text-muted-foreground font-mono">3D</span>
+                  <span className="text-sm text-muted-foreground ">3D</span>
                   <Switch checked={is3D} onCheckedChange={setIs3D} />
                 </div>
               </div>
               {/* Zoom controls above the braid window */}
               {!is3D && (
                 <div className="flex items-center justify-end gap-3 bg-background/70 border border-border rounded-md px-3 py-2 mb-3 shadow-professional">
-                  <span className="text-xs font-mono text-muted-foreground">Zoom</span>
+                  <span className="text-xs  text-muted-foreground">Zoom</span>
                   <div className="w-40">
                     <Slider
                       value={[braidZoom]}
@@ -1024,7 +1024,7 @@ const MillionSongMind = () => {
                       onValueCommit={(v) => setBraidZoom(Math.max(0.8, Math.min(3.5, Math.round((v[0] ?? braidZoom) / 0.25) * 0.25)))}
                     />
                   </div>
-                  <span className="text-xs font-mono w-10 text-right">{Math.round(braidZoom * 100)}%</span>
+                  <span className="text-xs  w-10 text-right">{Math.round(braidZoom * 100)}%</span>
                 </div>
               )}
               <div className="relative" style={{ width: '100%', height: '51vh', overflow: 'hidden' }}>
@@ -1069,16 +1069,16 @@ const MillionSongMind = () => {
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-2xl font-mono font-bold text-foreground tracking-[0.2em] uppercase">
+                  <CardTitle className="text-2xl  font-bold text-foreground tracking-[0.2em] uppercase">
                     Song Search
                   </CardTitle>
-                  <p className="text-muted-foreground font-mono text-sm tracking-wide mt-1">
+                  <p className="text-muted-foreground  text-sm tracking-wide mt-1">
                     Professional Music Analysis • Educational Interface
                   </p>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-3 mb-2">
-                    <div className="text-2xl font-mono font-bold text-primary">
+                    <div className="text-2xl  font-bold text-primary">
                       {filteredSongs.length.toLocaleString()}
                     </div>
                     {filteredSongs.length > 0 && (
@@ -1093,20 +1093,20 @@ const MillionSongMind = () => {
                             description: `Selected ${filteredSongs.length} songs for harmonic analysis.`
                           });
                         }}
-                        className="font-mono text-xs tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
+                        className=" text-xs tracking-wide bg-primary text-primary-foreground hover:bg-primary/90"
                       >
                         Select {filteredSongs.length}
                       </Button>
                     )}
                   </div>
-                  <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                  <div className="text-xs text-muted-foreground  uppercase tracking-wider">
                     of {parseResult?.successfulRows?.toLocaleString() || '0'} songs
                   </div>
-                  <div className="text-xs text-accent font-mono">
+                  <div className="text-xs text-accent ">
                     {parseResult ? ((filteredSongs.length / parseResult.successfulRows) * 100).toFixed(1) : '0.0'}% filtered
                   </div>
                   {selectedSongs.size > 0 && (
-                    <div className="text-xs text-primary font-mono mt-1">
+                    <div className="text-xs text-primary  mt-1">
                       {selectedSongs.size} selected
                     </div>
                   )}
@@ -1122,19 +1122,19 @@ const MillionSongMind = () => {
                   placeholder="Search songs, artists, or albums..."
                   value={songSearch}
                   onChange={(e) => setSongSearch(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-background/50 border border-border rounded-lg text-foreground placeholder-muted-foreground font-mono focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
+                  className="w-full pl-12 pr-4 py-3 bg-background/50 border border-border rounded-lg text-foreground placeholder-muted-foreground  focus:outline-none focus:ring-2 focus:ring-primary/30 transition-all"
                 />
               </div>
 
               <div className="flex items-center justify-between mb-6">
-                <div className="text-sm font-mono text-muted-foreground uppercase tracking-wider">
+                <div className="text-sm  text-muted-foreground uppercase tracking-wider">
                   Advanced Filters
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={clearAllFilters}
-                  className="font-mono text-xs tracking-wide text-muted-foreground hover:text-foreground"
+                  className=" text-xs tracking-wide text-muted-foreground hover:text-foreground"
                 >
                   Clear All
                 </Button>
@@ -1143,11 +1143,11 @@ const MillionSongMind = () => {
               {/* Advanced Filters - Now Always Visible */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-3">
                 <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Genre</label>
+                  <label className="text-xs  uppercase tracking-wider text-muted-foreground">Genre</label>
                   <select
                     value={selectedGenre}
                     onChange={(e) => setSelectedGenre(e.target.value)}
-                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">All Genres</option>
                     {getUniqueGenres().map(genre => (
@@ -1157,11 +1157,11 @@ const MillionSongMind = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Decade</label>
+                  <label className="text-xs  uppercase tracking-wider text-muted-foreground">Decade</label>
                   <select
                     value={selectedDecade}
                     onChange={(e) => setSelectedDecade(e.target.value)}
-                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">All Decades</option>
                     <option value="2020">2020s</option>
@@ -1175,11 +1175,11 @@ const MillionSongMind = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Key</label>
+                  <label className="text-xs  uppercase tracking-wider text-muted-foreground">Key</label>
                   <select
                     value={selectedKey}
                     onChange={(e) => setSelectedKey(e.target.value)}
-                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">All Keys</option>
                     {getUniqueKeys().map(key => (
@@ -1189,31 +1189,31 @@ const MillionSongMind = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Year Range</label>
+                  <label className="text-xs  uppercase tracking-wider text-muted-foreground">Year Range</label>
                   <div className="flex space-x-2">
                     <input
                       type="number"
                       placeholder="From"
                       value={yearRangeStart}
                       onChange={(e) => setYearRangeStart(e.target.value)}
-                      className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                     <input
                       type="number"
                       placeholder="To"
                       value={yearRangeEnd}
                       onChange={(e) => setYearRangeEnd(e.target.value)}
-                      className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                     />
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono uppercase tracking-wider text-muted-foreground">Structure</label>
+                  <label className="text-xs  uppercase tracking-wider text-muted-foreground">Structure</label>
                   <select
                     value={selectedStructure}
                     onChange={(e) => setSelectedStructure(e.target.value)}
-                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                    className="w-full p-3 bg-background/50 border border-border rounded-lg text-foreground  text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
                   >
                     <option value="">All Structures</option>
                     <option value="Has Sections">Has Sections</option>
@@ -1225,13 +1225,13 @@ const MillionSongMind = () => {
 
               {/* Chord Query Mode */}
               <div className="flex items-center justify-center gap-3 mb-6">
-                <span className="text-sm font-mono text-muted-foreground uppercase tracking-wider">Chord Query</span>
-                <Button variant={chordQueryMode === 'possess' ? 'default' : 'outline'} size="sm" className="font-mono text-xs" onClick={() => setChordQueryMode('possess')}>Possess</Button>
-                <Button variant={chordQueryMode === 'only' ? 'default' : 'outline'} size="sm" className="font-mono text-xs" onClick={() => setChordQueryMode('only')}>Only</Button>
+                <span className="text-sm  text-muted-foreground uppercase tracking-wider">Chord Query</span>
+                <Button variant={chordQueryMode === 'possess' ? 'default' : 'outline'} size="sm" className=" text-xs" onClick={() => setChordQueryMode('possess')}>Possess</Button>
+                <Button variant={chordQueryMode === 'only' ? 'default' : 'outline'} size="sm" className=" text-xs" onClick={() => setChordQueryMode('only')}>Only</Button>
               </div>
               {/* Alphabet Filter Mode Toggle */}
               <div className="flex items-center justify-center gap-4 mb-4">
-                <span className="text-sm font-mono text-muted-foreground uppercase tracking-wider">
+                <span className="text-sm  text-muted-foreground uppercase tracking-wider">
                   Browse by first letter:
                 </span>
                 <div className="flex gap-2">
@@ -1239,7 +1239,7 @@ const MillionSongMind = () => {
                     variant={alphabetFilterMode === 'song' ? "default" : "outline"}
                     size="sm"
                     onClick={() => setAlphabetFilterMode('song')}
-                    className="font-mono text-xs"
+                    className=" text-xs"
                   >
                     Song
                   </Button>
@@ -1247,7 +1247,7 @@ const MillionSongMind = () => {
                     variant={alphabetFilterMode === 'artist' ? "default" : "outline"}
                     size="sm"
                     onClick={() => setAlphabetFilterMode('artist')}
-                    className="font-mono text-xs"
+                    className=" text-xs"
                   >
                     Artist
                   </Button>
@@ -1262,7 +1262,7 @@ const MillionSongMind = () => {
                     variant={letter === selectedLetter ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedLetter(selectedLetter === letter ? '' : letter)}
-                    className={`w-10 h-10 p-0 font-mono text-sm ${letter === selectedLetter ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
+                    className={`w-10 h-10 p-0  text-sm ${letter === selectedLetter ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
                       }`}
                   >
                     {letter}
@@ -1273,7 +1273,7 @@ const MillionSongMind = () => {
               {/* Song Table */}
               <div className="space-y-4">
                 <div className="overflow-x-auto">
-                  <div className="min-w-[900px] grid grid-cols-[32px,1.2fr,1fr,80px,2fr,2fr,64px] gap-4 py-3 text-xs md:text-sm font-mono border-b border-border/30 uppercase tracking-[0.08em] md:tracking-[0.1em] text-muted-foreground font-bold">
+                  <div className="min-w-[900px] grid grid-cols-[32px,1.2fr,1fr,80px,2fr,2fr,64px] gap-4 py-3 text-xs md:text-sm  border-b border-border/30 uppercase tracking-[0.08em] md:tracking-[0.1em] text-muted-foreground font-bold">
                     <div className="w-8"></div>
                     <div className="cursor-pointer hover:text-foreground transition-colors flex items-center gap-1" onClick={() => handleSort('spotify_song_id')}>
                       SONG
@@ -1297,7 +1297,7 @@ const MillionSongMind = () => {
                       paginatedSongs.map((song, idx) => (
                         <div
                           key={song.spotify_song_id || song.id}
-                          className={`min-w-[900px] grid grid-cols-[32px,1.2fr,1fr,80px,2fr,2fr,64px] gap-4 py-3 text-xs md:text-sm font-mono border-b border-border/30 hover:bg-accent/30 transition-colors cursor-pointer ${selectedSongs.has(song.spotify_song_id || song.id) ? 'bg-primary/10' : ''
+                          className={`min-w-[900px] grid grid-cols-[32px,1.2fr,1fr,80px,2fr,2fr,64px] gap-4 py-3 text-xs md:text-sm  border-b border-border/30 hover:bg-accent/30 transition-colors cursor-pointer ${selectedSongs.has(song.spotify_song_id || song.id) ? 'bg-primary/10' : ''
                             }`}
                           onClick={(e) => handleSongSelect(song.spotify_song_id || song.id, e)}
                         >
@@ -1316,13 +1316,13 @@ const MillionSongMind = () => {
                             {song.spotify_artist_id || 'Unknown Artist'}
                           </div>
                           <div className="text-muted-foreground" title={song.key || 'Unknown'}>{song.key || 'Unknown'}</div>
-                          <div className="text-accent font-mono text-xs truncate" title={song.chords ? song.chords : 'No chords'}>
+                          <div className="text-accent  text-xs truncate" title={song.chords ? song.chords : 'No chords'}>
                             {song.chords ? song.chords : 'No chords'}
                           </div>
-                          <div className="text-accent font-mono text-xs truncate" title={song.roman_numerals || 'No roman numerals'}>
+                          <div className="text-accent  text-xs truncate" title={song.roman_numerals || 'No roman numerals'}>
                             {song.roman_numerals ? song.roman_numerals : 'No roman numerals'}
                           </div>
-                          <div className="text-accent font-mono text-xs">
+                          <div className="text-accent  text-xs">
                             {song.chords ? song.chords.substring(0, 20) + '...' : 'No chords'}
                           </div>
                           <div>
@@ -1334,27 +1334,27 @@ const MillionSongMind = () => {
                       ))
                     ) : songBank.length > 0 ? (
                       <div className="text-center py-12">
-                        <div className="text-2xl font-mono font-bold text-muted-foreground/50 tracking-[0.4em] mb-4">
+                        <div className="text-2xl  font-bold text-muted-foreground/50 tracking-[0.4em] mb-4">
                           NO MATCHES
                         </div>
-                        <p className="text-muted-foreground font-mono text-sm tracking-wide mb-4">
+                        <p className="text-muted-foreground  text-sm tracking-wide mb-4">
                           No songs match your current filters from {songBank.length.toLocaleString()} stored songs.
                         </p>
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={clearAllFilters}
-                          className="mt-4 font-mono text-xs"
+                          className="mt-4  text-xs"
                         >
                           Clear All Filters
                         </Button>
                       </div>
                     ) : (
                       <div className="text-center py-12">
-                        <div className="text-4xl font-mono font-bold text-muted-foreground/20 tracking-[0.4em] mb-4">
+                        <div className="text-4xl  font-bold text-muted-foreground/20 tracking-[0.4em] mb-4">
                           NO DATA
                         </div>
-                        <p className="text-muted-foreground font-mono text-sm tracking-wide">
+                        <p className="text-muted-foreground  text-sm tracking-wide">
                           Upload song structure data files to begin analysis
                         </p>
                       </div>
@@ -1366,7 +1366,7 @@ const MillionSongMind = () => {
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-4 px-4 py-2 bg-muted/20 rounded-lg">
                     <div className="flex items-center gap-4">
-                      <span className="text-sm font-mono text-muted-foreground">
+                      <span className="text-sm  text-muted-foreground">
                         Page {currentPage} of {totalPages} • Showing {paginatedSongs.length} of {sortedFilteredSongs.length} songs
                       </span>
                     </div>
@@ -1395,7 +1395,7 @@ const MillionSongMind = () => {
                 {selectedSongs.size > 0 && (
                   <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-sm text-foreground">
+                      <span className=" text-sm text-foreground">
                         {selectedSongs.size} song{selectedSongs.size !== 1 ? 's' : ''} selected
                       </span>
                       <div className="flex gap-2">
@@ -1420,10 +1420,10 @@ const MillionSongMind = () => {
             <div className="w-16 h-16 mx-auto bg-primary/10 rounded-full flex items-center justify-center">
               <Music className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-3xl font-mono font-bold text-foreground tracking-[0.2em]">
+            <h2 className="text-3xl  font-bold text-foreground tracking-[0.2em]">
               SONG IMPORT
             </h2>
-            <p className="text-muted-foreground font-mono text-sm max-w-2xl mx-auto leading-relaxed">
+            <p className="text-muted-foreground  text-sm max-w-2xl mx-auto leading-relaxed">
               Drop CSV files here or <span className="text-primary font-semibold">browse to upload</span>
               <br />
               <span className="text-xs">• Industrial scale ready: 680,000+ files supported</span>
@@ -1440,10 +1440,10 @@ const MillionSongMind = () => {
                 <div className="w-20 h-20 mx-auto bg-primary/10 rounded-full flex items-center justify-center animate-pulse">
                   <Database className="h-10 w-10 text-primary" />
                 </div>
-                <div className="text-primary font-mono text-xl font-bold tracking-[0.1em]">
+                <div className="text-primary  text-xl font-bold tracking-[0.1em]">
                   PROCESSING FILE...
                 </div>
-                <div className="text-muted-foreground font-mono text-sm tracking-wide">
+                <div className="text-muted-foreground  text-sm tracking-wide">
                   Detecting format and parsing harmonic data
                 </div>
                 <div className="w-full max-w-lg mx-auto bg-muted rounded-full h-3 overflow-hidden">
@@ -1461,7 +1461,7 @@ const MillionSongMind = () => {
                   <Button
                     variant="ghost"
                     onClick={loadMockData}
-                    className="font-mono text-sm tracking-wide text-muted-foreground hover:text-foreground"
+                    className=" text-sm tracking-wide text-muted-foreground hover:text-foreground"
                   >
                     <Database className="w-4 h-4 mr-2" />
                     Load Mock Data (Testing)
@@ -1478,10 +1478,10 @@ const MillionSongMind = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-6">
                     <div className="text-center">
-                      <div className="text-3xl font-mono font-bold text-primary">
+                      <div className="text-3xl  font-bold text-primary">
                         {parseResult.successfulRows.toLocaleString()}
                       </div>
-                      <div className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                      <div className="text-xs text-muted-foreground  uppercase tracking-wider">
                         Songs Loaded
                       </div>
                     </div>
@@ -1489,10 +1489,10 @@ const MillionSongMind = () => {
                     <div className="h-12 w-px bg-border"></div>
 
                     <div className="space-y-1">
-                      <Badge variant="secondary" className="font-mono text-sm">
+                      <Badge variant="secondary" className=" text-sm">
                         {parseResult.format.toUpperCase()}
                       </Badge>
-                      <div className="text-xs text-muted-foreground font-mono">
+                      <div className="text-xs text-muted-foreground ">
                         Format Detected
                       </div>
                     </div>
@@ -1503,7 +1503,7 @@ const MillionSongMind = () => {
                       variant="ghost"
                       size="sm"
                       onClick={loadMockData}
-                      className="font-mono text-xs tracking-wider"
+                      className=" text-xs tracking-wider"
                     >
                       <Database className="w-4 h-4 mr-2" />
                       Cycle Mock Data
@@ -1523,10 +1523,10 @@ const MillionSongMind = () => {
           <div className="max-w-[120rem] mx-auto px-8 py-12">
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl font-mono font-bold text-foreground tracking-[0.2em] uppercase">
+                <CardTitle className="text-2xl  font-bold text-foreground tracking-[0.2em] uppercase">
                   Timeline Visualization
                 </CardTitle>
-                <p className="text-muted-foreground font-mono text-sm">
+                <p className="text-muted-foreground  text-sm">
                   Song structure analysis and chord progression timelines for selected songs
                 </p>
               </CardHeader>
@@ -1562,7 +1562,7 @@ const MillionSongMind = () => {
       {/* Footer */}
       <footer className="border-t border-border mt-16 py-6">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-muted-foreground font-mono text-sm">
+          <p className="text-muted-foreground  text-sm">
             Million Song Mind — built for harmonic exploration at scale
           </p>
         </div>

@@ -139,7 +139,7 @@ const BraidTorus3D: React.FC<BraidTorus3DProps> = ({ focusKey, onChordClick }) =
         <Environment preset="city" />
       </Canvas>
 
-      <div style={{ position: 'absolute', top: 12, left: 12, padding: '6px 10px', borderRadius: 8, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace', opacity: 0.9, background: 'rgba(0,0,0,0.45)', color: 'white' }}>
+      <div style={{ position: 'absolute', top: 12, left: 12, padding: '6px 10px', borderRadius: 8, fontFamily: 'nvxChord, monospace', opacity: 0.9, background: 'rgba(0,0,0,0.45)', color: 'white' }}>
         3D Braid Map — 12 keys around torus{major ? ` • focus: ${major}` : ''}
       </div>
     </section>

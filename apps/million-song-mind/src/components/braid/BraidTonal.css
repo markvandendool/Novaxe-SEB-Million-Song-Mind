@@ -40,32 +40,77 @@ section#braid-tonal .rect-arrow.erase {
 }
 
 @keyframes transitionClassic {
-    0% {fill: url("#greyGradient");}
-    8% {fill: url("#greyGradient0");}
-    16% {fill: url("#greyGradient1");}
-    24% {fill: url("#greyGradient2");}
-    32% {fill: url("#greyGradient3");}
-    40% {fill: url("#greyGradient4");}
-    48% {fill: url("#greyGradient5");}
-    56% {fill: url("#greyGradient6");}
-    64% {fill: url("#greyGradient7");}
-    72% {fill: url("#greyGradient8");}
-    80% {fill: url("#greyGradient9");}
-    88% {fill: url("#eraseGradient");}
-    96% {fill: url("#eraseGradient");}
-    100% {fill: url("#eraseGradient"); stroke: #000;}
+  0% {
+    fill: url("#greyGradient");
+  }
+
+  8% {
+    fill: url("#greyGradient0");
+  }
+
+  16% {
+    fill: url("#greyGradient1");
+  }
+
+  24% {
+    fill: url("#greyGradient2");
+  }
+
+  32% {
+    fill: url("#greyGradient3");
+  }
+
+  40% {
+    fill: url("#greyGradient4");
+  }
+
+  48% {
+    fill: url("#greyGradient5");
+  }
+
+  56% {
+    fill: url("#greyGradient6");
+  }
+
+  64% {
+    fill: url("#greyGradient7");
+  }
+
+  72% {
+    fill: url("#greyGradient8");
+  }
+
+  80% {
+    fill: url("#greyGradient9");
+  }
+
+  88% {
+    fill: url("#eraseGradient");
+  }
+
+  96% {
+    fill: url("#eraseGradient");
+  }
+
+  100% {
+    fill: url("#eraseGradient");
+    stroke: #000;
+  }
 }
 
 section#braid-tonal .bub {
   cursor: default;
 }
+
 section#braid-tonal .bub.zoom {
   transform: scale(2) translate(2px, -15px);
   transition: 0.5s;
 }
+
 section#braid-tonal .bub.zoom .comma {
   z-index: 9998;
 }
+
 section#braid-tonal .bub.zoom text {
   /* font-size: 0.9em; DISABLED - using natural Fontdec13 sizing */
   transition: 2s;
@@ -80,15 +125,17 @@ section#braid-tonal .smallBubble {
 section#braid-tonal .harmonic-bar {
   cursor: pointer;
 }
+
 section#braid-tonal .harmonic-bar.selected {
   /* glow handled globally, keep here for specificity if needed */
 }
 
 section#braid-tonal .smallBubble text {
-  font-family: "Fontdec13", "nvxChord", "Noto Music", "Share Tech Mono", "JetBrains Mono", "SF Mono", "Monaco", monospace;
+  font-family: "Fontdec13", "Monaco", "Menlo", monospace !important;
   fill: black;
-  /* font-size: 0.7em; DISABLED - using natural Fontdec13 sizing */
   text-anchor: left;
+  font-feature-settings: "liga" 1, "kern" 1;
+  text-rendering: optimizeLegibility;
 }
 
 /* DISABLED: Artificial font-size manipulation - using natural Fontdec13 */
@@ -116,24 +163,21 @@ section#braid-tonal .medBubble circle {
 section#braid-tonal .medBubble text.right {
   text-anchor: start;
   fill: black;
-  font-family: "Fontdec13", "nvxChord", "Noto Music", "Share Tech Mono", "JetBrains Mono", "SF Mono", "Monaco", monospace;
-  /* font-size: 0.9em; DISABLED - using natural Fontdec13 sizing */
+  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.left {
   text-anchor: end;
   fill: black;
-  font-family: "Fontdec13", "nvxChord", "Noto Music", "Share Tech Mono", "JetBrains Mono", "SF Mono", "Monaco", monospace;
-  /* font-size: 0.9em; DISABLED - using natural Fontdec13 sizing */
+  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.center {
   text-anchor: end;
   fill: black;
-  font-family: "Fontdec13", "nvxChord", "Noto Music", "Share Tech Mono", "JetBrains Mono", "SF Mono", "Monaco", monospace;
-  /* font-size: 0.9em; DISABLED - using natural Fontdec13 sizing */
+  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
 

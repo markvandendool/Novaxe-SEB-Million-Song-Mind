@@ -94,7 +94,7 @@ const handlePlay = (song: Song) => {
     return (
       <div className="bg-gradient-surface border border-border rounded-lg shadow-professional p-8 px-20">
         <div className="text-center space-y-4">
-          <div className="text-primary font-mono text-xl animate-pulse">
+          <div className="text-primary  text-xl animate-pulse">
             ⏳ ANALYZING MUSICAL DATABASE...
           </div>
           <div className="w-full max-w-md mx-auto bg-muted rounded-full h-2">
@@ -111,10 +111,10 @@ const handlePlay = (song: Song) => {
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xl font-mono font-bold text-foreground tracking-wider">
+            <h3 className="text-xl  font-bold text-foreground tracking-wider">
               SONG DATABASE
             </h3>
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-muted-foreground  text-sm">
               {filteredAndSortedSongs.length.toLocaleString()} songs • Letter "{selectedLetter}"
             </p>
           </div>
@@ -134,7 +134,7 @@ const handlePlay = (song: Song) => {
                   size="sm"
                   onClick={() => handleLetterChange(letter)}
                   disabled={count === 0}
-                  className="w-10 h-8 text-xs font-mono"
+                  className="w-10 h-8 text-xs "
                   title={`${count} songs starting with ${letter}`}
                 >
                   {letter}
@@ -151,7 +151,7 @@ const handlePlay = (song: Song) => {
           <thead className="bg-muted border-b border-border">
             <tr>
               <th 
-                className="px-6 py-4 text-left text-xs font-mono font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
+                className="px-6 py-4 text-left text-xs  font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
                 onClick={() => handleSort('songName')}
               >
                 <div className="flex items-center space-x-1">
@@ -163,7 +163,7 @@ const handlePlay = (song: Song) => {
                 </div>
               </th>
               <th 
-                className="px-6 py-4 text-left text-xs font-mono font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
+                className="px-6 py-4 text-left text-xs  font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
                 onClick={() => handleSort('artistName')}
               >
                 <div className="flex items-center space-x-1">
@@ -175,7 +175,7 @@ const handlePlay = (song: Song) => {
                 </div>
               </th>
 <th 
-  className="px-6 py-4 text-left text-xs font-mono font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
+  className="px-6 py-4 text-left text-xs  font-bold text-foreground uppercase tracking-wider cursor-pointer hover:bg-secondary transition-colors"
   onClick={() => handleSort('releaseDate')}
 >
   <div className="flex items-center space-x-1">
@@ -183,13 +183,13 @@ const handlePlay = (song: Song) => {
     <span>Key</span>
   </div>
 </th>
-<th className="px-6 py-4 text-left text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+<th className="px-6 py-4 text-left text-xs  font-bold text-foreground uppercase tracking-wider">
   Chords
 </th>
-<th className="px-6 py-4 text-left text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+<th className="px-6 py-4 text-left text-xs  font-bold text-foreground uppercase tracking-wider">
   Chords
 </th>
-<th className="px-6 py-4 text-center text-xs font-mono font-bold text-foreground uppercase tracking-wider">
+<th className="px-6 py-4 text-center text-xs  font-bold text-foreground uppercase tracking-wider">
   Play
 </th>
             </tr>
@@ -204,26 +204,26 @@ const handlePlay = (song: Song) => {
                 onClick={() => onSongSelect?.(song)}
               >
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-mono font-medium text-foreground">
+                  <div className="text-sm  font-medium text-foreground">
                     {song.songName}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-mono text-muted-foreground">
+                  <div className="text-sm  text-muted-foreground">
                     {song.artistName}
                   </div>
                 </td>
 <td className="px-6 py-4 whitespace-nowrap">
-  <div className="text-sm font-mono text-muted-foreground">
+  <div className="text-sm  text-muted-foreground">
     {song.key || '—'}
   </div>
 </td>
 <td className="px-6 py-4" colSpan={2}>
   <div className="max-w-xl">
-    <div className="text-sm font-mono text-foreground truncate">
+    <div className="text-sm  text-foreground truncate">
       {Array.isArray(song.chords) ? song.chords.join(' ') : song.chords}
     </div>
-    <div className="text-xs font-mono text-muted-foreground truncate">
+    <div className="text-xs  text-muted-foreground truncate">
       {song.romanNumerals || '—'}
     </div>
   </div>
@@ -251,7 +251,7 @@ const handlePlay = (song: Song) => {
       {/* Pagination Footer */}
       {totalPages > 1 && (
         <div className="px-6 py-4 border-t border-border flex items-center justify-between">
-          <div className="text-sm font-mono text-muted-foreground">
+          <div className="text-sm  text-muted-foreground">
             Page {currentPage} of {totalPages} • {filteredAndSortedSongs.length} songs starting with "{selectedLetter}"
           </div>
           
@@ -265,7 +265,7 @@ const handlePlay = (song: Song) => {
               <ChevronLeft className="w-4 h-4" />
             </Button>
             
-            <span className="text-sm font-mono text-foreground">
+            <span className="text-sm  text-foreground">
               {currentPage} / {totalPages}
             </span>
             

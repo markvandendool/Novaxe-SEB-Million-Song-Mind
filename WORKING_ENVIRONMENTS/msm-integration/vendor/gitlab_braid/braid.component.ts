@@ -8,7 +8,7 @@ import { ConfigModel } from '@models/configmodel/configModel';
 
 import { Subscription } from 'rxjs/Subscription';
 
-import Font_chords_eq from '@assets/font_chords_eq.json';
+import Font_chords_eq from '@assets/font_mapping.json';
 import { chordType } from '@tonaljs/chord-type';
 import { Note } from "@tonaljs/tonal";
 import { chord } from '@tonaljs/chord';

@@ -21,7 +21,7 @@ export const BraidMappingValidator: React.FC = () => {
           <div className="space-y-1 max-h-64 overflow-y-auto">
             {Object.entries(validMappings).map(([roman, slot]) => (
               <div key={roman} className="text-sm flex justify-between">
-                <span className="font-mono">{roman}</span>
+                <span className="">{roman}</span>
                 <span className="text-muted-foreground">→ {slot}</span>
               </div>
             ))}
@@ -34,7 +34,7 @@ export const BraidMappingValidator: React.FC = () => {
             {Object.entries(slotMapping).map(([slot, romans]) => (
               romans.length > 0 && (
                 <div key={slot} className="text-sm">
-                  <div className="font-mono font-semibold">{slot}:</div>
+                  <div className=" font-semibold">{slot}:</div>
                   <div className="pl-4 text-muted-foreground">
                     {romans.join(', ')}
                   </div>

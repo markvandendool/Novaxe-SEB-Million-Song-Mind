@@ -892,7 +892,7 @@ const MillionSongMind = () => {
       <section className="bg-slate-900 border border-slate-700 rounded-lg p-6 mx-4 md:mx-8 mt-4">
         <h3 className="text-lg font-mono text-white mb-4">🧪 BRAID FONT SYSTEM TEST</h3>
         <div className="space-y-4">
-          <div className="text-sm text-slate-400 mb-2">Testing nvxFont integration:</div>
+          <div className="text-sm text-slate-400 mb-2">Testing chord display:</div>
           <BraidChordSequence 
             chords={['Cmaj7', 'Dm7', 'G7', 'Am', 'F', 'Bdim', 'Em7b5']}
             debug={true}

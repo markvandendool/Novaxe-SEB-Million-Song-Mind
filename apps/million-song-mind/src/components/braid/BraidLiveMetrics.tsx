@@ -45,9 +45,9 @@ const SAMPLE_PROGRESSIONS = [
   { from: 'V', to: 'I', count: 520 },
 ];
 
-const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({ 
-  songData, 
-  onBubbleClick 
+const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
+  songData,
+  onBubbleClick
 }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('presence');
 
@@ -97,13 +97,13 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
     <section className="space-y-4">
       {/* SENTINEL_LOVABLE_BRAID_FREEZE */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-fontdec13 font-semibold text-primary">
+        <h2 className="text-lg  font-semibold text-primary">
           Live Harmonic Metrics
         </h2>
-        <Button 
-          variant="outline" 
+        <Button
+          variant="outline"
           onClick={cycleViewMode}
-          className="font-fontdec13 text-sm"
+          className=" text-sm"
         >
           {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} View
         </Button>
@@ -125,7 +125,7 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
                 <stop offset="70%" stopColor="hsl(var(--primary) / 0.4)" />
                 <stop offset="100%" stopColor="hsl(var(--primary) / 0.1)" />
               </radialGradient>
-              
+
               <radialGradient id="onlyGradient" cx="30%" cy="30%">
                 <stop offset="0%" stopColor="hsl(var(--accent) / 0.8)" />
                 <stop offset="70%" stopColor="hsl(var(--accent) / 0.4)" />
@@ -182,7 +182,7 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
 
               const fromIndex = chordData.indexOf(fromChord);
               const toIndex = chordData.indexOf(toChord);
-              
+
               const fromX = (fromIndex % 6) * 166 + 83;
               const fromY = Math.floor(fromIndex / 6) * 160 + 80;
               const toX = (toIndex % 6) * 166 + 83;
@@ -225,23 +225,23 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
                     strokeWidth="2"
                     className="transition-all duration-300 hover:stroke-primary hover:stroke-[3px]"
                   />
-                  
+
                   {/* Chord label */}
                   <text
                     x="0"
                     y="5"
                     textAnchor="middle"
-                    className="font-fontdec13 font-semibold fill-foreground pointer-events-none"
+                    className=" font-semibold fill-foreground pointer-events-none"
                   >
                     {chord.chord}
                   </text>
-                  
+
                   {/* Count label */}
                   <text
                     x="0"
                     y={radius + 20}
                     textAnchor="middle"
-                    className="font-fontdec13 text-xs fill-muted-foreground pointer-events-none"
+                    className=" text-xs fill-muted-foreground pointer-events-none"
                   >
                     {count.toLocaleString()}
                   </text>
@@ -254,8 +254,8 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
 
       <div className="text-xs text-muted-foreground space-y-1">
         <p>
-          <strong>Presence:</strong> Total chord occurrences | 
-          <strong> Only:</strong> Standalone chord counts | 
+          <strong>Presence:</strong> Total chord occurrences |
+          <strong> Only:</strong> Standalone chord counts |
           <strong> Progression:</strong> Chord transition flows
         </p>
         <p>Bubble size reflects relative frequency. Click bubbles to query Million Song Mind.</p>

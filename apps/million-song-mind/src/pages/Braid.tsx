@@ -35,7 +35,7 @@ const BraidPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-mono font-bold">Exact Braid</h1>
+        <h1 className="text-2xl  font-bold">Exact Braid</h1>
         <div className="flex items-center gap-3">
           <Link to="/calibrate-braid">
             <Button variant="secondary">Open Calibrator</Button>

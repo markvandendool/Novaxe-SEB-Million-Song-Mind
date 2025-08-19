@@ -97,13 +97,13 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
     <section className="space-y-4">
       {/* SENTINEL_LOVABLE_BRAID_FREEZE */}
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-fontdec13 font-semibold text-primary">
+        <h2 className="text-lg font-mono font-semibold text-primary">
           Live Harmonic Metrics
         </h2>
         <Button 
           variant="outline" 
           onClick={cycleViewMode}
-          className="font-fontdec13 text-sm"
+          className="font-mono text-sm"
         >
           {viewMode.charAt(0).toUpperCase() + viewMode.slice(1)} View
         </Button>
@@ -231,7 +231,7 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
                     x="0"
                     y="5"
                     textAnchor="middle"
-                    className="font-fontdec13 font-semibold fill-foreground pointer-events-none"
+                    className="font-mono font-semibold fill-foreground pointer-events-none"
                   >
                     {chord.chord}
                   </text>
@@ -241,7 +241,7 @@ const BraidLiveMetrics: React.FC<LiveMetricsProps> = ({
                     x="0"
                     y={radius + 20}
                     textAnchor="middle"
-                    className="font-fontdec13 text-xs fill-muted-foreground pointer-events-none"
+                    className="font-mono text-xs fill-muted-foreground pointer-events-none"
                   >
                     {count.toLocaleString()}
                   </text>

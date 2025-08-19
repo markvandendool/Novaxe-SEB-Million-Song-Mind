@@ -115,7 +115,7 @@ export function SongTimelineVisualizer({ song, onSectionTypeFilter }: SongTimeli
                   <div 
                     className={`w-3 h-3 rounded ${SECTION_COLORS[section.sectionType as keyof typeof SECTION_COLORS] || SECTION_COLORS.progression}`}
                   />
-                  <span className="text-purple-700 dark:text-purple-300 font-mono">
+                  <span className="text-purple-700 dark:text-purple-300 ">
                     {section.fullLabel} ({section.chords.length})
                   </span>
                 </div>

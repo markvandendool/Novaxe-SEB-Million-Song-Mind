@@ -18,12 +18,10 @@ export default {
 				'2xl': '1400px'
 			}
 		},
-			extend: {
+		extend: {
 			fontFamily: {
-				'mono': ['Fontdec13', 'nvxChord', 'Noto Music', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'monospace'],
-				'sans': ['Inter', 'system-ui', 'sans-serif'],
-				'fontdec13': ['Fontdec13', 'nvxChord', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', 'monospace'],
-				'music': ['Noto Music', 'Noto Sans', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', 'monospace'],
+				'mono': ['nvxChord', 'monospace'],
+				'sans': ['system-ui', 'sans-serif']
 			},
 			colors: {
 				border: 'hsl(var(--border))',

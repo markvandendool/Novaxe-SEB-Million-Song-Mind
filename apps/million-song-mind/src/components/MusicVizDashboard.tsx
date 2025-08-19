@@ -140,7 +140,7 @@ export function MusicVizDashboard({ songs }: MusicVizDashboardProps) {
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             <div>
-              <Label htmlFor="musicviz-artist-search" className="text-muted-foreground font-mono text-xs uppercase tracking-wider">Artist Search</Label>
+              <Label htmlFor="musicviz-artist-search" className="text-muted-foreground  text-xs uppercase tracking-wider">Artist Search</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -148,15 +148,15 @@ export function MusicVizDashboard({ songs }: MusicVizDashboardProps) {
                   placeholder="Search artists..."
                   value={filters.artistSearch}
                   onChange={(e) => setFilters(prev => ({ ...prev, artistSearch: e.target.value }))}
-                  className="pl-10 bg-background/50 border border-border focus:ring-2 focus:ring-primary/30 font-mono text-sm"
+                  className="pl-10 bg-background/50 border border-border focus:ring-2 focus:ring-primary/30  text-sm"
                 />
               </div>
             </div>
 
             <div>
-              <Label htmlFor="musicviz-genre-select" className="text-muted-foreground font-mono text-xs uppercase tracking-wider">Genre</Label>
+              <Label htmlFor="musicviz-genre-select" className="text-muted-foreground  text-xs uppercase tracking-wider">Genre</Label>
               <Select value={filters.genre} onValueChange={(value) => setFilters(prev => ({ ...prev, genre: value }))}>
-                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30 font-mono text-sm">
+                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30  text-sm">
                   <SelectValue placeholder="All genres" />
                 </SelectTrigger>
                 <SelectContent>
@@ -169,9 +169,9 @@ export function MusicVizDashboard({ songs }: MusicVizDashboardProps) {
             </div>
 
             <div>
-              <Label htmlFor="musicviz-decade-select" className="text-muted-foreground font-mono text-xs uppercase tracking-wider">Decade</Label>
+              <Label htmlFor="musicviz-decade-select" className="text-muted-foreground  text-xs uppercase tracking-wider">Decade</Label>
               <Select value={filters.decade} onValueChange={(value) => setFilters(prev => ({ ...prev, decade: value }))}>
-                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30 font-mono text-sm">
+                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30  text-sm">
                   <SelectValue placeholder="All decades" />
                 </SelectTrigger>
                 <SelectContent>
@@ -184,13 +184,13 @@ export function MusicVizDashboard({ songs }: MusicVizDashboardProps) {
             </div>
 
             <div>
-              <Label htmlFor="musicviz-sort-select" className="text-muted-foreground font-mono text-xs uppercase tracking-wider">Sort By</Label>
+              <Label htmlFor="musicviz-sort-select" className="text-muted-foreground  text-xs uppercase tracking-wider">Sort By</Label>
               <Select value={`${sortBy}-${sortOrder}`} onValueChange={(value) => {
                 const [newSortBy, newSortOrder] = value.split('-') as [typeof sortBy, typeof sortOrder];
                 setSortBy(newSortBy);
                 setSortOrder(newSortOrder);
               }}>
-                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30 font-mono text-sm">
+                <SelectTrigger className="bg-background/50 border border-border focus:ring-2 focus:ring-primary/30  text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -223,7 +223,7 @@ export function MusicVizDashboard({ songs }: MusicVizDashboardProps) {
                 checked={filters.hasStructureOnly}
                 onCheckedChange={(checked) => setFilters(prev => ({ ...prev, hasStructureOnly: !!checked }))}
               />
-              <Label htmlFor="musicviz-structure-only" className="text-muted-foreground font-mono text-xs uppercase tracking-wider">Show only songs with structure tags</Label>
+              <Label htmlFor="musicviz-structure-only" className="text-muted-foreground  text-xs uppercase tracking-wider">Show only songs with structure tags</Label>
             </div>
             </div>
             

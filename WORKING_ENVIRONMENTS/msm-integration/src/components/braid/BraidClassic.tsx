@@ -125,7 +125,7 @@ const BraidClassic: React.FC = () => {
         x="0"
         y="5"
         textAnchor="middle"
-        className="font-fontdec13 text-sm fill-foreground pointer-events-none"
+        className="font-mono text-sm fill-foreground pointer-events-none"
       >
         {label}
       </text>
@@ -135,13 +135,13 @@ const BraidClassic: React.FC = () => {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-lg font-fontdec13 font-semibold">Classic Braid (nvx_braid_fixes2)</h2>
+        <h2 className="text-lg font-mono font-semibold">Classic Braid (nvx_braid_fixes2)</h2>
         <div className="flex items-center gap-3 flex-wrap">
           <Button
             variant={displayRoman ? "default" : "outline"}
             size="sm"
             onClick={() => setDisplayRoman(!displayRoman)}
-            className="font-fontdec13"
+            className="font-mono"
           >
             {displayRoman ? 'Roman' : 'Notes'}
           </Button>

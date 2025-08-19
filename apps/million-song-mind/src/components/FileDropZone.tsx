@@ -56,7 +56,7 @@ export function FileDropZone({ onFiles, isLoading, isDragOver, setIsDragOver }: 
         <div className="text-6xl animate-fade-in">🎵</div>
         
         <div className="space-y-4">
-          <h3 className="text-2xl font-mono font-bold text-foreground tracking-wider">
+          <h3 className="text-2xl  font-bold text-foreground tracking-wider">
             HARMONIC DATA IMPORT
           </h3>
           
@@ -64,7 +64,7 @@ export function FileDropZone({ onFiles, isLoading, isDragOver, setIsDragOver }: 
             Drop CSV files here or{' '}
             <Button
               variant="link"
-              className="text-primary hover:text-primary/80 p-0 h-auto font-mono"
+              className="text-primary hover:text-primary/80 p-0 h-auto "
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading}
             >

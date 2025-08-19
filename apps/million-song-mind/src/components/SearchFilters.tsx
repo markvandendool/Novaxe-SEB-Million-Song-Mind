@@ -62,23 +62,23 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
       <div className="p-6 border-b border-border">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h2 className="text-2xl font-mono font-bold text-foreground tracking-wider">
+            <h2 className="text-2xl  font-bold text-foreground tracking-wider">
               HARMONIC DATABASE SEARCH
             </h2>
-            <p className="text-muted-foreground font-mono text-sm">
+            <p className="text-muted-foreground  text-sm">
               Professional Music Analysis • Educational Interface
             </p>
           </div>
           
           {/* Live Counter */}
           <div className="text-right">
-            <div className="text-3xl font-mono font-bold text-primary">
+            <div className="text-3xl  font-bold text-primary">
               {filteredCount.toLocaleString()}
             </div>
-            <div className="text-sm text-muted-foreground font-mono">
+            <div className="text-sm text-muted-foreground ">
               of {totalSongs.toLocaleString()} songs
             </div>
-            <div className="text-xs text-accent font-mono mt-1">
+            <div className="text-xs text-accent  mt-1">
               {((filteredCount / totalSongs) * 100).toFixed(1)}% of database
             </div>
           </div>
@@ -98,7 +98,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
               placeholder="Search songs..."
               value={filters.songName}
               onChange={(e) => handleFilterChange('songName', e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground  text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
               disabled={isLoading}
             />
           </div>
@@ -113,7 +113,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
               placeholder="Search artists..."
               value={filters.artistName}
               onChange={(e) => handleFilterChange('artistName', e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
+              className="w-full pl-10 pr-4 py-3 bg-input border border-border rounded-lg text-foreground  text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300"
               disabled={isLoading}
             />
           </div>
@@ -124,7 +124,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
           <Button
             variant="outline"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="font-mono"
+            className=""
             disabled={isLoading}
           >
             <Filter className="w-4 h-4 mr-2" />
@@ -148,14 +148,14 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
             
             {/* Genre Filter */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-mono font-bold text-foreground">
+              <label className="flex items-center text-sm  font-bold text-foreground">
                 <Tag className="w-4 h-4 mr-2 text-accent" />
                 GENRE
               </label>
               <select
                 value={filters.genre}
                 onChange={(e) => handleFilterChange('genre', e.target.value)}
-                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground  text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                 disabled={isLoading}
               >
                 <option value="">All Genres</option>
@@ -169,14 +169,14 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
 
             {/* Decade Filter */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-mono font-bold text-foreground">
+              <label className="flex items-center text-sm  font-bold text-foreground">
                 <Calendar className="w-4 h-4 mr-2 text-accent" />
                 DECADE
               </label>
               <select
                 value={filters.decade}
                 onChange={(e) => handleFilterChange('decade', e.target.value)}
-                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground font-mono text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                className="w-full px-3 py-2 bg-input border border-border rounded-lg text-foreground  text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
                 disabled={isLoading}
               >
                 <option value="">All Decades</option>
@@ -190,7 +190,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
 
             {/* Year Range */}
             <div className="space-y-2">
-              <label className="flex items-center text-sm font-mono font-bold text-foreground">
+              <label className="flex items-center text-sm  font-bold text-foreground">
                 <Calendar className="w-4 h-4 mr-2 text-accent" />
                 YEAR RANGE
               </label>
@@ -201,7 +201,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
                   max="2024"
                   value={filters.yearRange[0]}
                   onChange={(e) => handleFilterChange('yearRange', [parseInt(e.target.value), filters.yearRange[1]])}
-                  className="w-20 px-2 py-2 bg-input border border-border rounded text-foreground font-mono text-xs focus:ring-1 focus:ring-primary"
+                  className="w-20 px-2 py-2 bg-input border border-border rounded text-foreground  text-xs focus:ring-1 focus:ring-primary"
                   disabled={isLoading}
                 />
                 <span className="text-muted-foreground">–</span>
@@ -211,7 +211,7 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
                   max="2024"
                   value={filters.yearRange[1]}
                   onChange={(e) => handleFilterChange('yearRange', [filters.yearRange[0], parseInt(e.target.value)])}
-                  className="w-20 px-2 py-2 bg-input border border-border rounded text-foreground font-mono text-xs focus:ring-1 focus:ring-primary"
+                  className="w-20 px-2 py-2 bg-input border border-border rounded text-foreground  text-xs focus:ring-1 focus:ring-primary"
                   disabled={isLoading}
                 />
               </div>
@@ -220,10 +220,10 @@ export function SearchFilters({ onSearch, totalSongs, filteredCount, isLoading }
 
           {/* Chord Selection Instructions */}
           <div className="bg-card border border-border rounded-lg p-4">
-            <h4 className="text-sm font-mono font-bold text-foreground mb-2">
+            <h4 className="text-sm  font-bold text-foreground mb-2">
               🎵 CHORD FILTERING
             </h4>
-            <p className="text-xs text-muted-foreground font-mono">
+            <p className="text-xs text-muted-foreground ">
               Click chords on the chart below while holding <kbd className="bg-muted px-1 rounded text-xs">⌘</kbd> to filter songs.
               Selected chords will show only songs using those specific harmonies.
             </p>

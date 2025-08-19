@@ -18,8 +18,8 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
   if (compact) {
     return (
       <div className="flex items-center gap-2">
-        <div className="text-xs font-mono text-muted-foreground">Key:</div>
-        <div className="px-1.5 py-0.5 rounded bg-muted text-foreground font-mono text-xs min-w-[24px] text-center">
+        <div className="text-xs  text-muted-foreground">Key:</div>
+        <div className="px-1.5 py-0.5 rounded bg-muted text-foreground  text-xs min-w-[24px] text-center">
           {focusedKey}
         </div>
         <div className="min-w-[120px]">
@@ -28,11 +28,11 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
               <SelectValue placeholder="Key" />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 py-1 text-xs font-mono text-muted-foreground">Major</div>
+              <div className="px-2 py-1 text-xs  text-muted-foreground">Major</div>
               {MAJOR_KEYS.map(k => (
                 <SelectItem key={k} value={k}>{k}</SelectItem>
               ))}
-              <div className="px-2 pt-2 text-xs font-mono text-muted-foreground">Minor</div>
+              <div className="px-2 pt-2 text-xs  text-muted-foreground">Minor</div>
               {MINOR_KEYS.map(k => (
                 <SelectItem key={k} value={k}>{k}</SelectItem>
               ))}
@@ -46,7 +46,7 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
             id="lock-to-score-compact"
             className="scale-75"
           />
-          <label htmlFor="lock-to-score-compact" className="text-xs font-mono text-muted-foreground">Lock</label>
+          <label htmlFor="lock-to-score-compact" className="text-xs  text-muted-foreground">Lock</label>
         </div>
       </div>
     );
@@ -56,8 +56,8 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
     <section className="w-full">
       <div className="flex flex-wrap items-center justify-between gap-4 bg-card/80 border border-border rounded-md px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="text-sm font-mono text-muted-foreground">Global Key</div>
-          <div className="px-2 py-1 rounded bg-muted text-foreground font-mono text-xs">Focused: {focusedKey}</div>
+          <div className="text-sm  text-muted-foreground">Global Key</div>
+          <div className="px-2 py-1 rounded bg-muted text-foreground  text-xs">Focused: {focusedKey}</div>
         </div>
         <div className="flex items-center gap-3">
           <div className="min-w-[180px]">
@@ -66,11 +66,11 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
                 <SelectValue placeholder="Select key" />
               </SelectTrigger>
               <SelectContent>
-                <div className="px-2 py-1 text-xs font-mono text-muted-foreground">Major</div>
+                <div className="px-2 py-1 text-xs  text-muted-foreground">Major</div>
                 {MAJOR_KEYS.map(k => (
                   <SelectItem key={k} value={k}>{k}</SelectItem>
                 ))}
-                <div className="px-2 pt-2 text-xs font-mono text-muted-foreground">Minor</div>
+                <div className="px-2 pt-2 text-xs  text-muted-foreground">Minor</div>
                 {MINOR_KEYS.map(k => (
                   <SelectItem key={k} value={k}>{k}</SelectItem>
                 ))}
@@ -79,9 +79,9 @@ export const GlobalKeySelector: React.FC<{ compact?: boolean }> = ({ compact = f
           </div>
           <div className="flex items-center gap-2">
             <Switch checked={isLockedToScore} onCheckedChange={toggleLock} id="lock-to-score" />
-            <label htmlFor="lock-to-score" className="text-xs font-mono text-muted-foreground">Lock to score</label>
+            <label htmlFor="lock-to-score" className="text-xs  text-muted-foreground">Lock to score</label>
           </div>
-          <Button variant="secondary" onClick={() => setTonality('C')} className="font-mono text-xs">
+          <Button variant="secondary" onClick={() => setTonality('C')} className=" text-xs">
             Reset C
           </Button>
         </div>

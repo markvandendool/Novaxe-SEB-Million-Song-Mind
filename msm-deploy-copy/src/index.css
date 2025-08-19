@@ -227,7 +227,7 @@
 
 /* Premium Fontdec13 styling for harmonic visualization */
 .font-fontdec13 {
-  font-family: 'Fontdec13', 'nvxChord', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
+  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
   font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
   font-variant-ligatures: discretionary-ligatures contextual;
   text-rendering: optimizeLegibility;
@@ -284,7 +284,7 @@ svg .harmonic-bar.selected {
 svg text { pointer-events: none; }
 /* Ensure braid labels render musical glyphs (♯, ♭, °, Δ, ø) reliably */
 #braid-tonal svg text {
-  font-family: 'Fontdec13', 'nvxChord', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
+  font-family: 'Fontdec13', 'Arial', 'Noto Music', 'Noto Sans', 'Share Tech Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Segoe UI Symbol', 'Symbola', 'DejaVu Sans', monospace;
   font-feature-settings: 'liga' 1, 'kern' 1, 'dlig' 1, 'clig' 1;
   font-variant-ligatures: discretionary-ligatures contextual;
   text-rendering: optimizeLegibility;

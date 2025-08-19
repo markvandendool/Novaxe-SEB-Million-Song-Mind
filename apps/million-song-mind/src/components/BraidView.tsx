@@ -40,7 +40,7 @@ export const BraidView: React.FC<BraidViewProps> = ({
         <rect x={0} y={0} width={width} height={height} fill="transparent" />
         {centers.map((c, idx) => (
           <g key={`circle-${idx}`}>
-            <text x={c.x} y={c.y - circleRadius - 12} textAnchor="middle" fill="hsl(var(--muted-foreground))" className="font-mono text-xs">
+            <text x={c.x} y={c.y - circleRadius - 12} textAnchor="middle" fill="hsl(var(--muted-foreground))" className=" text-xs">
               {c.keyLabel}
             </text>
             <YinYangCircle
