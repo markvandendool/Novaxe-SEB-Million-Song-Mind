@@ -61,6 +61,49 @@ cd apps/million-song-mind && npm run dev
 - **Verification**: `ls -la apps/million-song-mind/public/fonts/`
 - **NEVER** modify font files without explicit permission
 
+### **🔬 RULE #5: FORENSIC MIGRATION PROTOCOL**
+**THIS IS THE PRIMARY SOURCE OF CONTAMINATION PREVENTION**
+
+All DIAMOND component conversions MUST follow this exact naming pattern:
+```
+ORIGINAL COMPONENT → REACT VERSION
+===================================
+BraidComponent → BraidComponentREACTV
+MidiService → MidiServiceREACTV
+TonalityCalculator → TonalityCalculatorREACTV
+ChordRenderer → ChordRendererREACTV
+```
+
+**FORBIDDEN NAMING (CAUSES CONTAMINATION):**
+```
+❌ BraidComponent → ReactBraid
+❌ MidiService → ReactMidiService  
+❌ TonalityCalculator → ReactTonalityCalculator
+```
+
+**INTEGRITY REQUIREMENTS:**
+1. ✅ 100% musical logic preservation
+2. ✅ Pixel-perfect styling fidelity
+3. ✅ Font system integrity (nvxChord glyphs)
+4. ✅ Line count verification and documentation
+5. ✅ Forensic header documentation in every component
+6. ✅ Output verification logs required
+7. ✅ Non-negotiable authenticity attestation
+
+**MANDATORY COMPONENT HEADER TEMPLATE:**
+```typescript
+/**
+ * FORENSIC MIGRATION RECORD
+ * =========================
+ * ORIGINAL: [ComponentName] (Angular 11)
+ * SOURCE: [exact file path]
+ * LINES: [exact line count]
+ * REACT VERSION: [ComponentName]REACTV
+ * MIGRATION DATE: [date]
+ * INTEGRITY LEVEL: 100% (VERIFIED)
+ */
+```
+
 ---
 
 ## 📊 **FORENSIC STATUS DASHBOARD**

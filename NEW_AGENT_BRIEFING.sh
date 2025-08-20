@@ -48,6 +48,42 @@ else
 fi
 
 # Check font integrity
+FONT_FILE="assets/fonts/Font Jan16.otf"
+if [ -f "$FONT_FILE" ]; then
+    FONT_SIZE=$(stat -f%z "$FONT_FILE" 2>/dev/null || stat -c%s "$FONT_FILE")
+    echo "   ✅ Font System: Font Jan16.otf ($FONT_SIZE bytes - nvxChord glyphs)"
+else
+    echo "   ❌ WARNING: Font Jan16.otf not found - musical rendering may be affected"
+fi
+
+# Check documentation system
+if [ -d "OFFICIAL_DOCUMENTS" ]; then
+    DOC_COUNT=$(find OFFICIAL_DOCUMENTS -name "*.md" | wc -l)
+    echo "   ✅ Documentation: $DOC_COUNT official documents ready"
+else
+    echo "   ❌ CRITICAL: OFFICIAL_DOCUMENTS system missing!"
+    exit 1
+fi
+
+echo ""
+echo "🔬 FORENSIC MIGRATION PROTOCOL ENFORCEMENT"
+echo "========================================="
+echo "⚠️  CRITICAL: All DIAMOND component conversions MUST follow forensic naming:"
+echo "   - Original: BraidComponent → React: BraidComponentREACTV"
+echo "   - NO EXCEPTIONS - This prevents contamination"
+echo "   - Line count verification MANDATORY"
+echo "   - 100% fidelity preservation REQUIRED"
+echo ""
+echo "🎯 FORENSIC NAMING EXAMPLES:"
+echo "   ✅ BraidComponent → BraidComponentREACTV"
+echo "   ✅ MidiService → MidiServiceREACTV"
+echo "   ✅ TonalityCalculator → TonalityCalculatorREACTV"
+echo "   ❌ BraidComponent → ReactBraid (FORBIDDEN - CAUSES CONTAMINATION)"
+echo "   ❌ MidiService → ReactMidiService (FORBIDDEN - CAUSES CONTAMINATION)"
+echo ""
+echo "🚨 PRIMARY CONTAMINATION SOURCE: Incorrect naming conventions!"
+echo "🔒 INTEGRITY ENFORCEMENT: [OriginalName]REACTV suffix MANDATORY"
+echo ""
 FONT_FILE="apps/million-song-mind/public/fonts/Font Jan16.otf"
 if [ -f "$FONT_FILE" ]; then
     FONT_SIZE=$(stat -f%z "$FONT_FILE" 2>/dev/null || stat -c%s "$FONT_FILE" 2>/dev/null)
