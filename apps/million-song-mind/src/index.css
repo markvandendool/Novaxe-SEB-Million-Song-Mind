@@ -280,8 +280,8 @@ svg text {
 /* Ensure braid labels render musical glyphs - REMOVED TOO-BROAD SELECTOR */
 /* Let BraidTonal.css handle specific font assignments */
 
-/* Braid fonts are handled by braid-angular-exact.css */
-/* Using exact Angular implementation with font-family: "nvxChord" */
+/* Font Jan16.otf is used for all braid text - requires b→l transformation */
+/* Handled by braid-angular-exact.css */
 
 .chord-label-custom {
   font-family: 'nvxChord' !important;
@@ -297,6 +297,11 @@ div .chord-label-custom {
 /* Additional protection for HarmonicChart fraction text */
 .fraction-text,
 .fraction-subtitle {
+  font-family: 'nvxChord' !important;
+}
+
+/* Force all braid text to use nvxChord (Font Jan16) */
+#braid-tonal svg text {
   font-family: 'nvxChord' !important;
 }
 

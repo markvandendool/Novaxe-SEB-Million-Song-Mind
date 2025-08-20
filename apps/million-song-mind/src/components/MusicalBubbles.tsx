@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import braidTonalities from '../data/braid_tonalities.json';
+import { BraidChord } from './BraidChord';
 
 interface BubblePosition {
   id: string;
   x: number;
   y: number;
-  type: 'note' | 'chord';
+  type: 'note' | 'chord' | 'roman';
   radius?: number;
+  row: number;
+  column: 'left' | 'center-left' | 'center-right' | 'right';
 }
 
 interface MusicalBubblesProps {
@@ -16,32 +19,56 @@ interface MusicalBubblesProps {
   className?: string;
 }
 
-// Original Novaxe bubble positions - matching the authentic braid layout
+// Authentic Novaxe braid layout - vertical braided pattern matching the screenshots
+// Based on the actual visual structure: vertical rows with interwoven diamond connections
 const bubblePositions: BubblePosition[] = [
-  // Left outer arc (5th circle) - fifth_left arrays
-  { id: 'outer-left-up', x: 200, y: 150, type: 'note', radius: 25 },
-  { id: 'outer-left-down', x: 200, y: 250, type: 'note', radius: 25 },
+  // Row 1 (top)
+  { id: 'row1-left', x: 100, y: 50, type: 'note', radius: 35, row: 1, column: 'left' },
+  { id: 'row1-center-left', x: 200, y: 50, type: 'roman', radius: 35, row: 1, column: 'center-left' },
+  { id: 'row1-center-right', x: 300, y: 50, type: 'chord', radius: 35, row: 1, column: 'center-right' },
+  { id: 'row1-right', x: 400, y: 50, type: 'note', radius: 35, row: 1, column: 'right' },
   
-  // Left inner arc - left arrays
-  { id: 'left-up', x: 250, y: 170, type: 'note', radius: 20 },
-  { id: 'left-down', x: 250, y: 230, type: 'note', radius: 20 },
+  // Row 2
+  { id: 'row2-left', x: 100, y: 130, type: 'note', radius: 35, row: 2, column: 'left' },
+  { id: 'row2-center-left', x: 200, y: 130, type: 'roman', radius: 35, row: 2, column: 'center-left' },
+  { id: 'row2-center-right', x: 300, y: 130, type: 'chord', radius: 35, row: 2, column: 'center-right' },
+  { id: 'row2-right', x: 400, y: 130, type: 'note', radius: 35, row: 2, column: 'right' },
   
-  // Center positions - center arrays (core of the braid)
-  { id: 'center-left', x: 300, y: 180, type: 'chord', radius: 30 },
-  { id: 'center-right', x: 300, y: 220, type: 'chord', radius: 30 },
+  // Row 3
+  { id: 'row3-left', x: 100, y: 210, type: 'note', radius: 35, row: 3, column: 'left' },
+  { id: 'row3-center-left', x: 200, y: 210, type: 'roman', radius: 35, row: 3, column: 'center-left' },
+  { id: 'row3-center-right', x: 300, y: 210, type: 'chord', radius: 35, row: 3, column: 'center-right' },
+  { id: 'row3-right', x: 400, y: 210, type: 'note', radius: 35, row: 3, column: 'right' },
   
-  // Right inner arc - right arrays  
-  { id: 'right-up', x: 350, y: 170, type: 'note', radius: 20 },
-  { id: 'right-down', x: 350, y: 230, type: 'note', radius: 20 },
+  // Row 4
+  { id: 'row4-left', x: 100, y: 290, type: 'note', radius: 35, row: 4, column: 'left' },
+  { id: 'row4-center-left', x: 200, y: 290, type: 'roman', radius: 35, row: 4, column: 'center-left' },
+  { id: 'row4-center-right', x: 300, y: 290, type: 'chord', radius: 35, row: 4, column: 'center-right' },
+  { id: 'row4-right', x: 400, y: 290, type: 'note', radius: 35, row: 4, column: 'right' },
   
-  // Right outer arc (5th circle) - fifth_right arrays
-  { id: 'outer-right-up', x: 400, y: 150, type: 'note', radius: 25 },
-  { id: 'outer-right-down', x: 400, y: 250, type: 'note', radius: 25 }
+  // Row 5
+  { id: 'row5-left', x: 100, y: 370, type: 'note', radius: 35, row: 5, column: 'left' },
+  { id: 'row5-center-left', x: 200, y: 370, type: 'roman', radius: 35, row: 5, column: 'center-left' },
+  { id: 'row5-center-right', x: 300, y: 370, type: 'chord', radius: 35, row: 5, column: 'center-right' },
+  { id: 'row5-right', x: 400, y: 370, type: 'note', radius: 35, row: 5, column: 'right' },
+  
+  // Row 6
+  { id: 'row6-left', x: 100, y: 450, type: 'note', radius: 35, row: 6, column: 'left' },
+  { id: 'row6-center-left', x: 200, y: 450, type: 'roman', radius: 35, row: 6, column: 'center-left' },
+  { id: 'row6-center-right', x: 300, y: 450, type: 'chord', radius: 35, row: 6, column: 'center-right' },
+  { id: 'row6-right', x: 400, y: 450, type: 'note', radius: 35, row: 6, column: 'right' },
+  
+  // Row 7 (bottom)
+  { id: 'row7-left', x: 100, y: 530, type: 'note', radius: 35, row: 7, column: 'left' },
+  { id: 'row7-center-left', x: 200, y: 530, type: 'roman', radius: 35, row: 7, column: 'center-left' },
+  { id: 'row7-center-right', x: 300, y: 530, type: 'chord', radius: 35, row: 7, column: 'center-right' },
+  { id: 'row7-right', x: 400, y: 530, type: 'note', radius: 35, row: 7, column: 'right' }
 ];
 
 /**
  * Get authentic bubble texts for a musical key
  * Uses the exact same mapping as the original Novaxe Angular component
+ * Now supports the vertical braided layout with proper row distribution
  */
 const getBubbleTextsForKey = (key: string = 'C', displayAsRoman: boolean = false) => {
   const tonality = displayAsRoman ? 'roman' : key;
@@ -52,33 +79,50 @@ const getBubbleTextsForKey = (key: string = 'C', displayAsRoman: boolean = false
     return getBubbleTextsForKey('C', displayAsRoman);
   }
   
+  // Map the original 10-position arrays to the vertical braided layout
   return {
-    // Left outer arc (5th circle) - outer_left arrays from original braid_tonalities.json
-    'outer-left-up': data.outer_left_up || [],
-    'outer-left-down': data.outer_left_down || [],
+    // Left column - outer_left arrays
+    'row1-left': data.outer_left_up?.[0] || '',
+    'row2-left': data.outer_left_up?.[1] || '',
+    'row3-left': data.outer_left_up?.[2] || '',
+    'row4-left': data.outer_left_down?.[0] || '',
+    'row5-left': data.outer_left_down?.[1] || '',
+    'row6-left': data.outer_left_down?.[2] || '',
+    'row7-left': data.outer_left_down?.[3] || '',
     
-    // Left inner arc - left arrays from original
-    'left-up': data.left_up || [],
-    'left-down': data.left_down || [],
+    // Center-left column - Roman numerals/left arrays
+    'row1-center-left': data.left_up?.[0] || '',
+    'row2-center-left': data.left_up?.[1] || '',
+    'row3-center-left': data.left_up?.[2] || '',
+    'row4-center-left': data.left_down?.[0] || '',
+    'row5-center-left': data.left_down?.[1] || '',
+    'row6-center-left': data.left_down?.[2] || '',
+    'row7-center-left': data.left_down?.[3] || '',
     
-    // Center positions - core of braid system
-    // Original mapping: center_left = center_major, center_right = center_minor  
-    'center-left': data.center_major || [],
-    'center-right': data.center_minor || [],
+    // Center-right column - center arrays (major/minor)
+    'row1-center-right': data.center_major?.[0] || '',
+    'row2-center-right': data.center_major?.[1] || '',
+    'row3-center-right': data.center_major?.[2] || '',
+    'row4-center-right': data.center_minor?.[0] || '',
+    'row5-center-right': data.center_minor?.[1] || '',
+    'row6-center-right': data.center_minor?.[2] || '',
+    'row7-center-right': data.center_minor?.[3] || '',
     
-    // Right inner arc - right arrays from original
-    'right-up': data.right_up || [],
-    'right-down': data.right_down || [],
-    
-    // Right outer arc (5th circle) - outer_right arrays from original
-    'outer-right-up': data.outer_right_up || [],
-    'outer-right-down': data.outer_right_down || []
+    // Right column - outer_right arrays
+    'row1-right': data.outer_right_up?.[0] || '',
+    'row2-right': data.outer_right_up?.[1] || '',
+    'row3-right': data.outer_right_up?.[2] || '',
+    'row4-right': data.outer_right_down?.[0] || '',
+    'row5-right': data.outer_right_down?.[1] || '',
+    'row6-right': data.outer_right_down?.[2] || '',
+    'row7-right': data.outer_right_down?.[3] || ''
   };
 };
 
 /**
- * MusicalBubbles - Authentic recreation of Novaxe SEB braid bubble system
- * Renders the 10-position musical note/chord arrangement with real data from braid_tonalities.json
+ * MusicalBubbles - Authentic recreation of Novaxe SEB vertical braided system
+ * Renders the vertical elongated braid with interwoven diamond patterns and connecting bands
+ * Matches the authentic visual structure from the original Novaxe screenshots
  */
 export const MusicalBubbles: React.FC<MusicalBubblesProps> = ({
   currentKey = 'C',
@@ -89,7 +133,7 @@ export const MusicalBubbles: React.FC<MusicalBubblesProps> = ({
   const [hoveredBubble, setHoveredBubble] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   
-  // Get authentic text arrays for the current key
+  // Get authentic text data for the current key
   const bubbleTexts = getBubbleTextsForKey(currentKey, displayAsRoman);
   
   const handleBubbleClick = (positionId: string, text: string) => {
@@ -104,144 +148,337 @@ export const MusicalBubbles: React.FC<MusicalBubblesProps> = ({
   return (
     <div className={`musical-bubbles ${className}`}>
       <svg 
-        viewBox="0 0 600 400" 
+        viewBox="0 0 500 600" 
         className="musical-bubbles-svg"
         style={{ 
           width: '100%', 
-          height: '400px',
-          background: 'transparent'
+          height: '600px',
+          background: 'linear-gradient(145deg, #1a1a1a 0%, #2d2d2d 50%, #1a1a1a 100%)'
         }}
       >
-        {/* Background braid lines - connecting the musical relationships */}
-        <g className="braid-connections" stroke="#e0e0e0" strokeWidth="1" fill="none">
-          {/* Fifth circle connections */}
-          <path d="M 200 150 Q 300 100 400 150" />
-          <path d="M 200 250 Q 300 300 400 250" />
+        {/* Authentic Novaxe Braid Connections - Interwoven Diamond Pattern */}
+        <defs>
+          <linearGradient id="braidGreen" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#4ade80" />
+            <stop offset="50%" stopColor="#22c55e" />
+            <stop offset="100%" stopColor="#16a34a" />
+          </linearGradient>
+          <linearGradient id="braidBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stopColor="#60a5fa" />
+            <stop offset="50%" stopColor="#3b82f6" />
+            <stop offset="100%" stopColor="#2563eb" />
+          </linearGradient>
+        </defs>
+        
+        {/* Vertical Braid Connections - Green Interwoven Bands */}
+        <g className="braid-connections" fill="none" strokeWidth="8">
+          {/* Primary braid bands - left to right weaving */}
+          {[1, 2, 3, 4, 5, 6].map(row => {
+            const y1 = 50 + (row - 1) * 80;
+            const y2 = y1 + 80;
+            return (
+              <g key={`braid-row-${row}`}>
+                {/* Left-to-center weave */}
+                <path 
+                  d={`M 100 ${y1} Q 150 ${y1 + 40} 200 ${y2}`}
+                  stroke="url(#braidGreen)"
+                  opacity="0.8"
+                />
+                {/* Center weave */}
+                <path 
+                  d={`M 200 ${y1} Q 250 ${y1 + 40} 300 ${y2}`}
+                  stroke="url(#braidGreen)" 
+                  opacity="0.8"
+                />
+                {/* Right-to-center weave */}
+                <path 
+                  d={`M 300 ${y1} Q 350 ${y1 + 40} 400 ${y2}`}
+                  stroke="url(#braidGreen)"
+                  opacity="0.8"
+                />
+              </g>
+            );
+          })}
           
-          {/* Inner arc connections */}
-          <path d="M 250 170 Q 300 150 350 170" />
-          <path d="M 250 230 Q 300 250 350 230" />
+          {/* Secondary braid bands - reverse weaving */}
+          {[1, 2, 3, 4, 5, 6].map(row => {
+            const y1 = 50 + (row - 1) * 80 + 40;
+            const y2 = y1 + 80;
+            return (
+              <g key={`reverse-braid-row-${row}`}>
+                {/* Reverse left-to-center weave */}
+                <path 
+                  d={`M 200 ${y1} Q 150 ${y1 + 40} 100 ${y2}`}
+                  stroke="url(#braidBlue)"
+                  opacity="0.6"
+                />
+                {/* Reverse center weave */}
+                <path 
+                  d={`M 300 ${y1} Q 250 ${y1 + 40} 200 ${y2}`}
+                  stroke="url(#braidBlue)"
+                  opacity="0.6"
+                />
+                {/* Reverse right-to-center weave */}
+                <path 
+                  d={`M 400 ${y1} Q 350 ${y1 + 40} 300 ${y2}`}
+                  stroke="url(#braidBlue)"
+                  opacity="0.6"
+                />
+              </g>
+            );
+          })}
           
-          {/* Center connection - the core braid */}
-          <line x1="300" y1="180" x2="300" y2="220" strokeWidth="3" stroke="#666" />
+          {/* Diamond connection pattern */}
+          {[2, 3, 4, 5, 6].map(row => {
+            const y = 50 + (row - 1) * 80;
+            return (
+              <g key={`diamond-${row}`}>
+                {/* Diamond connecting lines */}
+                <path 
+                  d={`M 150 ${y - 20} L 200 ${y} L 250 ${y - 20} L 300 ${y} L 350 ${y - 20}`}
+                  stroke="#4ade80"
+                  strokeWidth="2"
+                  opacity="0.4"
+                />
+                <path 
+                  d={`M 150 ${y + 20} L 200 ${y} L 250 ${y + 20} L 300 ${y} L 350 ${y + 20}`}
+                  stroke="#4ade80"
+                  strokeWidth="2"
+                  opacity="0.4"
+                />
+              </g>
+            );
+          })}
         </g>
         
-        {/* Bubble positions with authentic musical content */}
+        {/* Bubble positions with authentic musical content - Vertical Braided Layout */}
         {bubblePositions.map((position) => {
-          const textArray = bubbleTexts[position.id as keyof typeof bubbleTexts];
-          const currentText = textArray && textArray.length > 0 
-            ? textArray[currentIndex % textArray.length] 
-            : '';
+          const currentText = bubbleTexts[position.id as keyof typeof bubbleTexts] || '';
           const isHovered = hoveredBubble === position.id;
+          
+          // Get bubble color based on type and position
+          const getBubbleColor = () => {
+            switch (position.type) {
+              case 'chord': return '#3b82f6'; // Blue for chords
+              case 'roman': return '#8b5cf6'; // Purple for roman numerals
+              case 'note': return '#6b7280'; // Gray for notes
+              default: return '#6b7280';
+            }
+          };
           
           return (
             <g key={position.id} className="musical-bubble-group">
-              {/* Bubble circle */}
+              {/* Bubble shadow */}
+              <circle
+                cx={position.x + 3}
+                cy={position.y + 3}
+                r={position.radius}
+                fill="rgba(0,0,0,0.3)"
+                className="bubble-shadow"
+              />
+              
+              {/* Main bubble circle */}
               <circle
                 cx={position.x}
                 cy={position.y}
                 r={position.radius}
-                fill={position.type === 'chord' ? '#4a90e2' : '#7fb3d3'}
-                stroke={isHovered ? '#ff6b6b' : '#333'}
+                fill={getBubbleColor()}
+                stroke={isHovered ? '#fbbf24' : 'rgba(255,255,255,0.2)'}
                 strokeWidth={isHovered ? 3 : 1}
                 className="musical-bubble"
                 style={{ 
                   cursor: 'pointer',
-                  filter: isHovered ? 'drop-shadow(0 0 8px rgba(255,107,107,0.6))' : 'none',
-                  transition: 'all 0.2s ease'
+                  filter: isHovered ? 'drop-shadow(0 0 12px rgba(251,191,36,0.8))' : 'none',
+                  transition: 'all 0.3s ease'
                 }}
                 onMouseEnter={() => setHoveredBubble(position.id)}
                 onMouseLeave={() => setHoveredBubble(null)}
                 onClick={() => handleBubbleClick(position.id, currentText)}
               />
               
-              {/* Musical text - using original nvxChord font */}
-              <text
-                x={position.x}
-                y={position.y + 4}
-                textAnchor="middle"
-                fontSize={position.type === 'chord' ? '16' : '14'}
-                fontFamily="nvxChord, REAL_NOVAXE_FONT, music-font, monospace"
-                fill="white"
-                fontWeight="bold"
-                className="musical-text"
+              {/* Inner highlight */}
+              <circle
+                cx={position.x}
+                cy={position.y}
+                r={position.radius! - 8}
+                fill="none"
+                stroke="rgba(255,255,255,0.3)"
+                strokeWidth="1"
+                className="inner-highlight"
                 pointerEvents="none"
-                style={{
-                  textShadow: '1px 1px 2px rgba(0,0,0,0.8)'
-                }}
-              >
-                {currentText}
-              </text>
+              />
               
-              {/* Position label for debugging */}
+              {/* Musical text - using BraidChord component for authentic font rendering */}
+              <foreignObject
+                x={position.x - 20}
+                y={position.y - 10}
+                width="40"
+                height="20"
+              >
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'center', 
+                  alignItems: 'center',
+                  height: '100%',
+                  fontSize: currentText.length > 3 ? '12px' : '16px'
+                }}>
+                  <BraidChord 
+                    chord={currentText}
+                    active={isHovered}
+                    className="bubble-chord-text"
+                  />
+                </div>
+              </foreignObject>
+              
+              {/* Row and column indicators for debugging */}
               {hoveredBubble === position.id && (
-                <text
-                  x={position.x}
-                  y={position.y - position.radius! - 8}
-                  textAnchor="middle"
-                  fontSize="10"
-                  fill="#666"
-                  className="position-label"
-                >
-                  {position.id}
-                </text>
+                <g>
+                  <text
+                    x={position.x}
+                    y={position.y - position.radius! - 10}
+                    textAnchor="middle"
+                    fontSize="10"
+                    fill="#fbbf24"
+                    className="position-label"
+                    fontWeight="bold"
+                  >
+                    {position.id}
+                  </text>
+                  <text
+                    x={position.x}
+                    y={position.y + position.radius! + 20}
+                    textAnchor="middle"
+                    fontSize="8"
+                    fill="#94a3b8"
+                    className="position-details"
+                  >
+                    Row {position.row} • {position.column}
+                  </text>
+                </g>
               )}
             </g>
           );
         })}
         
-        {/* Key indicator */}
+        {/* Key indicator with authentic styling */}
+        <rect x="10" y="10" width="140" height="50" rx="8" fill="rgba(0,0,0,0.8)" stroke="rgba(255,255,255,0.2)" />
         <text 
-          x="30" 
+          x="25" 
           y="30" 
-          fontSize="18" 
+          fontSize="16" 
           fontFamily="nvxChord, REAL_NOVAXE_FONT, music-font, monospace"
-          fill="#333"
+          fill="#22c55e"
           fontWeight="bold"
         >
-          Key: {currentKey} {displayAsRoman ? '(Roman)' : ''}
+          Key: {currentKey}
+        </text>
+        <text 
+          x="25" 
+          y="45" 
+          fontSize="10" 
+          fill="#94a3b8"
+        >
+          {displayAsRoman ? 'Roman Numerals' : 'Note Names'}
         </text>
         
-        {/* Rotation indicator */}
+        {/* Braid title */}
         <text 
-          x="30" 
-          y="50" 
-          fontSize="12" 
-          fill="#666"
+          x="250" 
+          y="25" 
+          textAnchor="middle"
+          fontSize="18" 
+          fontFamily="nvxChord, REAL_NOVAXE_FONT, music-font, monospace"
+          fill="rgba(255,255,255,0.9)"
+          fontWeight="bold"
+          style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.8)' }}
         >
-          Position: {currentIndex + 1}/17
+          AUTHENTIC NOVAXE BRAID
         </text>
       </svg>
       
-      {/* Control panel */}
-      <div className="bubble-controls" style={{ marginTop: '10px' }}>
-        <button 
-          onClick={() => setCurrentIndex((prev) => (prev + 1) % 17)}
-          style={{
-            padding: '8px 16px',
-            marginRight: '10px',
-            backgroundColor: '#4a90e2',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Rotate Forward
-        </button>
-        
+      {/* Control panel with authentic styling */}
+      <div className="bubble-controls" style={{ 
+        marginTop: '15px',
+        display: 'flex',
+        gap: '15px',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '15px',
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        borderRadius: '12px',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
         <button 
           onClick={() => setCurrentIndex((prev) => (prev - 1 + 17) % 17)}
           style={{
-            padding: '8px 16px',
-            backgroundColor: '#7fb3d3',
+            padding: '10px 20px',
+            backgroundColor: 'rgba(59, 130, 246, 0.8)',
             color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
+            border: '1px solid rgba(59, 130, 246, 0.5)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontFamily: 'nvxChord, REAL_NOVAXE_FONT, music-font, monospace',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 1)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.8)';
+            e.currentTarget.style.transform = 'translateY(0)';
           }}
         >
-          Rotate Back
+          ← Previous
+        </button>
+        
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          color: 'rgba(255,255,255,0.9)',
+          minWidth: '120px'
+        }}>
+          <span style={{ 
+            fontSize: '14px', 
+            fontWeight: 'bold',
+            color: '#22c55e'
+          }}>
+            Position {currentIndex + 1} of 17
+          </span>
+          <span style={{ 
+            fontSize: '12px', 
+            color: 'rgba(255,255,255,0.6)',
+            marginTop: '2px'
+          }}>
+            Authentic Braid Rotation
+          </span>
+        </div>
+        
+        <button 
+          onClick={() => setCurrentIndex((prev) => (prev + 1) % 17)}
+          style={{
+            padding: '10px 20px',
+            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+            color: 'white',
+            border: '1px solid rgba(34, 197, 94, 0.5)',
+            borderRadius: '8px',
+            cursor: 'pointer',
+            fontFamily: 'nvxChord, REAL_NOVAXE_FONT, music-font, monospace',
+            fontWeight: 'bold',
+            transition: 'all 0.3s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 1)';
+            e.currentTarget.style.transform = 'translateY(-2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(34, 197, 94, 0.8)';
+            e.currentTarget.style.transform = 'translateY(0)';
+          }}
+        >
+          Next →
         </button>
       </div>
     </div>

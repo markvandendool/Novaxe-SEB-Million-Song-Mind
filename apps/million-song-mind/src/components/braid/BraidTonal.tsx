@@ -4,6 +4,7 @@ import "./BraidTonal.css";
 import { MusicalChordText } from '@/components/MusicalChordText';
 import { ChordAudioPlayer } from '@/components/ChordAudioPlayer';
 import { getBraidPositionUsage, mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
+import { getChordSuffix } from '@/utils/chordTypes';
 import { processChordForBraid } from '@/utils/fontTransform';
 
 interface TonalSet {
@@ -300,9 +301,26 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
   const simpleChord = (s?: string, position?: string, direction?: string) => {
     if (!s) return '';
 
-    // ANGULAR TRUTH: Just returns the root note, NO transformation, NO suffixes!
-    // The font handles everything through its own ligatures
-    return s;
+    // Font Jan16 requires b→l transformation for flats to work
+    // Bb → Bl shows ♭ symbol
+    let result = s.replace(/([A-G])(b)/g, '$1l');
+
+    // Add chord quality suffix based on position and direction
+    if (position && direction) {
+      const suffix = getChordSuffix(position, direction, displayRoman);
+      if (suffix) {
+        // Apply transformations to the suffix too
+        const transformedSuffix = suffix
+          .replace(/german/g, '+6')        // German 6th → augmented 6th notation
+          .replace(/m7b5/g, 'm7l5')       // Half-diminished
+          .replace(/7b5/g, '7l5')          // Dom7b5
+          .replace(/dim/g, 'o')            // Diminished
+          .replace(/bb/g, 'll');           // Double flats
+        result += transformedSuffix;
+      }
+    }
+
+    return result;
   };
   // Compute stitch geometry ensuring F#/Gb bottom and Db/C# top alignment
   const rowCount = center_left.length || 15;
@@ -373,13 +391,13 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
             <g className={`${usageClass(getUsage(center_left_in_use[i]))}`}>
               <use xlinkHref="#leftCommaXL" className={`${getBubbleClass(center_left[i], "")} harmonic-bar ${isSelected(center_left_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_left_in_use[i])} />
               <text className={displayRoman ? "left duo roman" : "left duo"} x={displayRoman ? "0" : "-5"} y="-6">
-                {displayRoman ? center_left_in_use[i] : simpleChord(center_left_in_use[i], 'center', 'left')}
+                {simpleChord(center_left_in_use[i], 'center', 'left')}
               </text>
             </g>
             <g className={`${usageClass(getUsage(center_right_in_use[i]))}`}>
               <use xlinkHref="#rightCommaXL" className={`${getBubbleClass(center_right[i], "m")} harmonic-bar ${isSelected(center_right_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_right_in_use[i])} />
               <text className={displayRoman ? "right duo roman braid-label label-right" : "right duo braid-label label-right"} x="-6" y="22">
-                {displayRoman ? center_right_in_use[i] : simpleChord(center_right_in_use[i], 'center', 'right')}
+                {simpleChord(center_right_in_use[i], 'center', 'right')}
               </text>
             </g>
           </g>
@@ -391,24 +409,24 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
                 <g className={`${usageClass(getUsage(left_up_in_use[i - 1]))}`}>
                   <use xlinkHref="#leftCommaSM" className={`${getBubbleClass(left_up[i - 1], "b7")} harmonic-bar ${isSelected(left_up_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, left_up_in_use[i - 1])} />
                   <text className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"} x="-20" y="-4">
-                    {displayRoman ? left_up_in_use[i - 1] : simpleChord(left_up_in_use[i - 1], 'left', 'up') || ''}
+                    {simpleChord(left_up_in_use[i - 1], 'left', 'up') || ''}
                   </text>
                 </g>
                 <g className={`${usageClass(getUsage(left_down_in_use[i - 1]))}`}>
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(left_down[i - 1], "mb7b5")} harmonic-bar ${isSelected(left_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, left_down_in_use[i - 1])} />
                   <text className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"} x="-5" y="16">
-                    {displayRoman ? left_down_in_use[i - 1] : simpleChord(left_down_in_use[i - 1], 'left', 'down') || ''}
+                    {simpleChord(left_down_in_use[i - 1], 'left', 'down') || ''}
                   </text>
                 </g>
               </g>
               <g className="smallBubble bub" transform="translate(90 0)">
                 <g className={`${usageClass(getUsage(right_up_in_use[i - 1]))}`}>
                   <use xlinkHref="#leftCommaSM" className={`${getBubbleClass(right_up[i - 1], 'b7')} harmonic-bar ${isSelected(right_up_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, right_up_in_use[i - 1])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x={displayRoman ? '-22' : '-20'} y="-2">{displayRoman ? right_up_in_use[i - 1] : simpleChord(right_up_in_use[i - 1], 'right', 'up') || ''}</text>
+                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x={displayRoman ? '-22' : '-20'} y="-2">{simpleChord(right_up_in_use[i - 1], 'right', 'up') || ''}</text>
                 </g>
                 <g className={`${usageClass(getUsage(right_down_in_use[i - 1]))}`}>
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(right_down[i - 1], 'o')} harmonic-bar ${isSelected(right_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, right_down_in_use[i - 1])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x="-6" y="18">{displayRoman ? right_down_in_use[i - 1] : simpleChord(right_down_in_use[i - 1], 'right', 'down') || ''}</text>
+                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x="-6" y="18">{simpleChord(right_down_in_use[i - 1], 'right', 'down') || ''}</text>
                 </g>
               </g>
             </>
