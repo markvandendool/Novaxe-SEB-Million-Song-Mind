@@ -827,7 +827,7 @@ const MillionSongMind = () => {
     <div className="min-h-screen bg-background">
       {/* ULTRA SIMPLE FONT TEST - TOP OF PAGE - NO FALLBACKS */}
       <FontTest />
-      
+
       {/* Sticky Premium Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border" style={{ boxShadow: 'var(--shadow-professional)' }}>
         <div className="max-w-[120rem] mx-auto px-4 md:px-8 py-6 md:py-8">

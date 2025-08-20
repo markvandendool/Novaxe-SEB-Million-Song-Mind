@@ -3,9 +3,9 @@ import React from 'react';
 // ULTRA SIMPLE TEST - NO DEPENDENCIES
 const FontTest: React.FC = () => {
     return (
-        <div style={{ 
-            fontSize: '24px', 
-            padding: '20px', 
+        <div style={{
+            fontSize: '24px',
+            padding: '20px',
             backgroundColor: '#1e293b',
             color: 'white',
             border: '2px solid red',

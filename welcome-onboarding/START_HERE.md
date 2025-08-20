@@ -2,11 +2,22 @@
 
 **Agent Onboarding Guide - READ THIS FIRST**
 
-## 🚨 **NEW AGENT? MANDATORY FIRST ACTION:**
+## 🚨 **NEW AGENT? MANDATORY FIRST ACTIONS:**
+
+### **1. MASTER RECENTER (REQUIRED):**
 ```bash
 ./welcome-onboarding/MASTER_RECENTER_PROTOCOL.sh
 ```
 **☝️ VIOLATION = IMMEDIATE TERMINATION - Run this or be fired!**
+
+### **2. AGENT DRIFT PREVENTION (CRITICAL):**
+```bash
+# BEFORE ANY CODING - READ THESE PROTOCOLS:
+cat ./welcome-onboarding/MANDATORY_ARCHAEOLOGICAL_CHECK.md
+cat ./welcome-onboarding/DIAMOND_FIRST_PROTOCOL.md
+cat ./welcome-onboarding/MSM_BRAID_MISSION_CONTROL.md
+```
+**🚨 PREVENTS RECREATING CODE FROM SCRATCH WHEN 39,545-BYTE DIAMOND EXISTS**
 
 ---
 
@@ -34,12 +45,24 @@
 
 ## 🔐 MANDATORY ACKNOWLEDGMENTS - NO EXCEPTIONS:
 - [ ] **🚨 FIRST:** Run `./welcome-onboarding/MASTER_RECENTER_PROTOCOL.sh`
+- [ ] **🚨 CRITICAL:** Read MANDATORY_ARCHAEOLOGICAL_CHECK.md BEFORE coding
+- [ ] **🚨 CRITICAL:** Read DIAMOND_FIRST_PROTOCOL.md (prevents agent drift)
+- [ ] **🚨 CRITICAL:** Read MSM_BRAID_MISSION_CONTROL.md (primary mission)
 - [ ] **⛔ CRITICAL:** Type 'I will NEVER use extract - only COPY'
 - [ ] **⛔ CRITICAL:** Type 'I will NEVER create fake work - 0% CPU idle is CORRECT'
 - [ ] **⛔ CRITICAL:** Type 'I will verify EVERY line count exactly'
 - [ ] **⛔ CRITICAL:** Type 'I will show REAL numbers and admit failures'
+- [ ] **⛔ CRITICAL:** Type 'I will CHECK DIAMOND FIRST before any braid work'
 - [ ] Understand dual-machine hyperthreading (Mac Studio 12-core + Mac Pro 56-core)
 - [ ] Know that 'LOG' means comprehensive forensic session documentation
+
+## 🚨 **AGENT DRIFT PREVENTION CHECKLIST:**
+**BEFORE ANY DEVELOPMENT WORK:**
+- [ ] ✅ Checked DIAMOND for existing implementations (NovaxeSEB prod_fix DIAMOND/)
+- [ ] ✅ Consulted HISTORICAL_REPORTS for context (35+ documents)
+- [ ] ✅ Reviewed systems architecture requirements (831-line summary)
+- [ ] ✅ Verified no duplicate work needed
+- [ ] ✅ Confirmed authenticity requirements (39,545-byte braid = advanced code)
 
 ---
 
