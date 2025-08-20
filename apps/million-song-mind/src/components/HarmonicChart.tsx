@@ -262,7 +262,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     <div
                       className="fraction-text text-white font-bold tracking-wider"
                       style={{
-                        fontFamily: "'Fontdec13', monospace",
+                        fontFamily: "'nvxChord', monospace",
                         fontStyle: 'italic',
                         fontWeight: '900',
                         color: '#E6F3FF',
@@ -283,7 +283,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     <div
                       className="fraction-subtitle text-white text-xs mt-1 font-bold tracking-widest"
                       style={{
-                        fontFamily: "'Fontdec13', monospace",
+                        fontFamily: "'nvxChord', monospace",
                         fontStyle: 'italic',
                         fontWeight: '700',
                         color: '#E6F3FF',

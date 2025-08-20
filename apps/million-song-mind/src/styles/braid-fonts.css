@@ -1,18 +1,25 @@
-/* Braid Font System - Fontdec13 with enhanced browser compatibility */
+/* EXACT REAL NOVAXE FONT - Font Jan16.otf from assets/fonts */
 
 @font-face {
-    font-family: "Fontdec13";
-    src: url("/fonts/Fontdec13.otf") format("opentype"),
-        url("/fonts/Fontdec13.otf") format("truetype");
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-    unicode-range: U+0020-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+    font-family: 'music-font';
+    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
 }
 
-/* Base braid chord text styling - matches original Angular */
+/* nvxChord alias - REAL FONT */
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+}
+
+/* Fontdec13 using REAL FONT */
+@font-face {
+    font-family: "Fontdec13";
+    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+}
+
+/* Base braid chord text styling - NO FALLBACKS - FORCE FONT LOADING ERRORS */
 .braid-chord-text {
-    font-family: "Fontdec13", "Monaco", "Menlo", "Consolas", monospace;
+    font-family: "nvxChord";
     font-size: 18px;
     font-weight: normal;
     line-height: 1;
@@ -23,9 +30,9 @@
     font-feature-settings: "liga" 1, "kern" 1;
 }
 
-/* Force font loading for all text elements */
+/* Force font loading for all text elements - NO FALLBACKS */
 .fontdec13-force-load {
-    font-family: "Fontdec13", monospace !important;
+    font-family: "Fontdec13";
     font-display: swap;
 }
 

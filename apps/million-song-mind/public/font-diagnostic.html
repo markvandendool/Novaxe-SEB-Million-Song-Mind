@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: "nvxChord";
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+
+        body {
+            padding: 30px;
+            background: #343a40;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .test {
+            font-family: "nvxChord";
+            font-size: 60px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px solid #666;
+            background: #ccc;
+            color: black;
+        }
+
+        .label {
+            font-family: monospace;
+            font-size: 16px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .status {
+            background: #222;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #555;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Font Diagnostic - What Is Actually Rendering?</h1>
+
+    <div class="status">
+        <h3>Current Font Setup:</h3>
+        <pre>
+Font Family: "nvxChord"
+Font File: /fonts/Chord_Grid_v2.otf (18,376 bytes)
+This is EXACTLY what Angular uses
+        </pre>
+    </div>
+
+    <div>
+        <div class="label">Test 1: Basic Notes (C D E F G A B):</div>
+        <div class="test" id="test1">C D E F G A B</div>
+    </div>
+
+    <div>
+        <div class="label">Test 2: Flats as 'b' (Bb Eb Ab Db Gb):</div>
+        <div class="test" id="test2">Bb Eb Ab Db Gb</div>
+    </div>
+
+    <div>
+        <div class="label">Test 3: Sharps (C# F# G#):</div>
+        <div class="test" id="test3">C# F# G#</div>
+    </div>
+
+    <div>
+        <div class="label">Test 4: Minor (lowercase) chords (am dm em):</div>
+        <div class="test" id="test4">am dm em</div>
+    </div>
+
+    <div>
+        <div class="label">Test 5: Mixed case (Em Am Dm Bm):</div>
+        <div class="test" id="test5">Em Am Dm Bm</div>
+    </div>
+
+    <div>
+        <div class="label">Test 6: What Angular Actually Shows (just roots):</div>
+        <div class="test" id="test6">C G D A E B F#</div>
+    </div>
+
+    <script>
+        document.fonts.ready.then(() => {
+            document.fonts.load('60px nvxChord').then((fonts) => {
+                if (fonts.length > 0) {
+                    console.log('✅ nvxChord loaded successfully');
+                    console.log('Font details:', fonts[0]);
+
+                    // Check what's actually rendering
+                    const tests = ['test1', 'test2', 'test3', 'test4', 'test5', 'test6'];
+                    tests.forEach(id => {
+                        const el = document.getElementById(id);
+                        const computed = window.getComputedStyle(el);
+                        console.log(`${id}: font-family = ${computed.fontFamily}`);
+                    });
+                } else {
+                    console.error('❌ nvxChord failed to load!');
+                    alert('Font failed to load! Check console.');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

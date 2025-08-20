@@ -2,7 +2,8 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import './styles/braid-fonts.css'
+import './styles/braid-angular-exact.css' // Use exact Angular font system
+import './styles/braid-fonts.css' // Additional braid font styles
 
 // Temporarily disabled Agent Check-In System
 // import AgentCheckInSystem from './utils/agentCheckIn.ts'

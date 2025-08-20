@@ -19,6 +19,13 @@ const TopNav: React.FC = () => {
             >
               Braid
             </Link>
+            <Link 
+              to="/braid-demo" 
+              className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              title="Authentic Novaxe SEB Braid System"
+            >
+              Authentic Braid
+            </Link>
           </div>
         </div>
       </div>

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @font-face {
+            font-family: 'music-font';
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+        body { padding: 50px; background: white; }
+        .test { font-family: 'music-font'; font-size: 48px; margin: 20px; }
+        .label { font-family: monospace; color: red; font-size: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Verify Font Loading</h1>
+    <div class="label">If font works, these should show flat symbols:</div>
+    <div class="test">Bl El Al Dl Gl</div>
+    <div class="label">These should stay as typed:</div>
+    <div class="test">Bm Em Am Dm Gm</div>
+    <div class="label">Direct from prod_fix font (Chord_Grid_v2.otf):</div>
+    <div class="test">C D E F G A B</div>
+    <script>
+        // Check if font loaded
+        document.fonts.ready.then(() => {
+            document.fonts.forEach(font => {
+                console.log('Loaded font:', font.family);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Inspect What's Actually Rendering</title>
+    <style>
+        body {
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #666;
+            background: white;
+        }
+
+        #output {
+            background: #222;
+            padding: 20px;
+            border: 1px solid #444;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .success {
+            color: #51cf66;
+        }
+
+        .info {
+            color: #74c0fc;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🔍 Inspecting Actual Braid Output</h1>
+
+    <button onclick="inspectBraid()">Inspect Braid Text Elements</button>
+    <button onclick="checkFonts()">Check Font Loading</button>
+    <button onclick="compareWithAngular()">Show Angular Expected Output</button>
+
+    <iframe id="appFrame" src="http://localhost:8080"></iframe>
+
+    <div id="output"></div>
+
+    <script>
+        function log(msg, type = 'info') {
+            const output = document.getElementById('output');
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            output.innerHTML += `<span class="${className}">${msg}</span>\n`;
+        }
+
+        function inspectBraid() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                // Find all text elements in the braid
+                const textElements = iframeDoc.querySelectorAll('#braid-tonal text');
+
+                log(`Found ${textElements.length} text elements in braid\n`, 'info');
+
+                textElements.forEach((el, i) => {
+                    const text = el.textContent;
+                    const className = el.className.baseVal || el.className;
+                    const computedStyle = iframe.contentWindow.getComputedStyle(el);
+                    const fontFamily = computedStyle.fontFamily;
+
+                    if (text && text.trim()) {
+                        log(`[${i}] Text: "${text}"`, 'success');
+                        log(`     Class: ${className}`);
+                        log(`     Font: ${fontFamily}`);
+                        log(`     Actual characters: ${Array.from(text).map(c => `${c} (U+${c.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')})`).join(', ')}`);
+                        log('');
+                    }
+                });
+
+                // Check what font files are loaded
+                iframe.contentDocument.fonts.forEach(font => {
+                    log(`Loaded font: ${font.family} - ${font.status}`, 'success');
+                });
+
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+                log('Note: If cross-origin error, open the main app directly and use browser console', 'error');
+            }
+        }
+
+        function checkFonts() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            try {
+                const iframe = document.getElementById('appFrame');
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+                // Check @font-face rules
+                const styleSheets = Array.from(iframeDoc.styleSheets);
+                log(`Checking ${styleSheets.length} stylesheets...\n`);
+
+                styleSheets.forEach(sheet => {
+                    try {
+                        const rules = Array.from(sheet.cssRules || []);
+                        rules.forEach(rule => {
+                            if (rule.type === CSSRule.FONT_FACE_RULE) {
+                                log(`@font-face found:`, 'success');
+                                log(`  family: ${rule.style.fontFamily}`);
+                                log(`  src: ${rule.style.src}`);
+                                log('');
+                            }
+                        });
+                    } catch (e) {
+                        // Cross-origin stylesheets can't be read
+                    }
+                });
+
+                // Check loaded fonts
+                log('\nLoaded fonts:', 'info');
+                iframe.contentDocument.fonts.forEach(font => {
+                    log(`  ${font.family}: ${font.status}`, font.status === 'loaded' ? 'success' : 'error');
+                });
+
+            } catch (e) {
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+
+        function compareWithAngular() {
+            const output = document.getElementById('output');
+            output.innerHTML = '';
+
+            log('ANGULAR EXPECTED OUTPUT (from braid.component.html):\n', 'info');
+
+            log('Center bubbles should show:', 'success');
+            log('  Major: C, G, D, A, E, B, F#, etc. (just root notes)');
+            log('  Minor: Em, Am, Dm, Gm, etc. (root + lowercase m)\n');
+
+            log('Side bubbles should show:', 'success');
+            log('  Dominant 7ths: G, D, A, E, etc. (just root, NO "7")');
+            log('  Half-diminished: Bm, F#m, etc. (root + m, NO "7b5")\n');
+
+            log('Key insight from Angular:', 'info');
+            log('  {{Translate[chord_type.xxx]}} returns undefined');
+            log('  So NO suffixes are appended!');
+            log('  The font must handle everything internally\n');
+
+            log('Character encoding Angular sends:', 'info');
+            log('  Flats: "b" character (U+0062)');
+            log('  Sharps: "#" character (U+0023)');
+            log('  Minor: lowercase letters\n');
+
+            log('If our output differs, the font file may be wrong!', 'error');
+        }
+
+        // Auto-inspect after 3 seconds
+        setTimeout(() => {
+            log('Page loaded, auto-inspecting...\n', 'info');
+            inspectBraid();
+        }, 3000);
+    </script>
+</body>
+
+</html>

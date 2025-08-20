@@ -1,6 +1,6 @@
 import React from 'react';
 import { translateChordToFont, classifyChord } from '@/utils/ChordFontMapper';
-import '@/styles/braid-fonts.css';
+import '@/styles/braid-angular-exact.css'; // Use exact Angular font system
 
 interface BraidChordProps {
     chord: string;

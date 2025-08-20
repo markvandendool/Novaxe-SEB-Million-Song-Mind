@@ -155,7 +155,7 @@
 
 /* Text Styles */
 text {
-  font-family: 'Fontdec13', monospace;
+  font-family: 'Fontdec13';
   font-size: 12px;
   font-weight: bold;
   text-anchor: middle;

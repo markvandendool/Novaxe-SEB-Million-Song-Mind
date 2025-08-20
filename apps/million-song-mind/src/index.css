@@ -277,49 +277,27 @@ svg text {
   pointer-events: none;
 }
 
-/* Ensure braid labels render musical glyphs using Fontdec13 font */
-#braid-tonal svg text {
-  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
-  text-rendering: optimizeLegibility;
-  font-feature-settings: "liga" 1, "kern" 1;
-}
+/* Ensure braid labels render musical glyphs - REMOVED TOO-BROAD SELECTOR */
+/* Let BraidTonal.css handle specific font assignments */
 
-/* Comprehensive font protection for all braid elements */
-#braid-tonal svg text,
-#braid-tonal .smallBubble text,
-#braid-tonal .medBubble text {
-  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
-}
-
-#braid-tonal svg text.braid-label {
-  stroke: hsl(var(--background) / 0.55);
-  stroke-width: 0.65px;
-  paint-order: stroke fill;
-}
-
-#braid-tonal svg text.label-right {
-  text-anchor: start;
-}
-
-#braid-tonal svg text.label-left {
-  text-anchor: end;
-}
+/* Braid fonts are handled by braid-angular-exact.css */
+/* Using exact Angular implementation with font-family: "nvxChord" */
 
 .chord-label-custom {
-  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+  font-family: 'nvxChord' !important;
   font-feature-settings: "liga" 1, "kern" 1;
 }
 
 /* High specificity protection for chart x-axis labels */
 .chord-label-custom,
 div .chord-label-custom {
-  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+  font-family: 'nvxChord' !important;
 }
 
 /* Additional protection for HarmonicChart fraction text */
 .fraction-text,
 .fraction-subtitle {
-  font-family: 'Fontdec13', 'Monaco', 'Menlo', monospace !important;
+  font-family: 'nvxChord' !important;
 }
 
 .flame-effect {

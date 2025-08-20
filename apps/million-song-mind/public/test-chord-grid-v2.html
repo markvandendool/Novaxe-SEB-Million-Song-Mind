@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'music-font';
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+
+        body {
+            padding: 30px;
+            background: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .test {
+            font-family: 'music-font';
+            font-size: 60px;
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #333;
+        }
+
+        .label {
+            font-family: monospace;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .success {
+            background: #d4edda;
+        }
+
+        .fail {
+            background: #f8d7da;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Testing Chord_Grid_v2.otf (The ACTUAL Angular Font)</h1>
+
+    <div>
+        <div class="label">Test 1: Raw "Bb Eb Ab" (NO transformation):</div>
+        <div class="test" id="test1">Bb Eb Ab</div>
+    </div>
+
+    <div>
+        <div class="label">Test 2: Transformed "Bl El Al" (b→l transformation):</div>
+        <div class="test" id="test2">Bl El Al</div>
+    </div>
+
+    <div>
+        <div class="label">Test 3: Basic notes "C D E F G A B":</div>
+        <div class="test" id="test3">C D E F G A B</div>
+    </div>
+
+    <div>
+        <div class="label">Test 4: Minor chords "Bm Em Am Dm Gm":</div>
+        <div class="test" id="test4">Bm Em Am Dm Gm</div>
+    </div>
+
+    <div>
+        <div class="label">Test 5: Sharp notes "C# F# G#":</div>
+        <div class="test" id="test5">C# F# G#</div>
+    </div>
+
+    <p style="font-size: 24px; color: green; margin-top: 30px;">
+        ✅ Whichever test shows flat symbols (♭) is the correct format!<br>
+        This is the EXACT font file used by Angular: Chord_Grid_v2.otf (18,376 bytes)
+    </p>
+
+    <script>
+        document.fonts.ready.then(() => {
+            document.fonts.load('60px music-font').then((fonts) => {
+                if (fonts.length > 0) {
+                    console.log('✅ music-font (Chord_Grid_v2.otf) loaded successfully!');
+
+                    // Check which test shows flats
+                    const test1 = document.getElementById('test1').innerText;
+                    const test2 = document.getElementById('test2').innerText;
+
+                    console.log('Test 1 (Bb):', test1);
+                    console.log('Test 2 (Bl):', test2);
+                } else {
+                    console.error('❌ music-font failed to load!');
+                    alert('Font failed to load!');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

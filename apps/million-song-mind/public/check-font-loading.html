@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        @font-face {
+            font-family: 'music-font';
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+    </style>
+</head>
+<body>
+    <h1>Font Loading Check</h1>
+    <div id="status">Checking...</div>
+    <div style="font-family: 'music-font'; font-size: 48px;">Test: Bl El Al</div>
+    
+    <script>
+        // Check if font loads
+        document.fonts.ready.then(() => {
+            const loaded = [];
+            document.fonts.forEach(font => {
+                loaded.push(`${font.family}: ${font.status}`);
+            });
+            
+            // Try to force load the font
+            document.fonts.load('48px music-font').then((fonts) => {
+                if (fonts.length > 0) {
+                    document.getElementById('status').innerHTML = 
+                        '<strong style="color: green">music-font LOADED!</strong><br>' + 
+                        loaded.join('<br>');
+                } else {
+                    document.getElementById('status').innerHTML = 
+                        '<strong style="color: red">music-font FAILED TO LOAD!</strong><br>' + 
+                        'Loaded fonts: ' + loaded.join('<br>');
+                }
+            }).catch(err => {
+                document.getElementById('status').innerHTML = 
+                    '<strong style="color: red">ERROR: ' + err + '</strong>';
+            });
+        });
+    </script>
+</body>
+</html>

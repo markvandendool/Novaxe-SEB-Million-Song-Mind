@@ -31,6 +31,7 @@ import { GlobalKeySelector } from '@/components/GlobalKeySelector';
 import { BraidTextSwitcher } from '@/components/BraidTextSwitcher';
 import { useBraidTextSwitching } from '@/hooks/useBraidTextSwitching';
 import { chordAudioManager } from '@/utils/ChordAudioManager';
+import FontTest from '@/components/FontTest';
 // Empty state data - all zeros
 const EMPTY_HARMONIC_DATA = [
   { chord: "I", percent: 0, root: 0, first: 0, second: 0, third: 0, section: "Major" },
@@ -824,6 +825,9 @@ const MillionSongMind = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* ULTRA SIMPLE FONT TEST - TOP OF PAGE - NO FALLBACKS */}
+      <FontTest />
+      
       {/* Sticky Premium Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border" style={{ boxShadow: 'var(--shadow-professional)' }}>
         <div className="max-w-[120rem] mx-auto px-4 md:px-8 py-6 md:py-8">

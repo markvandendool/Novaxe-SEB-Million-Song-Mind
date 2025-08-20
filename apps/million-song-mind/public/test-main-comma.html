@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'main-comma';
+            src: url("/fonts/main_comma.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'chord-grid-v2';
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+
+        body {
+            padding: 30px;
+            background: white;
+        }
+
+        .test {
+            font-size: 60px;
+            margin: 20px 0;
+            padding: 15px;
+            border: 2px solid #333;
+        }
+
+        .label {
+            font-family: monospace;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .main-comma {
+            font-family: 'main-comma';
+        }
+
+        .chord-grid {
+            font-family: 'chord-grid-v2';
+        }
+
+        .success {
+            background: #d4edda;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Testing main_comma.otf vs Chord_Grid_v2.otf</h1>
+
+    <div class="test">
+        <div class="label">main_comma.otf with 'Bb Eb Ab' (no transformation):</div>
+        <div class="main-comma">Bb Eb Ab</div>
+    </div>
+
+    <div class="test">
+        <div class="label">main_comma.otf with 'Bl El Al' (b→l transformation):</div>
+        <div class="main-comma">Bl El Al</div>
+    </div>
+
+    <div class="test">
+        <div class="label">chord-grid-v2 with 'Bb Eb Ab' (no transformation):</div>
+        <div class="chord-grid">Bb Eb Ab</div>
+    </div>
+
+    <div class="test">
+        <div class="label">chord-grid-v2 with 'Bl El Al' (b→l transformation):</div>
+        <div class="chord-grid">Bl El Al</div>
+    </div>
+
+    <div class="test">
+        <div class="label">main_comma.otf with basic notes:</div>
+        <div class="main-comma">C D E F G A B</div>
+    </div>
+
+    <div class="test">
+        <div class="label">main_comma.otf with minor chords (should NOT transform):</div>
+        <div class="main-comma">Bm Em Am Dm Gm</div>
+    </div>
+
+    <p style="font-size: 20px; color: green;">
+        ✓ If you see flat symbols (♭) in any of the above, that font+transformation combination works!
+    </p>
+
+    <script>
+        document.fonts.ready.then(() => {
+            Promise.all([
+                document.fonts.load('60px main-comma'),
+                document.fonts.load('60px chord-grid-v2')
+            ]).then((results) => {
+                console.log('Fonts loaded:', results);
+                console.log('main-comma loaded:', results[0].length > 0);
+                console.log('chord-grid-v2 loaded:', results[1].length > 0);
+            });
+        });
+    </script>
+</body>
+
+</html>

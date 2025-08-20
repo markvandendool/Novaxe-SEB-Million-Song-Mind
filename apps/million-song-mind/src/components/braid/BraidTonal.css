@@ -130,12 +130,10 @@ section#braid-tonal .harmonic-bar.selected {
   /* glow handled globally, keep here for specificity if needed */
 }
 
+/* Font family is now handled by braid-angular-exact.css */
 section#braid-tonal .smallBubble text {
-  font-family: "Fontdec13", "Monaco", "Menlo", monospace !important;
   fill: black;
   text-anchor: left;
-  font-feature-settings: "liga" 1, "kern" 1;
-  text-rendering: optimizeLegibility;
 }
 
 /* DISABLED: Artificial font-size manipulation - using natural Fontdec13 */
@@ -163,23 +161,22 @@ section#braid-tonal .medBubble circle {
 section#braid-tonal .medBubble text.right {
   text-anchor: start;
   fill: black;
-  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.left {
   text-anchor: end;
   fill: black;
-  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.center {
   text-anchor: end;
   fill: black;
-  font-family: "Fontdec13", monospace !important;
   word-spacing: 0px;
 }
+
+/* Font family is handled by braid-angular-exact.css */
 
 /* DISABLED: All artificial font-size manipulation - using natural Fontdec13 */
 section#braid-tonal .medBubble text.left.roman,

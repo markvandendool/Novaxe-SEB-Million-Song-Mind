@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'chord-grid-v2';
+            src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'chord-grid';
+            src: url("/fonts/Chord_Grid.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'test-jan16';
+            src: url("/fonts/test-jan16.otf") format("opentype");
+        }
+
+        @font-face {
+            font-family: 'nvx-font';
+            src: url("/fonts/nvxFont.otf") format("opentype");
+        }
+
+        body {
+            padding: 20px;
+            background: white;
+            font-family: monospace;
+        }
+
+        .test-row {
+            display: flex;
+            align-items: center;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .font-name {
+            width: 200px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .test-text {
+            font-size: 36px;
+            flex: 1;
+        }
+
+        .success {
+            background: #d4edda;
+        }
+
+        .fail {
+            background: #f8d7da;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Font Forensics - Finding the Working Font</h1>
+
+    <h2>Testing: "Bb Eb Ab" (should show flats)</h2>
+
+    <div class="test-row">
+        <div class="font-name">Chord_Grid_v2.otf:</div>
+        <div class="test-text" style="font-family: 'chord-grid-v2'">Bb Eb Ab</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">Chord_Grid.otf:</div>
+        <div class="test-text" style="font-family: 'chord-grid'">Bb Eb Ab</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">test-jan16.otf:</div>
+        <div class="test-text" style="font-family: 'test-jan16'">Bb Eb Ab</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">nvxFont.otf:</div>
+        <div class="test-text" style="font-family: 'nvx-font'">Bb Eb Ab</div>
+    </div>
+
+    <h2>Testing with 'l' transformation: "Bl El Al"</h2>
+
+    <div class="test-row">
+        <div class="font-name">Chord_Grid_v2.otf:</div>
+        <div class="test-text" style="font-family: 'chord-grid-v2'">Bl El Al</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">Chord_Grid.otf:</div>
+        <div class="test-text" style="font-family: 'chord-grid'">Bl El Al</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">test-jan16.otf:</div>
+        <div class="test-text" style="font-family: 'test-jan16'">Bl El Al</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">nvxFont.otf:</div>
+        <div class="test-text" style="font-family: 'nvx-font'">Bl El Al</div>
+    </div>
+
+    <h2>Testing Basic Notes: "C D E F G A B"</h2>
+
+    <div class="test-row">
+        <div class="font-name">Chord_Grid_v2.otf:</div>
+        <div class="test-text" style="font-family: 'chord-grid-v2'">C D E F G A B</div>
+    </div>
+
+    <div class="test-row">
+        <div class="font-name">test-jan16.otf:</div>
+        <div class="test-text" style="font-family: 'test-jan16'">C D E F G A B</div>
+    </div>
+
+    <script>
+        // Check which fonts loaded
+        document.fonts.ready.then(() => {
+            console.log('Fonts ready. Checking loaded fonts:');
+            document.fonts.forEach(font => {
+                console.log(`Font: ${font.family}, Status: ${font.status}`);
+            });
+        });
+    </script>
+</body>
+
+</html>

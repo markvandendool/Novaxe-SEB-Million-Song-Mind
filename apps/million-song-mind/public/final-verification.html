@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        @font-face {
+            font-family: 'music-font';
+            src: url("/fonts/test-jan16.otf") format("opentype");
+        }
+
+        body {
+            padding: 30px;
+            background: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .huge {
+            font-family: 'music-font';
+            font-size: 72px;
+            margin: 20px 0;
+            padding: 20px;
+            border: 3px solid green;
+            background: #d4edda;
+        }
+
+        .label {
+            font-family: monospace;
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>✅ FONT JAN16 VERIFICATION - THIS SHOULD WORK!</h1>
+
+    <div class="label">With Font Jan16 + b→l transformation:</div>
+    <div class="huge">Bl El Al Dl Gl</div>
+
+    <div class="label">This should show flat symbols (♭)!</div>
+
+    <p style="font-size: 24px; color: green;">
+        If you see flat symbols above, the fix is working!<br>
+        Now refresh http://localhost:8080 - the braid should show proper flats!
+    </p>
+
+    <script>
+        document.fonts.load('72px music-font').then((fonts) => {
+            if (fonts.length > 0) {
+                console.log('✅ Font Jan16 loaded successfully!');
+            } else {
+                console.error('❌ Font Jan16 failed to load!');
+            }
+        });
+    </script>
+</body>
+
+</html>
