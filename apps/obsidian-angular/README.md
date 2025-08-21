@@ -1,0 +1,64 @@
+# Novaxe
+
+This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 8.3.14.
+
+# Install 
+
+ne pas oublier de mettre  
+sudo chgrp -R shared/  
+sudo chgrp youtubeDl www-data  
+sudo chmod g+x getWavFromYoutube.php  
+sudo systemctl restart apache2.service  
+sudo -H pip install --upgrade youtube-dl  
+sudo apt-get install ffmpeg  
+sudo apt-get install jq  
+
+
+## Development server
+
+Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+
+## Code scaffolding
+
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+
+## Build
+
+Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+
+## Running unit tests
+
+Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+
+## Running end-to-end tests
+
+Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+
+## Further help
+
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+
+
+
+
+Keyboard Score Creating Shortcuts:
+Score Creation & Editing:
+M key → Add next region (mark tempo)
+P key → Add next part (mark part)
+Delete key → Delete selected measures
+
+Navigation:
+Left Arrow → Skip backward 1 second
+Right Arrow → Skip forward 1 second
+Up Arrow → Go to previous measure
+Down Arrow → Go to next measure
+Shift + Up Arrow → Go to previous part
+Shift + Down Arrow → Go to next part
+Ctrl + Shift + Up Arrow → Go to first measure
+
+Playback Control:
+Space → Play/pause audio
+Shift + Space → Play current measure (if paused)
+Editor Controls:
+E key → Open editor
+Escape → Close editor, metronome, circle, dictionary, options

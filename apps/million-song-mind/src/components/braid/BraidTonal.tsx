@@ -6,6 +6,7 @@ import { ChordAudioPlayer } from '@/components/ChordAudioPlayer';
 import { getBraidPositionUsage, mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
 import { getChordSuffix } from '@/utils/chordTypes';
 import { processChordForBraid } from '@/utils/fontTransform';
+import { NvxSvgText } from '@/components/NvxText';
 
 interface TonalSet {
   center_major: string[];
@@ -295,28 +296,20 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
   };
 
   // Transform chord text for font ligature rendering
-  // NOTE: Angular's Translate object doesn't have entries for suffix keys,
-  // so suffixes are NOT actually appended in the Angular version!
-  // We just apply the font character transformations
+  // EXACT DIAMOND ANGULAR PATTERN: {{root_note}}{{Translate[chord_suffix]}}
+  // BUT: Font_chords_eq.json doesn't have suffix entries like "M", "7", "dim", "german"
+  // So DIAMOND must render suffixes directly without going through Translate!
   const simpleChord = (s?: string, position?: string, direction?: string) => {
     if (!s) return '';
 
-    // Font Jan16 requires b→l transformation for flats to work
-    // Bb → Bl shows ♭ symbol
-    let result = s.replace(/([A-G])(b)/g, '$1l');
+    // DIAMOND ANGULAR: Just root note + suffix directly (no Font_chords_eq lookup for suffixes)
+    let result = s;  // Keep root note exactly as-is
 
-    // Add chord quality suffix based on position and direction
+    // Add chord quality suffix directly - DIAMOND doesn't transform these
     if (position && direction) {
       const suffix = getChordSuffix(position, direction, displayRoman);
-      if (suffix) {
-        // Apply transformations to the suffix too
-        const transformedSuffix = suffix
-          .replace(/german/g, '+6')        // German 6th → augmented 6th notation
-          .replace(/m7b5/g, 'm7l5')       // Half-diminished
-          .replace(/7b5/g, '7l5')          // Dom7b5
-          .replace(/dim/g, 'o')            // Diminished
-          .replace(/bb/g, 'll');           // Double flats
-        result += transformedSuffix;
+      if (suffix && suffix !== 'M') {  // DIAMOND: Don't add 'M' for major
+        result += suffix;  // Direct append - "german", "dim", "7b5" as-is
       }
     }
 
@@ -390,15 +383,23 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
           <g className="medBubble bub">
             <g className={`${usageClass(getUsage(center_left_in_use[i]))}`}>
               <use xlinkHref="#leftCommaXL" className={`${getBubbleClass(center_left[i], "")} harmonic-bar ${isSelected(center_left_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_left_in_use[i])} />
-              <text className={displayRoman ? "left duo roman" : "left duo"} x={displayRoman ? "0" : "-5"} y="-6">
+              <NvxSvgText
+                className={displayRoman ? "left duo roman" : "left duo"}
+                x={displayRoman ? "0" : "-5"}
+                y="-6"
+              >
                 {simpleChord(center_left_in_use[i], 'center', 'left')}
-              </text>
+              </NvxSvgText>
             </g>
             <g className={`${usageClass(getUsage(center_right_in_use[i]))}`}>
               <use xlinkHref="#rightCommaXL" className={`${getBubbleClass(center_right[i], "m")} harmonic-bar ${isSelected(center_right_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_right_in_use[i])} />
-              <text className={displayRoman ? "right duo roman braid-label label-right" : "right duo braid-label label-right"} x="-6" y="22">
+              <NvxSvgText
+                className={displayRoman ? "right duo roman braid-label label-right" : "right duo braid-label label-right"}
+                x="-6"
+                y="22"
+              >
                 {simpleChord(center_right_in_use[i], 'center', 'right')}
-              </text>
+              </NvxSvgText>
             </g>
           </g>
 
@@ -408,25 +409,45 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
               <g className="smallBubble bub" transform="translate(-85 0)">
                 <g className={`${usageClass(getUsage(left_up_in_use[i - 1]))}`}>
                   <use xlinkHref="#leftCommaSM" className={`${getBubbleClass(left_up[i - 1], "b7")} harmonic-bar ${isSelected(left_up_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, left_up_in_use[i - 1])} />
-                  <text className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"} x="-20" y="-4">
+                  <NvxSvgText
+                    className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"}
+                    x="-20"
+                    y="-4"
+                  >
                     {simpleChord(left_up_in_use[i - 1], 'left', 'up') || ''}
-                  </text>
+                  </NvxSvgText>
                 </g>
                 <g className={`${usageClass(getUsage(left_down_in_use[i - 1]))}`}>
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(left_down[i - 1], "mb7b5")} harmonic-bar ${isSelected(left_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, left_down_in_use[i - 1])} />
-                  <text className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"} x="-5" y="16">
+                  <NvxSvgText
+                    className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"}
+                    x="-5"
+                    y="16"
+                  >
                     {simpleChord(left_down_in_use[i - 1], 'left', 'down') || ''}
-                  </text>
+                  </NvxSvgText>
                 </g>
               </g>
               <g className="smallBubble bub" transform="translate(90 0)">
                 <g className={`${usageClass(getUsage(right_up_in_use[i - 1]))}`}>
                   <use xlinkHref="#leftCommaSM" className={`${getBubbleClass(right_up[i - 1], 'b7')} harmonic-bar ${isSelected(right_up_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, right_up_in_use[i - 1])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x={displayRoman ? '-22' : '-20'} y="-2">{simpleChord(right_up_in_use[i - 1], 'right', 'up') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
+                    x={displayRoman ? '-22' : '-20'}
+                    y="-2"
+                  >
+                    {simpleChord(right_up_in_use[i - 1], 'right', 'up') || ''}
+                  </NvxSvgText>
                 </g>
                 <g className={`${usageClass(getUsage(right_down_in_use[i - 1]))}`}>
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(right_down[i - 1], 'o')} harmonic-bar ${isSelected(right_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, right_down_in_use[i - 1])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x="-6" y="18">{simpleChord(right_down_in_use[i - 1], 'right', 'down') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
+                    x="-6"
+                    y="18"
+                  >
+                    {simpleChord(right_down_in_use[i - 1], 'right', 'down') || ''}
+                  </NvxSvgText>
                 </g>
               </g>
             </>
@@ -438,21 +459,45 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
               <g className="smallBubble outer bub" transform="translate(-130 45)">
                 <g className={`${usageClass(getUsage(fifth_left_up_in_use[i]))}`}>
                   <use className={`comma harmonic-bar ${isSelected(fifth_left_up_in_use[i]) ? 'selected' : ''}`} xlinkHref="#leftCommaSM" onClick={(e) => handleSelect(e, fifth_left_up_in_use[i])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-left' : 'duo braid-label label-left'} x="-22" y="-4">{displayRoman ? fifth_left_up_in_use[i] : simpleChord(fifth_left_up_in_use[i], 'fifth_left', 'up') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-left' : 'duo braid-label label-left'}
+                    x="-22"
+                    y="-4"
+                  >
+                    {displayRoman ? fifth_left_up_in_use[i] : simpleChord(fifth_left_up_in_use[i], 'fifth_left', 'up') || ''}
+                  </NvxSvgText>
                 </g>
                 <g className={`${usageClass(getUsage(fifth_left_down_in_use[i]))}`}>
                   <use className={`comma harmonic-bar ${isSelected(fifth_left_down_in_use[i]) ? 'selected' : ''}`} xlinkHref="#rightCommaSM" onClick={(e) => handleSelect(e, fifth_left_down_in_use[i])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-left' : 'duo braid-label label-left'} x={displayRoman ? '-5' : '-3'} y="14">{displayRoman ? fifth_left_down_in_use[i] : simpleChord(fifth_left_down_in_use[i], 'fifth_left', 'down') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-left' : 'duo braid-label label-left'}
+                    x={displayRoman ? '-5' : '-3'}
+                    y="14"
+                  >
+                    {displayRoman ? fifth_left_down_in_use[i] : simpleChord(fifth_left_down_in_use[i], 'fifth_left', 'down') || ''}
+                  </NvxSvgText>
                 </g>
               </g>
               <g className="smallBubble outer bub" transform="translate(130 45)">
                 <g className={`${usageClass(getUsage(fifth_right_up_in_use[i]))}`}>
                   <use className={`comma harmonic-bar ${isSelected(fifth_right_up_in_use[i]) ? 'selected' : ''}`} xlinkHref="#leftCommaSM" onClick={(e) => handleSelect(e, fifth_right_up_in_use[i])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x={displayRoman ? '-25' : '-22'} y="-2">{displayRoman ? fifth_right_up_in_use[i] : simpleChord(fifth_right_up_in_use[i], 'fifth_right', 'up') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
+                    x={displayRoman ? '-25' : '-22'}
+                    y="-2"
+                  >
+                    {displayRoman ? fifth_right_up_in_use[i] : simpleChord(fifth_right_up_in_use[i], 'fifth_right', 'up') || ''}
+                  </NvxSvgText>
                 </g>
                 <g className={`${usageClass(getUsage(fifth_right_down_in_use[i]))}`}>
                   <use className={`comma harmonic-bar ${isSelected(fifth_right_down_in_use[i]) ? 'selected' : ''}`} xlinkHref="#rightCommaSM" onClick={(e) => handleSelect(e, fifth_right_down_in_use[i])} />
-                  <text className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'} x={displayRoman ? '-5' : '-2'} y="15">{displayRoman ? fifth_right_down_in_use[i] : simpleChord(fifth_right_down_in_use[i], 'fifth_right', 'down') || ''}</text>
+                  <NvxSvgText
+                    className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
+                    x={displayRoman ? '-5' : '-2'}
+                    y="15"
+                  >
+                    {displayRoman ? fifth_right_down_in_use[i] : simpleChord(fifth_right_down_in_use[i], 'fifth_right', 'down') || ''}
+                  </NvxSvgText>
                 </g>
               </g>
             </>

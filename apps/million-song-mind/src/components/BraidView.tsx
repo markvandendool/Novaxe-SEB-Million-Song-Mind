@@ -1,11 +1,13 @@
 import React, { useMemo } from 'react';
 import YinYangCircle from './YinYangCircle';
+import { getAllChordMappings } from '@/utils/braidMapping';
 
 type BraidViewProps = {
   width?: number;
   height?: number;
   selectedChords: string[];
   onChordSelect?: (chord: string, isSelected: boolean) => void;
+  useRoman?: boolean;
 };
 
 export const BraidView: React.FC<BraidViewProps> = ({
@@ -13,21 +15,31 @@ export const BraidView: React.FC<BraidViewProps> = ({
   height = 2400,
   selectedChords,
   onChordSelect,
+  useRoman = true,
 }) => {
   const centerX = width / 2;
   const circleRadius = 220; // tuned to match Braid Simplified
   const verticalStep = circleRadius * 0.85; // heavier overlap, closer to reference
 
+  // Get chord mappings from braid_tonalities.json
+  const chordMappings = useMemo(() => getAllChordMappings(useRoman), [useRoman]);
+
   // 15 circle centers (7 up, center, 7 down)
   const centers = useMemo(() => {
-    const arr: { x: number; y: number; keyLabel: string }[] = [];
+    const arr: { x: number; y: number; keyLabel: string; chordMapping: { topChord: string; bottomChord: string } }[] = [];
     for (let i = -7; i <= 7; i++) {
-      arr.push({ x: centerX, y: height / 2 + i * verticalStep, keyLabel: `Key ${i + 8}` });
+      const mappingIndex = i + 7; // Convert to 0-14 range
+      arr.push({
+        x: centerX,
+        y: height / 2 + i * verticalStep,
+        keyLabel: `Key ${i + 8}`,
+        chordMapping: chordMappings[mappingIndex]
+      });
     }
     return arr;
-  }, [centerX, height, verticalStep]);
+  }, [centerX, height, verticalStep, chordMappings]);
 
-  const chords = ['I','ii','iii','IV','V','vi','viiø'];
+  const chords = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'viiø'];
 
   function polarToXY(cx: number, cy: number, r: number, angleDeg: number) {
     const a = (angleDeg * Math.PI) / 180;
@@ -47,8 +59,8 @@ export const BraidView: React.FC<BraidViewProps> = ({
               cx={c.x}
               cy={c.y}
               r={circleRadius}
-              chordTop="I"
-              chordBottom="i"
+              chordTop={c.chordMapping.topChord}
+              chordBottom={c.chordMapping.bottomChord}
               selectedChords={selectedChords}
               onChordSelect={onChordSelect}
             />

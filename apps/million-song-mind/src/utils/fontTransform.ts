@@ -16,11 +16,10 @@ export function transformChordForFont(chord: string): string {
 
     let transformed = chord;
 
-    // CRITICAL: Only transform 'b' to 'l' when it's a flat accidental (after A-G)
-    // Pattern: Capital letter A-G followed by 'b' = flat accidental
-    // Examples: Bb → Bl, Eb → El, Ab → Al, Db → Dl, Gb → Gl, Cb → Cl, Fb → Fl
-    // But NOT: Bm → Bm (B minor stays as is), B → B (B natural stays as is)
-    transformed = transformed.replace(/([A-G])b/g, '$1l');
+    // DIAMOND ANGULAR EXACT: Font_chords_eq.json is 1:1 mapping, NO transformations
+    // DIAMOND does NOT do b→l transformation - font handles everything via ligatures
+    // Keep chord exactly as-is, let font ligatures do the work
+    // transformed = transformed.replace(/([A-G])b/g, '$1l'); // NOT used in DIAMOND!
 
     // Note: Sharps (#) might also need transformation depending on font design
     // For now leaving # as-is, but could be transformed if needed

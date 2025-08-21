@@ -1,14 +1,14 @@
-/* REAL NOVAXE FONT - Font Jan16.otf from assets/fonts */
+/* WORKING NOVAXE FONT - nvxFont.otf with ligatures */
 
 @font-face {
     font-family: "nvxChord";
-    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+    src: url("/fonts/nvxFont.otf") format("opentype");
 }
 
-/* Also define music-font with REAL font */
+/* Also define music-font with WORKING font */
 @font-face {
     font-family: "music-font";
-    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+    src: url("/fonts/nvxFont.otf") format("opentype");
 }
 
 /* Angular braid text styling from braid.component.scss */

@@ -1,0 +1,31 @@
+<div id="results-page" style="background-color: #343a40;height: 100%;height: 100vh; display: flex; flex-direction: column; justify-content: center;">
+
+	<div style="background-color: white; border:2px solid black; display: flex; flex-direction: column; align-items: center;padding:20px;overflow-y: scroll;overflow-x: hidden;padding-top:130px">
+
+
+	<h1 id="scoreBoard" class="neon"> {{counter}}% </h1>
+  
+
+<!-- 
+<ng-container *ngIf="results.getResults_notes().length">
+		<div>Notes : </div>
+		<pre>
+			Mean response time : {{results.computed_notes.mean_time}}ms 
+
+			Total accuracy : {{results.computed_notes.total_accuracy*100}}% 
+		</pre>
+		<div id="chartContainer_computed_notes" style="height: 570px; width: 570px;"></div>
+</ng-container>
+ -->
+
+<div style="display: flex; flex-direction: row;z-index: 100;">
+	<button id="restart_button" type="button" class="btn btn-primary btn-gif red" style="margin:5px;" (click)="restart()" > Restart </button>
+	<button id="ok_button" type="button" class="btn btn-primary green" style="margin:5px;" (click)="navigate('select-exercise')" > Menu </button>
+</div>
+
+<div id="chartContainer_computed_rhythm" style="min-height:570px;height: 570px; width: 570px;"></div>
+<!-- <pre> {{results.getResults_chords() | json}} </pre> -->
+
+  <button class="btn btn-primary" (click)="clearResults()">Clear results</button>
+</div>
+</div>

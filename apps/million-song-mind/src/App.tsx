@@ -13,6 +13,12 @@ import BraidClassicPage from "./pages/BraidClassicPage";
 import BraidTonalPage from "./pages/BraidTonalPage";
 import BraidNew2Page from "./pages/BraidNew2Page";
 import BraidLiveMetricsPage from "./pages/BraidLiveMetricsPage";
+import BraidTest from './pages/BraidTest';
+import LigatureTest from './pages/LigatureTest';
+import FontDiagnostic from './pages/FontDiagnostic';
+import NvxFontRealTest from './pages/NvxFontRealTest';
+import FontLigatureTest from './components/FontLigatureTest';
+import FontLigatureComparison from './components/FontLigatureComparison';
 import { BraidGeometryProvider } from "@/state/braidGeometryStore";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import TopNav from "@/components/layout/TopNav";
@@ -40,6 +46,12 @@ const App = () => (
                 <Route path="/braid-hive" element={<BraidNew2Page />} />
                 <Route path="/braid-live-metrics" element={<BraidLiveMetricsPage />} />
                 <Route path="/novaxe-braid" element={<NovaxeBraidPage />} />
+                <Route path="/braid-test" element={<BraidTest />} />
+                <Route path="/ligature-test" element={<LigatureTest />} />
+                <Route path="/font-ligature-test" element={<FontLigatureTest />} />
+                <Route path="/font-ligature-comparison" element={<FontLigatureComparison />} />
+                <Route path="/font-diagnostic" element={<FontDiagnostic />} />
+                <Route path="/nvx-font-real-test" element={<NvxFontRealTest />} />
                 <Route path="/million-song-mind" element={<MillionSongMind />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />

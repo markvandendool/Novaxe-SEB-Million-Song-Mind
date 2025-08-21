@@ -1,0 +1,4 @@
+
+<select name="midi_ports" id="midi_ports" (change)="change_midi_port($event)" >
+  <option *ngFor="let item of midi_ports" [value]="item.value.name" [selected]="item.value.name === selected_midi">{{item.value.name}}</option>
+</select>
