@@ -98,9 +98,9 @@ export const YinYangCircle: React.FC<YinYangCircleProps> = ({
         y={topDotY}
         fontSize="0.7em"
         fill={topSelected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))'}
-        style={{ 
-          cursor: 'pointer', 
-          textAnchor: 'middle', 
+        style={{
+          cursor: 'pointer',
+          textAnchor: 'middle',
           dominantBaseline: 'middle',
           fontFamily: 'nvxChord, Fontdec13, music-font, monospace'
         }}
@@ -139,9 +139,9 @@ export const YinYangCircle: React.FC<YinYangCircleProps> = ({
         y={bottomDotY}
         fontSize="0.7em"
         fill={bottomSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--foreground))'}
-        style={{ 
-          cursor: 'pointer', 
-          textAnchor: 'middle', 
+        style={{
+          cursor: 'pointer',
+          textAnchor: 'middle',
           dominantBaseline: 'middle',
           fontFamily: 'nvxChord, Fontdec13, music-font, monospace'
         }}

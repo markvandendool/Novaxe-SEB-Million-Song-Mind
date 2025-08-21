@@ -310,7 +310,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
     onClick?: (e: React.MouseEvent<SVGTextElement>) => void;
   }> = ({ x = 0, y = 0, className, children, position = 'center-up', onClick }) => {
     const root = getRootNote(children);
-    
+
     // Get font size based on position - center bubbles are larger
     const getFontSize = (pos: string) => {
       if (pos.includes('center')) return '24px'; // Large for center bubbles
@@ -323,7 +323,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
       textAnchor: 'middle' as const,
       dominantBaseline: 'central' as const
     });
-    
+
     const renderChordText = () => {
       switch (position) {
         case 'center-up':
@@ -331,7 +331,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
         case 'center-down':
           return `${root}m`; // Root + m for minor
         case 'left-up':
-          return `${root}7`; // Root + 7
+          return `${root}b7`; // Root + b7
         case 'left-down':
           return (
             <>
@@ -339,7 +339,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
             </>
           );
         case 'right-up':
-          return `${root}7`; // Root + 7
+          return `${root}b7`; // Root + b7
         case 'right-down':
           return (
             <>
@@ -362,7 +362,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
           return root;
       }
     };
-    
+
     return (
       <text
         x={x}
@@ -451,8 +451,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
               <use xlinkHref="#leftCommaXL" className={`${getBubbleClass(center_left[i], "")} harmonic-bar ${isSelected(center_left_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_left_in_use[i])} />
               <BraidText
                 className={displayRoman ? "left duo roman" : "left duo"}
-                x="-18"
-                y="2"
+                x="-8"
+                y="-12"
                 position="center-up"
                 onClick={(e) => handleSelect(e, center_left_in_use[i])}
               >
@@ -463,8 +463,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
               <use xlinkHref="#rightCommaXL" className={`${getBubbleClass(center_right[i], "m")} harmonic-bar ${isSelected(center_right_in_use[i]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, center_right_in_use[i])} />
               <BraidText
                 className={displayRoman ? "right duo roman braid-label label-right" : "right duo braid-label label-right"}
-                x="18"
-                y="2"
+                x="8"
+                y="17"
                 position="center-down"
                 onClick={(e) => handleSelect(e, center_right_in_use[i])}
               >
@@ -493,8 +493,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(left_down[i - 1], "mb7b5")} harmonic-bar ${isSelected(left_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, left_down_in_use[i - 1])} />
                   <BraidText
                     className={displayRoman ? "duo roman braid-label label-left" : "duo braid-label label-left"}
-                    x="12"
-                    y="12"
+                    x="7"
+                    y="17"
                     position="left-down"
                     onClick={(e) => handleSelect(e, left_down_in_use[i - 1])}
                   >
@@ -519,8 +519,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
                   <use xlinkHref="#rightCommaSM" className={`${getBubbleClass(right_down[i - 1], 'o')} harmonic-bar ${isSelected(right_down_in_use[i - 1]) ? 'selected' : ''}`} onClick={(e) => handleSelect(e, right_down_in_use[i - 1])} />
                   <BraidText
                     className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
-                    x="12"
-                    y="12"
+                    x="7"
+                    y="17"
                     position="right-down"
                     onClick={(e) => handleSelect(e, right_down_in_use[i - 1])}
                   >
@@ -551,8 +551,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
                   <use className={`comma harmonic-bar ${isSelected(fifth_left_down_in_use[i]) ? 'selected' : ''}`} xlinkHref="#rightCommaSM" onClick={(e) => handleSelect(e, fifth_left_down_in_use[i])} />
                   <BraidText
                     className={displayRoman ? 'duo roman braid-label label-left' : 'duo braid-label label-left'}
-                    x="12"
-                    y="12"
+                    x="7"
+                    y="17"
                     position="outer-down"
                     onClick={(e) => handleSelect(e, fifth_left_down_in_use[i])}
                   >
@@ -577,8 +577,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
                   <use className={`comma harmonic-bar ${isSelected(fifth_right_down_in_use[i]) ? 'selected' : ''}`} xlinkHref="#rightCommaSM" onClick={(e) => handleSelect(e, fifth_right_down_in_use[i])} />
                   <BraidText
                     className={displayRoman ? 'duo roman braid-label label-right' : 'duo braid-label label-right'}
-                    x="12"
-                    y="12"
+                    x="7"
+                    y="17"
                     position="outer-down"
                     onClick={(e) => handleSelect(e, fifth_right_down_in_use[i])}
                   >

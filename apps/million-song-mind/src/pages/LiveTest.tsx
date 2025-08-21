@@ -2,20 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 const LiveTest = () => {
   const [timestamp, setTimestamp] = useState(Date.now());
-  
+
   useEffect(() => {
     const interval = setInterval(() => {
       setTimestamp(Date.now());
     }, 1000);
-    
+
     return () => clearInterval(interval);
   }, []);
-  
+
   const handleClick = () => {
     console.log('🔥 LIVE TEST CLICKED at', new Date().toISOString());
     alert('Live test working! Check console for details.');
   };
-  
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -32,7 +32,7 @@ const LiveTest = () => {
       <h1 style={{ fontSize: '3rem', marginBottom: '20px', textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
         🚀 LIVE TEST PAGE 🚀
       </h1>
-      
+
       <div style={{
         background: 'rgba(0,0,0,0.3)',
         padding: '30px',
@@ -50,7 +50,7 @@ const LiveTest = () => {
           ✅ Live reload timestamp: {new Date(timestamp).toLocaleTimeString()}
         </p>
       </div>
-      
+
       <button
         onClick={handleClick}
         style={{
@@ -69,7 +69,7 @@ const LiveTest = () => {
       >
         🎯 CLICK TO TEST INTERACTIVITY
       </button>
-      
+
       <div style={{
         background: 'rgba(255,255,255,0.1)',
         padding: '20px',
@@ -82,10 +82,10 @@ const LiveTest = () => {
         <p>• Screen: {window.screen.width}x{window.screen.height}</p>
         <p>• Viewport: {window.innerWidth}x{window.innerHeight}</p>
       </div>
-      
-      <div style={{ 
-        position: 'fixed', 
-        bottom: '20px', 
+
+      <div style={{
+        position: 'fixed',
+        bottom: '20px',
         right: '20px',
         background: 'rgba(0,0,0,0.7)',
         padding: '10px',

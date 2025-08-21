@@ -40,7 +40,7 @@ const App = () => (
             <BrowserRouter>
               <Routes>
                 <Route path="/test" element={<TestPage />} />
-                                <Route path="/test" element={<TestPage />} />
+                <Route path="/test" element={<TestPage />} />
                 <Route path="/live" element={<LiveTest />} />
                 <Route path="/debug" element={
                   <div style={{

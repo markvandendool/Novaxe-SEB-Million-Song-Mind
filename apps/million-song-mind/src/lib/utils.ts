@@ -26,7 +26,7 @@ export function detectCSVFormat(headers: string[]): CSVFormat {
     // 2) Per-metric columns like "i_percent", "i_root", etc.
     const CHORD_SLOTS = [
       'I','ii','iii','IV','V','vi','viiø',
-      'I7','iiiø','II(7)','#ivø','III(7)','#vº','VI(7)','#iº','VII(7)','#iiº','V(7)','viiº',
+      'I7','iiiø','II(7)','#ivø','III(7)','#vº','VI(7)','#iº','VII(7)','#iiº','viiº',
       'i','iiø','bIII','iv','v','bVI','bVII','Other'
     ];
     const hasVectorSlots = CHORD_SLOTS.some(s => headerSet.has(s.toLowerCase()));

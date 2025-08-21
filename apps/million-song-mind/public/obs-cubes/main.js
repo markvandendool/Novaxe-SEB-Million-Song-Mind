@@ -9,18 +9,17 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
-const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
-// 45° sticky views relative to the front row target at origin
-const defaultTarget = new THREE.Vector3(0, 0, 0);
-// 37.5°: tan(37.5°) ≈ 0.7673 → with z=8, y≈6.14
-const defaultCamPos = new THREE.Vector3(0, 6.14, 8);   // above @ 37.5°
-const belowCamPos = new THREE.Vector3(0, -6.14, 8);    // below @ 37.5°
-const belowTarget = defaultTarget.clone();
-camera.position.copy(defaultCamPos);
+const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+// 45° sticky views with a higher target to center shelf/front row
+const melodyTarget = new THREE.Vector3(0, 1.0, 0);
+const melodyCamPos = new THREE.Vector3(0, 7.2, 7.4);
+const bassTarget = melodyTarget.clone();
+const bassCamPos = new THREE.Vector3(0, -7.2, 7.4);
+camera.position.copy(melodyCamPos);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
-controls.target.copy(defaultTarget);
+controls.target.copy(melodyTarget);
 
 // Lighting
 scene.add(new THREE.AmbientLight(0xffffff, 0.7));
@@ -109,14 +108,14 @@ function pokeInteraction() { lastInteraction = performance.now(); homing = false
 // Camera view toggles
 function setViewAbove() {
     currentStickyView = 'above';
-    animateVector(camera.position, defaultCamPos.clone(), 700);
-    animateVector(controls.target, defaultTarget.clone(), 700);
+    animateVector(camera.position, melodyCamPos.clone(), 700);
+    animateVector(controls.target, melodyTarget.clone(), 700);
     pokeInteraction();
 }
 function setViewBelow() {
     currentStickyView = 'below';
-    animateVector(camera.position, belowCamPos.clone(), 700);
-    animateVector(controls.target, belowTarget.clone(), 700);
+    animateVector(camera.position, bassCamPos.clone(), 700);
+    animateVector(controls.target, bassTarget.clone(), 700);
     pokeInteraction();
 }
 

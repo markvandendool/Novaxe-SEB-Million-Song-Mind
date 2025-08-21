@@ -49,11 +49,11 @@ export function convertToNvxChordText(text: string): string {
 
     // Only apply conversions to actual musical chord symbols
     // Don't blindly convert all 'b' to 'l' - only in chord contexts
-    
+
     // Pattern for chord symbols (letter followed by accidental and/or chord quality)
     // Examples: Bb, C#, F#m, Ab7, Ger6, etc.
     const chordPattern = /([A-G][#b]*[^A-Za-z]*)|([ivxIVX]+[#b°ø]*)|([A-Za-z]*[+6789])/g;
-    
+
     let result = text.replace(chordPattern, (match) => {
         // Only convert 'b' to 'l' within chord symbols for flat rendering
         return match.replace(/b/g, 'l');

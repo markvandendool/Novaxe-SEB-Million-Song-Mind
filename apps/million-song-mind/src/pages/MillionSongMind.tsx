@@ -87,7 +87,7 @@ const log = (message: string, data?: any) => {
 const MillionSongMind = () => {
   console.log('🎵 MillionSongMind component is mounting...');
   console.log('🎵 Component render starting');
-  
+
   useSEO({
     title: 'MillionSongMind — Harmonic Oracle',
     description: 'Explore MillionSongMind harmonic analysis and data3 visualizations',
@@ -99,7 +99,7 @@ const MillionSongMind = () => {
   const [displayedSongs, setDisplayedSongs] = useState<any[]>([]); // Only filtered songs for rendering
   const [isLoading, setIsLoading] = useState(false);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
-  
+
   // Onboarding and educational system
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
@@ -941,7 +941,7 @@ const MillionSongMind = () => {
           <div className="learning-section">
             <h3 className="text-responsive-lg font-semibold mb-2">🎵 Welcome to Million Song Mind!</h3>
             <p className="text-responsive-sm text-muted-foreground mb-4">
-              This is your professional music analysis tool. Click the <strong>TUTORIAL</strong> button 
+              This is your professional music analysis tool. Click the <strong>TUTORIAL</strong> button
               in the header to get started with a guided tour.
             </p>
           </div>
@@ -955,14 +955,14 @@ const MillionSongMind = () => {
 
               {/* Welcome overlay for harmonic chart - disappears on any interaction */}
               {isFirstTimeUser && (
-                <div 
+                <div
                   className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm cursor-pointer rounded-lg"
                   onClick={() => setIsFirstTimeUser(false)}
                   onTouchStart={() => setIsFirstTimeUser(false)}
                 >
                   <div className="absolute top-4 left-4 right-4 bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg border border-primary">
                     <div className="text-sm font-medium">
-                      🎵 <strong>Harmonic Profile</strong> shows chord usage across your selected songs. 
+                      🎵 <strong>Harmonic Profile</strong> shows chord usage across your selected songs.
                       Click any chord to select it for analysis.
                     </div>
                     <div className="text-xs mt-1 opacity-75">Touch anywhere to continue</div>
@@ -1078,24 +1078,24 @@ const MillionSongMind = () => {
               </div>
             </CardHeader>
             <CardContent className="pt-0 relative">
-              
+
               {/* Welcome overlay for braid - disappears on any interaction */}
               {isFirstTimeUser && (
-                <div 
+                <div
                   className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm cursor-pointer"
                   onClick={() => setIsFirstTimeUser(false)}
                   onTouchStart={() => setIsFirstTimeUser(false)}
                 >
                   <div className="absolute top-4 left-4 right-4 bg-accent/90 text-accent-foreground px-4 py-3 rounded-lg border border-accent">
                     <div className="text-sm font-medium">
-                      💫 The <strong>Braid</strong> shows harmonic relationships as a geometric pattern. 
+                      💫 The <strong>Braid</strong> shows harmonic relationships as a geometric pattern.
                       Each chord is positioned by its harmonic distance from others.
                     </div>
                     <div className="text-xs mt-1 opacity-75">Touch anywhere to continue</div>
                   </div>
                 </div>
               )}
-              
+
               {/* Zoom controls - touch friendly */}
               {!is3D && (
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-card border border-border rounded-lg p-4 mb-4">
@@ -1116,7 +1116,7 @@ const MillionSongMind = () => {
                   </span>
                 </div>
               )}
-              
+
               <div className="relative bg-background/50 rounded-lg overflow-hidden" style={{ width: '100%', minHeight: '300px', height: '51vh' }}>
                 {is3D ? (
                   <div style={{ width: '100%', height: '100%' }}>

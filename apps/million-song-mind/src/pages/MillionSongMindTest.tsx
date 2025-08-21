@@ -2,7 +2,7 @@ import React from 'react';
 
 const MillionSongMindTest = () => {
   console.log('🔥 EMERGENCY TEST COMPONENT LOADING');
-  
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -38,7 +38,7 @@ const MillionSongMindTest = () => {
           <p style={{ fontSize: '1.2rem' }}>🕒 {new Date().toLocaleTimeString()}</p>
         </div>
         <p style={{ fontSize: '1rem', opacity: '0.8' }}>
-          This test proves the app structure is working.<br/>
+          This test proves the app structure is working.<br />
           If you see this, the white screen issue is component-specific.
         </p>
       </div>

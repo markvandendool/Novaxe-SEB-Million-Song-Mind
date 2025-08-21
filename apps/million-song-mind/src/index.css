@@ -23,6 +23,7 @@
 /* Million Song Mind - Premium Dark Design System */
 
 @layer base {
+
   /* Premium iOS-Safe Typography System */
   * {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "SF Pro Display", system-ui, sans-serif;
@@ -488,6 +489,7 @@ svg text {
 
 /* Touch-friendly base styles */
 @layer components {
+
   /* Touch targets - minimum 44px */
   .touch-target {
     min-height: var(--touch-target-min);
@@ -583,25 +585,25 @@ svg text {
     min-height: 300px;
     padding: 1rem;
   }
-  
+
   .harmonic-chart svg {
     width: 100%;
     height: auto;
   }
-  
+
   .chord-button {
     min-height: 44px;
     min-width: 44px;
     font-size: 0.9rem;
     margin: 2px;
   }
-  
+
   .braid-visualization {
     padding: 1rem;
     max-width: 100%;
     overflow-x: auto;
   }
-  
+
   .braid-circle {
     min-width: 60px;
     min-height: 60px;
@@ -614,7 +616,7 @@ svg text {
     line-height: 1.2;
     text-align: center;
   }
-  
+
   header p {
     font-size: var(--text-scale-sm) !important;
     text-align: center;

@@ -11,7 +11,7 @@ export function getChordMapping(position: number, useRoman: boolean = true): Cho
     // SIMPLIFIED MAPPING - NO JSON DATA
     // All top bubbles: "Fr" (French augmented 6th)
     // Bottom bubbles vary by position:
-    
+
     let bottomSymbol: string;
     if (position > 0) {
         bottomSymbol = "Gr";  // Right side: German augmented 6th
@@ -22,7 +22,7 @@ export function getChordMapping(position: number, useRoman: boolean = true): Cho
     }
 
     console.log(`🎵 Position ${position} -> Top: Fr, Bottom: ${bottomSymbol}`);
-    
+
     return {
         topChord: "Fr",
         bottomChord: bottomSymbol

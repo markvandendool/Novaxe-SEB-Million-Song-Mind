@@ -1,8 +1,9 @@
 // Braid to Harmonic Profile mapping system
-// Maps braid positions to harmonic profile slots based on Roman numeral analysis
+// DEFINITIVE USER-SPECIFIED MAPPINGS - August 21, 2025
+// Based on user's click order and cross-mapping specifications
 
 import { CHORD_SLOTS } from '@/constants/harmony';
-import { noteToRoman } from '@/utils/chordMapping';
+import { getBraidToHarmonicMapping } from './definiteBraidMapping';
 
 // Verbose logging utility
 const VERBOSE_LOGGING = true; // Set to false to disable
@@ -23,15 +24,13 @@ const log = (message: string, data?: any) => {
 };
 
 /**
- * Map Roman numeral chord to harmonic profile slot based on the rules:
- * - I, ii, iii, vi, viiø, I7 are 1:1 unique mappings
- * - V and V(b7) map to the same harmonic profile slot (V)
- * - II, III, V, VI, VII have multiple braid positions but map to single harmonic profile slots
- * - IV7 maps to "Other"
+ * Map braid chord to harmonic profile slot using DEFINITIVE user mappings
+ * Everything not explicitly mapped goes to "Other"
+ */
  * - Diminished symbols are flexible except viiø/viiº which must be unique
  */
 export function mapRomanToHarmonicSlot(chord: string, key: string = 'C'): string | null {
-  log(`🔍 MAPPING REQUEST: chord="${chord}", key="${key}"`);
+  log(`🔍 DEFINITIVE MAPPING REQUEST: chord="${chord}", key="${key}"`);
   
   if (!chord || chord.trim() === '') {
     log(`❌ EMPTY CHORD: returning null`);
@@ -39,170 +38,46 @@ export function mapRomanToHarmonicSlot(chord: string, key: string = 'C'): string
   }
 
   const cleanChord = chord.trim();
-  log(` CLEANED CHORD: "${cleanChord}"`);
+  log(`🧹 CLEANED CHORD: "${cleanChord}"`);
 
-  // Handle note names first (from braid clicks like "Am", "C", "F#", etc.)
-  // Convert note names to Roman numerals using key context
-  const notePattern = /^([A-G][#b]?)m?$/;
-  const noteMatch = cleanChord.match(notePattern);
-  if (noteMatch) {
-    log(` NOTE NAME DETECTED: "${cleanChord}" matches note pattern`);
-    const romanNumeral = noteToRoman(cleanChord, key);
-    log(` NOTE TO ROMAN: "${cleanChord}" → "${romanNumeral}" in key "${key}"`);
-    if (romanNumeral) {
-      log(`✅ RECURSIVE MAPPING: calling mapRomanToHarmonicSlot("${romanNumeral}", "${key}")`);
-      return mapRomanToHarmonicSlot(romanNumeral, key);
-    } else {
-      log(`❌ NOTE TO ROMAN FAILED: "${cleanChord}" could not be converted to Roman numeral in key "${key}"`);
-      return null;
-    }
+  // Use the definitive user-specified mapping
+  const harmonicSlot = getBraidToHarmonicMapping(cleanChord);
+  
+  if (harmonicSlot === "Other") {
+    log(`🔄 MAPPED TO OTHER: "${cleanChord}" → "Other" (not in definitive mappings)`);
+  } else {
+    log(`✅ DEFINITIVE MAPPING: "${cleanChord}" → "${harmonicSlot}"`);
   }
   
-  log(`📝 ROMAN NUMERAL DETECTED: "${cleanChord}" - checking mappings`);
-  
-  // Handle exact matches for unique 1:1 mappings
-  const uniqueMappings: Record<string, string> = {
-    'I': 'I',
-    'ii': 'ii', 
-    'iii': 'iii',
-    'vi': 'vi',
-    'viiø': 'viiø',
-    'I7': 'I7',
-    'viiº': 'viiø', // Maps to same slot as viiø per rules
-  };
-
-  if (uniqueMappings[cleanChord]) {
-    log(`✅ UNIQUE MAPPING: "${cleanChord}" → "${uniqueMappings[cleanChord]}"`);
-    return uniqueMappings[cleanChord];
-  }
-
-  // Handle applied chords that map to "Other"
-  if (cleanChord === 'IV7') {
-    log(`🔄 SPECIAL CASE: "${cleanChord}" → "Other"`);
-    return 'Other';
-  }
-
-  // Handle many-to-one mappings (with and without ♭7)
-  const manyToOneMappings: Record<string, string> = {
-    // V and V(♭7) map to same slot
-    'V': 'V',
-    'V7': 'V',
-    'V(b7)': 'V',
-    'V(♭7)': 'V',
-    'Vb7': 'V',
-    
-    // II variations map to same slot
-    'II': 'II(7)',
-    'II7': 'II(7)',
-    'II(b7)': 'II(7)',
-    'II(♭7)': 'II(7)',
-    'IIb7': 'II(7)',
-    
-    // III variations map to same slot
-    'III': 'III(7)',
-    'III7': 'III(7)',
-    'III(b7)': 'III(7)',
-    'III(♭7)': 'III(7)',
-    'IIIb7': 'III(7)',
-    
-    // VI variations map to same slot
-    'VI': 'VI(7)',
-    'VI7': 'VI(7)',
-    'VI(b7)': 'VI(7)',
-    'VI(♭7)': 'VI(7)',
-    'VIb7': 'VI(7)',
-    
-    // VII variations map to same slot
-    'VII': 'VII(7)',
-    'VII7': 'VII(7)',
-    'VII(b7)': 'VII(7)',
-    'VII(♭7)': 'VII(7)',
-    'VIIb7': 'VII(7)',
-    // Minor bVII remains bVII bucket
-    'bVII': 'bVII',
-    'bVII7': 'bVII',
-    'bVII(b7)': 'bVII',
-    'bVII(♭7)': 'bVII',
-    'bVIIb7': 'bVII',
-  };
-
-  if (manyToOneMappings[cleanChord]) {
-    log(`🔄 MANY-TO-ONE MAPPING: "${cleanChord}" → "${manyToOneMappings[cleanChord]}"`);
-    return manyToOneMappings[cleanChord];
-  }
-
-  // Handle diminished chords with flexible symbols (except viiø/viiº which are unique above)
-  const diminishedPattern = /^([iv]+|[IV]+)([º°ø])$/;
-  const dimMatch = cleanChord.match(diminishedPattern);
-  if (dimMatch) {
-    const root = dimMatch[1];
-    log(`🎭 DIMINISHED DETECTED: "${cleanChord}" with root "${root}"`);
-    // Map common diminished chords
-    if (root.toLowerCase() === 'ii') {
-      log(` DIMINISHED MAPPING: "${cleanChord}" → "#ivø" (ii root)`);
-      return '#ivø';
-    }
-    if (root.toLowerCase() === 'iv') {
-      log(` DIMINISHED MAPPING: "${cleanChord}" → "#ivø" (iv root)`);
-      return '#ivø';
-    }
-    if (root.toLowerCase() === 'vi') {
-      log(` DIMINISHED MAPPING: "${cleanChord}" → "#ivø" (vi root)`);
-      return '#ivø';
-    }
-  }
-
-  // Handle case variations and flats/sharps
-  const normalizedRoman = normalizeRomanNumeral(cleanChord);
-  log(` NORMALIZATION: "${cleanChord}" → "${normalizedRoman}"`);
-  if (manyToOneMappings[normalizedRoman]) {
-    log(`✅ NORMALIZED MAPPING: "${cleanChord}" → "${normalizedRoman}" → "${manyToOneMappings[normalizedRoman]}"`);
-    return manyToOneMappings[normalizedRoman];
-  }
-
-  // If no mapping found, return null (will be treated as "Other")
-  log(`❌ NO MAPPING FOUND: "${cleanChord}" - returning null (will be treated as "Other")`);
-  return null;
+  return harmonicSlot === "Other" ? null : harmonicSlot;
 }
 
 /**
- * Normalize Roman numeral notation for consistent mapping
- */
-function normalizeRomanNumeral(roman: string): string {
-  const normalized = roman
-    .replace(/♭/g, 'b')
-    .replace(/♯/g, '#')
-    .replace(/°/g, 'º')
-    .replace(/ø/g, 'ø');
-  log(`🔄 NORMALIZE: "${roman}" → "${normalized}"`);
-  return normalized;
-}
-
-/**
- * Get chord usage for a specific braid position based on harmonic function mapping
- * This replaces the simple chord name lookup with harmonic function mapping
+ * Get chord usage for a specific braid position based on definitive harmonic function mapping
  */
 export function getBraidPositionUsage(
-  romanLabel: string,
+  chordLabel: string,
   harmonicUsageData: Record<string, number>,
   key: string = 'C'
 ): number {
-  log(`📊 USAGE REQUEST: romanLabel="${romanLabel}", key="${key}"`);
-  const harmonicSlot = mapRomanToHarmonicSlot(romanLabel, key);
+  log(`📊 USAGE REQUEST: chordLabel="${chordLabel}", key="${key}"`);
   
-  if (!harmonicSlot) {
-    log(`❌ NO USAGE: "${romanLabel}" has no harmonic slot`);
-    return 0;
+  // Use definitive mapping
+  const harmonicSlot = getBraidToHarmonicMapping(chordLabel);
+  
+  if (harmonicSlot === "Other") {
+    const usage = harmonicUsageData["Other"] || 0;
+    log(`📊 OTHER USAGE: "${chordLabel}" → "Other" → ${usage}`);
+    return usage;
   }
   
   const usage = harmonicUsageData[harmonicSlot] || 0;
-  log(`📊 USAGE RESULT: "${romanLabel}" → "${harmonicSlot}" → ${usage}`);
+  log(`📊 USAGE RESULT: "${chordLabel}" → "${harmonicSlot}" → ${usage}`);
   return usage;
 }
 
 /**
- * Create a mapping of all harmonic profile slots to their braid positions
- * This helps understand which braid positions correspond to each harmonic function
+ * Create a mapping of all harmonic profile slots to their braid positions using definitive mappings
  */
 export function createHarmonicSlotToBraidMapping(): Record<string, string[]> {
   const mapping: Record<string, string[]> = {};
@@ -212,47 +87,46 @@ export function createHarmonicSlotToBraidMapping(): Record<string, string[]> {
     mapping[slot] = [];
   });
   
-  // Common Roman numerals that appear in the braid
-  const commonRomanNumerals = [
-    'I', 'ii', 'iii', 'IV', 'V', 'vi', 'viiø', 'I7',
-    'II', 'II7', 'III', 'III7', 'VI', 'VI7', 'VII', 'VII7',
-    'V7', 'IV7', 'bVII', 'bVII7', '#ivø', 'viiº',
-    // Add variations with different flat/sharp notations
-    'bII', 'bIII', 'bV', 'bVI', '#I', '#II', '#IV', '#V', '#VI'
-  ];
-  
-  commonRomanNumerals.forEach(roman => {
-    const slot = mapRomanToHarmonicSlot(roman);
-    if (slot && mapping[slot]) {
-      mapping[slot].push(roman);
-    }
+  // Use definitive mappings from our user-specified system
+  import('./definiteBraidMapping').then(({ COMPLETE_BRAID_MAPPING }) => {
+    Object.entries(COMPLETE_BRAID_MAPPING).forEach(([braidChord, harmonicSlot]) => {
+      if (mapping[harmonicSlot]) {
+        mapping[harmonicSlot].push(braidChord);
+      }
+    });
   });
   
   return mapping;
 }
 
 /**
- * Debug function to validate mappings
+ * Debug function to validate definitive mappings
  */
 export function validateBraidHarmonicMapping(): {
   validMappings: Record<string, string>;
   unmappedRomans: string[];
 } {
-  const commonRomanNumerals = [
-    'I', 'ii', 'iii', 'IV', 'V', 'vi', 'viiø', 'I7',
-    'II', 'II7', 'III', 'III7', 'VI', 'VI7', 'VII', 'VII7',
-    'V7', 'IV7', 'bVII', 'bVII7', '#ivø', 'viiº'
+  // Test chords from user's click order specification
+  const testChords = [
+    // Major
+    'C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bø',
+    // Applied  
+    'C7', 'Eø', 'D(7)', 'D7', 'F#ø', 'E(7)', 'E7', 'G#º', 'A(7)', 'A7', 'C#º', 'B(7)', 'B7', 'D#º',
+    // Minor
+    'Cm', 'Dø', 'Eb', 'E♭', 'Fm', 'Gm', 'Ab', 'A♭', 'Bb', 'B♭', 'G(7)(b9)', 'G7(b9)', 'Bº7',
+    // Special cross-mappings
+    'G7', 'D'
   ];
   
   const validMappings: Record<string, string> = {};
   const unmappedRomans: string[] = [];
   
-  commonRomanNumerals.forEach(roman => {
-    const slot = mapRomanToHarmonicSlot(roman);
-    if (slot) {
-      validMappings[roman] = slot;
+  testChords.forEach(chord => {
+    const slot = getBraidToHarmonicMapping(chord);
+    if (slot !== "Other") {
+      validMappings[chord] = slot;
     } else {
-      unmappedRomans.push(roman);
+      unmappedRomans.push(chord);
     }
   });
   

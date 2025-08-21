@@ -3,7 +3,7 @@
 // Group → ordered chord slots
 export const CHORD_GROUPS = {
   Major: ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'viiø'],
-  Applied: ['I7', 'iiiø', 'II(7)', '#ivø', 'III(7)', '#vº', 'VI(7)', '#iº', 'VII(7)', '#iiº', 'V(7)'],
+  Applied: ['I7', 'iiiø', 'II(7)', '#ivø', 'III(7)', '#vº', 'VI(7)', '#iº', 'VII(7)', '#iiº'],
   Minor: ['i', 'iiø', 'bIII', 'iv', 'v', 'bVI', 'bVII', 'V(b9)', 'viiº'],
   Other: ['Other']
 } as const;
@@ -24,7 +24,7 @@ export const NOTE_MAPPING: Record<string, string> = {
   i: 'Cm', 'iiø': 'Dø', 'bIII': 'E♭', iv: 'Fm', v: 'Gm', 'bVI': 'A♭', 'bVII': 'B♭', 'V(b9)': 'G7♭9', 'viiº': 'B°',
   // Applied / Non‑diatonic
   'I7': 'C7', 'iiiø': 'Eø', 'II(7)': 'D7', '#ivø': 'F#ø', 'III(7)': 'E7', '#vº': 'G#°',
-  'VI(7)': 'A7', '#iº': 'C#°', 'VII(7)': 'B7', '#iiº': 'D#°', 'V(7)': 'G7',
+  'VI(7)': 'A7', '#iº': 'C#°', 'VII(7)': 'B7', '#iiº': 'D#°',
   Other: ''
 };
 
