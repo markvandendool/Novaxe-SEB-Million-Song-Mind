@@ -6,34 +6,26 @@ export interface ChordMapping {
     bottomChord: string;
 }
 
-// Key mapping (simplified - matching the 15 positions)
-const KEY_SEQUENCE = [
-    'C', 'G', 'D', 'A', 'E', 'B', 'F#', 'C#', 'Ab', 'Eb', 'Bb', 'F', 'Db', 'Gb', 'Cb'
-];
-
+// Simplified mapping for braid bubbles per user request
 export function getChordMapping(position: number, useRoman: boolean = true): ChordMapping {
-    // Normalize position to array index (0-14)
-    const keyIndex = Math.abs(position) % KEY_SEQUENCE.length;
-
-    if (useRoman) {
-        const romanChords = braidTonalities.roman;
-        const majorChords = romanChords.center_major || [];
-        const minorChords = romanChords.center_minor || [];
-
-        // Use position to select chord from arrays
-        const chordIndex = position % majorChords.length;
-
-        return {
-            topChord: majorChords[chordIndex] || 'I',
-            bottomChord: minorChords[chordIndex] || 'i'
-        };
+    // SIMPLIFIED MAPPING - NO JSON DATA
+    // All top bubbles: "Fr" (French augmented 6th)
+    // Bottom bubbles vary by position:
+    
+    let bottomSymbol: string;
+    if (position > 0) {
+        bottomSymbol = "Gr";  // Right side: German augmented 6th
+    } else if (position < 0) {
+        bottomSymbol = "ø";   // Left side: Half diminished
+    } else {
+        bottomSymbol = "º";   // Center: Full diminished
     }
 
-    // Basic chord mapping for non-roman mode
-    const key = KEY_SEQUENCE[keyIndex];
+    console.log(`🎵 Position ${position} -> Top: Fr, Bottom: ${bottomSymbol}`);
+    
     return {
-        topChord: key,
-        bottomChord: key.toLowerCase()
+        topChord: "Fr",
+        bottomChord: bottomSymbol
     };
 }
 

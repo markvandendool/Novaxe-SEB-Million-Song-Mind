@@ -42,18 +42,22 @@ export const NVX_CHORD_MAPPINGS: ChordMapping[] = [
 
 /**
  * Convert text containing chord symbols to nvxFont character sequences
- * This function processes raw text and converts it to the character sequences
- * that the nvxFont recognizes and renders as musical notation
+ * This function processes musical chord symbols and converts them appropriately
  */
 export function convertToNvxChordText(text: string): string {
     if (!text) return text;
 
-    let result = text;
-
-    // CRITICAL TRANSFORMATION: b → l for flat symbols in nvxFont
-    // The nvxFont.otf expects lowercase 'l' to render as flat symbols (b+[anything] ligatures)
-    // This must be done first to enable the ligature system
-    result = result.replace(/b/g, 'l');
+    // Only apply conversions to actual musical chord symbols
+    // Don't blindly convert all 'b' to 'l' - only in chord contexts
+    
+    // Pattern for chord symbols (letter followed by accidental and/or chord quality)
+    // Examples: Bb, C#, F#m, Ab7, Ger6, etc.
+    const chordPattern = /([A-G][#b]*[^A-Za-z]*)|([ivxIVX]+[#b°ø]*)|([A-Za-z]*[+6789])/g;
+    
+    let result = text.replace(chordPattern, (match) => {
+        // Only convert 'b' to 'l' within chord symbols for flat rendering
+        return match.replace(/b/g, 'l');
+    });
 
     return result;
 }

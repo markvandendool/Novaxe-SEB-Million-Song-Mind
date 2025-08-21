@@ -22,7 +22,11 @@ export const BraidView: React.FC<BraidViewProps> = ({
   const verticalStep = circleRadius * 0.85; // heavier overlap, closer to reference
 
   // Get chord mappings from braid_tonalities.json
-  const chordMappings = useMemo(() => getAllChordMappings(useRoman), [useRoman]);
+  const chordMappings = useMemo(() => {
+    const mappings = getAllChordMappings(useRoman);
+    console.log('🎵 BraidView chord mappings:', mappings.slice(0, 3)); // Debug first 3
+    return mappings;
+  }, [useRoman]);
 
   // 15 circle centers (7 up, center, 7 down)
   const centers = useMemo(() => {

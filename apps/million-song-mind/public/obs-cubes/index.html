@@ -14,10 +14,22 @@
             <label>Key</label>
             <select id="key-select">
                 <option value="C" selected>C</option>
+                <option value="Db">Db</option>
+                <option value="D">D</option>
+                <option value="Eb">Eb</option>
+                <option value="E">E</option>
+                <option value="F">F</option>
+                <option value="F#">F#</option>
+                <option value="G">G</option>
+                <option value="Ab">Ab</option>
+                <option value="A">A</option>
+                <option value="Bb">Bb</option>
+                <option value="B">B</option>
             </select>
             <label>Set</label>
             <select id="set-select">
-                <option value="major" selected>Major</option>
+                <option value="none" selected>None</option>
+                <option value="major">Major</option>
                 <option value="applied">Applied</option>
                 <option value="minor">Minor</option>
                 <option value="all">All</option>
@@ -29,21 +41,34 @@
             </select>
             <button id="arrange-btn">Arrange</button>
             <button id="reset-btn">Reset</button>
+            <label style="margin-left:12px;">
+                <input type="checkbox" id="adjust-toggle" /> Adjust shelf
+            </label>
+            <button id="save-map-btn" title="Download shelf_map.json">Save Map</button>
+            <label class="file-btn">
+                Load Map
+                <input type="file" id="load-map-input" accept="application/json" hidden />
+            </label>
         </div>
         <div class="row small">
-            <span>Tip: Click a cube to rotate 90°. Drag to move. Dropping snaps to a grid.</span>
+            <span>Tip: Click a cube to rotate; drag to move. Drop to shelf or front row.</span>
         </div>
     </div>
     <canvas id="scene"></canvas>
+    <div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
+    <div id="camera-ui">
+        <button id="view-down" title="Melody View">Melody View</button>
+        <button id="view-up" title="Bass View">Bass View</button>
+    </div>
 
     <script type="importmap">
-    {
-      "imports": {
-        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
-      }
-    }
-    </script>
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+		}
+	}
+	</script>
     <script type="module" src="./chords.js"></script>
     <script type="module" src="./main.js"></script>
 </body>

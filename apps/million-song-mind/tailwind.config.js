@@ -41,6 +41,11 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Harmonic inversion colors for chord visualization
+        'harmonic-root': "hsl(var(--harmonic-root))",
+        'harmonic-first': "hsl(var(--harmonic-first))",
+        'harmonic-second': "hsl(var(--harmonic-second))",
+        'harmonic-third': "hsl(var(--harmonic-third))",
       },
       borderRadius: {
         lg: "var(--radius)",

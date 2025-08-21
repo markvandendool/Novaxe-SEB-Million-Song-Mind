@@ -1,6 +1,5 @@
 import React from 'react';
 import { audioManager } from '@/utils/audioManager';
-import { NvxSvgText } from './NvxText';
 
 type YinYangCircleProps = {
   cx: number;
@@ -94,17 +93,21 @@ export const YinYangCircle: React.FC<YinYangCircleProps> = ({
         fill={topSelected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))'}
         opacity={topSelected ? 0.95 : 0.7}
       />
-      <NvxSvgText
+      <text
         x={cx}
         y={topDotY}
         fontSize="0.7em"
         fill={topSelected ? 'hsl(var(--primary-foreground))' : 'hsl(var(--foreground))'}
-        style={{ cursor: 'pointer', textAnchor: 'middle', dominantBaseline: 'middle' }}
-        debug={true}
+        style={{ 
+          cursor: 'pointer', 
+          textAnchor: 'middle', 
+          dominantBaseline: 'middle',
+          fontFamily: 'nvxChord, Fontdec13, music-font, monospace'
+        }}
         onClick={(e) => handleSelect(e, chordTop, topSelected)}
       >
         {chordTop}
-      </NvxSvgText>
+      </text>
     </g>
   );
 
@@ -131,17 +134,21 @@ export const YinYangCircle: React.FC<YinYangCircleProps> = ({
         fill={bottomSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--foreground))'}
         opacity={bottomSelected ? 0.95 : 0.7}
       />
-      <NvxSvgText
+      <text
         x={cx}
         y={bottomDotY}
         fontSize="0.7em"
         fill={bottomSelected ? 'hsl(var(--accent-foreground))' : 'hsl(var(--foreground))'}
-        style={{ cursor: 'pointer', textAnchor: 'middle', dominantBaseline: 'middle' }}
-        debug={true}
+        style={{ 
+          cursor: 'pointer', 
+          textAnchor: 'middle', 
+          dominantBaseline: 'middle',
+          fontFamily: 'nvxChord, Fontdec13, music-font, monospace'
+        }}
         onClick={(e) => handleSelect(e, chordBottom, bottomSelected)}
       >
         {chordBottom}
-      </NvxSvgText>
+      </text>
     </g>
   );
 

@@ -154,22 +154,19 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
     return sectionInfo;
   });
 
-  // Compute dynamic chart width based on bars and enable horizontal scroll to avoid squish
-  const chordGroups = Object.values(CHORD_ORDER) as unknown as readonly string[][];
-  const totalBars = chordGroups.reduce((sum: number, arr: readonly string[]) => sum + arr.length, 0);
-  const idealWidth = 60 + (totalBars * (BAR_WIDTH + BAR_SPACING)) + (SECTION_SPACING * 3);
-  if (idealWidth > 1600) {
+  // Compute dynamic chart width based on actual section layout
+  const actualChartWidth = currentX + 100; // Add padding after last section
+  if (actualChartWidth > 1600) {
     BAR_WIDTH = 28;
     BAR_SPACING = 6;
   }
-  const chartWidth = 60 + (totalBars * (BAR_WIDTH + BAR_SPACING)) + (SECTION_SPACING * 3);
 
   const { focusedKey } = useGlobalKey();
   const noteMap = focusedKey ? getNoteMappingForKey(focusedKey) : NOTE_MAPPING;
 
   return (
     <div className="flex justify-center w-full">
-      <div className="relative animate-fade-in" style={{ width: Math.max(chartWidth * 2.1, 1800), height: CHART_HEIGHT + 200 }}>
+      <div className="relative animate-fade-in" style={{ width: Math.max(actualChartWidth, 1200), height: CHART_HEIGHT + 200 }}>
 
         {/* Y-Axis Labels with Compression - 100% anchored 10px from top */}
         <div className="absolute left-0 top-0 h-full">
@@ -191,7 +188,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
           style={{
             left: 60,
             bottom: 140,
-            width: currentX - 60, // Dynamically match all chord bars
+            width: actualChartWidth - 60, // Match actual chart width including Other section
             height: CHART_HEIGHT
           }}
         >
@@ -237,7 +234,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                 }}
               />
 
-              {['Major', 'Applied', 'Minor'].includes(section.name) && (() => {
+              {['Major', 'Applied', 'Minor', 'Other'].includes(section.name) && (() => {
                 const usagePercent = (usedChords / totalChords) * 100;
 
                 // Play celebration sound for 100% usage (once per section)
@@ -283,15 +280,15 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                     <div
                       className="fraction-subtitle text-white text-xs mt-1 font-bold tracking-widest"
                       style={{
-                        fontFamily: "'nvxChord', monospace",
-                        fontStyle: 'italic',
-                        fontWeight: '700',
+                        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif',
+                        fontStyle: 'normal',
+                        fontWeight: '600',
                         color: '#E6F3FF',
                         textShadow: `
                           0 0 3px #4FC3F7,
                           0 0 6px #29B6F6
                         `,
-                        transform: 'skew(-8deg, 0deg)'
+                        letterSpacing: '0.1em'
                       }}
                     >
                       ⚡ CHORDS ACTIVE ⚡
@@ -301,7 +298,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
               })()}
 
               {/* Section Total Percentage */}
-              {section.total > 0 && ['Major', 'Applied', 'Minor'].includes(section.name) && (
+              {section.total > 0 && ['Major', 'Applied', 'Minor', 'Other'].includes(section.name) && (
                 <div
                   className="absolute text-foreground text-lg font-mono font-bold text-center opacity-50 pointer-events-none"
                   style={{

@@ -935,19 +935,6 @@ const MillionSongMind = () => {
 
       {/* Global key is now provided via GlobalKeyProvider and updated by local selections */}
 
-      {/* BRAID FONT TEST SECTION */}
-      <section className="bg-slate-900 border border-slate-700 rounded-lg p-6 mx-4 md:mx-8 mt-4">
-        <h3 className="text-lg  text-white mb-4">🧪 BRAID FONT SYSTEM TEST</h3>
-        <div className="space-y-4">
-          <div className="text-sm text-slate-400 mb-2">Testing nvxFont integration:</div>
-          <BraidChordSequence
-            chords={['Cmaj7', 'Dm7', 'G7', 'Am', 'F', 'Bdim', 'Em7b5']}
-            debug={true}
-            className="bg-slate-800 p-4 rounded"
-          />
-        </div>
-      </section>
-
       <main className="container-mobile space-y-8 md:space-y-12">
         {/* Welcome message for first-time users */}
         {isFirstTimeUser && (
@@ -961,10 +948,27 @@ const MillionSongMind = () => {
         )}
 
         {/* Section 1: Harmonic Profile - TOP PRIORITY */}
-        <section className="space-y-6 md:space-y-8">
+        <section className="space-y-6 md:space-y-8 relative">
           <Card style={{ boxShadow: 'var(--shadow-card)' }} className="harmonic-chart">
             <CardContent className="pt-3 pb-3 relative">
               <h2 className="text-responsive-xl tracking-[0.2em] text-foreground mb-3">HARMONIC PROFILE</h2>
+
+              {/* Welcome overlay for harmonic chart - disappears on any interaction */}
+              {isFirstTimeUser && (
+                <div 
+                  className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm cursor-pointer rounded-lg"
+                  onClick={() => setIsFirstTimeUser(false)}
+                  onTouchStart={() => setIsFirstTimeUser(false)}
+                >
+                  <div className="absolute top-4 left-4 right-4 bg-primary/90 text-primary-foreground px-4 py-3 rounded-lg border border-primary">
+                    <div className="text-sm font-medium">
+                      🎵 <strong>Harmonic Profile</strong> shows chord usage across your selected songs. 
+                      Click any chord to select it for analysis.
+                    </div>
+                    <div className="text-xs mt-1 opacity-75">Touch anywhere to continue</div>
+                  </div>
+                </div>
+              )}
 
               {/* Dynamic harmonic profile based on SELECTED SONGS */}
               <HarmonicChart key={focusedKey}
@@ -1050,13 +1054,7 @@ const MillionSongMind = () => {
         </section>
 
         {/* Section 1.5: Braid Visualization (Educational) */}
-        <section className="space-y-6">
-          <div className="learning-tip">
-            The <strong>Braid</strong> shows harmonic relationships as a geometric pattern. 
-            Each chord is positioned by its harmonic distance from others. 
-            Larger circles represent more frequently used chords.
-          </div>
-          
+        <section className="space-y-6 relative">
           <Card className="braid-visualization">
             <CardHeader>
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -1079,7 +1077,25 @@ const MillionSongMind = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
+            <CardContent className="pt-0 relative">
+              
+              {/* Welcome overlay for braid - disappears on any interaction */}
+              {isFirstTimeUser && (
+                <div 
+                  className="absolute inset-0 z-10 bg-black/30 backdrop-blur-sm cursor-pointer"
+                  onClick={() => setIsFirstTimeUser(false)}
+                  onTouchStart={() => setIsFirstTimeUser(false)}
+                >
+                  <div className="absolute top-4 left-4 right-4 bg-accent/90 text-accent-foreground px-4 py-3 rounded-lg border border-accent">
+                    <div className="text-sm font-medium">
+                      💫 The <strong>Braid</strong> shows harmonic relationships as a geometric pattern. 
+                      Each chord is positioned by its harmonic distance from others.
+                    </div>
+                    <div className="text-xs mt-1 opacity-75">Touch anywhere to continue</div>
+                  </div>
+                </div>
+              )}
+              
               {/* Zoom controls - touch friendly */}
               {!is3D && (
                 <div className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-card border border-border rounded-lg p-4 mb-4">
@@ -1118,12 +1134,8 @@ const MillionSongMind = () => {
                       displayRoman={displayRoman}
                       chordUsage={useMemo(() => {
                         if (!parseResult?.harmonicData) return {};
-
-                        // Create harmonic function usage map instead of raw chord names
-                        // This maps harmonic profile slots to their usage percentages
                         const harmonicUsage: Record<string, number> = {};
                         parseResult.harmonicData.forEach(item => {
-                          // Use the harmonic profile slot names directly (I, ii, iii, etc.)
                           harmonicUsage[item.chord] = item.percent;
                         });
                         return harmonicUsage;

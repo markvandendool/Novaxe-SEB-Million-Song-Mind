@@ -13,10 +13,11 @@
 
 /* Angular braid text styling from braid.component.scss */
 section#braid-tonal .smallBubble text {
-    font-family: "nvxChord";
+    font-family: "Times New Roman", "Liberation Serif", serif;
     fill: black;
-    font-size: 0.7em;
-    text-anchor: left;
+    font-size: 16px;
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
 }
 
 section#braid-tonal .smallBubble text.duo {
@@ -28,26 +29,29 @@ section#braid-tonal .smallBubble text.duo.roman {
 }
 
 section#braid-tonal .medBubble text.right {
-    text-anchor: start;
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
     fill: black;
-    font-family: "nvxChord";
-    font-size: 0.9em;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
     word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.left {
-    text-anchor: end;
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
     fill: black;
-    font-family: "nvxChord";
-    font-size: 0.9em;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
     word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.center {
-    text-anchor: end;
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
     fill: black;
-    font-family: "nvxChord";
-    font-size: 0.9em;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
     word-spacing: 0px;
 }
 

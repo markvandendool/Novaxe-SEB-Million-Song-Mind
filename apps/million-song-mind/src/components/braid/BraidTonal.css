@@ -133,7 +133,8 @@ section#braid-tonal .harmonic-bar.selected {
 /* Font family is now handled by braid-angular-exact.css */
 section#braid-tonal .smallBubble text {
   fill: black;
-  text-anchor: left;
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
 }
 
 /* DISABLED: Artificial font-size manipulation - using natural Fontdec13 */
@@ -159,19 +160,22 @@ section#braid-tonal .medBubble circle {
 }
 
 section#braid-tonal .medBubble text.right {
-  text-anchor: start;
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
   fill: black;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.left {
-  text-anchor: end;
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
   fill: black;
   word-spacing: 0px;
 }
 
 section#braid-tonal .medBubble text.center {
-  text-anchor: end;
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
   fill: black;
   word-spacing: 0px;
 }
