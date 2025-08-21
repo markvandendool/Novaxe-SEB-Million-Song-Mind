@@ -1,6 +1,10 @@
 import React, { useState, useCallback, useEffect, useDeferredValue, useMemo } from 'react';
 import { useGlobalKey } from '@/state/globalKeyStore';
 import { sendDevLog } from '@/lib/devlog';
+
+// 🔥 IMMEDIATE DEBUG LOG
+console.log('🚀 MillionSongMind.tsx loading at', new Date().toISOString());
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -12,11 +16,12 @@ import { DebugPanel, debugLogger } from '@/components/DebugPanel';
 import { parseUnifiedCSVData, convertData3ToHarmonicData } from '@/utils/cpmlParser';
 import { UnifiedParseResult } from '@/types/cpml';
 import { useToast } from '@/hooks/use-toast';
-import { Music, Database, Upload, FileText, ArrowUpDown, Search } from 'lucide-react';
+import { Music, Database, Upload, FileText, ArrowUpDown, Search, BookOpen } from 'lucide-react';
 import Fuse from 'fuse.js';
 import { FixedSizeList as List } from 'react-window';
 import debounce from 'lodash.debounce';
 import { SongDetailPanel } from '@/components/SongDetailPanel';
+import { OnboardingSystem } from '@/components/OnboardingSystem';
 import { sendChord, sendScale, sendProgression } from '@/components/NovaxeBridgeSender';
 import BraidTonal from '@/components/braid/BraidTonal';
 import BraidTorus3D from '@/components/braid/BraidTorus3D';
@@ -31,7 +36,6 @@ import { GlobalKeySelector } from '@/components/GlobalKeySelector';
 import { BraidTextSwitcher } from '@/components/BraidTextSwitcher';
 import { useBraidTextSwitching } from '@/hooks/useBraidTextSwitching';
 import { chordAudioManager } from '@/utils/ChordAudioManager';
-import FontTest from '@/components/FontTest';
 // Empty state data - all zeros
 const EMPTY_HARMONIC_DATA = [
   { chord: "I", percent: 0, root: 0, first: 0, second: 0, third: 0, section: "Major" },
@@ -81,6 +85,9 @@ const log = (message: string, data?: any) => {
 };
 
 const MillionSongMind = () => {
+  console.log('🎵 MillionSongMind component is mounting...');
+  console.log('🎵 Component render starting');
+  
   useSEO({
     title: 'MillionSongMind — Harmonic Oracle',
     description: 'Explore MillionSongMind harmonic analysis and data3 visualizations',
@@ -92,6 +99,10 @@ const MillionSongMind = () => {
   const [displayedSongs, setDisplayedSongs] = useState<any[]>([]); // Only filtered songs for rendering
   const [isLoading, setIsLoading] = useState(false);
   const [debugPanelOpen, setDebugPanelOpen] = useState(false);
+  
+  // Onboarding and educational system
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [isFirstTimeUser, setIsFirstTimeUser] = useState(false);
   const [debugLogs, setDebugLogs] = useState(debugLogger.getLogs());
   const [selectedSongs, setSelectedSongs] = useState<Set<string>>(new Set());
   const [selectedSong, setSelectedSong] = useState<any>(null);
@@ -108,6 +119,29 @@ const MillionSongMind = () => {
   React.useEffect(() => {
     chordAudioManager.initialize().catch(console.warn);
   }, []);
+
+  // Check for first-time users and show onboarding
+  React.useEffect(() => {
+    const hasSeenTutorial = localStorage.getItem('msm:tutorial-completed');
+    if (!hasSeenTutorial) {
+      setIsFirstTimeUser(true);
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('msm:tutorial-completed', 'true');
+    setShowOnboarding(false);
+    setIsFirstTimeUser(false);
+  };
+
+  const handleOnboardingClose = () => {
+    setShowOnboarding(false);
+  };
+
+  const startTutorial = () => {
+    setShowOnboarding(true);
+  };
 
   // Example: emit a heartbeat-ish chord when focusedKey changes
   React.useEffect(() => {
@@ -823,11 +857,10 @@ const MillionSongMind = () => {
     toast({ title: "Selections Cleared", description: "Chord and song selections reset." });
   }, [toast]);
 
+  console.log('🎵 About to render MillionSongMind UI');
+
   return (
     <div className="min-h-screen bg-background">
-      {/* ULTRA SIMPLE FONT TEST - TOP OF PAGE - NO FALLBACKS */}
-      <FontTest />
-
       {/* Sticky Premium Header */}
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border" style={{ boxShadow: 'var(--shadow-professional)' }}>
         <div className="max-w-[120rem] mx-auto px-4 md:px-8 py-6 md:py-8">
@@ -861,29 +894,39 @@ const MillionSongMind = () => {
                 </div>
               )}
 
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 md:gap-4">
                 <GlobalKeySelector compact />
 
                 <div className="flex flex-col space-y-1">
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={startTutorial}
+                    className="text-xs tracking-wider h-8 px-3 touch-target"
+                  >
+                    <BookOpen className="w-3 h-3 mr-1" />
+                    TUTORIAL
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => setDebugPanelOpen(!debugPanelOpen)}
-                    className=" text-xs tracking-wider h-4 py-0 px-2"
+                    className="text-xs tracking-wider h-6 py-0 px-2"
                   >
                     <FileText className="w-3 h-3 mr-1" />
                     DEBUG
                   </Button>
-
-                  <Button
-                    variant="secondary"
-                    onClick={resetToEmpty}
-                    disabled={isLoading}
-                    className=" text-xs tracking-wider bg-gradient-accent h-4 py-0 px-2"
-                  >
-                    ⚡ RESET
-                  </Button>
                 </div>
+
+                <Button
+                  variant="secondary"
+                  onClick={resetToEmpty}
+                  disabled={isLoading}
+                  className="text-xs tracking-wider bg-gradient-accent touch-target"
+                >
+                  ⚡ RESET
+                </Button>
               </div>
             </div>
           </div>
@@ -905,15 +948,23 @@ const MillionSongMind = () => {
         </div>
       </section>
 
-      <main className="max-w-[120rem] mx-auto px-4 md:px-8 py-8 md:py-12 space-y-12">
-        {/* Section 1: Harmonic Profile - TOP PRIORITY */}
-        <section className="space-y-8">
-          <div className="text-center space-y-4">
+      <main className="container-mobile space-y-8 md:space-y-12">
+        {/* Welcome message for first-time users */}
+        {isFirstTimeUser && (
+          <div className="learning-section">
+            <h3 className="text-responsive-lg font-semibold mb-2">🎵 Welcome to Million Song Mind!</h3>
+            <p className="text-responsive-sm text-muted-foreground mb-4">
+              This is your professional music analysis tool. Click the <strong>TUTORIAL</strong> button 
+              in the header to get started with a guided tour.
+            </p>
           </div>
+        )}
 
-          <Card style={{ boxShadow: 'var(--shadow-card)' }}>
+        {/* Section 1: Harmonic Profile - TOP PRIORITY */}
+        <section className="space-y-6 md:space-y-8">
+          <Card style={{ boxShadow: 'var(--shadow-card)' }} className="harmonic-chart">
             <CardContent className="pt-3 pb-3 relative">
-              <h2 className="text-xl  tracking-[0.2em] text-foreground mb-3">HARMONIC PROFILE</h2>
+              <h2 className="text-responsive-xl tracking-[0.2em] text-foreground mb-3">HARMONIC PROFILE</h2>
 
               {/* Dynamic harmonic profile based on SELECTED SONGS */}
               <HarmonicChart key={focusedKey}
@@ -998,27 +1049,42 @@ const MillionSongMind = () => {
           </Card>
         </section>
 
-        {/* Section 1.5: Braid Visualization (simplified iconic version) */}
+        {/* Section 1.5: Braid Visualization (Educational) */}
         <section className="space-y-6">
-          <Card>
-            <CardContent className="pt-3 pb-3">
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xl  tracking-[0.2em] text-foreground">BRAID</h2>
-                <div className="flex items-center gap-3">
+          <div className="learning-tip">
+            The <strong>Braid</strong> shows harmonic relationships as a geometric pattern. 
+            Each chord is positioned by its harmonic distance from others. 
+            Larger circles represent more frequently used chords.
+          </div>
+          
+          <Card className="braid-visualization">
+            <CardHeader>
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <CardTitle className="text-responsive-lg tracking-[0.2em] text-foreground">BRAID PATTERN</CardTitle>
+                  <p className="text-responsive-sm text-muted-foreground mt-1">
+                    Geometric visualization of harmonic relationships
+                  </p>
+                </div>
+                <div className="flex items-center gap-3 flex-wrap">
                   <BraidTextSwitcher
                     mode={braidTextMode}
                     onModeChange={setBraidTextMode}
                     compact
                   />
-                  <span className="text-sm text-muted-foreground ">3D</span>
-                  <Switch checked={is3D} onCheckedChange={setIs3D} />
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">3D</span>
+                    <Switch checked={is3D} onCheckedChange={setIs3D} />
+                  </div>
                 </div>
               </div>
-              {/* Zoom controls above the braid window */}
+            </CardHeader>
+            <CardContent className="pt-0">
+              {/* Zoom controls - touch friendly */}
               {!is3D && (
-                <div className="flex items-center justify-end gap-3 bg-background/70 border border-border rounded-md px-3 py-2 mb-3 shadow-professional">
-                  <span className="text-xs  text-muted-foreground">Zoom</span>
-                  <div className="w-40">
+                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 bg-card border border-border rounded-lg p-4 mb-4">
+                  <span className="text-sm font-medium text-foreground">Zoom Level</span>
+                  <div className="flex-1 min-w-0">
                     <Slider
                       value={[braidZoom]}
                       min={0.8}
@@ -1026,12 +1092,16 @@ const MillionSongMind = () => {
                       step={0.01}
                       onValueChange={(v) => setBraidZoom(Math.min(3.5, Math.max(0.8, v[0] ?? braidZoom)))}
                       onValueCommit={(v) => setBraidZoom(Math.max(0.8, Math.min(3.5, Math.round((v[0] ?? braidZoom) / 0.25) * 0.25)))}
+                      className="touch-target"
                     />
                   </div>
-                  <span className="text-xs  w-10 text-right">{Math.round(braidZoom * 100)}%</span>
+                  <span className="text-sm font-bold w-16 text-center bg-primary/10 rounded px-2 py-1">
+                    {Math.round(braidZoom * 100)}%
+                  </span>
                 </div>
               )}
-              <div className="relative" style={{ width: '100%', height: '51vh', overflow: 'hidden' }}>
+              
+              <div className="relative bg-background/50 rounded-lg overflow-hidden" style={{ width: '100%', minHeight: '300px', height: '51vh' }}>
                 {is3D ? (
                   <div style={{ width: '100%', height: '100%' }}>
                     <BraidTorus3D focusKey={focusedKey} />
@@ -1563,10 +1633,17 @@ const MillionSongMind = () => {
         onClear={() => debugLogger.clear()}
       />
 
+      {/* Onboarding System */}
+      <OnboardingSystem
+        isOpen={showOnboarding}
+        onClose={handleOnboardingClose}
+        onComplete={handleOnboardingComplete}
+      />
+
       {/* Footer */}
       <footer className="border-t border-border mt-16 py-6">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-muted-foreground  text-sm">
+          <p className="text-muted-foreground text-sm">
             Million Song Mind — built for harmonic exploration at scale
           </p>
         </div>

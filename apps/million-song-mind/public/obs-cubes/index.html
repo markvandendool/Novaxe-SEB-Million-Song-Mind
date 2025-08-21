@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OBS Cubes</title>
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+    <div id="ui">
+        <div class="row">
+            <label>Key</label>
+            <select id="key-select">
+                <option value="C" selected>C</option>
+            </select>
+            <label>Set</label>
+            <select id="set-select">
+                <option value="major" selected>Major</option>
+                <option value="applied">Applied</option>
+                <option value="minor">Minor</option>
+                <option value="all">All</option>
+            </select>
+            <label>Label</label>
+            <select id="label-mode">
+                <option value="roman" selected>Roman</option>
+                <option value="letter">Letter</option>
+            </select>
+            <button id="arrange-btn">Arrange</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+        <div class="row small">
+            <span>Tip: Click a cube to rotate 90°. Drag to move. Dropping snaps to a grid.</span>
+        </div>
+    </div>
+    <canvas id="scene"></canvas>
+
+    <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+      }
+    }
+    </script>
+    <script type="module" src="./chords.js"></script>
+    <script type="module" src="./main.js"></script>
+</body>
+
+</html>

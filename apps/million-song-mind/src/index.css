@@ -1,5 +1,22 @@
 /* Original nvxChord font system only */
 
+/* Musical Font Face Declarations */
+@font-face {
+  font-family: 'nvxChord';
+  src: url('/fonts/nvxFont.otf') format('opentype');
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'FontDec13';
+  src: url('/fonts/Font Jan16.otf') format('opentype');
+  font-display: swap;
+  font-weight: normal;
+  font-style: normal;
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -42,15 +59,21 @@
 
     --radius: 0.5rem;
 
-    /* Premium typography scale */
-    --text-scale-xs: 0.75rem;
-    --text-scale-sm: 0.875rem;
-    --text-scale-base: 1rem;
-    --text-scale-lg: 1.125rem;
-    --text-scale-xl: 1.25rem;
-    --text-scale-2xl: 1.5rem;
-    --text-scale-3xl: 1.875rem;
-    --text-scale-4xl: 2.25rem;
+    /* Premium typography scale - Mobile-first responsive */
+    --text-scale-xs: clamp(0.7rem, 2vw, 0.75rem);
+    --text-scale-sm: clamp(0.8rem, 2.5vw, 0.875rem);
+    --text-scale-base: clamp(0.9rem, 3vw, 1rem);
+    --text-scale-lg: clamp(1rem, 3.5vw, 1.125rem);
+    --text-scale-xl: clamp(1.1rem, 4vw, 1.25rem);
+    --text-scale-2xl: clamp(1.3rem, 5vw, 1.5rem);
+    --text-scale-3xl: clamp(1.6rem, 6vw, 1.875rem);
+    --text-scale-4xl: clamp(2rem, 8vw, 2.25rem);
+
+    /* Touch-friendly spacing - 44px minimum touch targets */
+    --touch-target-min: 44px;
+    --spacing-touch: 0.75rem;
+    --spacing-comfortable: 1.5rem;
+    --spacing-section: 2rem;
 
     /* Custom Harmonic Analysis Colors - Refined palette */
     --harmonic-root: 142 65% 50%;
@@ -284,20 +307,30 @@ svg text {
 /* Handled by braid-angular-exact.css */
 
 .chord-label-custom {
-  font-family: 'nvxChord' !important;
-  font-feature-settings: "liga" 1, "kern" 1;
+  font-family: 'nvxChord', 'FontDec13', monospace !important;
+  font-feature-settings: "liga" 1, "kern" 1, "dlig" 1, "clig" 1;
+  font-variant-ligatures: discretionary-ligatures;
 }
 
 /* High specificity protection for chart x-axis labels */
 .chord-label-custom,
 div .chord-label-custom {
-  font-family: 'nvxChord' !important;
+  font-family: 'nvxChord', 'FontDec13', monospace !important;
+  font-feature-settings: "liga" 1, "kern" 1, "dlig" 1, "clig" 1;
 }
 
 /* Additional protection for HarmonicChart fraction text */
 .fraction-text,
 .fraction-subtitle {
-  font-family: 'nvxChord' !important;
+  font-family: 'nvxChord', 'FontDec13', monospace !important;
+  font-feature-settings: "liga" 1, "kern" 1, "dlig" 1, "clig" 1;
+}
+
+/* FontDec13 class for components */
+.font-fontdec13 {
+  font-family: 'FontDec13', 'nvxChord', monospace !important;
+  font-feature-settings: "liga" 1, "kern" 1, "dlig" 1, "clig" 1;
+  font-variant-ligatures: discretionary-ligatures;
 }
 
 /* Force all braid text to use nvxChord (Font Jan16) */
@@ -459,4 +492,134 @@ div .chord-label-custom {
 
 .animate-pulse-glow {
   animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* =================================================================== */
+/* MOBILE-FIRST RESPONSIVE DESIGN & ACCESSIBILITY IMPROVEMENTS */
+/* =================================================================== */
+
+/* Touch-friendly base styles */
+@layer components {
+  /* Touch targets - minimum 44px */
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: var(--spacing-touch);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .touch-target:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .touch-target:active {
+    transform: translateY(0);
+    transition: all 0.1s ease;
+  }
+
+  /* Responsive containers */
+  .container-mobile {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-mobile {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-mobile {
+      max-width: 1024px;
+      padding: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-mobile {
+      max-width: 1280px;
+    }
+  }
+
+  /* Educational scaffolding */
+  .learning-section {
+    border-left: 4px solid hsl(var(--accent));
+    padding: var(--spacing-comfortable);
+    margin: var(--spacing-section) 0;
+    background: hsl(var(--card));
+    border-radius: 8px;
+  }
+
+  .learning-tip {
+    background: hsl(var(--accent) / 0.1);
+    border: 1px solid hsl(var(--accent) / 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: var(--text-scale-sm);
+    margin: 1rem 0;
+  }
+
+  .learning-tip::before {
+    content: "💡 ";
+    font-size: 1.2em;
+    margin-right: 0.5rem;
+  }
+
+  /* Accessibility improvements */
+  .focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Mobile-specific harmonic chart improvements */
+@media (max-width: 768px) {
+  .harmonic-chart {
+    min-height: 300px;
+    padding: 1rem;
+  }
+  
+  .harmonic-chart svg {
+    width: 100%;
+    height: auto;
+  }
+  
+  .chord-button {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.9rem;
+    margin: 2px;
+  }
+  
+  .braid-visualization {
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  
+  .braid-circle {
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 0.8rem;
+  }
+
+  /* Make header responsive */
+  header h1 {
+    font-size: var(--text-scale-3xl) !important;
+    line-height: 1.2;
+    text-align: center;
+  }
+  
+  header p {
+    font-size: var(--text-scale-sm) !important;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
 }

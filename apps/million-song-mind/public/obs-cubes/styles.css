@@ -1,0 +1,56 @@
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: transparent;
+}
+
+#scene {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Side-face color legend (used for canvas drawing, documented here) */
+/* Root: #2ecc71, Third: #e74c3c, Fifth: #3498db, Seventh: #bdc3c7 */
+
+#ui {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.5);
+    color: #fff;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+    padding: 8px 10px;
+    border-radius: 8px;
+    backdrop-filter: blur(6px);
+}
+
+#ui .row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+#ui .row.small {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 0;
+}
+
+#ui select,
+#ui button {
+    height: 28px;
+    border-radius: 6px;
+    border: 1px solid #888;
+    background: #1f1f1f;
+    color: #fff;
+    padding: 0 6px;
+}
+
+#ui button {
+    cursor: pointer;
+}

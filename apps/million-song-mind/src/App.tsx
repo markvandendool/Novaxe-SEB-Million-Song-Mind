@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MillionSongMind from "./pages/MillionSongMind";
+import MillionSongMindTest from "./pages/MillionSongMindTest";
 import Index from "./pages/Index";
 import BraidCalibration from "./pages/BraidCalibration";
 import NotFound from "./pages/NotFound";
@@ -19,6 +20,8 @@ import FontDiagnostic from './pages/FontDiagnostic';
 import NvxFontRealTest from './pages/NvxFontRealTest';
 import FontLigatureTest from './components/FontLigatureTest';
 import FontLigatureComparison from './components/FontLigatureComparison';
+import TestPage from './pages/TestPage';
+import LiveTest from './pages/LiveTest';
 import { BraidGeometryProvider } from "@/state/braidGeometryStore";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import TopNav from "@/components/layout/TopNav";
@@ -36,7 +39,26 @@ const App = () => (
           <GlobalKeyProvider>
             <BrowserRouter>
               <Routes>
+                <Route path="/test" element={<TestPage />} />
+                                <Route path="/test" element={<TestPage />} />
+                <Route path="/live" element={<LiveTest />} />
+                <Route path="/debug" element={
+                  <div style={{
+                    background: 'red',
+                    color: 'white',
+                    padding: '50px',
+                    textAlign: 'center',
+                    fontSize: '24px',
+                    fontWeight: 'bold',
+                    minHeight: '100vh'
+                  }}>
+                    <h1>🚨 DEBUG ROUTE WORKING 🚨</h1>
+                    <p>React Router is functional!</p>
+                    <p>Browser should display this red page.</p>
+                  </div>
+                } />
                 <Route path="/" element={<MillionSongMind />} />
+                <Route path="/test" element={<MillionSongMindTest />} />
                 <Route path="/calibrate-braid" element={<BraidCalibration />} />
                 <Route path="/braid" element={<BraidTonalPage />} />
                 <Route path="/braid-classic" element={<BraidTonalPage />} />

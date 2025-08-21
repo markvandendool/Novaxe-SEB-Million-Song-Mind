@@ -56,7 +56,7 @@ function loggingMiddleware() {
 export default defineConfig(({ mode }) => ({
   server: {
     host: 'localhost',
-    port: 8080,
+    port: 8090,
     strictPort: true,
   },
   plugins: [
