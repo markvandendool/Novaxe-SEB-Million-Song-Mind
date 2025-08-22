@@ -1287,18 +1287,49 @@ document.getElementById('view-up').addEventListener('click', setViewBelow);
 // Audio state (declare before any usage)
 let audioCtx = null;
 let withSeventh = false;
+let bassEnabled = true;
+let melodyEnabled = false;
+let chordInst = 'acoustic_grand_piano';
+let bassInst = 'acoustic_bass';
+let melodyInst = 'flute';
+let sfChord = null, sfBass = null, sfMelody = null;
+async function loadInstruments() {
+    try {
+        if (window.Soundfont) {
+            const ac = ensureAudio();
+            sfChord = await window.Soundfont.instrument(ac, chordInst);
+            sfBass = await window.Soundfont.instrument(ac, bassInst);
+            sfMelody = await window.Soundfont.instrument(ac, melodyInst);
+        }
+    } catch (_) { }
+}
 
 // UI wiring
 const setSelect = document.getElementById('set-select');
 const labelSelect = document.getElementById('label-mode');
 const keySelect = document.getElementById('key-select');
 const with7th = document.getElementById('with-7th');
+const bassEnabledEl = document.getElementById('bass-enabled');
+const melodyEnabledEl = document.getElementById('melody-enabled');
+const chordInstEl = document.getElementById('chord-inst');
+const bassInstEl = document.getElementById('bass-inst');
+const melodyInstEl = document.getElementById('melody-inst');
+const playProgBtn = document.getElementById('play-progression');
 // Initialize labelMode from current UI so startup respects it
 labelMode = labelSelect ? labelSelect.value : labelMode;
 withSeventh = !!(with7th && with7th.checked);
+bassEnabled = !!(bassEnabledEl && bassEnabledEl.checked);
+melodyEnabled = !!(melodyEnabledEl && melodyEnabledEl.checked);
+chordInst = chordInstEl?.value || chordInst;
+bassInst = bassInstEl?.value || bassInst;
+melodyInst = melodyInstEl?.value || melodyInst;
 with7th?.addEventListener('change', () => { withSeventh = !!with7th.checked; });
-document.getElementById('arrange-btn').addEventListener('click', reflowLineup);
-document.getElementById('reset-btn').addEventListener('click', () => loadSet(currentSet));
+bassEnabledEl?.addEventListener('change', () => { bassEnabled = !!bassEnabledEl.checked; });
+melodyEnabledEl?.addEventListener('change', () => { melodyEnabled = !!melodyEnabledEl.checked; });
+chordInstEl?.addEventListener('change', async () => { chordInst = chordInstEl.value; await loadInstruments(); });
+bassInstEl?.addEventListener('change', async () => { bassInst = bassInstEl.value; await loadInstruments(); });
+melodyInstEl?.addEventListener('change', async () => { melodyInst = melodyInstEl.value; await loadInstruments(); });
+playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 
 setSelect.addEventListener('change', () => {
     currentSet = setSelect.value;
@@ -1354,7 +1385,7 @@ window.addEventListener('resize', onResize);
 
 // Initial: start immediately with canvas-rendered labels (no PNG manifest)
 textureManifest = null;
-(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); setViewAbove(); })();
+(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); await loadInstruments(); setViewAbove(); })();
 
 // Animation loop
 function animate() {
@@ -1587,7 +1618,6 @@ async function processShelfQueue() {
 }
 async function animateShelfClickAdd(shelf) {
     try {
-        // Clone from shelf; keep shelf in place (infinite resource)
         const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
         clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0 };
         clone.position.copy(shelf.position);
@@ -1595,18 +1625,77 @@ async function animateShelfClickAdd(shelf) {
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
-        // Pick next slot at the end
         const xs = computeSlotPositions(lineup.length + 1);
         const targetX = xs[lineup.length];
         lineup.push(clone);
         animateScale(clone, FRONT_ROW_SCALE, 280);
         animatePosition(clone, new THREE.Vector3(targetX, 0, 0), 300);
         reflowLineup();
-        // Play chord using orientation mapping
         playChordForObject(clone);
-        // Little pause to keep sequential feel
+        addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
     } catch (_) { }
+}
+
+let progressionEnabled = false;
+let progressionArrows = [];
+let progressionPoints = [];
+let playButtonMesh = null;
+
+function createPlayButton() {
+    if (playButtonMesh) return;
+    const geo = new THREE.ConeGeometry(0.35, 0.5, 24);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffd34d, emissive: 0x222200, metalness: 0.3, roughness: 0.4 });
+    playButtonMesh = new THREE.Mesh(geo, mat);
+    playButtonMesh.rotation.z = -Math.PI / 2; // like a play icon
+    playButtonMesh.position.set(0, 0.25, 1.1);
+    playButtonMesh.userData.isPlayButton = true;
+    scene.add(playButtonMesh);
+}
+
+function clearProgressionArrows() {
+    for (const a of progressionArrows) scene.remove(a);
+    progressionArrows = [];
+    progressionPoints = [];
+}
+
+function drawArrow(from, to) {
+    const dir = new THREE.Vector3().subVectors(to, from); const len = dir.length(); if (len < 0.01) return;
+    const arrow = new THREE.ArrowHelper(dir.clone().normalize(), from, len, 0xffe066, 0.25, 0.15);
+    arrow.cone.material.transparent = true; arrow.line.material.transparent = true;
+    arrow.cone.material.opacity = 0.85; arrow.line.material.opacity = 0.85;
+    // Simple shimmer by oscillating opacity in animate()
+    arrow.userData.shimmer = { base: 0.75, amp: 0.15, phase: Math.random() * Math.PI * 2 };
+    progressionArrows.push(arrow);
+    scene.add(arrow);
+}
+
+function addProgressionPointFromCube(cube) {
+    if (!progressionEnabled || !cube) return;
+    const p = new THREE.Vector3(); cube.getWorldPosition(p); p.y = p.y + 0.6;
+    if (progressionPoints.length > 0) {
+        const prev = progressionPoints[progressionPoints.length - 1];
+        drawArrow(prev.clone(), p.clone());
+    }
+    progressionPoints.push(p);
+    if (progressionPoints.length > 200) progressionPoints.shift();
+}
+
+function updateProgressionArrows() {
+    clearProgressionArrows();
+    if (!progressionEnabled) return;
+    // Recreate arrows from stored points
+    for (let i = 0; i < progressionPoints.length - 1; i++) drawArrow(progressionPoints[i], progressionPoints[i + 1]);
+}
+
+async function playFrontRowProgression() {
+    if (lineup.length === 0) return;
+    for (let i = 0; i < lineup.length; i++) {
+        const c = lineup[i];
+        playChordForObject(c);
+        addProgressionPointFromCube(c);
+        await new Promise(r => setTimeout(r, 450));
+    }
 }
 
 
