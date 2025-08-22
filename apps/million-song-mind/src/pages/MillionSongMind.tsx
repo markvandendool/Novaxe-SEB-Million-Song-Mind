@@ -35,6 +35,14 @@ import { BraidChordSequence } from '@/components/BraidChord';
 import { CHORD_SLOTS, CHORD_GROUPS } from '@/constants/harmony';
 import { useSEO } from '@/hooks/useSEO';
 import { Switch } from '@/components/ui/switch';
+
+// Extend Window interface for custom properties
+declare global {
+  interface Window {
+    millionSongMindLogs?: Array<{ timestamp: string; message: string; data?: any }>;
+    __msmSelectedKey?: string;
+  }
+}
 import { Slider } from '@/components/ui/slider';
 import { noteToRoman, romanToNote, createChordMappingForKey } from '@/utils/chordMapping';
 import { mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
@@ -1040,7 +1048,7 @@ const MillionSongMind = () => {
                 fileCount={1}
                 totalSongs={filteredSongs.length || parseResult?.successfulRows || 0}
                 onChordSelect={handleChordSelect}
-                selectedChords={selectedChords}
+                selectedChords={Array.from(selectedChords)}
               />
 
               {/* Small reset button in bottom-right of chart card */}

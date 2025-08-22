@@ -547,6 +547,8 @@ function addEpicTitles() {
 
 // State
 const cubes = [];
+// Dedicated list for shelf proxies added later
+const shelfPickProxies = [];
 let currentSet = 'none';
 let labelMode = 'roman';
 let currentKey = 'C';
@@ -653,6 +655,7 @@ function borderColorForRoman(roman) {
     return COLOR_NEUTRAL;
 }
 const shelfCubes = [];
+const shelfPickProxies = [];
 let scaleByRoman = {
     // Major: 1.0 for I/IV/V; slightly smaller for others
     'I': 1.2, 'IV': 1.2, 'V': 1.2,
@@ -724,22 +727,20 @@ async function ensureFontsLoaded() {
     if (window.__obsFontsLoaded) return window.__obsFontsLoaded;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    // Only the fonts we actually use on faces
     link.href = 'https://fonts.googleapis.com/css2?family=Noto+Music&display=swap';
     document.head.appendChild(link);
+    const loads = [
+        // Serif stack (Cochin/Times)
+        `700 430px ${SERIF_STACK}`,
+        // Music stack (Noto Music/Finale/Bravura)
+        `900 220px ${MUSIC_STACK}`,
+        `800 130px ${MUSIC_STACK}`
+    ].map(spec => {
+        try { return document.fonts.load(spec); } catch (_) { return Promise.resolve(); }
+    });
     window.__obsFontsLoaded = Promise.race([
-        (async () => {
-            try {
-                await document.fonts.ready;
-                await Promise.all([
-                    document.fonts.load('700 430px serif'),
-                    document.fonts.load('900 220px "Noto Music"'),
-                    document.fonts.load('800 130px "Noto Music"')
-                ]);
-            } catch (_) { /* ignore */ }
-            return true;
-        })(),
-        new Promise(resolve => setTimeout(() => resolve(true), 1200))
+        Promise.all(loads).then(() => true).catch(() => true),
+        new Promise(resolve => setTimeout(() => resolve(true), 1600))
     ]);
     return window.__obsFontsLoaded;
 }
@@ -880,8 +881,20 @@ async function createShelfCube(roman) {
     m.position.copy(pos);
     m.userData = { roman, letter: item.letter, rotationIndex: 0, isShelf: true };
     addBorder(m, borderColorForRoman(roman));
-    addQuadrantOverlay(m);
+    // Do NOT add quadrant overlays to shelf cubes to avoid occluding clicks
     shelfCubes.push(m);
+    // Add an invisible, raycast-only proxy just in front of the shelf cube
+    try {
+        const sclr = m.scale?.x || m.scale || 1;
+        const proxyGeo = new THREE.PlaneGeometry(cubeSize * sclr * 1.08, cubeSize * sclr * 1.08);
+        const proxyMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide });
+        const proxy = new THREE.Mesh(proxyGeo, proxyMat);
+        proxy.position.set(m.position.x, m.position.y, m.position.z + 0.001);
+        proxy.userData = { isShelfProxy: true, parent: m };
+        scene.add(proxy);
+        shelfPickProxies.push(proxy);
+        m.userData.pickProxy = proxy;
+    } catch (_) { }
     // Record exact origin
     shelfOriginByRoman[roman] = { position: pos.clone(), scale: s, quaternion: m.quaternion.clone() };
     scene.add(m);
@@ -937,9 +950,25 @@ function getIntersects(event) {
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
     // Recurse into children so overlay planes and center circles are hit
-    const targets = [...cubes, ...shelfCubes];
+    const targets = [...cubes, ...shelfCubes, ...shelfPickProxies];
     if (playButtonMesh) targets.push(playButtonMesh);
     return raycaster.intersectObjects(targets, true);
+}
+
+function getFrontRowHits(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObjects(cubes, true);
+}
+
+function getShelfHits(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    return raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
 }
 
 // Ascend from any child (edges, overlay, center) to the owning cube mesh
@@ -954,20 +983,168 @@ function resolveCubeFromObject(obj) {
     return cur || obj;
 }
 
+// Debug overlay for shelf picking
+let debugEnabled = new URLSearchParams(window.location.search).has('debug');
+let debugOverlay = null;
+function createDebugOverlay() {
+    if (!debugEnabled || debugOverlay) return;
+    debugOverlay = document.createElement('div');
+    debugOverlay.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:420px;pointer-events:none;';
+    document.body.appendChild(debugOverlay);
+}
+function updateDebugOverlay(info) { if (debugOverlay) debugOverlay.innerHTML = info; }
+
+// Helper: point in polygon (ray casting)
+function pointInPolygon(x, y, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-6) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+function polygonArea(poly) {
+    let area = 0;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) area += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
+    return Math.abs(area / 2);
+}
+function distanceToLineSegment(x, y, p1, p2) {
+    const dx = p2.x - p1.x, dy = p2.y - p1.y; const len2 = dx * dx + dy * dy;
+    if (len2 === 0) return Math.hypot(x - p1.x, y - p1.y);
+    let t = ((x - p1.x) * dx + (y - p1.y) * dy) / len2; t = Math.max(0, Math.min(1, t));
+    const px = p1.x + t * dx, py = p1.y + t * dy; return Math.hypot(x - px, y - py);
+}
+function distanceToPolygon(x, y, poly) {
+    let min = Infinity; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) min = Math.min(min, distanceToLineSegment(x, y, poly[j], poly[i]));
+    return min;
+}
+
+// Improved shelf picking using projected front-face quad
+function pickShelfCubeByProjectedArea(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = event.clientX - rect.left; const y = event.clientY - rect.top;
+    const candidates = [];
+    for (const cube of shelfCubes) {
+        if (!cube.visible) continue;
+        const box = new THREE.Box3().setFromObject(cube);
+        // Four corners of the front face at z = box.max.z (toward camera for shelf)
+        const corners = [
+            new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+            new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+            new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+            new THREE.Vector3(box.min.x, box.max.y, box.max.z)
+        ];
+        const screenCorners = corners.map(c => {
+            const p = c.clone().project(camera);
+            return { x: (p.x + 1) * 0.5 * rect.width, y: (-p.y + 1) * 0.5 * rect.height };
+        });
+        let inside = pointInPolygon(x, y, screenCorners);
+        const area = polygonArea(screenCorners);
+        const distance = inside ? 0 : distanceToPolygon(x, y, screenCorners);
+        // Tap tolerance: treat near-edge taps as inside to help smaller blocks
+        if (!inside && distance <= 12) inside = true;
+        candidates.push({ cube, roman: cube.userData.roman, inside, area, distance });
+    }
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => {
+        if (a.inside !== b.inside) return a.inside ? -1 : 1;
+        if (a.inside && b.inside) return a.area - b.area; // smaller wins when overlapping
+        return a.distance - b.distance;
+    });
+    if (debugEnabled) {
+        const info = `<b>Pointer:</b> ${x.toFixed(0)}, ${y.toFixed(0)}<br>` +
+            `<b>Top:</b> ${candidates.slice(0, 5).map((c, i) => `${i + 1}. ${c.roman} ${c.inside ? 'INSIDE' : 'out'} A=${c.area.toFixed(0)} D=${c.distance.toFixed(1)}`).join('<br>')}`;
+        updateDebugOverlay(info);
+    }
+    return candidates[0].cube || null;
+}
+// Pick the intended shelf cube under the pointer using screen-space rectangles
+function pickShelfCubeAtPointer(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const px = (e.clientX - rect.left);
+    const py = (e.clientY - rect.top);
+    // Helper: convert world point to screen pixels
+    const toScreen = (vec3) => {
+        const v = vec3.clone();
+        v.project(camera);
+        return { x: (v.x * 0.5 + 0.5) * rect.width, y: (-v.y * 0.5 + 0.5) * rect.height };
+    };
+    // Estimate pixel size for 1 world unit at shelfZ by projecting a delta along X
+    const p0 = new THREE.Vector3(0, 0, shelfZ);
+    const p1 = new THREE.Vector3(1, 0, shelfZ);
+    const s0 = toScreen(p0);
+    const s1 = toScreen(p1);
+    const pxPerWorld = Math.max(1, Math.hypot(s1.x - s0.x, s1.y - s0.y));
+    // First pass: any rect contains pointer → choose smallest area rect
+    const candidates = [];
+    for (const s of shelfCubes) {
+        if (!s.visible) continue;
+        const center = toScreen(new THREE.Vector3(s.position.x, s.position.y, shelfZ));
+        const halfWorld = (cubeSize * (s.scale?.x || s.scale || 1)) / 2;
+        const halfPx = halfWorld * pxPerWorld;
+        const left = center.x - halfPx, right = center.x + halfPx, top = center.y - halfPx, bottom = center.y + halfPx;
+        const contains = (px >= left && px <= right && py >= top && py <= bottom);
+        if (contains) {
+            const area = (2 * halfPx) * (2 * halfPx);
+            candidates.push({ s, area });
+        }
+    }
+    if (candidates.length > 0) {
+        candidates.sort((a, b) => a.area - b.area);
+        return candidates[0].s;
+    }
+    // Fallback: nearest center with size penalty
+    let best = null; let bestScore = Infinity;
+    for (const s of shelfCubes) {
+        if (!s.visible) continue;
+        const center = toScreen(new THREE.Vector3(s.position.x, s.position.y, shelfZ));
+        const dist = Math.hypot(center.x - px, center.y - py);
+        const size = (s.scale?.x || s.scale || 1);
+        const score = dist + size * 18; // penalize larger blocks more in screen-space
+        if (score < bestScore) { bestScore = score; best = s; }
+    }
+    return best;
+}
+
+function isPointerOverShelf(e) {
+    // Heuristic: if the pointer is within a vertical band around the shelf Y at shelfZ in screen space, treat as shelf click
+    const rect = renderer.domElement.getBoundingClientRect();
+    const px = (e.clientX - rect.left);
+    const py = (e.clientY - rect.top);
+    const shelfPoint = new THREE.Vector3(0, shelfY, shelfZ);
+    const scr = shelfPoint.project(camera);
+    const shelfPy = (-scr.y * 0.5 + 0.5) * rect.height;
+    const band = Math.max(60, rect.height * 0.08); // 8% of screen height or 60px
+    return Math.abs(py - shelfPy) <= band;
+}
+
 function onPointerDown(e) {
-    const hits = getIntersects(e);
-    if (hits.length > 0) {
-        let obj = resolveCubeFromObject(hits[0].object);
+    const rect = renderer.domElement.getBoundingClientRect();
+    const beginPending = (obj) => {
         pendingObj = obj;
         mouseDownTime = performance.now();
-        const rect = renderer.domElement.getBoundingClientRect();
         mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
         fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
         try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
         controls.enabled = !adjustMode;
-        if (adjustMode && pendingObj.userData?.isShelf) {
-            lastShelfTarget = pendingObj;
-        }
+        if (adjustMode && pendingObj?.userData?.isShelf) lastShelfTarget = pendingObj;
+    };
+
+    // Hard rule: if a front-row cube is under the cursor, it wins
+    const frHits = getFrontRowHits(e);
+    if (frHits.length > 0) { beginPending(resolveCubeFromObject(frHits[0].object)); return; }
+    const hits = getIntersects(e);
+    // Otherwise, if we're over the shelf band, try precise shelf polygon picking
+    if (isPointerOverShelf(e)) {
+        const shelfPick = pickShelfCubeByProjectedArea(e);
+        if (shelfPick && shelfPick.userData?.isShelf) { beginPending(shelfPick); return; }
+    }
+    // Fallback: whatever we hit (shelf or otherwise)
+    if (hits.length > 0) {
+        const obj = resolveCubeFromObject(hits[0].object);
+        if (obj) { beginPending(obj); }
     }
 }
 
@@ -1126,6 +1303,8 @@ function onPointerUp(e) {
             removeFromLineup(dragging);
             const ci = cubes.indexOf(dragging); if (ci >= 0) cubes.splice(ci, 1);
             if (!shelfCubes.includes(dragging)) shelfCubes.push(dragging);
+            // Close gaps in lineup immediately after removal
+            reflowLineup();
         }
         dragging = null;
         controls.enabled = true;
@@ -1139,7 +1318,53 @@ function onPointerUp(e) {
             const hits = getIntersects(e);
             // Global 3D play button check
             for (const h of hits) { if (h.object?.userData?.isPlayButton) { playFrontRowProgression(); pendingObj = null; return; } }
-            const targetObj = pendingObj;
+            // Use screen-space rectangle picking for shelf cubes
+            let shelfHit = null;
+            try { shelfHit = pickShelfCubeAtPointer(e); } catch (_) { }
+            const fromShelfBand = isPointerOverShelf(e);
+            // If polygon picker already chose a shelf cube at mousedown, trust it
+            if (pendingObj && pendingObj.userData?.isShelf) {
+                enqueueShelfAdd(pendingObj);
+                pendingObj = null; return;
+            }
+            // Additional safety: if any shelf cube is directly in the hit stack, prioritize it immediately
+            let shelfFromRay = null;
+            for (const h of hits) {
+                const o = resolveCubeFromObject(h.object);
+                // Treat shelf proxy as its parent cube
+                const shelfCandidate = (h.object?.userData?.isShelfProxy && h.object.userData.parent) ? h.object.userData.parent : o;
+                if (shelfCandidate?.userData?.isShelf) { shelfFromRay = shelfCandidate; break; }
+            }
+            // If we're over the shelf region, try a strict shelf-only raycast first
+            let targetObj = null;
+            if (fromShelfBand) {
+                const shelfHits = (() => {
+                    const rect = renderer.domElement.getBoundingClientRect();
+                    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    const ny = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    const rc = new THREE.Raycaster();
+                    rc.setFromCamera(new THREE.Vector2(nx, ny), camera);
+                    return rc.intersectObjects(shelfCubes, true);
+                })();
+                if (shelfHits && shelfHits.length) {
+                    // Prefer the shelf cube whose footprint contains the hit point; break ties by smaller size
+                    let chosen = null; let bestSize = Infinity;
+                    for (const h of shelfHits) {
+                        const o = resolveCubeFromObject(h.object);
+                        if (!o?.userData?.isShelf) continue;
+                        const half = (cubeSize * (o.scale?.x || o.scale || 1)) / 2;
+                        if (Math.abs(h.point.x - o.position.x) <= half && Math.abs(h.point.y - o.position.y) <= half) {
+                            const sz = (o.scale?.x || o.scale || 1);
+                            if (sz < bestSize) { bestSize = sz; chosen = o; }
+                        }
+                    }
+                    targetObj = chosen || resolveCubeFromObject(shelfHits[0].object);
+                } else {
+                    targetObj = shelfHit || pendingObj;
+                }
+            } else {
+                targetObj = shelfFromRay || ((pendingObj && pendingObj.userData?.isShelf) ? pendingObj : resolveCubeFromObject(hits[0]?.object));
+            }
             if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) { enqueueShelfAdd(targetObj); pendingObj = null; return; }
@@ -1266,11 +1491,12 @@ function makeQuadrantOverlayMaterial() {
 }
 
 function addQuadrantOverlay(parentCube) {
-    const overlayGeom = new THREE.PlaneGeometry(1.15, 1.15); // slightly smaller than face
+    const overlayGeom = new THREE.PlaneGeometry(0.98, 0.98); // tighter than face to reduce occlusion
     const overlayMat = makeQuadrantOverlayMaterial();
     const overlay = new THREE.Mesh(overlayGeom, overlayMat);
     overlay.position.set(0, 0, (cubeSize / 2) + 0.002); // sit just above +z face
     parentCube.add(overlay);
+    overlay.layers.mask = parentCube.layers.mask; // inherit layer
     parentCube.userData.overlay = overlay;
     overlay.userData = { isOverlay: true, parent: parentCube };
     // Center play circle (half the face width); never triggers rotation
@@ -1281,6 +1507,7 @@ function addQuadrantOverlay(parentCube) {
     centerCircle.position.set(0, 0, (cubeSize / 2) + 0.006);
     centerCircle.userData = { isCenterPlay: true, parent: parentCube };
     parentCube.add(centerCircle);
+    centerCircle.layers.mask = parentCube.layers.mask; // inherit layer
     parentCube.userData.centerPlay = centerCircle;
 }
 
@@ -1360,6 +1587,11 @@ renderer.domElement.addEventListener('pointermove', onPointerMove);
 window.addEventListener('pointerup', onPointerUp);
 renderer.domElement.addEventListener('pointerdown', pokeInteraction);
 renderer.domElement.addEventListener('wheel', pokeInteraction, { passive: true });
+// Right-click toggles between Melody (above) and Bassline (below) views
+renderer.domElement.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    if (currentStickyView === 'above') setViewBelow(); else setViewAbove();
+});
 
 // Scale shelf cubes with the mouse wheel in adjust mode
 renderer.domElement.addEventListener('wheel', (e) => {
@@ -1526,6 +1758,7 @@ textureManifest = null;
     await loadInstruments();
     setViewAbove();
     createPlayButton();
+    createDebugOverlay();
     // Color calibrators
     const tonicEl = document.getElementById('color-tonic');
     const subEl = document.getElementById('color-sub');
@@ -1819,17 +2052,35 @@ async function animateShelfClickAdd(shelf) {
     try {
         const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
         clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0 };
+        // Start exactly at shelf origin
         clone.position.copy(shelf.position);
         clone.scale.copy(shelf.scale);
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
+        // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
         const xs = computeSlotPositions(lineup.length + 1);
         const targetX = xs[lineup.length];
-        lineup.push(clone);
-        animateScale(clone, FRONT_ROW_SCALE, 280);
-        animatePosition(clone, new THREE.Vector3(targetX, 0, 0), 300);
-        reflowLineup();
+        // Animate from shelf Y/Z to front row smoothly with scale normalization
+        clone.userData.animatingIn = true;
+        const s0 = clone.scale.x;
+        tweenObject({
+            duration: 480, owner: clone, onUpdate: (v) => {
+                // Position ease
+                clone.position.x = THREE.MathUtils.lerp(clone.position.x, targetX, v);
+                clone.position.y = THREE.MathUtils.lerp(clone.position.y, 0, v);
+                clone.position.z = THREE.MathUtils.lerp(clone.position.z, 0, v);
+                // Scale ease toward front-row normalized size
+                const s = THREE.MathUtils.lerp(s0, FRONT_ROW_SCALE, v);
+                clone.scale.setScalar(s);
+            }
+        });
+        // After animation completes, add to lineup and reflow
+        setTimeout(() => {
+            if (!lineup.includes(clone)) lineup.push(clone);
+            clone.userData.animatingIn = false;
+            reflowLineup();
+        }, 470);
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
@@ -1847,8 +2098,10 @@ function readFlagsFromUrl() {
         const url = new URL(window.location.href);
         const arrows = url.searchParams.get('arrows');
         const bpm = url.searchParams.get('bpm');
+        const sf = url.searchParams.get('sf');
         if (arrows === '1') progressionEnabled = true;
         if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
+        if (sf) { try { setSfBase(sf); } catch (_) { } }
     } catch (_) { /* ignore */ }
 }
 
@@ -1912,7 +2165,7 @@ function updateProgressionArrows() {
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
     const msPerBeat = Math.round(60000 / progressionBpm);
-    const perChordMs = Math.max(400, msPerBeat * 2); // at least 0.4s; default 2s at 30 BPM
+    const perChordMs = 1000; // 1 second per chord per request
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         playChordForObject(c);
