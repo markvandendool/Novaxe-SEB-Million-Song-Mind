@@ -7,6 +7,7 @@
 - Reverted global accidental/ø repositioning; kept precise `#ivø` surgical alignment only.
 - Restored Adjust mode behavior: shelf cubes are freely movable/scalable while editing; positions persist to localStorage and can be exported via Save Map.
 - Restored `Shelf Map Official.json` to canonical layout (pre‑symmetry); only applied stack was previously trialed and is now rolled back.
+- Deterministic picking: front row (layer 1) first, shelf (layer 2) second; raycaster layers reset per call; clones assigned to layer 1; overlays/center inherit parent layer; camera layers (0/1/2) enabled at startup and after `loadSet()`.
 
 # OBS Cubes – Changelog (2025‑08‑22)
 

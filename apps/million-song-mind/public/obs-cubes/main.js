@@ -18,12 +18,16 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+// CRITICAL: Enable all layers on camera
+try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
 // Melody/Bass presets – lowered angle by ~10°
 const melodyTarget = new THREE.Vector3(0, 1.4, 0);
 const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5);
 const bassTarget = melodyTarget.clone();
 const bassCamPos = new THREE.Vector3(0, -5.8, 11.5);
 camera.position.copy(melodyCamPos);
+// Ensure camera renders default, front, and shelf layers
+try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
@@ -655,7 +659,6 @@ function borderColorForRoman(roman) {
     return COLOR_NEUTRAL;
 }
 const shelfCubes = [];
-const shelfPickProxies = [];
 let scaleByRoman = {
     // Major: 1.0 for I/IV/V; slightly smaller for others
     'I': 1.2, 'IV': 1.2, 'V': 1.2,
@@ -881,6 +884,8 @@ async function createShelfCube(roman) {
     m.position.copy(pos);
     m.userData = { roman, letter: item.letter, rotationIndex: 0, isShelf: true };
     addBorder(m, borderColorForRoman(roman));
+    // Shelf cubes live on layer 2
+    setCubeLayerRecursive(m, 2);
     // Do NOT add quadrant overlays to shelf cubes to avoid occluding clicks
     shelfCubes.push(m);
     // Add an invisible, raycast-only proxy just in front of the shelf cube
@@ -891,6 +896,7 @@ async function createShelfCube(roman) {
         const proxy = new THREE.Mesh(proxyGeo, proxyMat);
         proxy.position.set(m.position.x, m.position.y, m.position.z + 0.001);
         proxy.userData = { isShelfProxy: true, parent: m };
+        proxy.layers.set(2);
         scene.add(proxy);
         shelfPickProxies.push(proxy);
         m.userData.pickProxy = proxy;
@@ -898,6 +904,8 @@ async function createShelfCube(roman) {
     // Record exact origin
     shelfOriginByRoman[roman] = { position: pos.clone(), scale: s, quaternion: m.quaternion.clone() };
     scene.add(m);
+    // Ensure shelf layer assignment
+    try { setCubeLayerRecursive(m, 2); } catch (_) { }
     return m;
 }
 
@@ -919,6 +927,8 @@ async function loadSet(setName) {
         'I7', 'iiiø', 'II(7)', '#ivø', 'III(7)', '#vº', 'VI(7)', '#iº', 'VII(7)', '#iiº'
     ];
     for (const r of shelfRomans) await createShelfCube(r);
+    // Ensure camera sees both layers by default
+    try { camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
     // Safety: ensure visibility and repopulate if something went wrong
     if (shelfCubes.length === 0) {
         for (const r of shelfRomans) await createShelfCube(r);
@@ -944,15 +954,24 @@ async function updateLabels() {
 }
 
 // Raycast helpers
+function setCubeLayerRecursive(root, layer) {
+    if (!root) return;
+    root.traverse?.((o) => { try { o.layers.set(layer); } catch (_) { } });
+}
+
 function getIntersects(event) {
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    // Recurse into children so overlay planes and center circles are hit
-    const targets = [...cubes, ...shelfCubes, ...shelfPickProxies];
-    if (playButtonMesh) targets.push(playButtonMesh);
-    return raycaster.intersectObjects(targets, true);
+    // CRITICAL: reset layers every time for a full-scene pick
+    try {
+        raycaster.layers.set(0);
+        raycaster.layers.enable(1);
+        raycaster.layers.enable(2);
+    } catch (_) { }
+    // Keep generic hits limited to primary meshes (not proxies), non-recursive
+    return raycaster.intersectObjects([...cubes, ...shelfCubes], false);
 }
 
 function getFrontRowHits(event) {
@@ -960,6 +979,7 @@ function getFrontRowHits(event) {
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(1); // front row layer
     return raycaster.intersectObjects(cubes, true);
 }
 
@@ -968,6 +988,7 @@ function getShelfHits(event) {
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(2); // shelf layer
     return raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
 }
 
@@ -1122,30 +1143,34 @@ function isPointerOverShelf(e) {
 
 function onPointerDown(e) {
     const rect = renderer.domElement.getBoundingClientRect();
-    const beginPending = (obj) => {
+    mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
+    mouseDownTime = performance.now();
+    fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
+    try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
+
+    // Front-row first (layer 1)
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(1);
+    let hits = raycaster.intersectObjects(cubes, true);
+    if (hits.length > 0) {
+        let obj = resolveCubeFromObject(hits[0].object);
         pendingObj = obj;
-        mouseDownTime = performance.now();
-        mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
-        fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
-        try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
+        controls.enabled = !adjustMode;
+        return;
+    }
+
+    // Shelf second (layer 2)
+    raycaster.layers.set(2);
+    hits = raycaster.intersectObjects(shelfCubes, false);
+    if (hits.length > 0) {
+        pendingObj = resolveCubeFromObject(hits[0].object);
         controls.enabled = !adjustMode;
         if (adjustMode && pendingObj?.userData?.isShelf) lastShelfTarget = pendingObj;
-    };
-
-    // Hard rule: if a front-row cube is under the cursor, it wins
-    const frHits = getFrontRowHits(e);
-    if (frHits.length > 0) { beginPending(resolveCubeFromObject(frHits[0].object)); return; }
-    const hits = getIntersects(e);
-    // Otherwise, if we're over the shelf band, try precise shelf polygon picking
-    if (isPointerOverShelf(e)) {
-        const shelfPick = pickShelfCubeByProjectedArea(e);
-        if (shelfPick && shelfPick.userData?.isShelf) { beginPending(shelfPick); return; }
+        return;
     }
-    // Fallback: whatever we hit (shelf or otherwise)
-    if (hits.length > 0) {
-        const obj = resolveCubeFromObject(hits[0].object);
-        if (obj) { beginPending(obj); }
-    }
+    pendingObj = null;
 }
 
 function onPointerMove(e) {
@@ -1287,6 +1312,7 @@ function onPointerUp(e) {
             dragging.userData.isShelf = false;
             dragging.userData.fromShelf = false;
             if (!cubes.includes(dragging)) cubes.push(dragging);
+            setCubeLayerRecursive(dragging, 1);
             // Ensure shelf has a canonical cube for this roman if we pulled it from the shelf
             if (dragging.userData.wasPulledFromShelf) {
                 dragging.userData.wasPulledFromShelf = false;
@@ -1303,6 +1329,7 @@ function onPointerUp(e) {
             removeFromLineup(dragging);
             const ci = cubes.indexOf(dragging); if (ci >= 0) cubes.splice(ci, 1);
             if (!shelfCubes.includes(dragging)) shelfCubes.push(dragging);
+            setCubeLayerRecursive(dragging, 2);
             // Close gaps in lineup immediately after removal
             reflowLineup();
         }
@@ -1321,7 +1348,9 @@ function onPointerUp(e) {
             // Use screen-space rectangle picking for shelf cubes
             let shelfHit = null;
             try { shelfHit = pickShelfCubeAtPointer(e); } catch (_) { }
-            const fromShelfBand = isPointerOverShelf(e);
+            // If we pressed a FRONT-ROW cube on pointerdown, force it as the target for click handling
+            const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
+            const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
             // If polygon picker already chose a shelf cube at mousedown, trust it
             if (pendingObj && pendingObj.userData?.isShelf) {
                 enqueueShelfAdd(pendingObj);
@@ -1335,9 +1364,11 @@ function onPointerUp(e) {
                 const shelfCandidate = (h.object?.userData?.isShelfProxy && h.object.userData.parent) ? h.object.userData.parent : o;
                 if (shelfCandidate?.userData?.isShelf) { shelfFromRay = shelfCandidate; break; }
             }
-            // If we're over the shelf region, try a strict shelf-only raycast first
+            // If we're over the shelf region, try a strict shelf-only raycast first (unless frontOverride)
             let targetObj = null;
-            if (fromShelfBand) {
+            if (frontOverride) {
+                targetObj = pendingObj;
+            } else if (fromShelfBand) {
                 const shelfHits = (() => {
                     const rect = renderer.domElement.getBoundingClientRect();
                     const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -1754,6 +1785,8 @@ textureManifest = null;
     await loadSet(currentSet);
     // Ensure shelf is visible by default
     for (const s of shelfCubes) s.visible = true;
+    // Re-enable camera layers after load
+    try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
     await updateLabels();
     await loadInstruments();
     setViewAbove();
@@ -2055,6 +2088,8 @@ async function animateShelfClickAdd(shelf) {
         // Start exactly at shelf origin
         clone.position.copy(shelf.position);
         clone.scale.copy(shelf.scale);
+        // CRITICAL: front-row layer for clones
+        try { setCubeLayerRecursive(clone, 1); } catch (_) { }
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
