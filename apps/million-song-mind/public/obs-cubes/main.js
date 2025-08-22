@@ -651,23 +651,22 @@ const shelfOriginByRoman = {};
 // --- Adjustable shelf map: load/save ---
 const MAP_STORAGE_KEY = 'obsCubes.shelfMap.v1';
 async function loadShelfMap() {
-    // Always prefer the official map on load
+    // Hard purge any saved overrides – ALWAYS use the official map
     try {
-        const res = await fetch('./Shelf%20Map%20Official.json');
+        localStorage.removeItem(MAP_STORAGE_KEY);
+        localStorage.removeItem('obsCubes.shelfMap');
+        localStorage.removeItem('obsCubes.map');
+        localStorage.removeItem('shelf_map');
+    } catch { }
+    try {
+        const res = await fetch(`./Shelf%20Map%20Official.json?v=${Date.now()}`, { cache: 'no-store' });
         if (res.ok) {
             const json = await res.json();
             applyShelfMap(json);
             return;
         }
     } catch { }
-    // Fallback to any saved local adjustments
-    try {
-        const raw = localStorage.getItem(MAP_STORAGE_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            applyShelfMap(parsed);
-        }
-    } catch { }
+    // If fetch fails, keep built-in defaults; do not read localStorage
 }
 
 function applyShelfMap(json) {
@@ -703,14 +702,7 @@ function exportShelfMap() {
     URL.revokeObjectURL(url);
 }
 
-function saveShelfMapToLocalStorage() {
-    const positions = {};
-    for (const [k, v] of Object.entries(shelfSlots)) {
-        positions[k] = { x: v.x, y: v.y, z: v.z };
-    }
-    const json = { positions, scales: scaleByRoman };
-    try { localStorage.setItem(MAP_STORAGE_KEY, JSON.stringify(json)); } catch { }
-}
+function saveShelfMapToLocalStorage() { /* disabled – official map only */ }
 
 // Ensure web fonts are available before drawing to canvas
 async function ensureFontsLoaded() {
