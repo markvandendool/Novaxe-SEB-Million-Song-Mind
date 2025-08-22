@@ -40,7 +40,7 @@ type BraidTonalProps = {
   onZoomChange?: (z: number) => void;
   onChordClick?: (chord: string) => void;
   onChordSelect?: (chord: string, isSelected: boolean) => void;
-  selectedChords?: string[];
+  selectedChords?: Set<string>;
   scrollContainerRef?: React.RefObject<HTMLDivElement>;
   chordUsage?: Record<string, number>;
   displayRoman?: boolean; // Add external control for text switching
@@ -269,8 +269,8 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
     } else {
       // Replace selection with this single chord
       // selectedChords is a Set, so convert to Array to use filter
-      const others = Array.from(selectedChords || new Set()).filter(c => c !== label);
-      others.forEach(c => onChordSelect?.(c, false));
+      const others = Array.from(selectedChords || new Set()).filter((c: string) => c !== label);
+      others.forEach((c: string) => onChordSelect?.(c, false));
       onChordSelect?.(label, true);
     }
   };

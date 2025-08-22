@@ -21,7 +21,7 @@ interface HarmonicChartProps {
   fileCount: number;
   totalSongs: number;
   onChordSelect?: (chord: string, isSelected: boolean) => void;
-  selectedChords?: string[];
+  selectedChords?: Set<string>;
 }
 
 const CHORD_ORDER = CHORD_GROUPS;
@@ -38,7 +38,7 @@ function formatChordLabel(label: string): string {
   return label; // Return natural text, let Fontdec13 handle all formatting
 }
 
-export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect, selectedChords = [] }: HarmonicChartProps) {
+export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect, selectedChords = new Set() }: HarmonicChartProps) {
   const animationTriggered = useRef(new Set<string>());
 
   // Find highest percentage chords for special styling
@@ -321,7 +321,7 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
             const barHeight = compressedPercent * (CHART_HEIGHT - 10);
             const inversionValues: number[] = [chord.root, chord.first, chord.second, chord.third];
             const totalInversions = inversionValues.reduce((a, b) => a + b, 0);
-            const isSelected = selectedChords.includes(chord.chord) || selectedChords.includes(mapRomanToHarmonicSlot(chord.chord, focusedKey) || '');
+            const isSelected = selectedChords.has(chord.chord) || selectedChords.has(mapRomanToHarmonicSlot(chord.chord, focusedKey) || '');
 
             const handleChordClick = (e: React.MouseEvent) => {
               e.preventDefault();

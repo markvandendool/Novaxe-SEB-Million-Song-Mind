@@ -1040,7 +1040,7 @@ const MillionSongMind = () => {
                 fileCount={1}
                 totalSongs={filteredSongs.length || parseResult?.successfulRows || 0}
                 onChordSelect={handleChordSelect}
-                selectedChords={Array.from(selectedChords)}
+                selectedChords={selectedChords}
               />
 
               {/* Small reset button in bottom-right of chart card */}
@@ -1127,7 +1127,7 @@ const MillionSongMind = () => {
                     <BraidTonal
                       focusKey={focusedKey}
                       onChordSelect={handleChordSelect}
-                      selectedChords={Array.from(selectedChords)}
+                      selectedChords={selectedChords}
                       zoom={braidZoom}
                       onZoomChange={setBraidZoom}
                       scrollContainerRef={braidScrollRef}
