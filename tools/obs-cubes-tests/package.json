@@ -1,0 +1,12 @@
+{
+    "name": "obs-cubes-tests",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "test": "vitest run --reporter=basic",
+        "test:watch": "vitest"
+    },
+    "devDependencies": {
+        "vitest": "^1.6.0"
+    }
+}

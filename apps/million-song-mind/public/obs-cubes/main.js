@@ -1,6 +1,14 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
+import { pickCenterPlay, isFrontOverlayHit } from './raycastRouter.js'
+import { loadOfficialMap } from './shelfMapService.js'
+import { InteractionFSM } from './interactionFSM.js'
+import { BORDER_RATIO, SERIF_STACK, MUSIC_STACK } from './textureConfig.js'
+import { ensureInstruments, setBaseUrl as setSfBase } from './instrumentManager.js'
+import { setupDiagnostics } from './diagnosticsOverlay.js'
+import { createBridge } from './integration/bridge.js'
+import { setState } from './stateStore.js'
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -112,6 +120,16 @@ let lastInteraction = performance.now();
 let homing = false;
 let currentStickyView = 'above'; // 'above' | 'below'
 function pokeInteraction() { lastInteraction = performance.now(); homing = false; }
+const diag = setupDiagnostics(() => ({ tweens: activeTweens.length, dragging, lineup: lineup.length }));
+const bridge = createBridge();
+
+function hasActiveTweenFor(obj) {
+    for (let i = 0; i < activeTweens.length; i++) {
+        const tw = activeTweens[i];
+        if (!tw.cancelled && tw.owner === obj) return true;
+    }
+    return false;
+}
 
 // Camera view toggles
 function setViewAbove() {
@@ -151,7 +169,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // inner frame with border color tied to roman family
     const color = borderColorForRoman(romanLabel);
     const strokeColor = `#${(color).toString(16).padStart(6, '0')}`;
-    const borderPx = Math.max(10, Math.round(size / 15)); // 1/15 width
+    const borderPx = Math.max(10, Math.round(size / BORDER_RATIO)); // 1/15 width
     // Draw a SOLID band border (four filled rects) for maximum visibility
     ctx.fillStyle = strokeColor;
     // Top
@@ -188,7 +206,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // Typography base (Cochin/Times)
     const centerX = size / 2; const baselineY = size / 2 + 6;
     const baseSize = 430;
-    const cochin = `'Cochin', 'Cochin-Bold', 'Times New Roman', serif`;
+    const cochin = SERIF_STACK;
     // Draw centered base (without leading accidental token)
     ctx.save();
     ctx.fillStyle = fill;
@@ -206,7 +224,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // Supers: Finale Numerics (music), large and clear; include ø/º as supers
     if (supersPretty.length && romanLabel !== '#ivø') {
         const supSize = 220;
-        const supFamily = `900 ${supSize}px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        const supFamily = `900 ${supSize}px ${MUSIC_STACK}, ${SERIF_STACK}`;
         const rightX = size - 90; let y = 170;
         for (const token of supersPretty) {
             const text = String(token);
@@ -659,12 +677,9 @@ async function loadShelfMap() {
         localStorage.removeItem('shelf_map');
     } catch { }
     try {
-        const res = await fetch(`./Shelf%20Map%20Official.json?v=${Date.now()}`, { cache: 'no-store' });
-        if (res.ok) {
-            const json = await res.json();
-            applyShelfMap(json);
-            return;
-        }
+        const json = await loadOfficialMap('./Shelf%20Map%20Official.json');
+        applyShelfMap(json);
+        return;
     } catch { }
     // If fetch fails, keep built-in defaults; do not read localStorage
 }
@@ -738,6 +753,8 @@ const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let pendingObj = null;
 let mouseDownPos = new THREE.Vector2();
 let mouseDownTime = 0;
+// Initialize FSM with inline thresholds to avoid TDZ on consts declared later
+const fsm = new InteractionFSM({ DRAG_START_PX: 8, CLICK_MAX_PX: 5, CLICK_MAX_MS: 250 });
 // Additional drag tracking for shelf pulls
 let dragStartScreenY = 0;
 let dragStartZ = 0;
@@ -779,6 +796,8 @@ function reflowLineup() {
         if (Math.abs(cube.scale.x - FRONT_ROW_SCALE) > 1e-3) cube.scale.setScalar(FRONT_ROW_SCALE);
         animatePosition(cube, target, 400);
     });
+    try { bridge.emit('lineupChanged', { lineup: lineup.map(c => c.userData?.roman), key: currentKey }); } catch (_) { }
+    try { setState({ lineup: lineup.map(c => c.userData?.roman) }); } catch (_) { }
 }
 
 function previewMakeWay(insertIndex) {
@@ -917,19 +936,34 @@ function getIntersects(event) {
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    return raycaster.intersectObjects([...cubes, ...shelfCubes], false);
+    // Recurse into children so overlay planes and center circles are hit
+    const targets = [...cubes, ...shelfCubes];
+    if (playButtonMesh) targets.push(playButtonMesh);
+    return raycaster.intersectObjects(targets, true);
+}
+
+// Ascend from any child (edges, overlay, center) to the owning cube mesh
+function resolveCubeFromObject(obj) {
+    if (!obj) return null;
+    // If overlay/center play exposes parent in userData
+    if (obj.userData?.parent) return obj.userData.parent;
+    let cur = obj;
+    while (cur && !(cur.userData && (cur.userData.roman || cur.userData.isShelf))) {
+        cur = cur.parent;
+    }
+    return cur || obj;
 }
 
 function onPointerDown(e) {
     const hits = getIntersects(e);
     if (hits.length > 0) {
-        let obj = hits[0].object;
-        // If we clicked the invisible overlay, act on its parent cube
-        if (obj.userData?.isOverlay && obj.userData.parent) obj = obj.userData.parent;
+        let obj = resolveCubeFromObject(hits[0].object);
         pendingObj = obj;
         mouseDownTime = performance.now();
         const rect = renderer.domElement.getBoundingClientRect();
         mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
+        fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
+        try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
         controls.enabled = !adjustMode;
         if (adjustMode && pendingObj.userData?.isShelf) {
             lastShelfTarget = pendingObj;
@@ -945,10 +979,8 @@ function onPointerMove(e) {
     raycaster.setFromCamera(pointer, camera);
     const worldPoint = new THREE.Vector3();
     if (!dragging && pendingObj) {
-        // Check drag threshold
-        const dx = (e.clientX - rect.left) - mouseDownPos.x;
-        const dy = (e.clientY - rect.top) - mouseDownPos.y;
-        if (Math.hypot(dx, dy) > DRAG_START_PX) {
+        // Check drag threshold via FSM
+        if (fsm.movementExceeded(e.clientX - rect.left, e.clientY - rect.top)) {
             // Begin drag
             if (!adjustMode && pendingObj.userData.isShelf) {
                 // Move the actual shelf object; duplicate later after it rests in front row
@@ -1034,6 +1066,7 @@ function onPointerMove(e) {
 
 function onPointerUp(e) {
     const now = performance.now();
+    try { renderer.domElement.releasePointerCapture?.(e.pointerId); } catch (_) { }
     if (dragging) {
         const r = dragging.userData.roman;
         // Adjust mode: persist shelf edits and do not snap
@@ -1101,62 +1134,57 @@ function onPointerUp(e) {
     // Rotation click if minimal move/time (only front-face quadrant behavior)
     if (pendingObj) {
         const rect = renderer.domElement.getBoundingClientRect();
-        const dx = (e.clientX - rect.left) - mouseDownPos.x;
-        const dy = (e.clientY - rect.top) - mouseDownPos.y;
-        const moved = Math.hypot(dx, dy);
-        const elapsed = now - mouseDownTime;
-        if (moved <= CLICK_MAX_PX && elapsed <= CLICK_MAX_MS) {
-            // If clicking a shelf cube, enqueue add + audio and return
-            if (!adjustMode && pendingObj.userData?.isShelf) {
-                enqueueShelfAdd(pendingObj);
-                pendingObj = null; return;
-            }
-            // Do NOT rotate shelf cubes under any circumstance
-            if (pendingObj.userData?.isShelf) { pendingObj = null; return; }
+        const res = fsm.classifyRelease(e.clientX - rect.left, e.clientY - rect.top, now);
+        if (res.isClick) {
             const hits = getIntersects(e);
+            // Global 3D play button check
+            for (const h of hits) { if (h.object?.userData?.isPlayButton) { playFrontRowProgression(); pendingObj = null; return; } }
+            const targetObj = pendingObj;
+            if (!targetObj) { pendingObj = null; return; }
+            // If clicking a shelf cube, enqueue add + audio and return
+            if (!adjustMode && targetObj.userData?.isShelf) { enqueueShelfAdd(targetObj); pendingObj = null; return; }
+            if (targetObj.userData?.isShelf) { pendingObj = null; return; }
+            // Center play priority for the pressed cube
+            const centerHit = pickCenterPlay(hits, targetObj);
+            if (centerHit) { playChordForObject(targetObj); pendingObj = null; return; }
+            // Find a hit belonging to the pressed cube (overlay or face)
             let hit = null;
-            for (const h of hits) {
-                if (h.object === pendingObj || h.object === pendingObj.userData?.overlay || h.object.parent === pendingObj) { hit = h; break; }
-            }
+            for (const h of hits) { const o = resolveCubeFromObject(h.object); if (o === targetObj) { hit = h; break; } }
             if (hit) {
-                // Prioritize center play, then overlay/front, then faces
-                let centerHit = null;
-                for (const h of hits) { if (h.object?.userData?.isCenterPlay && h.object.userData.parent === pendingObj) { centerHit = h; break; } }
-                if (centerHit) {
-                    playChordForObject(pendingObj);
-                    pendingObj = null; return;
-                }
-                const isOverlay = (hit.object === pendingObj.userData?.overlay || hit.object.parent === pendingObj);
+                // Then overlay/front, then faces
+                const isOverlay = isFrontOverlayHit(hit, targetObj);
                 const normalZ = isOverlay ? 1 : (hit.face?.normal?.z ?? 0);
                 if (Math.abs(normalZ - 1) < 0.5) {
-                    const local = pendingObj.worldToLocal(hit.point.clone());
+                    const local = targetObj.worldToLocal(hit.point.clone());
                     const absX = Math.abs(local.x);
                     const absY = Math.abs(local.y);
                     let targetToneIndex; if (absX > absY) targetToneIndex = local.x > 0 ? 1 : 3; else targetToneIndex = local.y > 0 ? 2 : 0;
-                    const r = pendingObj.userData.rotationIndex || 0;
+                    const r = targetObj.userData.rotationIndex || 0;
                     const cw = (targetToneIndex - r + 4) % 4; const ccw = (r - targetToneIndex + 4) % 4;
                     let angle = 0; let delta = 0;
                     if (cw <= ccw) { angle = -cw * (Math.PI / 2); delta = +cw; } else { angle = ccw * (Math.PI / 2); delta = -ccw; }
                     if (angle !== 0) {
                         const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-                        const finalQ = pendingObj.quaternion.clone().multiply(extra);
-                        animateQuaternion(pendingObj, finalQ, 700);
-                        pendingObj.userData.rotationIndex = (pendingObj.userData.rotationIndex + (delta + 4)) % 4;
-                        // Trigger audio with new orientation
-                        playChordForObject(pendingObj);
+                        const finalQ = targetObj.quaternion.clone().multiply(extra);
+                        if (hasActiveTweenFor(targetObj)) cancelTweensFor(targetObj);
+                        // Gentle eased rotation
+                        animateQuaternion(targetObj, finalQ, 650);
+                        targetObj.userData.rotationIndex = (targetObj.userData.rotationIndex + (delta + 4)) % 4;
+                        // Trigger audio with new orientation slightly after animation starts
+                        setTimeout(() => playChordForObject(targetObj), 80);
                     }
-                    pendingObj.userData.rotationIndex = ((pendingObj.userData.rotationIndex % 4) + 4) % 4;
+                    targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
                 } else if (hit.face) {
                     // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
                     const normalLocal = hit.face.normal.clone();
-                    const normalWorld = normalLocal.transformDirection(pendingObj.matrixWorld);
+                    const normalWorld = normalLocal.transformDirection(targetObj.matrixWorld);
                     const up = new THREE.Vector3(0, 1, 0);
                     const dotY = normalWorld.dot(up);
                     const right = new THREE.Vector3(1, 0, 0);
                     const dotX = normalWorld.dot(right);
-                    const tones = noteSetsC[pendingObj.userData.roman] || ['C', 'E', 'G', 'B'];
+                    const tones = noteSetsC[targetObj.userData.roman] || ['C', 'E', 'G', 'B'];
                     const names = transposeNotes(tones, currentKey);
-                    const r = ((pendingObj.userData.rotationIndex || 0) % 4 + 4) % 4;
+                    const r = ((targetObj.userData.rotationIndex || 0) % 4 + 4) % 4;
                     let voice = 'chord';
                     let idx = r; // default
                     if (dotY < -0.8) { voice = 'bass'; idx = r; } // bottom face
@@ -1164,7 +1192,7 @@ function onPointerUp(e) {
                     else if (dotX > 0.8) { voice = 'chord'; idx = (r + 1) % 4; } // right
                     else if (dotX < -0.8) { voice = 'chord'; idx = (r + 3) % 4; } // left
                     const fi = hit.face.materialIndex;
-                    const mat = Array.isArray(pendingObj.material) ? pendingObj.material[fi] : pendingObj.material;
+                    const mat = Array.isArray(targetObj.material) ? targetObj.material[fi] : targetObj.material;
                     const pulse = () => {
                         if (!mat || !mat.color) return;
                         const orig = mat.color.getHex(); mat.color.setHex(0xffff66);
@@ -1173,11 +1201,11 @@ function onPointerUp(e) {
                     pulse();
                     const t0 = ensureAudio().currentTime;
                     if (voice === 'bass') {
-                        const midi = getBassMidiForObject(pendingObj);
+                        const midi = getBassMidiForObject(targetObj);
                         if (sfBass && sfBass.play) sfBass.play(midi, t0, { duration: 0.45, gain: 0.34 });
                         else { const ctx = ensureAudio(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = midiToFreq(midi); o.connect(g).connect(ctx.destination); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.32, t0 + 0.02); g.gain.linearRampToValueAtTime(0, t0 + 0.45); o.start(t0); o.stop(t0 + 0.47); }
                     } else if (voice === 'melody') {
-                        const midi = getMelodyMidiForObject(pendingObj);
+                        const midi = getMelodyMidiForObject(targetObj);
                         if (sfMelody && sfMelody.play) sfMelody.play(midi, t0, { duration: 0.45, gain: 0.32 });
                         else { const ctx = ensureAudio(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'square'; o.frequency.value = midiToFreq(midi); o.connect(g).connect(ctx.destination); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.3, t0 + 0.02); g.gain.linearRampToValueAtTime(0, t0 + 0.45); o.start(t0); o.stop(t0 + 0.47); }
                     } else {
@@ -1248,9 +1276,9 @@ function addQuadrantOverlay(parentCube) {
     // Center play circle (half the face width); never triggers rotation
     const radius = (1.15 * 0.5) / 2; // half the square width
     const circleGeom = new THREE.CircleGeometry(radius, 48);
-    const circleMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
+    const circleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
     const centerCircle = new THREE.Mesh(circleGeom, circleMat);
-    centerCircle.position.set(0, 0, (cubeSize / 2) + 0.0035);
+    centerCircle.position.set(0, 0, (cubeSize / 2) + 0.006);
     centerCircle.userData = { isCenterPlay: true, parent: parentCube };
     parentCube.add(centerCircle);
     parentCube.userData.centerPlay = centerCircle;
@@ -1362,12 +1390,9 @@ let melodyInst = 'flute';
 let sfChord = null, sfBass = null, sfMelody = null;
 async function loadInstruments() {
     try {
-        if (window.Soundfont) {
-            const ac = ensureAudio();
-            sfChord = await window.Soundfont.instrument(ac, chordInst);
-            sfBass = await window.Soundfont.instrument(ac, bassInst);
-            sfMelody = await window.Soundfont.instrument(ac, melodyInst);
-        }
+        const ac = ensureAudio();
+        const res = await ensureInstruments(ac, { chord: chordInst, bass: bassInst, melody: melodyInst });
+        sfChord = res.chord; sfBass = res.bass; sfMelody = res.melody;
     } catch (_) { }
 }
 
@@ -1391,9 +1416,19 @@ melodyEnabled = !!(melodyEnabledEl && melodyEnabledEl.checked);
 chordInst = chordInstEl?.value || chordInst;
 bassInst = bassInstEl?.value || bassInst;
 melodyInst = melodyInstEl?.value || melodyInst;
-with7th?.addEventListener('change', () => { withSeventh = !!with7th.checked; });
-bassEnabledEl?.addEventListener('change', () => { bassEnabled = !!bassEnabledEl.checked; });
-melodyEnabledEl?.addEventListener('change', () => { melodyEnabled = !!melodyEnabledEl.checked; });
+try { setState({ key: currentKey, withSeventh, bassEnabled, melodyEnabled }); } catch (_) { }
+with7th?.addEventListener('change', () => {
+    withSeventh = !!with7th.checked;
+    try { setState({ withSeventh }); bridge.emit('settingsChanged', { withSeventh }); } catch (_) { }
+});
+bassEnabledEl?.addEventListener('change', () => {
+    bassEnabled = !!bassEnabledEl.checked;
+    try { setState({ bassEnabled }); bridge.emit('settingsChanged', { bassEnabled }); } catch (_) { }
+});
+melodyEnabledEl?.addEventListener('change', () => {
+    melodyEnabled = !!melodyEnabledEl.checked;
+    try { setState({ melodyEnabled }); bridge.emit('settingsChanged', { melodyEnabled }); } catch (_) { }
+});
 chordInstEl?.addEventListener('change', async () => { chordInst = chordInstEl.value; await loadInstruments(); });
 bassInstEl?.addEventListener('change', async () => { bassInst = bassInstEl.value; await loadInstruments(); });
 melodyInstEl?.addEventListener('change', async () => { melodyInst = melodyInstEl.value; await loadInstruments(); });
@@ -1437,6 +1472,7 @@ labelSelect.addEventListener('change', () => {
 keySelect?.addEventListener('change', () => {
     currentKey = keySelect.value;
     updateLabels();
+    try { setState({ key: currentKey }); bridge.emit('settingsChanged', { key: currentKey }); } catch (_) { }
 });
 
 // Adjust mode UI
@@ -1481,6 +1517,7 @@ window.addEventListener('resize', onResize);
 textureManifest = null;
 (async () => {
     await ensureFontsLoaded();
+    readFlagsFromUrl();
     currentSet = 'all';
     await loadSet(currentSet);
     // Ensure shelf is visible by default
@@ -1488,6 +1525,7 @@ textureManifest = null;
     await updateLabels();
     await loadInstruments();
     setViewAbove();
+    createPlayButton();
     // Color calibrators
     const tonicEl = document.getElementById('color-tonic');
     const subEl = document.getElementById('color-sub');
@@ -1516,6 +1554,7 @@ function animate() {
         const done = activeTweens[i].tick(now);
         if (done) activeTweens.splice(i, 1);
     }
+    diag.update && diag.update();
     // Harmonized drag smoothing
     tickDragSmoothing();
     // Enforce two rest zones for all non-dragging cubes
@@ -1620,13 +1659,15 @@ function enforceRestZones() {
             // Front row exact plane
             c.position.y = 0;
             c.position.z = 0;
-            // Snap rotation to nearest 90° around Z
-            const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
-            const z = e.z;
-            const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
-            if (Math.abs(snappedZ - z) > 1e-3) {
-                const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
-                c.quaternion.copy(q);
+            // Only snap rotation when not animating and already near a quadrant
+            if (!hasActiveTweenFor(c)) {
+                const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
+                const z = e.z;
+                const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
+                if (Math.abs(snappedZ - z) < 0.02) {
+                    const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
+                    c.quaternion.copy(q);
+                }
             }
         } else if (c.userData?.isShelf) {
             if (adjustMode) continue; // allow free placement while editing the shelf map
@@ -1756,6 +1797,7 @@ function playChordForObject(obj) {
             osc.start(now); osc.stop(now + duration + 0.02);
         }
     }
+    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
 }
 
 // Shelf-click sequencing
@@ -1798,15 +1840,37 @@ let progressionEnabled = false;
 let progressionArrows = [];
 let progressionPoints = [];
 let playButtonMesh = null;
+let progressionBpm = 30; // 30 BPM → 2s per chord by default
+
+function readFlagsFromUrl() {
+    try {
+        const url = new URL(window.location.href);
+        const arrows = url.searchParams.get('arrows');
+        const bpm = url.searchParams.get('bpm');
+        if (arrows === '1') progressionEnabled = true;
+        if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
+    } catch (_) { /* ignore */ }
+}
 
 function createPlayButton() {
     if (playButtonMesh) return;
-    const geo = new THREE.ConeGeometry(0.35, 0.5, 24);
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffd34d, emissive: 0x222200, metalness: 0.3, roughness: 0.4 });
+    // Flat 2D button on the ground near the bottom center
+    const size = 1.6;
+    const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 256, 256);
+    // background circle
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI * 2); ctx.fill();
+    // play triangle
+    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(108, 84); ctx.lineTo(108, 172); ctx.lineTo(180, 128); ctx.closePath(); ctx.fill();
+    const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+    const geo = new THREE.PlaneGeometry(size, size);
     playButtonMesh = new THREE.Mesh(geo, mat);
-    playButtonMesh.rotation.z = -Math.PI / 2; // like a play icon
-    playButtonMesh.position.set(0, 0.25, 1.1);
+    playButtonMesh.rotation.x = -Math.PI / 2; // flat to ground
+    playButtonMesh.position.set(0, 0.001, -6.2); // below titles nearer bottom
     playButtonMesh.userData.isPlayButton = true;
+    playButtonMesh.renderOrder = 5;
     scene.add(playButtonMesh);
 }
 
@@ -1847,11 +1911,13 @@ function updateProgressionArrows() {
 
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
+    const msPerBeat = Math.round(60000 / progressionBpm);
+    const perChordMs = Math.max(400, msPerBeat * 2); // at least 0.4s; default 2s at 30 BPM
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         playChordForObject(c);
         addProgressionPointFromCube(c);
-        await new Promise(r => setTimeout(r, 2000));
+        await new Promise(r => setTimeout(r, perChordMs));
     }
 }
 
