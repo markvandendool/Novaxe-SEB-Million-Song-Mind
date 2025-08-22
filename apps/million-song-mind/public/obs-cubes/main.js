@@ -18,6 +18,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+let shelfPickCamera = null; // orthographic camera used only for shelf picking
 // CRITICAL: Enable all layers on camera
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
 // Melody/Bass presets – lowered angle by ~10°
@@ -559,6 +560,15 @@ let currentKey = 'C';
 // Shelf (back-row) configuration
 const shelfZ = -4.2;
 const shelfY = 1.6;
+// Initialize orthographic shelf picking camera now that shelfY/Z are known
+try {
+    const aspect = window.innerWidth / window.innerHeight;
+    const halfH = 5;
+    shelfPickCamera = new THREE.OrthographicCamera(-aspect * halfH, aspect * halfH, halfH, -halfH, 0.1, 1000);
+    shelfPickCamera.position.set(0, shelfY, 10);
+    shelfPickCamera.lookAt(0, shelfY, shelfZ);
+    shelfPickCamera.layers.enable(2); // view shelf layer
+} catch (_) { }
 // Shelf anchor map. If shelf_map.json exists or localStorage has an override,
 // we will load into this at runtime. Otherwise we start with approximations.
 let shelfSlots = {
@@ -992,6 +1002,17 @@ function getShelfHits(event) {
     return raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
 }
 
+// Orthographic shelf picking – parallel rays avoid large-cube dominance
+function getShelfHitsOrtho(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    if (!shelfPickCamera) return [];
+    raycaster.setFromCamera(pointer, shelfPickCamera);
+    raycaster.layers.set(2);
+    return raycaster.intersectObjects(shelfCubes, true);
+}
+
 // Ascend from any child (edges, overlay, center) to the owning cube mesh
 function resolveCubeFromObject(obj) {
     if (!obj) return null;
@@ -1161,9 +1182,19 @@ function onPointerDown(e) {
         return;
     }
 
-    // Shelf second (layer 2)
+    // Shelf second (layer 2): precise screen-projected polygon picker first (no band gating)
+    try {
+        const shelfPick = pickShelfCubeByProjectedArea(e);
+        if (shelfPick && shelfPick.userData?.isShelf) {
+            pendingObj = shelfPick;
+            controls.enabled = !adjustMode;
+            if (adjustMode) lastShelfTarget = pendingObj;
+            return;
+        }
+    } catch (_) { }
+    // Fallback: shelf proxies/cubes raycast with perspective camera
     raycaster.layers.set(2);
-    hits = raycaster.intersectObjects(shelfCubes, false);
+    hits = raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
     if (hits.length > 0) {
         pendingObj = resolveCubeFromObject(hits[0].object);
         controls.enabled = !adjustMode;
