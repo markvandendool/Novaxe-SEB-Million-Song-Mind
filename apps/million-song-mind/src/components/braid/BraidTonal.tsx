@@ -183,8 +183,9 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
     const currentTonalitySet = tonalities[tonality] as TonalSet;
 
     const getInUse = (noteArr: string[], romanArr: string[], rotation = 0) => {
-      const rotatedRoman = rotate(romanArr, rotation);
-      return displayRoman ? rotatedRoman : noteArr;
+      // ALWAYS use note names for consistency with selectedChords
+      // This ensures isSelected() checks against the same identifiers used by handleChordSelect
+      return noteArr;
     };
 
     // The original Angular code has a rotation of -3 for roman numerals in minor context
