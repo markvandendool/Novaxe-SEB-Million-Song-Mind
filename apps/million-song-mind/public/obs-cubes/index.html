@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>OBS Cubes</title>
 	<link rel="stylesheet" href="./styles.css" />
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
 </head>
+
 <body>
 	<div id="ui">
 		<div class="row">
@@ -50,9 +53,39 @@
 			<label style="margin-left:12px;">
 				<input type="checkbox" id="with-7th" /> With 7th
 			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="bass-enabled" checked /> Bass
+			</label>
+			<label style="margin-left:8px;">
+				<input type="checkbox" id="melody-enabled" /> Melody
+			</label>
+			<label style="margin-left:12px;">Chord Inst</label>
+			<select id="chord-inst">
+				<option value="acoustic_grand_piano" selected>Piano</option>
+				<option value="string_ensemble_1">Strings</option>
+				<option value="electric_piano_1">EPiano</option>
+				<option value="choir_aahs">Choir</option>
+			</select>
+			<label style="margin-left:12px;">Bass Inst</label>
+			<select id="bass-inst">
+				<option value="acoustic_bass" selected>Acoustic Bass</option>
+				<option value="electric_bass_finger">Electric Bass</option>
+				<option value="synth_bass_1">Synth Bass</option>
+			</select>
+			<label style="margin-left:12px;">Melody Inst</label>
+			<select id="melody-inst">
+				<option value="flute" selected>Flute</option>
+				<option value="violin">Violin</option>
+				<option value="clarinet">Clarinet</option>
+				<option value="trumpet">Trumpet</option>
+			</select>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="progression-toggle" /> Progression Arrows
+			</label>
 		</div>
 		<div class="row small">
-			<span>Tip: Click a cube to rotate 90°. Click a shelf cube to add; drag to move.</span>
+			<span>Tip: Click a cube to rotate chord (replays chord). Click any non-label face to audition that one
+				note.</span>
 		</div>
 	</div>
 	<canvas id="scene"></canvas>
@@ -74,4 +107,5 @@
 	<script type="module" src="./chords.js"></script>
 	<script type="module" src="./main.js"></script>
 </body>
+
 </html>

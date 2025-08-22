@@ -13,7 +13,7 @@ export const DEFINITIVE_BRAID_MAPPING: Record<string, string> = {
   // MAJOR SECTION (7 chords) - EXACT user click order
   'C': 'I',
   'Dm': 'ii',
-  'Em': 'iii', 
+  'Em': 'iii',
   'F': 'IV',
   'G': 'V',        // G maps to V (not G7!)
   'Am': 'vi',
@@ -21,14 +21,14 @@ export const DEFINITIVE_BRAID_MAPPING: Record<string, string> = {
 
   // APPLIED SECTION (10 chords) - EXACT user click order
   'C7': 'I7',
-  'Eø': 'iiiø', 
+  'Eø': 'iiiø',
   'D7': 'II(7)',   // D7 maps to II(7) (not D!)
   'F#ø': '#ivø',
-  'E7': 'III(7)',  
+  'E7': 'III(7)',
   'G#º': '#vº',
   'A7': 'VI(7)',
   'C#º': '#iº',
-  'B7': 'VII(7)', 
+  'B7': 'VII(7)',
   'D#º': '#iiº',
 
   // MINOR SECTION (9 chords) - EXACT user click order
@@ -36,7 +36,7 @@ export const DEFINITIVE_BRAID_MAPPING: Record<string, string> = {
   'Dø': 'iiø',
   'Eb': 'bIII',
   'Fm': 'iv',
-  'Gm': 'v', 
+  'Gm': 'v',
   'Ab': 'bVI',
   'Bb': 'bVII',
   'G7(b9)': 'V(b9)',  // Use exact notation from user spec
@@ -47,7 +47,7 @@ export const DEFINITIVE_BRAID_MAPPING: Record<string, string> = {
 export const HARMONIC_TO_BRAID_MAPPING: Record<string, string> = {
   // MAJOR
   'I': 'C',
-  'ii': 'Dm', 
+  'ii': 'Dm',
   'iii': 'Em',
   'IV': 'F',
   'V': 'G',
@@ -62,7 +62,7 @@ export const HARMONIC_TO_BRAID_MAPPING: Record<string, string> = {
   'III(7)': 'E7',
   '#vº': 'G#º',
   'VI(7)': 'A7',
-  '#iº': 'C#º', 
+  '#iº': 'C#º',
   'VII(7)': 'B7',
   '#iiº': 'D#º',
 
@@ -86,12 +86,12 @@ export const HARMONIC_TO_BRAID_MAPPING: Record<string, string> = {
 export function getBraidToHarmonicMapping(braidChord: string): string {
   // Clean the chord symbol (remove spaces, normalize)
   const cleaned = braidChord.trim();
-  
+
   // Check STRICT mapping first
   if (DEFINITIVE_BRAID_MAPPING[cleaned]) {
     return DEFINITIVE_BRAID_MAPPING[cleaned];
   }
-  
+
   // Try some common variations
   const variations = [
     cleaned.replace('♭', 'b').replace('♯', '#'),  // Flat/sharp symbols
@@ -100,13 +100,13 @@ export function getBraidToHarmonicMapping(braidChord: string): string {
     cleaned.replace('º', '°'),  // Diminished variations
     cleaned.replace('°', 'º')   // Reverse
   ];
-  
+
   for (const variation of variations) {
     if (DEFINITIVE_BRAID_MAPPING[variation]) {
       return DEFINITIVE_BRAID_MAPPING[variation];
     }
   }
-  
+
   // Default to "Other" for everything not explicitly mapped
   return "Other";
 }

@@ -5,6 +5,12 @@ import { sendDevLog } from '@/lib/devlog';
 // 🔥 IMMEDIATE DEBUG LOG
 console.log('🚀 MillionSongMind.tsx loading at', new Date().toISOString());
 
+// 🔥 INITIALIZE EXHAUSTIVE LOGGING
+import { exhaustiveLogger } from '@/utils/exhaustiveLogger';
+if (typeof window !== 'undefined') {
+  exhaustiveLogger.clear();
+}
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -318,41 +324,47 @@ const MillionSongMind = () => {
 
   // Handle chord selection with DEFINITIVE user-specified mappings
   const handleChordSelect = useCallback((chord: string, isSelected: boolean) => {
-    log(`🎯 DEFINITIVE CHORD SELECTION: chord="${chord}", isSelected=${isSelected}`);
+    exhaustiveLogger.func('MillionSongMind', 'handleChordSelect ENTRY', { chord, isSelected });
+    console.log(`🚨 DEBUG handleChordSelect: chord="${chord}", isSelected=${isSelected}`);
+    console.log(`🚨 DEBUG CHORD_SLOTS.includes("${chord}"):`, CHORD_SLOTS.includes(chord));
 
     // Determine if this is a braid chord or harmonic slot
     let chordsToToggle: string[] = [];
-    
+
     // Check if this is a harmonic slot being clicked (from harmonic chart)
     if (CHORD_SLOTS.includes(chord)) {
-      log(`📊 HARMONIC SLOT CLICKED: "${chord}"`);
+      console.log(`� DEBUG HARMONIC SLOT CLICKED: "${chord}"`);
       // Find the SINGLE braid chord that maps to this harmonic slot
       const braidChords = getHarmonicToBraidMapping(chord);
-      log(`🔄 REVERSE MAPPING: "${chord}" → [${braidChords.join(', ')}]`);
-      
+      console.log(`� DEBUG getHarmonicToBraidMapping("${chord}") returned:`, braidChords);
+
       // STRICT: Only light up the corresponding braid chord, not the harmonic slot
       chordsToToggle = braidChords;
+      console.log(`🚨 DEBUG chordsToToggle for harmonic:`, chordsToToggle);
     } else {
-      log(`🎼 BRAID CHORD CLICKED: "${chord}"`);
+      console.log(`🚨 DEBUG BRAID CHORD CLICKED: "${chord}"`);
       // This is a braid chord being clicked
       const harmonicSlot = getBraidToHarmonicMapping(chord);
-      log(`🎯 DEFINITIVE MAPPING: "${chord}" → "${harmonicSlot}"`);
+      console.log(`🚨 DEBUG getBraidToHarmonicMapping("${chord}") returned:`, harmonicSlot);
 
       if (harmonicSlot !== "Other") {
         // STRICT: Only light up the corresponding harmonic slot, not the braid chord
         chordsToToggle = [harmonicSlot];
-        log(`✅ MAPPED TO SLOT: "${harmonicSlot}"`);
+        console.log(`🚨 DEBUG chordsToToggle for braid:`, chordsToToggle);
       } else {
         // This chord maps to "Other" - just select itself
         chordsToToggle = [chord];
-        log(`🔄 MAPPED TO OTHER: "${chord}"`);
+        console.log(`� DEBUG chordsToToggle for Other:`, chordsToToggle);
       }
     }
+
+    console.log(`🚨 DEBUG FINAL chordsToToggle:`, chordsToToggle);
 
     log(`📋 CHORDS TO TOGGLE:`, chordsToToggle);
 
     // Update selection state
     setSelectedChords(prev => {
+      exhaustiveLogger.state('MillionSongMind', 'setSelectedChords ENTRY', { previousSelection: Array.from(prev), isSelected, chordsToToggle });
       const newSelection = new Set(prev);
       log(` PREVIOUS SELECTION:`, Array.from(prev));
 

@@ -6,6 +6,7 @@ import { ChordAudioPlayer } from '@/components/ChordAudioPlayer';
 import { getBraidPositionUsage } from '@/utils/braidHarmonicMapping';
 import { getBraidToHarmonicMapping } from '@/utils/definiteBraidMapping';
 import { getChordSuffix } from '@/utils/chordTypes';
+import { exhaustiveLogger } from '@/utils/exhaustiveLogger';
 
 interface TonalSet {
   center_major: string[];
@@ -214,6 +215,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
       fifth_right_up_in_use: getInUse(currentTonalitySet.outer_right_up, tonalities.roman.outer_right_up, displayRoman ? romanMinorRotation : 0),
       fifth_right_down_in_use: getInUse(currentTonalitySet.outer_right_down, tonalities.roman.outer_right_down, displayRoman ? romanMinorRotation : 0),
     };
+
   }, [tonalities, tonality, displayRoman]);
 
   // Center the selected key row in view when focusKey/tonality changes
@@ -235,11 +237,19 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
 
   // STRICT selection logic - only check if chord is directly in selectedChords
   const isSelected = (label?: string) => {
+    exhaustiveLogger.selection('BraidTonal', 'isSelected CALLED', { label, selectedChords });
     if (!label) return false;
     // STRICT: Only light up if this exact chord is in selectedChords
-    return selectedChords?.includes(label) || false;
+    // selectedChords is a Set, so use .has() not .includes()
+    const selected = selectedChords?.has(label) || false;
+    if (selected) {
+      exhaustiveLogger.selection('BraidTonal', 'CHORD SELECTED TRUE', { label, selectedChords });
+      console.log(`🚨 BraidTonal.isSelected("${label}") = TRUE | selectedChords:`, selectedChords);
+    }
+    return selected;
   };
   const toggleChord = (label: string) => {
+    exhaustiveLogger.func('BraidTonal', 'toggleChord CALLED', { label });
     if (!label) return;
     if (onChordSelect) onChordSelect(label, !isSelected(label));
     else onChordClick?.(label);
@@ -247,13 +257,19 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
 
   // Selection with Cmd/Ctrl semantics: click = replace, Cmd/Ctrl-click = add/remove
   const handleSelect = (e: React.MouseEvent, label: string) => {
+    exhaustiveLogger.click('BraidTonal', 'handleSelect CLICKED', {
+      label,
+      isSelected: isSelected(label),
+      additive: e.metaKey || e.ctrlKey
+    }, e.nativeEvent);
     if (!label) return;
     const additive = e.metaKey || e.ctrlKey;
     if (additive) {
       onChordSelect ? onChordSelect(label, !isSelected(label)) : onChordClick?.(label);
     } else {
       // Replace selection with this single chord
-      const others = (selectedChords || []).filter(c => c !== label);
+      // selectedChords is a Set, so convert to Array to use filter
+      const others = Array.from(selectedChords || new Set()).filter(c => c !== label);
       others.forEach(c => onChordSelect?.(c, false));
       onChordSelect?.(label, true);
     }
@@ -280,11 +296,11 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
   // Usage-based styling helpers using DEFINITIVE mappings
   const getUsage = (label?: string) => {
     if (!label) return 0;
-    
+
     // Map braid chord to harmonic slot using definitive mapping
     const harmonicSlot = getBraidToHarmonicMapping(label);
     console.log(`🎯 USAGE LOOKUP: "${label}" → "${harmonicSlot}"`);
-    
+
     // Get usage from harmonic slot
     let usage = 0;
     if (harmonicSlot !== "Other") {
@@ -292,7 +308,7 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
     } else {
       usage = (chordUsage as any)?.[label] || (chordUsage as any)?.["Other"];
     }
-    
+
     if (typeof usage !== 'number' || isNaN(usage)) return 0;
     const finalUsage = Math.max(0, Math.min(100, Math.round(usage)));
     console.log(`📊 FINAL USAGE: "${label}" → ${finalUsage}%`);
