@@ -36,12 +36,25 @@ export async function ensureInstruments(ac, names) {
   try {
     if (!window.Soundfont) return { chord: null, bass: null, melody: null };
     const opts = BASE_URL
-      ? { nameToUrl: (n) => `${BASE_URL}/${resolveName(n)}-mp3.js` }
-      : undefined;
+      ? {
+        nameToUrl: (name, _sf, format) => {
+          const resolved = resolveName(name);
+          const fmt = format || 'mp3';
+          const url = `${BASE_URL}/${resolved}-${fmt}.js`;
+          try { console.log('[obs-cubes] Loading soundfont', resolved, url); } catch (_) { }
+          return url;
+        }
+      }
+      : { soundfont: 'MusyngKite' };
     // Load sequentially to avoid spikes; cached by Soundfont internally
     for (const [key, name] of Object.entries(names)) {
-      try { out[key] = await window.Soundfont.instrument(ac, resolveName(name), opts); }
-      catch (_) { out[key] = null; }
+      try {
+        const n = resolveName(name);
+        out[key] = await window.Soundfont.instrument(ac, n, opts);
+      } catch (e) {
+        try { console.warn('[obs-cubes] Failed to load instrument', name, e); } catch (_) { }
+        out[key] = null;
+      }
     }
     return out;
   } catch (_) {
