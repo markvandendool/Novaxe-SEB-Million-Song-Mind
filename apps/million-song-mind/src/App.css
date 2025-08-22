@@ -1,42 +1,95 @@
+/* MILLION SONG MIND - FULL SCREEN PROFESSIONAL LAYOUT */
+/* Remove Vite template restrictions for sophisticated interface */
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  /* Full viewport utilization - no container restrictions */
+  width: 100vw;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  text-align: left; /* Professional alignment */
+  overflow-x: hidden; overflow-y: auto; /* Prevent document scroll */
+  display: flex;
+  flex-direction: column;
 }
 
+/* Professional dark theme variables */
+:root {
+  --professional-bg: hsl(218, 27%, 4%);
+  --card-bg: hsl(218, 25%, 6%);
+  --border-color: hsl(218, 20%, 12%);
+  --primary-blue: hsl(217, 91%, 59%);
+  --accent-green: hsl(142, 65%, 50%);
+}
+
+/* Remove all default margins and restrictions */
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--professional-bg);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", system-ui, sans-serif;
+  overflow-x: hidden; overflow-y: auto;
+}
+
+/* Professional app container */
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--professional-bg);
+}
+
+/* Full-width components */
+.million-song-mind-container {
+  width: 100%;
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Remove all old Vite template styles */
 .logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+  display: none;
 }
 
 .card {
-  padding: 2em;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 0.5rem;
 }
 
-.read-the-docs {
-  color: #888;
+/* Professional responsive design */
+@media (max-width: 768px) {
+  #root {
+    padding: 0;
+  }
+  
+  .card {
+    margin: 0.25rem;
+    padding: 1rem;
+  }
+}
+
+/* Ensure braid visualization takes full available space */
+#braid-tonal {
+  width: 100%;
+  height: auto;
+  max-width: none;
+}
+
+/* Professional typography */
+h1, h2, h3, h4, h5, h6 {
+  color: hsl(210, 40%, 98%);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+p {
+  color: hsl(215, 25%, 70%);
+  line-height: 1.6;
 }
