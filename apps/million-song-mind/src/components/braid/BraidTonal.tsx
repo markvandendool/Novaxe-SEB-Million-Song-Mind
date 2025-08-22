@@ -4,6 +4,7 @@ import "./BraidTonal.css";
 import { MusicalChordText } from '@/components/MusicalChordText';
 import { ChordAudioPlayer } from '@/components/ChordAudioPlayer';
 import { getBraidPositionUsage, mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
+import { getBraidToHarmonicMapping } from '@/utils/definiteBraidMapping';
 import { getChordSuffix } from '@/utils/chordTypes';
 
 interface TonalSet {
@@ -277,12 +278,26 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
     return "arrows-2";
   };
 
-  // Usage-based styling helpers
+  // Usage-based styling helpers using DEFINITIVE mappings
   const getUsage = (label?: string) => {
     if (!label) return 0;
-    const p = (chordUsage as any)?.[label];
-    if (typeof p !== 'number' || isNaN(p)) return 0;
-    return Math.max(0, Math.min(100, Math.round(p)));
+    
+    // Map braid chord to harmonic slot using definitive mapping
+    const harmonicSlot = getBraidToHarmonicMapping(label);
+    console.log(`🎯 USAGE LOOKUP: "${label}" → "${harmonicSlot}"`);
+    
+    // Get usage from harmonic slot
+    let usage = 0;
+    if (harmonicSlot !== "Other") {
+      usage = (chordUsage as any)?.[harmonicSlot];
+    } else {
+      usage = (chordUsage as any)?.[label] || (chordUsage as any)?.["Other"];
+    }
+    
+    if (typeof usage !== 'number' || isNaN(usage)) return 0;
+    const finalUsage = Math.max(0, Math.min(100, Math.round(usage)));
+    console.log(`📊 FINAL USAGE: "${label}" → ${finalUsage}%`);
+    return finalUsage;
   };
   const usageClass = (p: number) => {
     if (p >= 100) return 'usage-max';

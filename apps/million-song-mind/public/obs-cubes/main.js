@@ -9,12 +9,12 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
-const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-// 45° sticky views with a higher target to center shelf/front row
-const melodyTarget = new THREE.Vector3(0, 1.0, 0);
-const melodyCamPos = new THREE.Vector3(0, 7.2, 7.4);
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+// Tighter Melody/Bass presets to remove bottom dead space (zoomed out ~10%)
+const melodyTarget = new THREE.Vector3(0, 1.6, 0);
+const melodyCamPos = new THREE.Vector3(0, 10.12, 7.04); // 9.2→10.12, 6.4→7.04
 const bassTarget = melodyTarget.clone();
-const bassCamPos = new THREE.Vector3(0, -7.2, 7.4);
+const bassCamPos = new THREE.Vector3(0, -10.12, 7.04);
 camera.position.copy(melodyCamPos);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -108,14 +108,14 @@ function pokeInteraction() { lastInteraction = performance.now(); homing = false
 // Camera view toggles
 function setViewAbove() {
     currentStickyView = 'above';
-    animateVector(camera.position, melodyCamPos.clone(), 700);
-    animateVector(controls.target, melodyTarget.clone(), 700);
+    animateVector(camera.position, melodyCamPos.clone(), 650);
+    animateVector(controls.target, melodyTarget.clone(), 650);
     pokeInteraction();
 }
 function setViewBelow() {
     currentStickyView = 'below';
-    animateVector(camera.position, bassCamPos.clone(), 700);
-    animateVector(controls.target, bassTarget.clone(), 700);
+    animateVector(camera.position, bassCamPos.clone(), 650);
+    animateVector(controls.target, bassTarget.clone(), 650);
     pokeInteraction();
 }
 
@@ -1065,6 +1065,12 @@ function onPointerUp(e) {
             dragging.userData.isShelf = false;
             dragging.userData.fromShelf = false;
             if (!cubes.includes(dragging)) cubes.push(dragging);
+            // Ensure shelf has a canonical cube for this roman if we pulled it from the shelf
+            if (dragging.userData.wasPulledFromShelf) {
+                dragging.userData.wasPulledFromShelf = false;
+                const exists = shelfCubes.some(c => c.userData?.roman === r);
+                if (!exists) { createShelfCube(r); }
+            }
             reflowLineup();
         } else {
             // Hard snap to shelf origin
@@ -1088,6 +1094,13 @@ function onPointerUp(e) {
         const moved = Math.hypot(dx, dy);
         const elapsed = now - mouseDownTime;
         if (moved <= CLICK_MAX_PX && elapsed <= CLICK_MAX_MS) {
+            // If clicking a shelf cube, enqueue add + audio and return
+            if (!adjustMode && pendingObj.userData?.isShelf) {
+                enqueueShelfAdd(pendingObj);
+                pendingObj = null; return;
+            }
+            // Do NOT rotate shelf cubes under any circumstance
+            if (pendingObj.userData?.isShelf) { pendingObj = null; return; }
             const hits = getIntersects(e);
             let hit = null;
             for (const h of hits) {
@@ -1100,8 +1113,7 @@ function onPointerUp(e) {
                     const local = pendingObj.worldToLocal(hit.point.clone());
                     const absX = Math.abs(local.x);
                     const absY = Math.abs(local.y);
-                    let targetToneIndex; // 0=root,1=3rd,2=5th,3=7th
-                    if (absX > absY) targetToneIndex = local.x > 0 ? 1 : 3; else targetToneIndex = local.y > 0 ? 2 : 0;
+                    let targetToneIndex; if (absX > absY) targetToneIndex = local.x > 0 ? 1 : 3; else targetToneIndex = local.y > 0 ? 2 : 0;
                     const r = pendingObj.userData.rotationIndex || 0;
                     const cw = (targetToneIndex - r + 4) % 4; const ccw = (r - targetToneIndex + 4) % 4;
                     let angle = 0; let delta = 0;
@@ -1111,6 +1123,8 @@ function onPointerUp(e) {
                         const finalQ = pendingObj.quaternion.clone().multiply(extra);
                         animateQuaternion(pendingObj, finalQ, 700);
                         pendingObj.userData.rotationIndex = (pendingObj.userData.rotationIndex + (delta + 4)) % 4;
+                        // Trigger audio with new orientation
+                        playChordForObject(pendingObj);
                     }
                     pendingObj.userData.rotationIndex = ((pendingObj.userData.rotationIndex % 4) + 4) % 4;
                 }
@@ -1274,8 +1288,11 @@ document.getElementById('view-up').addEventListener('click', setViewBelow);
 const setSelect = document.getElementById('set-select');
 const labelSelect = document.getElementById('label-mode');
 const keySelect = document.getElementById('key-select');
+const with7th = document.getElementById('with-7th');
 // Initialize labelMode from current UI so startup respects it
 labelMode = labelSelect ? labelSelect.value : labelMode;
+withSeventh = !!(with7th && with7th.checked);
+with7th?.addEventListener('change', () => { withSeventh = !!with7th.checked; });
 document.getElementById('arrange-btn').addEventListener('click', reflowLineup);
 document.getElementById('reset-btn').addEventListener('click', () => loadSet(currentSet));
 
@@ -1333,7 +1350,7 @@ window.addEventListener('resize', onResize);
 
 // Initial: start immediately with canvas-rendered labels (no PNG manifest)
 textureManifest = null;
-(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); })();
+(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); setViewAbove(); })();
 
 // Animation loop
 function animate() {
@@ -1448,6 +1465,110 @@ function enforceRestZones() {
             }
         }
     }
+}
+
+// Simple WebAudio chord playback
+let audioCtx = null;
+let withSeventh = false;
+function ensureAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
+function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
+function parseNoteName(name) {
+    // e.g., C, C#, Db, Bb; infer octave around 4
+    const n = name.replace(/[^A-G#b]/g, '');
+    const idx = NOTE_INDEX[n] ?? 0; return { idx, octave: 4 };
+}
+function getFaceOrder(rotationIndex, includeSeventh) {
+    const r = ((rotationIndex % 4) + 4) % 4;
+    const b = r; // bottom
+    const right = (r + 1) % 4;
+    const top = (r + 2) % 4;
+    const left = (r + 3) % 4; // 7th face
+    if (includeSeventh) return [b, right, left, top];
+    return [b, right, top];
+}
+function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
+    const ctx = ensureAudio();
+    const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const order = getFaceOrder(rotationIndex || 0, includeSeventh);
+    // Map to ascending MIDI
+    const baseOct = 4;
+    const midiOf = (name) => {
+        const { idx, octave } = parseNoteName(name);
+        return idx + 12 * (octave || baseOct);
+    };
+    const semis = order.map(i => midiOf(names[i]));
+    const asc = [];
+    let prev = semis[0];
+    asc.push(prev);
+    for (let k = 1; k < semis.length; k++) {
+        let m = semis[k];
+        while (m < prev) m += 12;
+        asc.push(m);
+        prev = m;
+    }
+    return asc.map(m => 440 * Math.pow(2, (m - (9 + 12 * 4)) / 12));
+}
+function playChordForObject(obj) {
+    const ctx = ensureAudio();
+    const freqs = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
+    const now = ctx.currentTime;
+    const duration = 1.2;
+    const master = ctx.createGain(); master.gain.value = 0.0; master.connect(ctx.destination);
+    master.gain.linearRampToValueAtTime(0.18, now + 0.02);
+    master.gain.linearRampToValueAtTime(0.0, now + duration);
+    freqs.forEach((f, i) => {
+        const osc = ctx.createOscillator();
+        const g = ctx.createGain();
+        osc.frequency.value = f;
+        osc.type = i === 3 ? 'triangle' : 'sine';
+        g.gain.value = 0.0;
+        osc.connect(g).connect(master);
+        osc.start(now);
+        g.gain.linearRampToValueAtTime(0.25 / (i + 1), now + 0.03);
+        g.gain.linearRampToValueAtTime(0.0, now + duration);
+        osc.stop(now + duration + 0.02);
+    });
+}
+
+// Shelf-click sequencing
+const shelfClickQueue = [];
+let processingShelfQueue = false;
+async function enqueueShelfAdd(shelfMesh) {
+    shelfClickQueue.push(shelfMesh);
+    if (!processingShelfQueue) processShelfQueue();
+}
+async function processShelfQueue() {
+    processingShelfQueue = true;
+    while (shelfClickQueue.length) {
+        const shelf = shelfClickQueue.shift();
+        await animateShelfClickAdd(shelf);
+    }
+    processingShelfQueue = false;
+}
+async function animateShelfClickAdd(shelf) {
+    try {
+        // Clone from shelf; keep shelf in place (infinite resource)
+        const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
+        clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0 };
+        clone.position.copy(shelf.position);
+        clone.scale.copy(shelf.scale);
+        addQuadrantOverlay(clone);
+        scene.add(clone);
+        cubes.push(clone);
+        // Pick next slot at the end
+        const xs = computeSlotPositions(lineup.length + 1);
+        const targetX = xs[lineup.length];
+        lineup.push(clone);
+        animateScale(clone, FRONT_ROW_SCALE, 280);
+        animatePosition(clone, new THREE.Vector3(targetX, 0, 0), 300);
+        reflowLineup();
+        // Play chord using orientation mapping
+        playChordForObject(clone);
+        // Little pause to keep sequential feel
+        await new Promise(r => setTimeout(r, 180));
+    } catch (_) { }
 }
 
 

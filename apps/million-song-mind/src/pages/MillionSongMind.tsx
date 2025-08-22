@@ -32,6 +32,7 @@ import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { noteToRoman, romanToNote, createChordMappingForKey } from '@/utils/chordMapping';
 import { mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
+import { getBraidToHarmonicMapping, getHarmonicToBraidMapping } from '@/utils/definiteBraidMapping';
 import { GlobalKeySelector } from '@/components/GlobalKeySelector';
 import { BraidTextSwitcher } from '@/components/BraidTextSwitcher';
 import { useBraidTextSwitching } from '@/hooks/useBraidTextSwitching';
@@ -315,50 +316,37 @@ const MillionSongMind = () => {
     [performOptimizedSearch]
   );
 
-  // Handle chord selection with NEW harmonic function mapping (key-aware)
+  // Handle chord selection with DEFINITIVE user-specified mappings
   const handleChordSelect = useCallback((chord: string, isSelected: boolean) => {
-    log(`🎯 CHORD SELECTION: chord="${chord}", isSelected=${isSelected}`);
+    log(`🎯 DEFINITIVE CHORD SELECTION: chord="${chord}", isSelected=${isSelected}`);
 
-    // Resolve key context first
-    const currentKey = selectedSong?.key || selectedKey || 'C';
-    log(`🔑 KEY CONTEXT: selectedSong?.key="${selectedSong?.key}", selectedKey="${selectedKey}", currentKey="${currentKey}"`);
-
-    setTonality(currentKey);
-    try {
-      if (selectedSong?.key) {
-        log(`🎼 SETTING SCORE TONALITY: "${selectedSong.key}"`);
-        setScoreTonality(selectedSong.key);
-      }
-    } catch (error) {
-      log(`❌ ERROR SETTING SCORE TONALITY:`, error);
-    }
-
-    // Map with key context
-    const harmonicSlot = mapRomanToHarmonicSlot(chord, currentKey);
-    log(`🎯 MAPPING RESULT: "${chord}" → "${harmonicSlot}" in key "${currentKey}"`);
-
-    // Create bidirectional mapping for the current key (still needed for note/name conversions)
-    const { romanToNoteMap, noteToRomanMap } = createChordMappingForKey(currentKey);
-    log(`🔄 CREATED MAPPINGS: romanToNoteMap size=${romanToNoteMap.size}, noteToRomanMap size=${noteToRomanMap.size}`);
-
-    // Determine what to select based on mapping
+    // Determine if this is a braid chord or harmonic slot
     let chordsToToggle: string[] = [];
-    if (harmonicSlot) {
-      chordsToToggle.push(harmonicSlot);
-      log(`✅ USING HARMONIC SLOT: "${harmonicSlot}"`);
+    
+    // Check if this is a harmonic slot being clicked (from harmonic chart)
+    if (CHORD_SLOTS.includes(chord)) {
+      log(`📊 HARMONIC SLOT CLICKED: "${chord}"`);
+      // Find all braid chords that map to this harmonic slot
+      const braidChords = getHarmonicToBraidMapping(chord);
+      log(`🔄 REVERSE MAPPING: "${chord}" → [${braidChords.join(', ')}]`);
+      
+      // Add the harmonic slot itself and all corresponding braid chords
+      chordsToToggle = [chord, ...braidChords];
     } else {
-      // Fallback: if no harmonic mapping, try the old mapping system
-      let harmonicChord = chord;
-      let braidChord = chord;
-      if (noteToRomanMap.has(chord)) {
-        harmonicChord = noteToRomanMap.get(chord) || chord;
-        log(`🔄 FALLBACK NOTE TO ROMAN: "${chord}" → "${harmonicChord}"`);
-      } else if (romanToNoteMap.has(chord)) {
-        braidChord = romanToNoteMap.get(chord) || chord;
-        log(`🔄 FALLBACK ROMAN TO NOTE: "${chord}" → "${braidChord}"`);
+      log(`🎼 BRAID CHORD CLICKED: "${chord}"`);
+      // This is a braid chord being clicked
+      const harmonicSlot = getBraidToHarmonicMapping(chord);
+      log(`🎯 DEFINITIVE MAPPING: "${chord}" → "${harmonicSlot}"`);
+
+      if (harmonicSlot !== "Other") {
+        // This chord maps to a specific harmonic slot
+        chordsToToggle = [chord, harmonicSlot];
+        log(`✅ MAPPED TO SLOT: "${harmonicSlot}"`);
+      } else {
+        // This chord maps to "Other" - just select itself
+        chordsToToggle = [chord];
+        log(`🔄 MAPPED TO OTHER: "${chord}"`);
       }
-      chordsToToggle = [chord, harmonicChord, braidChord];
-      log(`🔄 USING FALLBACK MAPPING:`, chordsToToggle);
     }
 
     log(`📋 CHORDS TO TOGGLE:`, chordsToToggle);

@@ -27,8 +27,6 @@ const log = (message: string, data?: any) => {
  * Map braid chord to harmonic profile slot using DEFINITIVE user mappings
  * Everything not explicitly mapped goes to "Other"
  */
- * - Diminished symbols are flexible except viiø/viiº which must be unique
- */
 export function mapRomanToHarmonicSlot(chord: string, key: string = 'C'): string | null {
   log(`🔍 DEFINITIVE MAPPING REQUEST: chord="${chord}", key="${key}"`);
   
