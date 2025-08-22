@@ -10,11 +10,11 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
-// Tighter Melody/Bass presets to remove bottom dead space (zoomed out ~10%)
-const melodyTarget = new THREE.Vector3(0, 1.6, 0);
-const melodyCamPos = new THREE.Vector3(0, 10.12, 7.04); // 9.2→10.12, 6.4→7.04
+// Melody/Bass presets – lowered angle by ~10°
+const melodyTarget = new THREE.Vector3(0, 1.4, 0);
+const melodyCamPos = new THREE.Vector3(0, 8.9, 7.04);
 const bassTarget = melodyTarget.clone();
-const bassCamPos = new THREE.Vector3(0, -10.12, 7.04);
+const bassCamPos = new THREE.Vector3(0, -8.9, 7.04);
 camera.position.copy(melodyCamPos);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -1284,6 +1284,10 @@ renderer.domElement.addEventListener('wheel', (e) => {
 document.getElementById('view-down').addEventListener('click', setViewAbove);
 document.getElementById('view-up').addEventListener('click', setViewBelow);
 
+// Audio state (declare before any usage)
+let audioCtx = null;
+let withSeventh = false;
+
 // UI wiring
 const setSelect = document.getElementById('set-select');
 const labelSelect = document.getElementById('label-mode');
@@ -1468,8 +1472,6 @@ function enforceRestZones() {
 }
 
 // Simple WebAudio chord playback
-let audioCtx = null;
-let withSeventh = false;
 function ensureAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
 const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
 function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
@@ -1512,24 +1514,60 @@ function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
 }
 function playChordForObject(obj) {
     const ctx = ensureAudio();
-    const freqs = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
+    const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
     const now = ctx.currentTime;
-    const duration = 1.2;
-    const master = ctx.createGain(); master.gain.value = 0.0; master.connect(ctx.destination);
-    master.gain.linearRampToValueAtTime(0.18, now + 0.02);
-    master.gain.linearRampToValueAtTime(0.0, now + duration);
-    freqs.forEach((f, i) => {
+    const duration = 1.25;
+
+    // Master
+    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+
+    // Layers
+    const chordBus = ctx.createGain(); chordBus.gain.value = 0.22; chordBus.connect(master);
+    const bassBus = ctx.createGain(); bassBus.gain.value = 0.28; bassBus.connect(master);
+    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.24; melodyBus.connect(master);
+
+    // Envelope helper
+    const env = (g, t0, d) => {
+        g.gain.setValueAtTime(0.0, t0);
+        g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01);
+        g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03);
+        g.gain.linearRampToValueAtTime(0.0, t0 + d);
+    };
+
+    // Determine bottom/top for bass/melody layers
+    const lowest = freqsAsc[0];
+    const highest = freqsAsc[freqsAsc.length - 1];
+
+    // Chord bed (triad or with 7th) – same set regardless of inversion, just pitched ascending
+    freqsAsc.forEach((f, i) => {
         const osc = ctx.createOscillator();
         const g = ctx.createGain();
-        osc.frequency.value = f;
         osc.type = i === 3 ? 'triangle' : 'sine';
-        g.gain.value = 0.0;
-        osc.connect(g).connect(master);
-        osc.start(now);
-        g.gain.linearRampToValueAtTime(0.25 / (i + 1), now + 0.03);
-        g.gain.linearRampToValueAtTime(0.0, now + duration);
-        osc.stop(now + duration + 0.02);
+        osc.frequency.value = f;
+        osc.connect(g).connect(chordBus);
+        const t0 = now;
+        const d = duration;
+        env(g, t0, d);
+        osc.start(t0); osc.stop(t0 + d + 0.02);
     });
+
+    // Bass layer – lowest face
+    if (lowest) {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = 'sawtooth'; osc.frequency.value = lowest;
+        osc.connect(g).connect(bassBus);
+        env(g, now, duration);
+        osc.start(now); osc.stop(now + duration + 0.02);
+    }
+
+    // Melody layer – top face
+    if (highest) {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = 'square'; osc.frequency.value = highest;
+        osc.connect(g).connect(melodyBus);
+        env(g, now, duration);
+        osc.start(now); osc.stop(now + duration + 0.02);
+    }
 }
 
 // Shelf-click sequencing

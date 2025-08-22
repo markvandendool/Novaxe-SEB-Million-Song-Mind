@@ -3,7 +3,7 @@ import "@/styles/braid-angular-exact.css"; // EXACT Angular font definitions
 import "./BraidTonal.css";
 import { MusicalChordText } from '@/components/MusicalChordText';
 import { ChordAudioPlayer } from '@/components/ChordAudioPlayer';
-import { getBraidPositionUsage, mapRomanToHarmonicSlot } from '@/utils/braidHarmonicMapping';
+import { getBraidPositionUsage } from '@/utils/braidHarmonicMapping';
 import { getBraidToHarmonicMapping } from '@/utils/definiteBraidMapping';
 import { getChordSuffix } from '@/utils/chordTypes';
 
@@ -232,13 +232,11 @@ const BraidTonal: React.FC<BraidTonalProps> = ({
 
   const focusedKey = normalizeKey(focusKey) || tonality;
 
-  // Selection helpers to mirror HarmonicChart logic
+  // STRICT selection logic - only check if chord is directly in selectedChords
   const isSelected = (label?: string) => {
     if (!label) return false;
-    // Check both the original label and its mapped harmonic function (key-aware)
-    const harmonicSlot = mapRomanToHarmonicSlot(label, focusedKey);
-    return selectedChords?.includes(label) ||
-      (harmonicSlot && selectedChords?.includes(harmonicSlot)) || false;
+    // STRICT: Only light up if this exact chord is in selectedChords
+    return selectedChords?.includes(label) || false;
   };
   const toggleChord = (label: string) => {
     if (!label) return;

@@ -326,12 +326,12 @@ const MillionSongMind = () => {
     // Check if this is a harmonic slot being clicked (from harmonic chart)
     if (CHORD_SLOTS.includes(chord)) {
       log(`📊 HARMONIC SLOT CLICKED: "${chord}"`);
-      // Find all braid chords that map to this harmonic slot
+      // Find the SINGLE braid chord that maps to this harmonic slot
       const braidChords = getHarmonicToBraidMapping(chord);
       log(`🔄 REVERSE MAPPING: "${chord}" → [${braidChords.join(', ')}]`);
       
-      // Add the harmonic slot itself and all corresponding braid chords
-      chordsToToggle = [chord, ...braidChords];
+      // STRICT: Only light up the corresponding braid chord, not the harmonic slot
+      chordsToToggle = braidChords;
     } else {
       log(`🎼 BRAID CHORD CLICKED: "${chord}"`);
       // This is a braid chord being clicked
@@ -339,8 +339,8 @@ const MillionSongMind = () => {
       log(`🎯 DEFINITIVE MAPPING: "${chord}" → "${harmonicSlot}"`);
 
       if (harmonicSlot !== "Other") {
-        // This chord maps to a specific harmonic slot
-        chordsToToggle = [chord, harmonicSlot];
+        // STRICT: Only light up the corresponding harmonic slot, not the braid chord
+        chordsToToggle = [harmonicSlot];
         log(`✅ MAPPED TO SLOT: "${harmonicSlot}"`);
       } else {
         // This chord maps to "Other" - just select itself

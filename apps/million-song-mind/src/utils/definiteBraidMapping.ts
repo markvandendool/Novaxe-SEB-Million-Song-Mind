@@ -7,66 +7,79 @@
  * to harmonic profile slots. Everything else maps to "Other".
  */
 
-// Direct 1:1 mappings from braid chords to harmonic slots
-export const BRAID_TO_HARMONIC_MAPPING: Record<string, string> = {
-  // MAJOR SECTION (7 chords)
+// STRICT 1:1 mappings from braid chords to harmonic slots - USER SPECIFIED
+// Each harmonic slot maps to EXACTLY ONE braid chord (no duplicates)
+export const DEFINITIVE_BRAID_MAPPING: Record<string, string> = {
+  // MAJOR SECTION (7 chords) - EXACT user click order
   'C': 'I',
   'Dm': 'ii',
   'Em': 'iii', 
   'F': 'IV',
-  'G': 'V',
+  'G': 'V',        // G maps to V (not G7!)
   'Am': 'vi',
   'Bø': 'viiø',
 
-  // APPLIED SECTION (10 chords)
+  // APPLIED SECTION (10 chords) - EXACT user click order
   'C7': 'I7',
   'Eø': 'iiiø', 
-  'D(7)': 'II(7)',
-  'D7': 'II(7)',  // Alternative notation
+  'D7': 'II(7)',   // D7 maps to II(7) (not D!)
   'F#ø': '#ivø',
-  'E(7)': 'III(7)',
-  'E7': 'III(7)',  // Alternative notation
+  'E7': 'III(7)',  
   'G#º': '#vº',
-  'A(7)': 'VI(7)',
-  'A7': 'VI(7)',  // Alternative notation
+  'A7': 'VI(7)',
   'C#º': '#iº',
-  'B(7)': 'VII(7)',
-  'B7': 'VII(7)',  // Alternative notation
+  'B7': 'VII(7)', 
   'D#º': '#iiº',
 
-  // MINOR SECTION (9 chords)
+  // MINOR SECTION (9 chords) - EXACT user click order
   'Cm': 'i',
   'Dø': 'iiø',
   'Eb': 'bIII',
-  'E♭': 'bIII',  // Alternative notation
   'Fm': 'iv',
   'Gm': 'v', 
   'Ab': 'bVI',
-  'A♭': 'bVI',  // Alternative notation
   'Bb': 'bVII',
-  'B♭': 'bVII',  // Alternative notation
-  'G(7)(b9)': 'V(b9)',
-  'G7(b9)': 'V(b9)',  // Alternative notation
+  'G7(b9)': 'V(b9)',  // Use exact notation from user spec
   'Bº7': 'viiº'
 };
 
-// Special cross-mappings noted by user
-export const SPECIAL_CROSS_MAPPINGS: Record<string, string> = {
-  // G7 chord (left-up bubble next to C/Am pair) → Major V
-  'G7': 'V',  // Maps to Major V, not Applied V(7)
-  
-  // D major chord → II(7) 
-  'D': 'II(7)'  // Maps to Applied II(7)
-};
+// Reverse mapping: harmonic slot → braid chord (1:1 STRICT)
+export const HARMONIC_TO_BRAID_MAPPING: Record<string, string> = {
+  // MAJOR
+  'I': 'C',
+  'ii': 'Dm', 
+  'iii': 'Em',
+  'IV': 'F',
+  'V': 'G',
+  'vi': 'Am',
+  'viiø': 'Bø',
 
-// Combined mapping (special mappings override standard ones)
-export const COMPLETE_BRAID_MAPPING: Record<string, string> = {
-  ...BRAID_TO_HARMONIC_MAPPING,
-  ...SPECIAL_CROSS_MAPPINGS
+  // APPLIED  
+  'I7': 'C7',
+  'iiiø': 'Eø',
+  'II(7)': 'D7',
+  '#ivø': 'F#ø',
+  'III(7)': 'E7',
+  '#vº': 'G#º',
+  'VI(7)': 'A7',
+  '#iº': 'C#º', 
+  'VII(7)': 'B7',
+  '#iiº': 'D#º',
+
+  // MINOR
+  'i': 'Cm',
+  'iiø': 'Dø',
+  'bIII': 'Eb',
+  'iv': 'Fm',
+  'v': 'Gm',
+  'bVI': 'Ab',
+  'bVII': 'Bb',
+  'V(b9)': 'G7(b9)',
+  'viiº': 'Bº7'
 };
 
 /**
- * Get harmonic slot for a braid chord
+ * Get harmonic slot for a braid chord - STRICT 1:1 mapping
  * @param braidChord The chord symbol from the braid
  * @returns Harmonic slot name or "Other" if no mapping exists
  */
@@ -74,9 +87,9 @@ export function getBraidToHarmonicMapping(braidChord: string): string {
   // Clean the chord symbol (remove spaces, normalize)
   const cleaned = braidChord.trim();
   
-  // Check complete mapping
-  if (COMPLETE_BRAID_MAPPING[cleaned]) {
-    return COMPLETE_BRAID_MAPPING[cleaned];
+  // Check STRICT mapping first
+  if (DEFINITIVE_BRAID_MAPPING[cleaned]) {
+    return DEFINITIVE_BRAID_MAPPING[cleaned];
   }
   
   // Try some common variations
@@ -89,8 +102,8 @@ export function getBraidToHarmonicMapping(braidChord: string): string {
   ];
   
   for (const variation of variations) {
-    if (COMPLETE_BRAID_MAPPING[variation]) {
-      return COMPLETE_BRAID_MAPPING[variation];
+    if (DEFINITIVE_BRAID_MAPPING[variation]) {
+      return DEFINITIVE_BRAID_MAPPING[variation];
     }
   }
   
@@ -99,14 +112,13 @@ export function getBraidToHarmonicMapping(braidChord: string): string {
 }
 
 /**
- * Get all mapped braid chords for a given harmonic slot
+ * Get the SINGLE braid chord for a given harmonic slot - STRICT 1:1 mapping
  * @param harmonicSlot The harmonic slot name
- * @returns Array of braid chord symbols that map to this slot
+ * @returns Single braid chord that maps to this slot, or empty array if not found
  */
 export function getHarmonicToBraidMapping(harmonicSlot: string): string[] {
-  return Object.entries(COMPLETE_BRAID_MAPPING)
-    .filter(([_, slot]) => slot === harmonicSlot)
-    .map(([chord, _]) => chord);
+  const braidChord = HARMONIC_TO_BRAID_MAPPING[harmonicSlot];
+  return braidChord ? [braidChord] : [];
 }
 
 // Export the click order for reference
