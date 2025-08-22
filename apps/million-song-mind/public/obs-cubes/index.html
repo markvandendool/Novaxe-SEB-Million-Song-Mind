@@ -29,11 +29,10 @@
 			</select>
 			<label>Set</label>
 			<select id="set-select">
-				<option value="none" selected>None</option>
+				<option value="all" selected>All</option>
 				<option value="major">Major</option>
 				<option value="applied">Applied</option>
 				<option value="minor">Minor</option>
-				<option value="all">All</option>
 			</select>
 			<label>Label</label>
 			<select id="label-mode">
@@ -84,6 +83,13 @@
 		<div class="row small">
 			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
 		</div>
+		<div class="row small" id="color-cal">
+			<label style="margin-right:6px;">Colors</label>
+			<label>Tonic <input type="color" id="color-tonic" value="#62d1e6"></label>
+			<label style="margin-left:8px;">Subdom <input type="color" id="color-sub" value="#6b46c1"></label>
+			<label style="margin-left:8px;">Dominant <input type="color" id="color-dom" value="#ff7a45"></label>
+			<label style="margin-left:8px;">Neutral <input type="color" id="color-neu" value="#bfbfbf"></label>
+		</div>
 	</div>
 	<canvas id="scene"></canvas>
 	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
@@ -101,8 +107,8 @@
 		}
 	}
 	</script>
-	<script type="module" src="./chords.js"></script>
-	<script type="module" src="./main.js"></script>
+	<script type="module" src="./chords.js?v=1"></script>
+	<script type="module" src="./main.js?v=1"></script>
 </body>
 
 </html>

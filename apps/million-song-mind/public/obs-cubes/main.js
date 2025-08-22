@@ -12,9 +12,9 @@ scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
 // Melody/Bass presets – lowered angle by ~10°
 const melodyTarget = new THREE.Vector3(0, 1.4, 0);
-const melodyCamPos = new THREE.Vector3(0, 8.9, 7.04);
+const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5);
 const bassTarget = melodyTarget.clone();
-const bassCamPos = new THREE.Vector3(0, -8.9, 7.04);
+const bassCamPos = new THREE.Vector3(0, -5.8, 11.5);
 camera.position.copy(melodyCamPos);
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
@@ -27,10 +27,18 @@ const dir = new THREE.DirectionalLight(0xffffff, 0.7);
 dir.position.set(3, 5, 4);
 scene.add(dir);
 
-// Grid plane for visual reference (can be hidden in OBS)
+// Grid and legibility darkening plane
 const grid = new THREE.GridHelper(40, 40, 0x444444, 0x333333);
 grid.position.y = -2.2;
 scene.add(grid);
+// Darkening plane that fades in when camera goes below the ground
+const darkPlaneGeo = new THREE.PlaneGeometry(40, 40);
+const darkPlaneMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, depthWrite: false });
+const darkPlane = new THREE.Mesh(darkPlaneGeo, darkPlaneMat);
+darkPlane.rotation.x = -Math.PI / 2;
+darkPlane.position.set(0, 0.001, 0);
+darkPlane.renderOrder = 0; // keep under text
+scene.add(darkPlane);
 
 // Shared geometry
 const cubeSize = 1.2;
@@ -122,10 +130,13 @@ function setViewBelow() {
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    return String(s)
-        .replace(/#/g, '♯')
-        .replace(/([A-Ga-g])b/g, '$1♭')   // Eb → E♭
+    // Tight kerning around accidentals by removing stray spaces and using narrow no-break space
+    const NNBSP = '\u202F';
+    let out = String(s)
+        .replace(/\s*#\s*/g, NNBSP + '♯')
+        .replace(/([A-Ga-g])\s*b/g, '$1' + NNBSP + '♭')   // Eb → E♭ with tight space
         .replace(/\bb(?=(?:\d|[IViv]))/g, '♭'); // b3/bVI → ♭3/♭VI
+    return out;
 }
 
 // Generate a canvas texture for labels (advanced with stacked superscripts)
@@ -233,31 +244,73 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const fill = strokeColor;
 
     // Typography base (Cochin for everything primary)
-    const centerX = size / 2; const baselineY = size / 2 + 24;
-    const baseSize = 440;
+    const centerX = size / 2; const baselineY = size / 2 + 6; // vertical centering
+    const baseSize = 430;
     const cochin = `'Cochin', 'Cochin-Bold', 'Times New Roman', serif`;
-    ctx.save();
-    ctx.fillStyle = fill;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-    ctx.font = `700 ${baseSize}px ${cochin}`;
-    ctx.fillText(basePretty, centerX, baselineY);
-    ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
-    ctx.strokeText(basePretty, centerX, baselineY - 2);
-    ctx.restore();
+    // Special surgical layout for '#ivø' to match template precisely
+    if (romanLabel === '#ivø') {
+        // Base 'iv' centered
+        const baseCore = toMusicalGlyphs('iv');
+        ctx.save();
+        ctx.fillStyle = fill;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
+        ctx.font = `700 ${baseSize}px ${cochin}`;
+        ctx.fillText(baseCore, centerX, baselineY);
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
+        ctx.strokeText(baseCore, centerX, baselineY - 2);
+        ctx.restore();
 
-    // Supers: Finale Numerics (music), large and clear
-    if (supersPretty.length) {
-        const supSize = 240;
-        const supFamily = `900 ${supSize}px 'Finale Numerics', 'Bravura Text', 'Noto Music', 'Cochin', 'Times New Roman', serif`;
-        const rightX = size - 70; let y = 170;
+        // Small sharp before 'i' (upper-left), tightly kerned
+        const sharp = toMusicalGlyphs('#'); // → ♯ with narrow space
+        ctx.save();
+        const sharpSize = Math.round(baseSize * 0.42);
+        ctx.font = `800 ${sharpSize}px ${cochin}`;
+        ctx.fillStyle = fill; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
+        const ivWidth = ctx.measureText(baseCore).width;
+        const sharpX = centerX - ivWidth / 2 - Math.round(sharpSize * 0.08);
+        const sharpY = baselineY - Math.round(baseSize * 0.20);
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
+        ctx.fillText(sharp, sharpX, sharpY);
+        ctx.shadowColor = 'transparent';
+        ctx.restore();
+
+        // ø half-diminished superscript at top-right of the block
+        ctx.save();
+        const hdSize = Math.round(baseSize * 0.34);
+        ctx.font = `900 ${hdSize}px ${cochin}`;
+        ctx.fillStyle = fill; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+        const ivRightX = centerX + ivWidth / 2 + Math.round(hdSize * 0.05);
+        const hdY = baselineY - Math.round(baseSize * 0.55);
+        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
+        ctx.fillText('ø', ivRightX, hdY);
+        ctx.shadowColor = 'transparent';
+        ctx.restore();
+    } else {
+        ctx.save();
+        ctx.fillStyle = fill;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+        ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
+        ctx.font = `700 ${baseSize}px ${cochin}`;
+        ctx.fillText(basePretty, centerX, baselineY);
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
+        ctx.strokeText(basePretty, centerX, baselineY - 2);
+        ctx.restore();
+    }
+
+    // Supers: Finale Numerics (music), large and clear; include ø/º as supers
+    if (supersPretty.length && romanLabel !== '#ivø') {
+        const supSize = 220;
+        const supFamily = `900 ${supSize}px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        const rightX = size - 90; let y = 170;
         for (const token of supersPretty) {
             const text = String(token);
             ctx.save();
             // Light capsule for contrast
             ctx.font = supFamily; const w = ctx.measureText(text).width;
-            const padX = 14, padY = 10; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
+            const padX = 10, padY = 8; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
             ctx.fillStyle = 'rgba(255,255,255,0.12)';
             ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 4;
             ctx.beginPath(); ctx.rect(rectX, rectY, w + padX * 2, supSize + padY * 1.2); ctx.fill(); ctx.stroke();
@@ -267,7 +320,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
             ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
             ctx.font = supFamily; ctx.fillText(text, rightX, y);
             ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 5;
+            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 4;
             ctx.strokeText(text, rightX, y - 1);
             ctx.restore();
             y += supSize * 0.92;
@@ -278,11 +331,12 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const annotation = annotationForRoman(romanLabel);
     if (annotation) {
         const a = toMusicalGlyphs(annotation).replace(/ of /g, ' of ');
-        ctx.font = `800 120px 'Finale Numerics', 'Bravura Text', 'Noto Music', 'Cochin', 'Times New Roman', serif`;
+        ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = fill;
         ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
-        ctx.fillText(`[${a}]`, size / 2, size - 110);
+        const annY = size - 105;
+        ctx.fillText(`[${a}]`, size / 2, annY);
         ctx.shadowColor = 'transparent';
     }
 
@@ -290,6 +344,25 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter;
     tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; return tex;
+}
+
+// Minimal wood panel painter if not present
+function makeWoodPanel(ctx, size) {
+    // soft tan base
+    const grd = ctx.createLinearGradient(0, 0, 0, size);
+    grd.addColorStop(0, '#d5b38a');
+    grd.addColorStop(1, '#b88d5f');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, size, size);
+    // subtle grain lines
+    ctx.strokeStyle = 'rgba(90,60,30,0.08)';
+    ctx.lineWidth = 4;
+    for (let y = 40; y < size; y += 52) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(size * 0.25, y + 6, size * 0.5, y - 6, size, y + 4);
+        ctx.stroke();
+    }
 }
 
 function hexToRgb(hex) {
@@ -351,29 +424,8 @@ function candidatePngNamesForRoman(roman) {
 }
 
 function loadFaceTexture(label, romanLabel) {
-    // Attempt multiple PNG name candidates before falling back to manifest or canvas
-    const candidates = candidatePngNamesForRoman(romanLabel).map(n => `./${encodeURIComponent(n)}`);
-    const tryLoad = (idx) => new Promise((resolve) => {
-        if (idx >= candidates.length) {
-            // Manifest secondary fallback
-            const url = textureManifest && textureManifest[label];
-            if (!url) return resolve(makeFrontLabelTexture(label, romanLabel));
-            const loader2 = new THREE.TextureLoader();
-            loader2.load(url, tex => {
-                tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
-                resolve(tex);
-            }, undefined, () => resolve(makeFrontLabelTexture(label, romanLabel)));
-            return;
-        }
-        const loader = new THREE.TextureLoader();
-        loader.load(candidates[idx], tex => {
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
-            resolve(tex);
-        }, undefined, () => resolve(tryLoad(idx + 1)));
-    });
-    return tryLoad(0);
+    // Always use canvas-rendered texture; no PNGs
+    return makeFrontLabelTextureStyled(label, romanLabel);
 }
 
 function makeCircleDiamondFace(text, color, rotateDeg = 0) {
@@ -490,10 +542,10 @@ function makeShelfTexture() {
     }
     // REST centered at top center of the top circle (anchor ~ -90°)
     drawCurvedWord('REST', top.x, top.y, top.r - 22, -Math.PI / 2, { fill: '#223', spacingDeg: 14 });
-    // MOTION centered around ~2 o'clock on the right circle (anchor ~ 30°)
-    drawCurvedWord('MOTION', right.x, right.y, right.r - 28, Math.PI / 6, { fill: '#222', spacingDeg: 12 });
-    // TENSION centered around ~10 o'clock on the left circle (anchor ~ 150°)
-    drawCurvedWord('TENSION', left.x, left.y, left.r - 28, (5 * Math.PI) / 6, { fill: '#222', spacingDeg: 12 });
+    // MOTION centered around ~2 o'clock on the right circle (anchor ~ 60°)
+    drawCurvedWord('MOTION', right.x, right.y, right.r - 28, Math.PI / 3, { fill: '#222', spacingDeg: 12 });
+    // TENSION centered around ~10 o'clock on the left circle (anchor ~ 120°)
+    drawCurvedWord('TENSION', left.x, left.y, left.r - 28, (2 * Math.PI) / 3, { fill: '#222', spacingDeg: 12 });
     const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
 }
 
@@ -567,6 +619,7 @@ function addEpicTitles() {
         // readable from below: flip to face downward without mirroring
         bassMesh.rotation.x = Math.PI / 2;
         bassMesh.position.set(0, 0.002, 2.8);
+        bassMesh.renderOrder = 1; // draw after darkening plane
         scene.add(bassMesh);
     }
 }
@@ -617,19 +670,66 @@ let shelfSlots = {
     'II': new THREE.Vector3(3.2, shelfY - 0.7, shelfZ),
     'VII': new THREE.Vector3(-3.2, shelfY - 0.7, shelfZ),
 };
+// Color families (approximated from reference image; can be overridden later)
+let COLOR_TONIC = 0x62d1e6;      // cyan/teal for I/vi family
+let COLOR_SUBDOMINANT = 0x6b46c1; // purple for IV/ii family
+let COLOR_DOMINANT = 0xff7a45;    // coral/orange for V/VII family
+let COLOR_NEUTRAL = 0xbfbfbf;     // grey for iii and unclassified
+
+// Locked exact colors derived from template PNGs (border/text)
+// Major
 const borderColorByRoman = {
-    'I': 0x7fdfff, 'vi': 0x7fdfff, 'I7': 0x7fdfff,
-    'IV': 0x6f42c1, 'ii': 0x6f42c1, 'iv': 0x6f42c1, '#ivø': 0x6f42c1,
-    'V': 0xff7f50, 'viiø': 0xff7f50, '#vº': 0xff7f50, 'VII': 0xff7f50,
-    'iii': 0xbfbfbf,
+    'I': 0x52b9d5,
+    'ii': 0x44255c,
+    'iii': 0x8caaaa,
+    'IV': 0x623978,
+    'V': 0xe28a5a,
+    'vi': 0x6c9cc4,
+    'viiø': 0xc24a2e,
+    // Applied
+    'I7': 0xa4324a,
+    'iiiø': 0xba5847,
+    'II(7)': 0xad6f71,
+    '#ivø': 0xad6f71,
+    'III(7)': 0xaf505d,
+    '#vº': 0xad6f71,
+    'VI(7)': 0xad6f71,
+    '#iº': 0xad6f71,
+    'VII(7)': 0xb3394a,
+    '#iiº': 0xad6f71,
+    // Minor
+    'i': 0x409abe,
+    'iiø': 0xba5847,
+    'bIII': 0x6673ab,
+    'iv': 0x884a7c,
+    'v': 0xab8c71,
+    'bVI': 0x5f5199,
+    'bVII': 0xb77046,
+    'V(7)(b9)': 0xe28a5a, // paired to dominant neighbor
+    'viiº7': 0xc24a2e,
+    // Extras present in assets, map reasonably
+    'viio': 0xc24a2e,
+    'VII': 0xe28a5a
 };
 function borderColorForRoman(roman) {
     if (borderColorByRoman[roman]) return borderColorByRoman[roman];
-    // Family heuristics to match legacy PNG palette
-    if (/IV|iv|\bii\b|#iv/.test(roman)) return 0x6f42c1; // purple family
-    if (/\bV\b|\bv\b|VII|#v/.test(roman)) return 0xff7f50; // coral dominants
-    if (/\bI\b|\bvi\b|I7/.test(roman)) return 0x7fdfff; // cyan tonics
-    return 0xbfbfbf; // neutral
+    // Applied-chord: color by target of annotation ([... of X]) so ø/º match their neighbor in the stack
+    const ann = annotationForRoman(roman);
+    if (ann) {
+        const m = ann.match(/ of ([IViv]+|vi|iii)/);
+        const target = m && m[1] ? m[1] : null;
+        if (target) {
+            if (/^(IV|iv|ii)$/.test(target)) return COLOR_SUBDOMINANT;
+            if (/^(V|v|VII)$/.test(target)) return COLOR_DOMINANT;
+            if (/^(I|vi)$/.test(target)) return COLOR_TONIC;
+            if (/^(iii)$/.test(target)) return COLOR_NEUTRAL;
+        }
+    }
+    // Family heuristics fallback
+    if (/IV|iv|\bii\b|#iv/.test(roman)) return COLOR_SUBDOMINANT;
+    if (/\bV\b|\bv\b|VII|#v/.test(roman)) return COLOR_DOMINANT;
+    if (/\bI\b|\bvi\b|I7/.test(roman)) return COLOR_TONIC;
+    return COLOR_NEUTRAL;
 }
 const shelfCubes = [];
 let scaleByRoman = {
@@ -891,6 +991,11 @@ async function loadSet(setName) {
         'I7', 'iiiø', 'II(7)', '#ivø', 'III(7)', '#vº', 'VI(7)', '#iº', 'VII(7)', '#iiº'
     ];
     for (const r of shelfRomans) await createShelfCube(r);
+    // Safety: ensure visibility and repopulate if something went wrong
+    if (shelfCubes.length === 0) {
+        for (const r of shelfRomans) await createShelfCube(r);
+    }
+    for (const s of shelfCubes) { s.visible = true; }
     // Start with empty front row
     lineup = [];
 }
@@ -1107,6 +1212,13 @@ function onPointerUp(e) {
                 if (h.object === pendingObj || h.object === pendingObj.userData?.overlay || h.object.parent === pendingObj) { hit = h; break; }
             }
             if (hit) {
+                // Prioritize center play, then overlay/front, then faces
+                let centerHit = null;
+                for (const h of hits) { if (h.object?.userData?.isCenterPlay && h.object.userData.parent === pendingObj) { centerHit = h; break; } }
+                if (centerHit) {
+                    playChordForObject(pendingObj);
+                    pendingObj = null; return;
+                }
                 const isOverlay = (hit.object === pendingObj.userData?.overlay || hit.object.parent === pendingObj);
                 const normalZ = isOverlay ? 1 : (hit.face?.normal?.z ?? 0);
                 if (Math.abs(normalZ - 1) < 0.5) {
@@ -1127,6 +1239,45 @@ function onPointerUp(e) {
                         playChordForObject(pendingObj);
                     }
                     pendingObj.userData.rotationIndex = ((pendingObj.userData.rotationIndex % 4) + 4) % 4;
+                } else if (hit.face) {
+                    // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
+                    const normalLocal = hit.face.normal.clone();
+                    const normalWorld = normalLocal.transformDirection(pendingObj.matrixWorld);
+                    const up = new THREE.Vector3(0, 1, 0);
+                    const dotY = normalWorld.dot(up);
+                    const right = new THREE.Vector3(1, 0, 0);
+                    const dotX = normalWorld.dot(right);
+                    const tones = noteSetsC[pendingObj.userData.roman] || ['C', 'E', 'G', 'B'];
+                    const names = transposeNotes(tones, currentKey);
+                    const r = ((pendingObj.userData.rotationIndex || 0) % 4 + 4) % 4;
+                    let voice = 'chord';
+                    let idx = r; // default
+                    if (dotY < -0.8) { voice = 'bass'; idx = r; } // bottom face
+                    else if (dotY > 0.8) { voice = 'melody'; idx = (r + 2) % 4; } // top face
+                    else if (dotX > 0.8) { voice = 'chord'; idx = (r + 1) % 4; } // right
+                    else if (dotX < -0.8) { voice = 'chord'; idx = (r + 3) % 4; } // left
+                    const fi = hit.face.materialIndex;
+                    const mat = Array.isArray(pendingObj.material) ? pendingObj.material[fi] : pendingObj.material;
+                    const pulse = () => {
+                        if (!mat || !mat.color) return;
+                        const orig = mat.color.getHex(); mat.color.setHex(0xffff66);
+                        setTimeout(() => { mat.color.setHex(orig); }, 140);
+                    };
+                    pulse();
+                    const t0 = ensureAudio().currentTime;
+                    if (voice === 'bass') {
+                        const midi = getBassMidiForObject(pendingObj);
+                        if (sfBass && sfBass.play) sfBass.play(midi, t0, { duration: 0.45, gain: 0.34 });
+                        else { const ctx = ensureAudio(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sawtooth'; o.frequency.value = midiToFreq(midi); o.connect(g).connect(ctx.destination); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.32, t0 + 0.02); g.gain.linearRampToValueAtTime(0, t0 + 0.45); o.start(t0); o.stop(t0 + 0.47); }
+                    } else if (voice === 'melody') {
+                        const midi = getMelodyMidiForObject(pendingObj);
+                        if (sfMelody && sfMelody.play) sfMelody.play(midi, t0, { duration: 0.45, gain: 0.32 });
+                        else { const ctx = ensureAudio(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'square'; o.frequency.value = midiToFreq(midi); o.connect(g).connect(ctx.destination); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.3, t0 + 0.02); g.gain.linearRampToValueAtTime(0, t0 + 0.45); o.start(t0); o.stop(t0 + 0.47); }
+                    } else {
+                        const midi = 60 + pcOf(names[idx]);
+                        if (sfChord && sfChord.play) sfChord.play(midi, t0, { duration: 0.4, gain: 0.22 });
+                        else { const ctx = ensureAudio(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.type = 'sine'; o.frequency.value = midiToFreq(midi); o.connect(g).connect(ctx.destination); g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.2, t0 + 0.02); g.gain.linearRampToValueAtTime(0, t0 + 0.4); o.start(t0); o.stop(t0 + 0.42); }
+                    }
                 }
             }
         }
@@ -1187,6 +1338,15 @@ function addQuadrantOverlay(parentCube) {
     parentCube.add(overlay);
     parentCube.userData.overlay = overlay;
     overlay.userData = { isOverlay: true, parent: parentCube };
+    // Center play circle (half the face width); never triggers rotation
+    const radius = (1.15 * 0.5) / 2; // half the square width
+    const circleGeom = new THREE.CircleGeometry(radius, 48);
+    const circleMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, side: THREE.DoubleSide });
+    const centerCircle = new THREE.Mesh(circleGeom, circleMat);
+    centerCircle.position.set(0, 0, (cubeSize / 2) + 0.0035);
+    centerCircle.userData = { isCenterPlay: true, parent: parentCube };
+    parentCube.add(centerCircle);
+    parentCube.userData.centerPlay = centerCircle;
 }
 
 function animateYZToFrontRow(obj, duration = 350) {
@@ -1315,6 +1475,7 @@ const chordInstEl = document.getElementById('chord-inst');
 const bassInstEl = document.getElementById('bass-inst');
 const melodyInstEl = document.getElementById('melody-inst');
 const playProgBtn = document.getElementById('play-progression');
+const resetBtn = document.getElementById('reset-btn');
 // Initialize labelMode from current UI so startup respects it
 labelMode = labelSelect ? labelSelect.value : labelMode;
 withSeventh = !!(with7th && with7th.checked);
@@ -1330,10 +1491,36 @@ chordInstEl?.addEventListener('change', async () => { chordInst = chordInstEl.va
 bassInstEl?.addEventListener('change', async () => { bassInst = bassInstEl.value; await loadInstruments(); });
 melodyInstEl?.addEventListener('change', async () => { melodyInst = melodyInstEl.value; await loadInstruments(); });
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
+resetBtn?.addEventListener('click', () => {
+    // Return all active cubes to their shelf origin and clear lineup
+    for (const c of [...lineup]) {
+        const r = c.userData.roman;
+        const origin = shelfOriginByRoman[r];
+        if (origin?.position) {
+            c.position.copy(origin.position);
+            c.scale.setScalar(origin.scale ?? c.scale.x);
+        } else {
+            c.position.set((shelfSlots[r] || new THREE.Vector3()).x, (shelfSlots[r] || new THREE.Vector3()).y, shelfZ);
+        }
+        c.userData.isShelf = true;
+        if (!shelfCubes.includes(c)) shelfCubes.push(c);
+        const ci = cubes.indexOf(c); if (ci >= 0) cubes.splice(ci, 1);
+    }
+    lineup = [];
+});
 
 setSelect.addEventListener('change', () => {
-    currentSet = setSelect.value;
-    loadSet(currentSet);
+    // Toggle shelf visibility only; default shows all
+    const val = setSelect.value;
+    currentSet = val;
+    const show = new Set();
+    if (val === 'major') chordSetsC.major.forEach(c => show.add(c.roman));
+    else if (val === 'minor') chordSetsC.minor.forEach(c => show.add(c.roman));
+    else if (val === 'applied') chordSetsC.applied.forEach(c => show.add(c.roman));
+    else {
+        [...chordSetsC.major, ...chordSetsC.minor, ...chordSetsC.applied].forEach(c => show.add(c.roman));
+    }
+    for (const s of shelfCubes) { s.visible = show.has(s.userData.roman); }
 });
 
 labelSelect.addEventListener('change', () => {
@@ -1385,7 +1572,33 @@ window.addEventListener('resize', onResize);
 
 // Initial: start immediately with canvas-rendered labels (no PNG manifest)
 textureManifest = null;
-(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); await loadInstruments(); setViewAbove(); })();
+(async () => {
+    await ensureFontsLoaded();
+    currentSet = 'all';
+    await loadSet(currentSet);
+    // Ensure shelf is visible by default
+    for (const s of shelfCubes) s.visible = true;
+    await updateLabels();
+    await loadInstruments();
+    setViewAbove();
+    // Color calibrators
+    const tonicEl = document.getElementById('color-tonic');
+    const subEl = document.getElementById('color-sub');
+    const domEl = document.getElementById('color-dom');
+    const neuEl = document.getElementById('color-neu');
+    const applyColors = async () => {
+        const hexToInt = (hex) => parseInt(hex.replace('#', ''), 16);
+        if (tonicEl?.value) COLOR_TONIC = hexToInt(tonicEl.value);
+        if (subEl?.value) COLOR_SUBDOMINANT = hexToInt(subEl.value);
+        if (domEl?.value) COLOR_DOMINANT = hexToInt(domEl.value);
+        if (neuEl?.value) COLOR_NEUTRAL = hexToInt(neuEl.value);
+        await updateLabels();
+    };
+    tonicEl?.addEventListener('change', applyColors);
+    subEl?.addEventListener('change', applyColors);
+    domEl?.addEventListener('change', applyColors);
+    neuEl?.addEventListener('change', applyColors);
+})();
 
 // Animation loop
 function animate() {
@@ -1405,9 +1618,9 @@ function animate() {
     if (melodyMat && bassMat) {
         const toTarget = camera.position.clone().sub(controls.target);
         const horiz = Math.hypot(toTarget.x, toTarget.z);
-        const angle = Math.atan2(Math.abs(toTarget.y), horiz); // radians above/below plane
-        const deg = angle * (180 / Math.PI);
-        const t = Math.min(1, deg / 30);
+        const angle = Math.atan2(toTarget.y, horiz); // signed radians (positive above, negative below)
+        const absDeg = Math.abs(angle) * (180 / Math.PI);
+        const t = Math.min(1, absDeg / 30);
         const alpha = 0.4 * t;
         if (toTarget.y >= 0) { // above plane
             melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
@@ -1421,6 +1634,18 @@ function animate() {
         shelfPlane.material.opacity = Math.max(shelfPlane.material.opacity ?? 0, belowAlpha);
         // When above plane, keep the original texture fully visible (no forced fade)
         if (belowAlpha === 0) shelfPlane.material.opacity = 1.0;
+    }
+    // Darkening plane: smoothly increase up to 0.20 opacity at -25° and below
+    if (darkPlane && darkPlane.material) {
+        const toTarget = camera.position.clone().sub(controls.target);
+        const horiz = Math.hypot(toTarget.x, toTarget.z);
+        const angle = Math.atan2(toTarget.y, horiz); // signed
+        let darkT = 0;
+        if (angle < 0) {
+            const deg = Math.abs(angle) * (180 / Math.PI);
+            darkT = Math.min(1, deg / 25);
+        }
+        darkPlane.material.opacity = 0.20 * darkT;
     }
     // Subtle shimmer for background title (non-intrusive)
     if (bgTitleMesh && bgTitleMesh.material) {
@@ -1488,6 +1713,14 @@ function enforceRestZones() {
             // Front row exact plane
             c.position.y = 0;
             c.position.z = 0;
+            // Snap rotation to nearest 90° around Z
+            const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
+            const z = e.z;
+            const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
+            if (Math.abs(snappedZ - z) > 1e-3) {
+                const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
+                c.quaternion.copy(q);
+            }
         } else if (c.userData?.isShelf) {
             // Exact shelf origin if available
             const r = c.userData.roman;
@@ -1495,6 +1728,8 @@ function enforceRestZones() {
             if (origin?.position) {
                 c.position.copy(origin.position);
                 c.scale.setScalar(origin.scale ?? c.scale.x);
+                // Ensure shelf rotation restored
+                if (origin.quaternion) c.quaternion.copy(origin.quaternion);
             } else {
                 c.position.z = shelfZ;
             }
@@ -1511,51 +1746,60 @@ function parseNoteName(name) {
     const n = name.replace(/[^A-G#b]/g, '');
     const idx = NOTE_INDEX[n] ?? 0; return { idx, octave: 4 };
 }
-function getFaceOrder(rotationIndex, includeSeventh) {
-    const r = ((rotationIndex % 4) + 4) % 4;
-    const b = r; // bottom
-    const right = (r + 1) % 4;
-    const top = (r + 2) % 4;
-    const left = (r + 3) % 4; // 7th face
-    if (includeSeventh) return [b, right, left, top];
-    return [b, right, top];
-}
-function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
-    const ctx = ensureAudio();
+// Pitch-class helpers
+function pcOf(name) { return parseNoteName(name).idx; }
+function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
+
+// Chord bed: lock voices into C4..C5 regardless of chord
+function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const order = getFaceOrder(rotationIndex || 0, includeSeventh);
-    // Map to ascending MIDI
-    const baseOct = 4;
-    const midiOf = (name) => {
-        const { idx, octave } = parseNoteName(name);
-        return idx + 12 * (octave || baseOct);
-    };
-    const semis = order.map(i => midiOf(names[i]));
-    const asc = [];
-    let prev = semis[0];
-    asc.push(prev);
-    for (let k = 1; k < semis.length; k++) {
-        let m = semis[k];
-        while (m < prev) m += 12;
-        asc.push(m);
-        prev = m;
-    }
-    return asc.map(m => 440 * Math.pow(2, (m - (9 + 12 * 4)) / 12));
+    const use = includeSeventh ? names.slice(0, 4) : names.slice(0, 3);
+    const baseC4 = 60; // MIDI C4
+    const midis = use.map(n => baseC4 + pcOf(n));
+    midis.sort((a, b) => a - b);
+    // Ensure within [60, 71]
+    return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+}
+
+// Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
+function getBassMidiForObject(obj) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const rootPc = pcOf(names[0]);
+    const bottomPc = pcOf(names[r]);
+    const baseC2 = 36; // low register
+    const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
+    const diff = (bottomPc - rootPc + 12) % 12;
+    return rootBaseMidi + diff; // within one octave above root
+}
+
+// Melody: map top-face tone into a higher octave anchored to the chord root
+function getMelodyMidiForObject(obj) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const rootPc = pcOf(names[0]);
+    const topPc = pcOf(names[(r + 2) % 4]);
+    const baseC5 = 72; // higher register
+    const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
+    const diff = (topPc - rootPc + 12) % 12;
+    return rootBaseMidi + diff;
 }
 function playChordForObject(obj) {
     const ctx = ensureAudio();
-    const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
     const now = ctx.currentTime;
-    const duration = 1.25;
+    const duration = 1.1;
 
     // Master
-    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
 
     // Layers
-    const chordBus = ctx.createGain(); chordBus.gain.value = 0.22; chordBus.connect(master);
-    const bassBus = ctx.createGain(); bassBus.gain.value = 0.28; bassBus.connect(master);
-    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.24; melodyBus.connect(master);
+    const chordBus = ctx.createGain(); chordBus.gain.value = 0.18; chordBus.connect(master);
+    const bassBus = ctx.createGain(); bassBus.gain.value = 0.3; bassBus.connect(master);
+    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.26; melodyBus.connect(master);
 
     // Envelope helper
     const env = (g, t0, d) => {
@@ -1565,39 +1809,44 @@ function playChordForObject(obj) {
         g.gain.linearRampToValueAtTime(0.0, t0 + d);
     };
 
-    // Determine bottom/top for bass/melody layers
-    const lowest = freqsAsc[0];
-    const highest = freqsAsc[freqsAsc.length - 1];
-
-    // Chord bed (triad or with 7th) – same set regardless of inversion, just pitched ascending
-    freqsAsc.forEach((f, i) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = i === 3 ? 'triangle' : 'sine';
-        osc.frequency.value = f;
-        osc.connect(g).connect(chordBus);
-        const t0 = now;
-        const d = duration;
-        env(g, t0, d);
-        osc.start(t0); osc.stop(t0 + d + 0.02);
-    });
-
-    // Bass layer – lowest face
-    if (lowest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.value = lowest;
-        osc.connect(g).connect(bassBus);
-        env(g, now, duration);
-        osc.start(now); osc.stop(now + duration + 0.02);
+    // Chord bed: locked octave C4..C5
+    const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
+    if (sfChord && sfChord.play) {
+        chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+    } else {
+        chordMidis.forEach((m, i) => {
+            const f = midiToFreq(m);
+            const osc = ctx.createOscillator(); const g = ctx.createGain();
+            osc.type = i === 3 ? 'triangle' : 'sine';
+            osc.frequency.value = f; osc.connect(g).connect(chordBus);
+            env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
+        });
     }
 
-    // Melody layer – top face
-    if (highest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'square'; osc.frequency.value = highest;
-        osc.connect(g).connect(melodyBus);
-        env(g, now, duration);
-        osc.start(now); osc.stop(now + duration + 0.02);
+    // Bass: bottom face within one octave above chord root
+    if (bassEnabled) {
+        const bassMidi = getBassMidiForObject(obj);
+        if (sfBass && sfBass.play) {
+            sfBass.play(bassMidi, now, { duration, gain: 0.34 });
+        } else {
+            const osc = ctx.createOscillator(); const g = ctx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.value = midiToFreq(bassMidi);
+            osc.connect(g).connect(bassBus); env(g, now, duration);
+            osc.start(now); osc.stop(now + duration + 0.02);
+        }
+    }
+
+    // Melody: top face anchored higher
+    if (melodyEnabled) {
+        const melMidi = getMelodyMidiForObject(obj);
+        if (sfMelody && sfMelody.play) {
+            sfMelody.play(melMidi, now, { duration, gain: 0.3 });
+        } else {
+            const osc = ctx.createOscillator(); const g = ctx.createGain();
+            osc.type = 'square'; osc.frequency.value = midiToFreq(melMidi);
+            osc.connect(g).connect(melodyBus); env(g, now, duration);
+            osc.start(now); osc.stop(now + duration + 0.02);
+        }
     }
 }
 
@@ -1694,7 +1943,7 @@ async function playFrontRowProgression() {
         const c = lineup[i];
         playChordForObject(c);
         addProgressionPointFromCube(c);
-        await new Promise(r => setTimeout(r, 450));
+        await new Promise(r => setTimeout(r, 2000));
     }
 }
 
