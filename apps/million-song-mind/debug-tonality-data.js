@@ -50,12 +50,12 @@ console.log('==========================================');
 
 allArrays.forEach(({ name, data }) => {
   if (!data) return;
-  
+
   const cChords = data.filter(chord => {
     const chordStr = String(chord);
     return chordStr.includes('C') || chordStr.includes('c');
   });
-  
+
   if (cChords.length > 0) {
     console.log(`📍 ${name}: [${cChords.join(', ')}]`);
   }
@@ -65,7 +65,7 @@ allArrays.forEach(({ name, data }) => {
 if (tonalities.roman) {
   console.log('\n🏛️ ROMAN NUMERAL ARRAYS:');
   console.log('==========================================');
-  
+
   const romanArrays = [
     { name: 'center_major', data: tonalities.roman.center_major },
     { name: 'center_minor', data: tonalities.roman.center_minor },
@@ -81,12 +81,12 @@ if (tonalities.roman) {
 
   romanArrays.forEach(({ name, data }) => {
     if (!data) return;
-    
+
     const cChords = data.filter(chord => {
       const chordStr = String(chord);
       return chordStr.includes('I') || chordStr.includes('i');
     });
-    
+
     if (cChords.length > 0) {
       console.log(`📍 ${name}: [${cChords.join(', ')}]`);
     }
@@ -98,7 +98,7 @@ console.log('==========================================');
 console.log('If multiple chord arrays contain different C chords like:');
 console.log('  - C (from center_major)');
 console.log('  - CFr (from somewhere)');
-console.log('  - C7 (from applied chords)');  
+console.log('  - C7 (from applied chords)');
 console.log('  - C#º (from diminished)');
 console.log('');
 console.log('Then when selectedChords = ["C"], isSelected() will return true for ALL of them!');

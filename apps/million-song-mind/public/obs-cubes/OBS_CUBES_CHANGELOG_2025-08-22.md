@@ -1,3 +1,13 @@
+## 2025-08-22 (later)
+
+- Locked per‑chord border/text hex colors to template‑extracted values (I/ii/iii/IV/V/vi/viiø; applied; minor), eliminating family ambiguity.
+- Removed legacy `makeFrontLabelTexture`; styled canvas renderer is now the single source of truth for front faces.
+- Font loader hardened: loads serif + Noto Music and waits on weights before texture generation to avoid fallbacks.
+- Curved shelf labels use stable string spread (`const chars = [...word]`) with tuned anchors for REST/MOTION/TENSION.
+- Reverted global accidental/ø repositioning; kept precise `#ivø` surgical alignment only.
+- Restored Adjust mode behavior: shelf cubes are freely movable/scalable while editing; positions persist to localStorage and can be exported via Save Map.
+- Restored `Shelf Map Official.json` to canonical layout (pre‑symmetry); only applied stack was previously trialed and is now rolled back.
+
 # OBS Cubes – Changelog (2025‑08‑22)
 
 ## Summary

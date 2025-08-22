@@ -74,7 +74,7 @@ Object.entries(allBubbleArrays).forEach(([arrayName, bubbles]) => {
     totalBubbles++;
     const isThisBubbleSelected = selectedChords.includes(bubble);
     if (isThisBubbleSelected) selectedBubbles++;
-    
+
     const status = isThisBubbleSelected ? '✅ SELECTED' : '  ';
     console.log(`  [${i}] "${bubble}" ${status}`);
   });

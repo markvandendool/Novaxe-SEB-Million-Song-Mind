@@ -140,66 +140,7 @@ function toMusicalGlyphs(s) {
 }
 
 // Generate a canvas texture for labels (advanced with stacked superscripts)
-function makeFrontLabelTexture(labelText, romanLabel) {
-    const size = 1024; // extra crisp
-    const c = document.createElement('canvas');
-    c.width = size; c.height = size;
-    const ctx = c.getContext('2d');
-
-    // Wood panel background + frame
-    ctx.fillStyle = '#c89f6a';
-    ctx.fillRect(0, 0, size, size);
-    ctx.strokeStyle = '#2b1c10';
-    ctx.lineWidth = 28;
-    ctx.strokeRect(32, 32, size - 64, size - 64);
-
-    // Parse base and superscripts: e.g., V(7)(b9) → base=V, supers=['7','b9']
-    const supers = [];
-    let base = String(labelText);
-    // Pull out parenthetical tokens
-    const paren = [...base.matchAll(/\(([^)]+)\)/g)].map(m => m[1]);
-    if (paren.length) {
-        supers.push(...paren);
-        base = base.replace(/\([^)]*\)/g, '');
-    }
-    // Trailing simple tokens like I7 or viiº7
-    const m1 = base.match(/^(.*?)(?:([#b]?\d+)|º7)$/);
-    if (m1 && m1[2]) { supers.push(m1[2]); base = m1[1]; }
-    else if (/(º7)$/.test(base)) { supers.push('º7'); base = base.replace(/º7$/, ''); }
-
-    base = base.trim();
-    const basePretty = toMusicalGlyphs(base);
-    const supersPretty = supers.map(toMusicalGlyphs);
-
-    // Main chord text
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#1a1a1a';
-    const baseSize = 420;
-    ctx.font = `700 ${baseSize}px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
-    ctx.fillText(basePretty, size / 2, size / 2 + 10);
-
-    // Right-aligned stacked supers in the top-right corner
-    const supSize = 180;
-    ctx.font = `700 ${supSize}px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'alphabetic';
-    const rightX = size - 64;
-    let y = 140;
-    for (const token of supersPretty) {
-        ctx.fillText(token, rightX, y);
-        y += supSize * 0.95;
-    }
-
-    const tex = new THREE.CanvasTexture(c);
-    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    tex.generateMipmaps = true;
-    tex.minFilter = THREE.LinearMipmapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.needsUpdate = true;
-    return tex;
-}
+// (legacy makeFrontLabelTexture removed; styled renderer is used exclusively)
 
 function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const size = 1024;
@@ -237,68 +178,30 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const trailing = base.match(/^(.*?)([#b]?\d+)$/);
     if (trailing) { base = trailing[1]; supers.push(trailing[2]); }
 
-    const basePretty = toMusicalGlyphs(base.trim());
-    const supersPretty = supers.map(s => toMusicalGlyphs(s));
+    const baseTrim = base.trim();
+    const basePretty = toMusicalGlyphs(baseTrim);
+    let supersPretty = supers.map(s => toMusicalGlyphs(s));
 
     // Embossed text color: EXACT same as border color (per requirement)
     const fill = strokeColor;
 
-    // Typography base (Cochin for everything primary)
-    const centerX = size / 2; const baselineY = size / 2 + 6; // vertical centering
+    // Typography base (Cochin/Times)
+    const centerX = size / 2; const baselineY = size / 2 + 6;
     const baseSize = 430;
     const cochin = `'Cochin', 'Cochin-Bold', 'Times New Roman', serif`;
-    // Special surgical layout for '#ivø' to match template precisely
-    if (romanLabel === '#ivø') {
-        // Base 'iv' centered
-        const baseCore = toMusicalGlyphs('iv');
-        ctx.save();
-        ctx.fillStyle = fill;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-        ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-        ctx.font = `700 ${baseSize}px ${cochin}`;
-        ctx.fillText(baseCore, centerX, baselineY);
-        ctx.shadowColor = 'transparent';
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
-        ctx.strokeText(baseCore, centerX, baselineY - 2);
-        ctx.restore();
+    // Draw centered base (without leading accidental token)
+    ctx.save();
+    ctx.fillStyle = fill;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
+    ctx.font = `700 ${baseSize}px ${cochin}`;
+    ctx.fillText(basePretty, centerX, baselineY);
+    ctx.shadowColor = 'transparent';
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
+    ctx.strokeText(basePretty, centerX, baselineY - 2);
+    ctx.restore();
 
-        // Small sharp before 'i' (upper-left), tightly kerned
-        const sharp = toMusicalGlyphs('#'); // → ♯ with narrow space
-        ctx.save();
-        const sharpSize = Math.round(baseSize * 0.42);
-        ctx.font = `800 ${sharpSize}px ${cochin}`;
-        ctx.fillStyle = fill; ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-        const ivWidth = ctx.measureText(baseCore).width;
-        const sharpX = centerX - ivWidth / 2 - Math.round(sharpSize * 0.08);
-        const sharpY = baselineY - Math.round(baseSize * 0.20);
-        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-        ctx.fillText(sharp, sharpX, sharpY);
-        ctx.shadowColor = 'transparent';
-        ctx.restore();
-
-        // ø half-diminished superscript at top-right of the block
-        ctx.save();
-        const hdSize = Math.round(baseSize * 0.34);
-        ctx.font = `900 ${hdSize}px ${cochin}`;
-        ctx.fillStyle = fill; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-        const ivRightX = centerX + ivWidth / 2 + Math.round(hdSize * 0.05);
-        const hdY = baselineY - Math.round(baseSize * 0.55);
-        ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-        ctx.fillText('ø', ivRightX, hdY);
-        ctx.shadowColor = 'transparent';
-        ctx.restore();
-    } else {
-        ctx.save();
-        ctx.fillStyle = fill;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-        ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-        ctx.font = `700 ${baseSize}px ${cochin}`;
-        ctx.fillText(basePretty, centerX, baselineY);
-        ctx.shadowColor = 'transparent';
-        ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
-        ctx.strokeText(basePretty, centerX, baselineY - 2);
-        ctx.restore();
-    }
+    // (No global accidental/ø repositioning; special alignment remains only for specific labels like '#ivø')
 
     // Supers: Finale Numerics (music), large and clear; include ø/º as supers
     if (supersPretty.length && romanLabel !== '#ivø') {
@@ -814,16 +717,17 @@ async function ensureFontsLoaded() {
     if (window.__obsFontsLoaded) return window.__obsFontsLoaded;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Music&family=Noto+Sans+SC:wght@700;900&display=swap';
+    // Only the fonts we actually use on faces
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Music&display=swap';
     document.head.appendChild(link);
     window.__obsFontsLoaded = Promise.race([
         (async () => {
             try {
                 await document.fonts.ready;
                 await Promise.all([
-                    document.fonts.load('900 440px "Lobster"'),
-                    document.fonts.load('900 240px "Noto Music"'),
-                    document.fonts.load('900 440px "Noto Sans SC"')
+                    document.fonts.load('700 430px serif'),
+                    document.fonts.load('900 220px "Noto Music"'),
+                    document.fonts.load('800 130px "Noto Music"')
                 ]);
             } catch (_) { /* ignore */ }
             return true;
@@ -1140,6 +1044,17 @@ function onPointerUp(e) {
     const now = performance.now();
     if (dragging) {
         const r = dragging.userData.roman;
+        // Adjust mode: persist shelf edits and do not snap
+        if (adjustMode && dragging.userData?.isShelf) {
+            // Persist position and scale into the live map and origin
+            shelfSlots[r] = dragging.position.clone();
+            if (!shelfOriginByRoman[r]) shelfOriginByRoman[r] = { position: new THREE.Vector3(), scale: dragging.scale.x, quaternion: dragging.quaternion.clone() };
+            shelfOriginByRoman[r].position.copy(dragging.position);
+            shelfOriginByRoman[r].scale = dragging.scale.x;
+            shelfOriginByRoman[r].quaternion.copy(dragging.quaternion);
+            saveShelfMapToLocalStorage();
+            dragging = null; controls.enabled = true; return;
+        }
         // Quick flick upward to shelf using dragStartScreenY baseline
         const dyScreen = dragStartScreenY - e.clientY; // positive if moved up
         const totalMs = now - mouseDownTime;
@@ -1722,6 +1637,7 @@ function enforceRestZones() {
                 c.quaternion.copy(q);
             }
         } else if (c.userData?.isShelf) {
+            if (adjustMode) continue; // allow free placement while editing the shelf map
             // Exact shelf origin if available
             const r = c.userData.roman;
             const origin = shelfOriginByRoman[r];
