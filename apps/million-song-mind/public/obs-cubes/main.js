@@ -10,6 +10,9 @@ import { setupDiagnostics } from './diagnosticsOverlay.js'
 import { createBridge } from './integration/bridge.js'
 import { setState } from './stateStore.js'
 
+// Default Soundfont CDN (override via ?sf=...)
+try { setSfBase('https://gleitz.github.io/midi-js-soundfonts/MusyngKite'); } catch (_) { }
+
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
