@@ -37,3 +37,5 @@
 - `main.js`: interaction/audio/loop fixes; arrows; play circle; toggles; instruments.
 - `index.html`: controls for toggles, instruments, Soundfont‑Player include; Play Progression button.
 - `OBS_CUBES_TECH_REPORT.md`: prior technical details.
+
+- Orchestral defaults: chord=string_ensemble_1, bass=contrabass, melody=violin; instrument dropdowns reloading Soundfont voices live.

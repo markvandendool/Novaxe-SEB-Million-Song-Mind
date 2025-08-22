@@ -1163,6 +1163,8 @@ function isPointerOverShelf(e) {
 }
 
 function onPointerDown(e) {
+    // Only honor left-click for selections/drags
+    if (typeof e.button === 'number' && e.button !== 0) return;
     const rect = renderer.domElement.getBoundingClientRect();
     mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
     mouseDownTime = performance.now();
@@ -1678,15 +1680,18 @@ let audioCtx = null;
 let withSeventh = false;
 let bassEnabled = true;
 let melodyEnabled = false;
-let chordInst = 'acoustic_grand_piano';
-let bassInst = 'acoustic_bass';
-let melodyInst = 'flute';
+let chordInst = 'string_ensemble_1';
+let bassInst = 'contrabass';
+let melodyInst = 'violin';
 let sfChord = null, sfBass = null, sfMelody = null;
 async function loadInstruments() {
     try {
         const ac = ensureAudio();
         const res = await ensureInstruments(ac, { chord: chordInst, bass: bassInst, melody: melodyInst });
         sfChord = res.chord; sfBass = res.bass; sfMelody = res.melody;
+        if (!sfChord || !sfBass || !sfMelody) {
+            console.warn('[obs-cubes] One or more instruments failed to load; using oscillator fallback for missing parts.');
+        }
     } catch (_) { }
 }
 
