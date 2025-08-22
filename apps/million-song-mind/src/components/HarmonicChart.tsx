@@ -300,11 +300,12 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
               {/* Section Total Percentage */}
               {section.total > 0 && ['Major', 'Applied', 'Minor', 'Other'].includes(section.name) && (
                 <div
-                  className="absolute text-foreground text-lg font-mono font-bold text-center opacity-50 pointer-events-none"
+                  className="absolute text-foreground text-lg font-bold text-center opacity-50 pointer-events-none"
                   style={{
                     left: section.x,
                     width: section.width,
-                    bottom: compressPercent(section.total) * (CHART_HEIGHT - 10) + 150
+                    bottom: compressPercent(section.total) * (CHART_HEIGHT - 10) + 150,
+                    fontFamily: "FontDec13, monospace"
                   }}
                 >
                   {section.total.toFixed(1)}%
@@ -367,11 +368,12 @@ export function HarmonicChart({ data = [], fileCount, totalSongs, onChordSelect,
                 {/* Percentage Label - Static positioning to prevent flicker */}
                 {chord.percent > 0 && (
                   <div
-                    className="absolute text-foreground text-sm font-mono text-center font-bold pointer-events-none"
+                    className="absolute text-foreground text-sm text-center font-bold pointer-events-none"
                     style={{
                       left: 0,
                       width: BAR_WIDTH,
-                      bottom: barHeight + 48
+                      bottom: barHeight + 48,
+                      fontFamily: "FontDec13, monospace"
                     }}
                   >
                     {chord.percent.toFixed(1)}%
