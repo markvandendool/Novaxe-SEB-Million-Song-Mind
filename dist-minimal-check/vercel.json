@@ -1,0 +1,35 @@
+{
+    "version": 2,
+    "routes": [
+        {
+            "src": "/cubes/(.*)",
+            "dest": "/cubes/$1"
+        },
+        {
+            "src": "/cubes",
+            "dest": "/cubes/index.html"
+        },
+        {
+            "src": "/obsidian/(.*)",
+            "status": 308,
+            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/$1" }
+        },
+        {
+            "src": "/obsidian",
+            "status": 308,
+            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/" }
+        },
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1"
+        },
+        {
+            "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
+            "dest": "/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ]
+}

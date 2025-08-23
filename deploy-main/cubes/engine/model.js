@@ -1,0 +1,53 @@
+// v1.1 Engine models: minimal, non-breaking scaffolding
+
+export class FaceModel {
+    constructor(cubeModel, faceIdx) {
+        this.cube = cubeModel; // backref
+        this.faceIdx = faceIdx; // 0 bottom,1 right,2 top,3 left (fixed)
+    }
+    getToneIdx() {
+        const r = ((this.cube.rotationIndex % 4) + 4) % 4;
+        return (r + this.faceIdx) % 4;
+    }
+    getToneName(noteSetsC, transposeNotes, key) {
+        const roman = this.cube.roman;
+        const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, key);
+        return names[this.getToneIdx()];
+    }
+}
+
+export class CubeModel {
+    constructor({ roman, key, threeObject }) {
+        this.roman = roman;
+        this.key = key || 'C';
+        this.obj = threeObject; // Three.Group or Mesh
+        this.rotationIndex = 0;
+        this.faces = [0, 1, 2, 3].map(i => new FaceModel(this, i));
+    }
+    setRotationIndex(idx) {
+        this.rotationIndex = ((idx % 4) + 4) % 4;
+    }
+    updateFromQuaternion(quat) {
+        try {
+            // project four base normals and pick dominant for bottom
+            const base = [
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+            ];
+            const down = new THREE.Vector3(0, -1, 0);
+            let best = 0, bestDot = -Infinity;
+            for (let i = 0; i < 4; i++) {
+                const d = base[i].clone().applyQuaternion(quat).dot(down);
+                if (d > bestDot) { bestDot = d; best = i; }
+            }
+            this.rotationIndex = best;
+        } catch (_) { }
+    }
+    getTopFace() { return this.faces[2]; }
+    getBottomFace() { return this.faces[0]; }
+}
+
+
