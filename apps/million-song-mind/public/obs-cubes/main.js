@@ -1785,53 +1785,13 @@ function onPointerUp(e) {
                     const normalWorld = normalLocal.transformDirection(targetObj.matrixWorld);
                     const up = new THREE.Vector3(0, 1, 0);
                     const dotY = normalWorld.dot(up);
+                    const down = new THREE.Vector3(0, -1, 0);
                     const right = new THREE.Vector3(1, 0, 0);
-                    const dotX = normalWorld.dot(right);
-                    const tones = noteSetsC[targetObj.userData.roman] || ['C', 'E', 'G', 'B'];
-                    const names = transposeNotes(tones, currentKey);
-                    const r = ((targetObj.userData.rotationIndex || 0) % 4 + 4) % 4;
-                    let voice = 'chord';
-                    let idx = r; // default
-                    if (dotY < -0.8) { voice = 'bass'; idx = r; } // bottom face
-                    else if (dotY > 0.8) { voice = 'melody'; idx = (r + 2) % 4; } // top face
-                    else if (dotX > 0.8) { voice = 'chord'; idx = (r + 1) % 4; } // right
-                    else if (dotX < -0.8) { voice = 'chord'; idx = (r + 3) % 4; } // left
-                    const fi = hit.face.materialIndex;
-                    const mat = Array.isArray(targetObj.material) ? targetObj.material[fi] : targetObj.material;
-                    const pulse = () => {
-                        if (!mat || !mat.color) return;
-                        const orig = mat.color.getHex(); mat.color.setHex(0xffff66);
-                        setTimeout(() => { mat.color.setHex(orig); }, 140);
-                    };
-                    pulse();
-                    const t0 = ensureAudio().currentTime;
-                    if (voice === 'bass') {
-                        let midi = getBassMidiForObject(targetObj);
-                        // Force into a strong low register around C2..C3 for presence
-                        while (midi > 55) midi -= 12; // keep <= G#2
-                        while (midi < 36) midi += 12; // keep >= C2
-                        midi = voiceLeadMidi(midi, lastBassMidi);
-                        if (sfBass && sfBass.play) {
-                            sfBass.play(midi, t0, { duration: 0.45, gain: 0.34 });
-                            lastBassMidi = midi;
-                        }
-                        else { console.error('[obs-cubes] Bass instrument missing; no oscillator fallback.'); }
-                    } else if (voice === 'melody') {
-                        let midi = getMelodyMidiForObject(targetObj);
-                        // Keep melody modest: around C4..C6
-                        while (midi > 84) midi -= 12; // <= C6
-                        while (midi < 60) midi += 12; // >= C4
-                        midi = voiceLeadMidi(midi, lastMelodyMidi);
-                        if (sfMelody && sfMelody.play) {
-                            sfMelody.play(midi, t0, { duration: 0.45, gain: 0.32 });
-                            lastMelodyMidi = midi;
-                        }
-                        else { console.error('[obs-cubes] Melody instrument missing; no oscillator fallback.'); }
-                    } else {
-                        const midi = 60 + pcOf(names[idx]);
-                        if (sfChord && sfChord.play) sfChord.play(midi, t0, { duration: 0.4, gain: 0.22 });
-                        else { console.error('[obs-cubes] Chord instrument missing; no oscillator fallback.'); }
-                    }
+                    const left = new THREE.Vector3(-1, 0, 0);
+                    if (dotY > 0.7) { playFaceIdxTone(targetObj, 2); pendingObj = null; return; }
+                    if (normalWorld.dot(down) > 0.7) { playFaceIdxTone(targetObj, 0); pendingObj = null; return; }
+                    if (normalWorld.dot(right) > 0.7) { playFaceIdxTone(targetObj, 1); pendingObj = null; return; }
+                    if (normalWorld.dot(left) > 0.7) { playFaceIdxTone(targetObj, 3); pendingObj = null; return; }
                 }
             }
         }
@@ -2068,6 +2028,36 @@ function playProxyTone(cube, proxy) {
             if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
         }
         logAudio('proxy:play', { roman: cube.userData?.roman, idx, name, top: isTop, bottom: isBottom });
+    } catch (_) { }
+}
+
+// Fallback: play tone by face index using proxies if available
+function playFaceIdxTone(cube, faceIdx) {
+    try {
+        const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
+        const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        let idx = 0;
+        const proxies = cube?.userData?.faceProxies;
+        if (proxies && proxies.length) {
+            const p = proxies.find(p => p.userData.faceIdx === faceIdx);
+            idx = p ? (p.userData.toneIdx ?? 0) : 0;
+        } else {
+            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+            idx = (r + faceIdx) % 4;
+        }
+        const name = names[idx];
+        if (faceIdx === 0) {
+            let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12;
+            if (sfBass && sfBass.play) sfBass.play(m, now, { duration, gain: 0.34 });
+        } else if (faceIdx === 2) {
+            let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12;
+            if (sfMelody && sfMelody.play) sfMelody.play(m, now, { duration, gain: 0.30 });
+        } else {
+            let m = 60 + pcOf(name);
+            if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
+        }
+        logAudio('faceIdx:play', { roman: cube.userData?.roman, faceIdx, idx, name });
     } catch (_) { }
 }
 
