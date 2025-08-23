@@ -1053,7 +1053,7 @@ async function loadSet(setName) {
     for (const s of shelfCubes) { s.visible = true; }
     // Start with empty front row
     lineup = [];
-    try { ensureTempoUi(); } catch(_){}
+    try { ensureTempoUi(); } catch (_) { }
 }
 
 async function updateLabels() {
@@ -2659,6 +2659,23 @@ let progressionArrows = [];
 let progressionPoints = [];
 let playButtonMesh = null;
 let progressionBpm = 30; // 30 BPM → 2s per chord by default
+// Smooth camera follow of active chord
+let cameraFocusTween = null;
+function focusCameraOnCube(cube, durationMs = 700) {
+    try {
+        const p = new THREE.Vector3(); cube.getWorldPosition(p);
+        const camFrom = camera.position.clone();
+        const tgtFrom = controls.target.clone();
+        // Keep stage-view distance; slide horizontally to track the active cube
+        const targetTo = new THREE.Vector3(p.x, 0.6, 0);
+        const cameraTo = new THREE.Vector3(p.x, 0.8, 9.5);
+        if (cameraFocusTween) cameraFocusTween.cancelled = true;
+        cameraFocusTween = tweenObject({ duration: durationMs, owner: camera, onUpdate:(v)=>{
+            camera.position.lerpVectors(camFrom, cameraTo, v);
+            controls.target.lerpVectors(tgtFrom, targetTo, v);
+        }});
+    } catch (_) { }
+}
 // Metronome/tempo UI + engine
 let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
 let metroOn = false; let metroSynth = null; let metroLoop = null;
@@ -2683,19 +2700,19 @@ function ensureTempoUi() {
     const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
     const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
     const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
-    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value)||120)); val.textContent = `${progressionBpm} BPM`; };
+    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
     const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
     btn.onclick = async () => {
         try { if (window.Tone) await window.Tone.start(); } catch (_) { }
-        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope:{attack:0.001,decay:0.08,sustain:0,release:0.05} }).toDestination(); }
+        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
         if (!metroLoop && window.Tone) {
-            metroLoop = new window.Tone.Loop((time)=>{ try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch(_){} }, '4n');
+            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
         }
         if (!metroOn) {
-            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch(_){}
+            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
             btn.textContent = 'Metronome: On'; metroOn = true;
         } else {
-            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch(_){}
+            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
             btn.textContent = 'Metronome: Off'; metroOn = false;
         }
     };
@@ -2766,35 +2783,35 @@ const activeHighlights = [];
 function highlightChordEffect(cube, durationMs = 800) {
     try {
         const p = new THREE.Vector3(); cube.getWorldPosition(p);
-        const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s)/2;
+        const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
         const ringGeo = new THREE.RingGeometry(0.62, 0.82, 48);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent:true, opacity:0.95, side:THREE.DoubleSide, blending:THREE.AdditiveBlending });
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
         const ring = new THREE.Mesh(ringGeo, mat);
         ring.position.set(p.x, p.y, p.z + half + 0.01);
-        ring.rotation.set(0,0,0);
+        ring.rotation.set(0, 0, 0);
         ring.renderOrder = 6;
         scene.add(ring);
         activeHighlights.push(ring);
         // Animate scale/opacity out
         const fromScale = 0.1; const toScale = 1.4;
         ring.scale.set(fromScale, fromScale, fromScale);
-        tweenObject({ duration: durationMs, owner: ring, onUpdate:(v)=>{ try { const sc = fromScale + (toScale-fromScale)*v; ring.scale.set(sc, sc, sc); mat.opacity = 0.95*(1-v); } catch(_){} }, onComplete:()=>{ try { scene.remove(ring); ring.geometry.dispose(); mat.dispose(); } catch(_){} } });
+        tweenObject({ duration: durationMs, owner: ring, onUpdate: (v) => { try { const sc = fromScale + (toScale - fromScale) * v; ring.scale.set(sc, sc, sc); mat.opacity = 0.95 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); mat.dispose(); } catch (_) { } } });
         // Spark burst
-        for (let i=0;i<12;i++) {
-            const d = Math.random()*0.45+0.35; const dir = (Math.PI*2*i)/12 + Math.random()*0.2;
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([ new THREE.Vector3(p.x, p.y, p.z+half+0.012), new THREE.Vector3(p.x + Math.cos(dir)*d, p.y + Math.sin(dir)*d, p.z+half+0.012) ]);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0xfff1a8, transparent:true, opacity:0.9, blending:THREE.AdditiveBlending });
-            const line = new THREE.Line(lineGeo, lineMat); line.renderOrder=7; scene.add(line); activeHighlights.push(line);
-            tweenObject({ duration: durationMs*0.9, owner: line, onUpdate:(v)=>{ try { lineMat.opacity = 0.9*(1-v); } catch(_){} }, onComplete:()=>{ try { scene.remove(line); line.geometry.dispose(); lineMat.dispose(); } catch(_){} } });
+        for (let i = 0; i < 12; i++) {
+            const d = Math.random() * 0.45 + 0.35; const dir = (Math.PI * 2 * i) / 12 + Math.random() * 0.2;
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, p.z + half + 0.012), new THREE.Vector3(p.x + Math.cos(dir) * d, p.y + Math.sin(dir) * d, p.z + half + 0.012)]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+            const line = new THREE.Line(lineGeo, lineMat); line.renderOrder = 7; scene.add(line); activeHighlights.push(line);
+            tweenObject({ duration: durationMs * 0.9, owner: line, onUpdate: (v) => { try { lineMat.opacity = 0.9 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(line); line.geometry.dispose(); lineMat.dispose(); } catch (_) { } } });
         }
-    } catch(_){}
+    } catch (_) { }
 }
 
-function pulseGiantAt(index, durationMs=600) {
+function pulseGiantAt(index, durationMs = 600) {
     try {
-        const pulse = (group)=>{ const node = group?.children?.[index]; const mesh = node?.children?.[0]; const mat = mesh?.material; if (!mat) return; const base = mat.opacity ?? 1; tweenObject({ duration: durationMs, owner: mat, onUpdate:(v)=>{ try { mat.transparent=true; mat.opacity = base*(0.6+0.4*Math.sin(v*Math.PI)); } catch(_){} }, onComplete:()=>{ try { mat.opacity = base; } catch(_){} } }); };
+        const pulse = (group) => { const node = group?.children?.[index]; const mesh = node?.children?.[0]; const mat = mesh?.material; if (!mat) return; const base = mat.opacity ?? 1; tweenObject({ duration: durationMs, owner: mat, onUpdate: (v) => { try { mat.transparent = true; mat.opacity = base * (0.6 + 0.4 * Math.sin(v * Math.PI)); } catch (_) { } }, onComplete: () => { try { mat.opacity = base; } catch (_) { } } }); };
         if (melodyGiantGroup) pulse(melodyGiantGroup); if (bassGiantGroup) pulse(bassGiantGroup);
-    } catch(_){}
+    } catch (_) { }
 }
 
 function shimmerMaterial(mat) {
@@ -3121,7 +3138,7 @@ async function playFrontRowProgression() {
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         // Ultra-flashy active chord highlight
-        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); } catch(_){}
+        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); } catch (_) { }
         if (lockedMelody || lockedBass) {
             // Use locked lines if present; fallback to face-derived where missing
             const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
