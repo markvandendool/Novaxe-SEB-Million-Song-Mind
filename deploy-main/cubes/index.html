@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musical Cubes - Million Song Mind</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #fff, #e0e7ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .cubes-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+        
+        .cube-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .cube-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .cube-card img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .cube-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .cube-card p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .nav-links {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .coming-soon {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .coming-soon h2 {
+            margin-bottom: 15px;
+            color: #e0e7ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-links">
+        <a href="/">← Back to MSM1.0</a>
+        <a href="/obsidian">Obsidian Angular</a>
+    </div>
+
+    <div class="header">
+        <h1>🎵 Musical Cubes</h1>
+        <p>Interactive Harmonic Cube Visualizations</p>
+    </div>
+
+    <div class="cubes-gallery" id="cubesGallery">
+        <!-- Cubes will be loaded dynamically -->
+    </div>
+
+    <div class="coming-soon">
+        <h2>🚀 Interactive 3D Cubes Coming Soon</h2>
+        <p>Full Three.js implementation with interactive musical cube manipulation will be available in the next update.</p>
+    </div>
+
+    <script>
+        // Sample cube data - would be loaded from actual cube face images
+        const cubeData = [
+            { name: "Root Chord", image: "placeholder", description: "Fundamental tonal center" },
+            { name: "V7 Chord", image: "placeholder", description: "Dominant seventh harmonic" },
+            { name: "vi Chord", image: "placeholder", description: "Relative minor harmony" },
+            { name: "IV Chord", image: "placeholder", description: "Subdominant progression" },
+            { name: "iii Chord", image: "placeholder", description: "Mediant harmonic function" },
+            { name: "ii Chord", image: "placeholder", description: "Supertonic harmonic movement" },
+            { name: "viiø Chord", image: "placeholder", description: "Leading tone diminished" },
+            { name: "bVII Chord", image: "placeholder", description: "Subtonic modal harmony" },
+        ];
+
+        function createCubeCard(cube) {
+            return `
+                <div class="cube-card">
+                    <div style="width: 150px; height: 150px; background: linear-gradient(45deg, #4f46e5, #7c3aed); margin: 0 auto 15px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: bold; color: white; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+                        ${cube.name.split(' ')[0]}
+                    </div>
+                    <h3>${cube.name}</h3>
+                    <p>${cube.description}</p>
+                </div>
+            `;
+        }
+
+        function loadCubes() {
+            const gallery = document.getElementById('cubesGallery');
+            gallery.innerHTML = cubeData.map(createCubeCard).join('');
+        }
+
+        // Load cubes on page load
+        document.addEventListener('DOMContentLoaded', loadCubes);
+        
+        // Add some interactive animations
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.cube-card');
+            cards.forEach(card => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                const distance = Math.sqrt(x*x + y*y);
+                
+                if (distance < 100) {
+                    const intensity = (100 - distance) / 100;
+                    card.style.transform = `translateY(-${5 + intensity * 5}px) rotateX(${y * intensity * 0.1}deg) rotateY(${x * intensity * 0.1}deg)`;
+                } else {
+                    card.style.transform = '';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -2561,14 +2561,21 @@ textureManifest = null;
 (async () => {
     await ensureFontsLoaded();
     readFlagsFromUrl();
-    // Add a visible audio unlock overlay if context is suspended
+    // Add a visible audio unlock overlay if either WebAudio or Tone.js is not running yet
     try {
         const ctx = ensureAudio();
-        if (ctx && ctx.state !== 'running') {
+        const toneState = (window.Tone && window.Tone.context) ? window.Tone.context.state : 'unknown';
+        const needsUnlock = (ctx && ctx.state !== 'running') || (toneState !== 'running');
+        if (needsUnlock) {
             const banner = document.createElement('div');
             banner.textContent = 'Click anywhere to enable audio';
             banner.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);color:#fff;font:600 18px system-ui;z-index:200000;cursor:pointer;';
-            const unlock = async () => { try { await ctx.resume(); } catch (_) { } banner.remove(); };
+            const unlock = async () => {
+                try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+                try { if (ctx && ctx.state !== 'running') await ctx.resume(); } catch (_) { }
+                banner.remove();
+                console.log('[obs-cubes] audio contexts resumed');
+            };
             banner.addEventListener('pointerdown', unlock);
             banner.addEventListener('touchstart', unlock);
             document.body.appendChild(banner);

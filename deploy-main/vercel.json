@@ -1,11 +1,5 @@
 {
     "version": 2,
-    "outputDirectory": "dist",
-    "public": true,
-    "alias": [
-        "millionsongmind.com",
-        "www.millionsongmind.com"
-    ],
     "routes": [
         {
             "src": "/cubes/(.*)",

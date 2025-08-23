@@ -1,0 +1,17 @@
+node_modules/
+.git/
+.venv/
+.venv-1/
+apps/
+Angular Documentation OFFICIAL/
+ARCHIVE/
+BACKUP_ARCHIVES/
+backup/
+Obsidian/
+Musical-Cubes/
+novaxe-fakebook-ultra-pristine/
+.DS_Store
+*.md
+*.txt
+*.log
+*.sh
