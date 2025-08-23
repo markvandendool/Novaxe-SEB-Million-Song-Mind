@@ -1764,7 +1764,7 @@ function onPointerUp(e) {
                             };
                             const faceIdx = mapAngleToFace(angle);
                             finalQ = model?.rotateFaceToBottom(faceIdx, targetObj) || null;
-                        } catch (_) {}
+                        } catch (_) { }
                         if (!finalQ) {
                             const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
                             finalQ = targetObj.quaternion.clone().multiply(extra);
@@ -1880,7 +1880,11 @@ function makeQuadrantOverlayMaterial() {
     const tex = new THREE.CanvasTexture(c);
     tex.needsUpdate = true;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-    mat.opacity = 0; // invisible but present for reference if needed
+    try {
+        const u = new URL(window.location.href);
+        const showX = u.searchParams.has('showX') || u.searchParams.has('showx');
+        mat.opacity = showX ? 0.6 : 0.0;
+    } catch (_) { mat.opacity = 0.0; }
     return mat;
 }
 
@@ -1972,7 +1976,7 @@ function ensureFaceProxies(parentCube) {
                 text.position.copy(faceCenters[faceIdx]);
                 // rendering settings for overlay cleanliness
                 text.renderOrder = 3;
-                try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) {}
+                try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) { }
                 text.sync();
                 parentCube.add(text);
                 parentCube.userData.msdfFaces[faceIdx] = text;
@@ -2972,7 +2976,7 @@ function ensureTempoUi() {
             if (window.Tone) window.Tone.Transport.bpm.value = progressionBpm;
             if (!transportBridge) transportBridge = createBridge?.('transport');
             transportBridge?.emit('bpm', { bpm: progressionBpm });
-        } catch (_) {}
+        } catch (_) { }
     };
     const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
     btn.onclick = async () => {
@@ -2984,11 +2988,11 @@ function ensureTempoUi() {
         if (!metroOn) {
             try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
             btn.textContent = 'Metronome: On'; metroOn = true;
-            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('start', { bpm: progressionBpm }); } catch (_) {}
+            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('start', { bpm: progressionBpm }); } catch (_) { }
         } else {
             try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
             btn.textContent = 'Metronome: Off'; metroOn = false;
-            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('stop', {}); } catch (_) {}
+            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('stop', {}); } catch (_) { }
         }
     };
     box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
@@ -3332,7 +3336,7 @@ function lockInMelody() {
             msdf.rotation.z = melUpright;
             msdf.position.z = 0.004;
             msdf.renderOrder = 5;
-            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) {}
+            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) { }
             msdf.userData.uprightZ = melUpright;
             msdf.sync();
             const group = new THREE.Group();
@@ -3407,7 +3411,7 @@ function lockInBass() {
             msdf.rotation.z = bassUpright;
             msdf.position.z = 0.004;
             msdf.renderOrder = 5;
-            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) {}
+            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) { }
             msdf.userData.uprightZ = bassUpright;
             msdf.sync();
             // Center on cube and place so the diamond top tip touches the cube's front-bottom edge
