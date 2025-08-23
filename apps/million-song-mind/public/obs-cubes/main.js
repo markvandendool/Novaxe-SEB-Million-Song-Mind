@@ -1046,6 +1046,7 @@ async function createShelfCube(roman) {
     setCubeLayerRecursive(m, 2);
     // Do NOT add quadrant overlays to shelf cubes to avoid occluding clicks
     shelfCubes.push(m);
+    ensureFaceProxies(m);
     // Add an invisible, raycast-only proxy just in front of the shelf cube
     try {
         const sclr = m.scale?.x || m.scale || 1;
@@ -1869,6 +1870,70 @@ function addQuadrantOverlay(parentCube) {
     parentCube.userData.centerPlay = centerCircle;
 }
 
+// Create raycastable face proxies (invisible planes) for robust picking and tone identity
+function ensureFaceProxies(parentCube) {
+    try {
+        if (!parentCube || !parentCube.add) return;
+        // If already present, skip
+        if (parentCube.userData && parentCube.userData.faceProxies) return;
+        const makeProxy = (w, h, offset, normal, toneIdx) => {
+            const geo = new THREE.PlaneGeometry(w, h);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0, depthWrite: false });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(offset.clone());
+            // Orient so its normal equals provided local normal
+            const up = new THREE.Vector3(0, 0, 1); // plane faces +z by default; rotate to match desired normal
+            const q = new THREE.Quaternion().setFromUnitVectors(up, normal.clone().normalize());
+            p.quaternion.copy(q);
+            p.userData = { isFaceProxy: true, toneIdx, baseNormal: normal.clone(), parent: parentCube };
+            // Put on same layer as cube for picking
+            try { p.layers.set( parentCube.layers.mask ); } catch (_) { }
+            return p;
+        };
+        const half = (cubeSize * (parentCube.scale?.x || parentCube.scale || 1)) / 2 + 0.002;
+        const size = cubeSize * 0.98;
+        const proxies = [
+            makeProxy(size, size, new THREE.Vector3(0, -half, 0), new THREE.Vector3(0, -1, 0), 0), // bottom/root
+            makeProxy(size, size, new THREE.Vector3(half, 0, 0), new THREE.Vector3(1, 0, 0), 1),   // right/3rd
+            makeProxy(size, size, new THREE.Vector3(0, half, 0), new THREE.Vector3(0, 1, 0), 2),   // top/5th
+            makeProxy(size, size, new THREE.Vector3(-half, 0, 0), new THREE.Vector3(-1, 0, 0), 3), // left/7th
+        ];
+        proxies.forEach(p => parentCube.add(p));
+        if (!parentCube.userData) parentCube.userData = {};
+        parentCube.userData.faceProxies = proxies;
+    } catch (_) { }
+}
+
+function getTopToneIdxFromProxies(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const up = new THREE.Vector3(0, 1, 0);
+        let best = null; let bestDot = -Infinity;
+        for (const p of proxies) {
+            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+            const d = normalWorld.dot(up);
+            if (d > bestDot) { bestDot = d; best = p; }
+        }
+        if (best) return best.userData.toneIdx;
+    } catch (_) { }
+    return null;
+}
+
+function getBottomToneIdxFromProxies(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const down = new THREE.Vector3(0, -1, 0);
+        let best = null; let bestDot = -Infinity;
+        for (const p of proxies) {
+            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+            const d = normalWorld.dot(down);
+            if (d > bestDot) { bestDot = d; best = p; }
+        }
+        if (best) return best.userData.toneIdx;
+    } catch (_) { }
+    return null;
+}
+
 function animateYZToFrontRow(obj, duration = 350) {
     const fromY = obj.position.y;
     const fromZ = obj.position.z;
@@ -2512,7 +2577,8 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const proxyBottom = getBottomToneIdxFromProxies(obj);
+    const r = proxyBottom != null ? proxyBottom : ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const rootPc = pcOf(names[0]);
     const bottomPc = pcOf(names[r]);
     const baseC2 = 36; // low register
@@ -2525,9 +2591,11 @@ function getBassMidiForObject(obj) {
 function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const proxyTop = getTopToneIdxFromProxies(obj);
+    const r = proxyTop != null ? ((proxyTop + 2) % 4) : ((obj.userData.rotationIndex || 0) % 4 + 4) % 4; // if proxyTop is actual top index, equivalent topPc uses proxyTop
     const rootPc = pcOf(names[0]);
-    const topPc = pcOf(names[(r + 2) % 4]);
+    const topIndex = proxyTop != null ? proxyTop : (r + 2) % 4;
+    const topPc = pcOf(names[topIndex]);
     const baseC5 = 72; // higher register
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
     const diff = (topPc - rootPc + 12) % 12;
@@ -2684,6 +2752,7 @@ async function animateShelfClickAdd(shelf) {
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
+        ensureFaceProxies(clone);
         // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
         const xs = computeSlotPositions(lineup.length + 1);
         const targetX = xs[lineup.length];
