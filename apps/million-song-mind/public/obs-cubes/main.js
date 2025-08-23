@@ -70,7 +70,7 @@ function enterStageMode() {
     const spotFrom = frontSpot.intensity, spotTo = 2.9; // +~30%
     const spotLFrom = frontSpotL.intensity, spotLTo = 1.8;
     const spotRFrom = frontSpotR.intensity, spotRTo = 1.8;
-    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 3.5;
+    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 4.9; // +40%
     const melFrom = melodyMesh?.position.clone();
     const bassFrom = bassMesh?.position.clone();
     const melTo = melFrom ? melFrom.clone().setY(melFrom.y + 0.6) : null;
@@ -1120,6 +1120,35 @@ function getShelfHitsOrtho(event) {
     return raycaster.intersectObjects(shelfCubes, true);
 }
 
+// Robust screen-space quadrant decision for shelf inversion
+function decideShelfDeltaScreen(cube, event) {
+    try {
+        const rect = renderer.domElement.getBoundingClientRect();
+        // Project cube center
+        const center = cube.position.clone().project(camera);
+        const cx = rect.left + (center.x + 1) * 0.5 * rect.width;
+        const cy = rect.top + (1 - (center.y + 1) * 0.5) * rect.height;
+        // Estimate projected half extents by projecting offsets along local X/Y
+        const half = (cubeSize * (cube.scale?.x || cube.scale || 1)) / 2;
+        const pLocal = (x, y) => new THREE.Vector3(x, y, 0).applyMatrix4(cube.matrixWorld).project(camera);
+        const px = pLocal(half, 0);
+        const py = pLocal(0, half);
+        const hx = Math.max(8, Math.abs((px.x - center.x) * 0.5 * rect.width));
+        const hy = Math.max(8, Math.abs((py.y - center.y) * 0.5 * rect.height));
+        const dx = event.clientX - cx;
+        const dy = event.clientY - cy;
+        const ax = Math.abs(dx), ay = Math.abs(dy);
+        const xThresh = hx * 0.35, yThresh = hy * 0.35;
+        // Lower or center → root
+        if (dy > yThresh) return 0;
+        // Top dominant → 2nd inversion
+        if (dy < -yThresh && ay >= ax) return +2;
+        // Side dominant → 1st/3rd
+        if (ax > xThresh) return dx > 0 ? +1 : -1;
+        return 0;
+    } catch (_) { return 0; }
+}
+
 // Ascend from any child (edges, overlay, center) to the owning cube mesh
 function resolveCubeFromObject(obj) {
     if (!obj) return null;
@@ -1549,41 +1578,7 @@ function onPointerUp(e) {
             const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
             const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
             // If polygon picker already chose a shelf cube at mousedown, trust it
-            if (pendingObj && pendingObj.userData?.isShelf) {
-                // Prefer local-space shelf hit to decide inversion via quadrant mapping
-                try {
-                    let decided = false;
-                    const hits = getShelfHits(e);
-                    for (const h of hits) {
-                        const cube = resolveCubeFromObject(h.object);
-                        if (cube === pendingObj) {
-                            const local = cube.worldToLocal(h.point.clone());
-                            const half = (cubeSize * (cube.scale?.x || cube.scale || 1)) / 2;
-                            const nx = local.x / (half || 1);
-                            const ny = local.y / (half || 1);
-                            let delta = 0;
-                            if (ny <= -0.25) delta = 0; // lower/center → root
-                            else {
-                                if (Math.abs(nx) >= Math.abs(ny)) delta = nx > 0 ? +1 : -1; // right/left → 1st/3rd
-                                else delta = ny > 0 ? +2 : 0; // top → 2nd
-                            }
-                            pendingObj.userData.desiredRotationDelta = delta;
-                            decided = true; break;
-                        }
-                    }
-                    if (!decided) {
-                        const rect = renderer.domElement.getBoundingClientRect();
-                        const world = pendingObj.position.clone();
-                        const proj = world.project(camera);
-                        const cx = rect.left + (proj.x + 1) * 0.5 * rect.width;
-                        const dx = e.clientX - cx;
-                        const thresh = Math.max(18, rect.width * 0.03);
-                        pendingObj.userData.desiredRotationDelta = (Math.abs(dx) > thresh) ? (dx > 0 ? +1 : -1) : 0;
-                    }
-                } catch (_) { pendingObj.userData.desiredRotationDelta = 0; }
-                enqueueShelfAdd(pendingObj);
-                pendingObj = null; return;
-            }
+            if (pendingObj && pendingObj.userData?.isShelf) { try { pendingObj.userData.desiredRotationDelta = 0; } catch (_) {} enqueueShelfAdd(pendingObj); pendingObj = null; return; }
             // Additional safety: if any shelf cube is directly in the hit stack, prioritize it immediately
             let shelfFromRay = null;
             for (const h of hits) {
@@ -1627,7 +1622,25 @@ function onPointerUp(e) {
             if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) {
-                try { targetObj.userData.desiredRotationDelta = 0; } catch (_) { }
+                try {
+                    // Try local quadrant mapping; fallback to screen-space
+                    let decided = false;
+                    const hits2 = getShelfHits(e);
+                    for (const h2 of hits2) {
+                        const cube2 = resolveCubeFromObject(h2.object);
+                        if (cube2 === targetObj) {
+                            const local = cube2.worldToLocal(h2.point.clone());
+                            const half = (cubeSize * (cube2.scale?.x || cube2.scale || 1)) / 2;
+                            const nx = local.x / (half || 1);
+                            const ny = local.y / (half || 1);
+                            let delta = 0;
+                            if (ny <= -0.25) delta = 0;
+                            else { if (Math.abs(nx) >= Math.abs(ny)) delta = nx > 0 ? +1 : -1; else delta = ny > 0 ? +2 : 0; }
+                            targetObj.userData.desiredRotationDelta = delta; decided = true; break;
+                        }
+                    }
+                    if (!decided) targetObj.userData.desiredRotationDelta = decideShelfDeltaScreen(targetObj, e);
+                } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
                 enqueueShelfAdd(targetObj); pendingObj = null; return;
             }
             if (targetObj.userData?.isShelf) { pendingObj = null; return; }
@@ -2601,10 +2614,10 @@ async function animateShelfClickAdd(shelf) {
         // Animate from shelf Y/Z to front row smoothly with scale normalization
         clone.userData.animatingIn = true;
         const s0 = clone.scale.x;
-        // Smooth position/scale; keep rotation unchanged (root)
+        // Smooth position/scale; apply desiredRotationDelta once if provided
         const startQuat = clone.quaternion.clone();
-        let deltaSteps = 0; // revert feature: no shelf inversion
-        const targetQuat = startQuat.clone();
+        let deltaSteps = ((shelf.userData?.desiredRotationDelta || 0) % 4 + 4) % 4;
+        const targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
         tweenObject({
             duration: 520, owner: clone, onUpdate: (v) => {
                 // Position ease
@@ -2622,9 +2635,12 @@ async function animateShelfClickAdd(shelf) {
         setTimeout(() => {
             if (!lineup.includes(clone)) lineup.push(clone);
             clone.userData.animatingIn = false;
+            // Apply rotation index delta exactly once
+            if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
             reflowLineup();
         }, 470);
-        // Play root position on pull
+        // Play with intended inversion immediately
+        if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
