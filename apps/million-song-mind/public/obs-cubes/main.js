@@ -596,6 +596,7 @@ function createShelfPlane() {
 
 // Epic titles
 let bgTitleMesh = null;
+let versionMesh = null;
 let melodyMesh = null; let melodyMat = null;
 let bassMesh = null; let bassMat = null;
 
@@ -635,6 +636,14 @@ function addEpicTitles() {
         bgTitleMesh.position.set(0, 12, -60);
         bgTitleMesh.lookAt(new THREE.Vector3(0, 6, 0));
         scene.add(bgTitleMesh);
+        // Add version label (starts at V1.0)
+        const vTex = makeTitleTexture(['V1.0'], { width: 2048, height: 1024, size: 600, weight: 1000 });
+        const vMat = new THREE.MeshBasicMaterial({ map: vTex, transparent: true, opacity: 0.7, depthWrite: false, color: 0xffffff });
+        const vGeo = new THREE.PlaneGeometry(24, 10);
+        versionMesh = new THREE.Mesh(vGeo, vMat);
+        versionMesh.position.set(0, 7.5, -35);
+        versionMesh.lookAt(new THREE.Vector3(0, 6, 0));
+        scene.add(versionMesh);
     }
     if (!melodyMesh) {
         const tex = makeTitleTexture(['MELODY'], { width: 4096, height: 1024, size: 420, weight: 1000 });
@@ -1947,6 +1956,34 @@ function getBottomToneIdxFromProxies(cube) {
         if (best) return best.userData.toneIdx;
     } catch (_) { }
     return null;
+}
+
+function playProxyTone(cube, proxy) {
+    try {
+        const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
+        const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const idx = proxy?.userData?.toneIdx ?? 0;
+        const name = names[idx];
+        const up = new THREE.Vector3(0, 1, 0); const down = new THREE.Vector3(0, -1, 0);
+        const nWorld = proxy.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+        const isTop = nWorld.dot(up) > 0.8; const isBottom = nWorld.dot(down) > 0.8;
+        const midiOf = (n) => 60 + pcOf(n); // base C4
+        if (isBottom) {
+            // Bass register
+            let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12;
+            if (sfBass && sfBass.play) sfBass.play(m, now, { duration, gain: 0.34 });
+        } else if (isTop) {
+            // Melody register
+            let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12;
+            if (sfMelody && sfMelody.play) sfMelody.play(m, now, { duration, gain: 0.30 });
+        } else {
+            // Side faces: simple chord voice audition in mid register
+            let m = midiOf(name);
+            if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
+        }
+        logAudio('proxy:play', { roman: cube.userData?.roman, idx, name, top: isTop, bottom: isBottom });
+    } catch (_) { }
 }
 
 function animateYZToFrontRow(obj, duration = 350) {
