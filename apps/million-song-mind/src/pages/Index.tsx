@@ -94,7 +94,7 @@ const Index = () => {
     selectedChords: [],
     decade: ''
   });
-  
+
   // MusicViz state
   const [musicVizSongs, setMusicVizSongs] = useState<ParsedSong[]>([]);
   const [isMusicVizLoading, setIsMusicVizLoading] = useState(false);
@@ -148,7 +148,7 @@ const Index = () => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data && event.data.source === 'novaxe-braid') {
         const { type, data } = event.data;
-        
+
         switch (type) {
           case 'tonalityChange':
             console.log('Braid tonality changed:', data.tonality);
@@ -174,34 +174,34 @@ const Index = () => {
     try {
       const lines = text.trim().split('\n').filter(line => line.trim());
       if (lines.length < 2) return [];
-      
+
       const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
       const requiredHeaders = ['chord', 'percent', 'root', 'first', 'second', 'third', 'section'];
-      
-      const hasRequiredHeaders = requiredHeaders.every(header => 
+
+      const hasRequiredHeaders = requiredHeaders.every(header =>
         headers.some(h => h.includes(header))
       );
-      
+
       // Verbose diagnostics: detect likely Data3 uploads on the Index page
       const isLikelyData3 = headers.includes('chords')
         || headers.includes('roman_numerals')
         || headers.includes('artist_id')
-        || headers.some(h => ['i','ii','iii','iv','v','vi','viiø','other','v(7)','ii(7)','iii(7)','vi(7)','vii(7)'].includes(h));
+        || headers.some(h => ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'viiø', 'other', 'v(7)', 'ii(7)', 'iii(7)', 'vi(7)', 'vii(7)'].includes(h));
       console.groupCollapsed('[Index] CSV header check');
       console.log('headers:', headers.slice(0, 60));
       console.log('isLikelyData3:', isLikelyData3);
       console.log('requiredHeaders:', requiredHeaders);
       console.groupEnd();
-      
+
       if (!hasRequiredHeaders) {
         if (isLikelyData3) {
           console.warn('[Index] Detected CPML/Data3-style headers. This page expects vertical harmonic profile (Datanaught) CSV. For Data3 ingestion, use /million-song-mind.');
         }
         throw new Error(`CSV must have headers: ${requiredHeaders.join(', ')}`);
       }
-      
+
       const data = [];
-      
+
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
         if (values.length >= 7) {
@@ -214,13 +214,13 @@ const Index = () => {
             third: parseFloat(values[5]) || 0,
             section: values[6] || ''
           };
-          
+
           if (row.chord && row.section && !isNaN(row.percent) && row.percent >= 0) {
             data.push(row);
           }
         }
       }
-      
+
       return data;
     } catch (err) {
       throw new Error(`CSV parsing failed: ${err instanceof Error ? err.message : 'Unknown error'}`);
@@ -231,7 +231,7 @@ const Index = () => {
   const aggregateData = (allFiles: any[][]) => {
     const aggregated: { [key: string]: any } = {};
     const totalFiles = allFiles.length;
-    
+
     // Initialize all possible chords
     Object.entries(CHORD_ORDER).forEach(([section, chords]) => {
       chords.forEach(chord => {
@@ -252,7 +252,7 @@ const Index = () => {
     const CHUNK_SIZE = 1000;
     for (let i = 0; i < allFiles.length; i += CHUNK_SIZE) {
       const chunk = allFiles.slice(i, i + CHUNK_SIZE);
-      
+
       chunk.forEach(fileData => {
         fileData.forEach(row => {
           if (aggregated[row.chord]) {
@@ -296,11 +296,11 @@ const Index = () => {
   // Professional file processing with error recovery
   const handleFiles = useCallback(async (files: File[]) => {
     setIsLoading(true);
-    
+
     try {
       const allData = [];
       const errors = [];
-      
+
       for (let i = 0; i < files.length; i++) {
         try {
           const content = await files[i].text();
@@ -309,7 +309,7 @@ const Index = () => {
           const isLikelyData3 = headers.includes('chords')
             || headers.includes('roman_numerals')
             || headers.includes('artist_id')
-            || headers.some(h => ['i','ii','iii','iv','v','vi','viiø','other','v(7)','ii(7)','iii(7)','vi(7)','vii(7)'].includes(h));
+            || headers.some(h => ['i', 'ii', 'iii', 'iv', 'v', 'vi', 'viiø', 'other', 'v(7)', 'ii(7)', 'iii(7)', 'vi(7)', 'vii(7)'].includes(h));
 
           console.groupCollapsed('[Index] Processing file', files[i].name);
           console.log('firstLine:', firstLine.slice(0, 200));
@@ -317,7 +317,7 @@ const Index = () => {
 
           if (isLikelyData3) {
             console.warn('[Index] Detected Data3/CPML file. Routing to /million-song-mind for proper ingestion.');
-            try { sessionStorage.setItem('msm:pendingUpload', content); } catch {}
+            try { sessionStorage.setItem('msm:pendingUpload', content); } catch { }
             toast({ title: 'Routing to MSM', description: 'Detected Data3 file. Opening MSM Explorer for proper ingestion.' });
             console.groupEnd();
             navigate('/million-song-mind?auto=1');
@@ -335,12 +335,12 @@ const Index = () => {
           errors.push(`${files[i].name}: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
       }
-      
+
       if (allData.length === 0) {
         console.error('[Index] No valid data found. This uploader expects vertical harmonic profile CSV with headers: chord, percent, root, first, second, third, section. If your file is Data3/CPML, use /million-song-mind.', { fileErrors: errors });
         throw new Error('No valid data found in uploaded files');
       }
-      
+
       if (errors.length > 0 && errors.length < files.length) {
         toast({
           title: "Partial Success",
@@ -348,17 +348,17 @@ const Index = () => {
           variant: "destructive"
         });
       }
-      
+
       const aggregated = aggregateData(allData);
       setCurrentData(aggregated);
       setFileCount(files.length);
       setTotalSongs(allData.length);
-      
+
       toast({
         title: "Analysis Complete",
         description: `Successfully processed ${files.length} files containing ${allData.length} songs`,
       });
-      
+
     } catch (err) {
       toast({
         title: "Processing Error",
@@ -383,7 +383,7 @@ const Index = () => {
         section
       }))
     );
-    
+
     setCurrentData(ZERO_DATA);
     setFileCount(0);
     setTotalSongs(679807); // Keep massive database ready
@@ -396,7 +396,7 @@ const Index = () => {
       selectedChords: [],
       decade: ''
     });
-    
+
     toast({
       title: "Reset Complete",
       description: "All values reset to zero - clean slate ready",
@@ -405,16 +405,16 @@ const Index = () => {
 
   // V2: Chord selection handler for interactive filtering
   const handleChordSelect = useCallback((chord: string, isSelected: boolean) => {
-    const newSelectedChords = isSelected 
+    const newSelectedChords = isSelected
       ? [...selectedChords, chord]
       : selectedChords.filter(c => c !== chord);
-    
+
     setSelectedChords(newSelectedChords);
     setSearchFilters(prev => ({
       ...prev,
       selectedChords: newSelectedChords
     }));
-    
+
     toast({
       title: "Chord Filter Updated",
       description: `${newSelectedChords.length} chords selected`,
@@ -430,12 +430,12 @@ const Index = () => {
   // V2: Calculate filtered song count based on current filters
   const filteredSongCount = useMemo(() => {
     let count = sampleSongs.length;
-    
+
     if (searchFilters.songName) count = Math.floor(count * 0.1); // Simulate filtering
     if (searchFilters.artistName) count = Math.floor(count * 0.3);
     if (searchFilters.genre) count = Math.floor(count * 0.2);
     if (selectedChords.length > 0) count = Math.floor(count * (0.8 ** selectedChords.length));
-    
+
     return Math.max(1, count);
   }, [searchFilters, selectedChords, sampleSongs.length]);
 
@@ -450,18 +450,18 @@ const Index = () => {
   // MusicViz file upload handler
   const handleMusicVizFileUpload = useCallback(async (content: string) => {
     setIsMusicVizLoading(true);
-    
+
     try {
       const parseResult = parseCSVData(content);
       const enrichedSongs = enrichSongsWithStructure(parseResult.songs);
-      
+
       setMusicVizSongs(enrichedSongs);
-      
+
       toast({
         title: "CPML Dataset Loaded",
         description: `Parsed ${enrichedSongs.length} songs from CPML data`,
       });
-      
+
     } catch (error) {
       console.error('Error parsing CPML CSV:', error);
       toast({
@@ -482,13 +482,13 @@ const Index = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <h1 className="text-xl font-bold text-foreground tracking-tight ">
-                MILLION SONG MIND
+                MILLION SONG MIND <span className="text-primary font-black text-2xl">V1.0</span>
               </h1>
               <p className="text-xs text-muted-foreground ">
                 Professional Music Intelligence Analytics Platform
               </p>
             </div>
-            
+
             <div className="flex items-center space-x-6">
               <div className="text-right text-foreground  text-sm space-y-1">
                 <div className="flex items-center space-x-2">
@@ -500,7 +500,7 @@ const Index = () => {
                   <span className="text-accent font-bold">{totalSongs.toLocaleString()}</span>
                 </div>
               </div>
-              
+
               <div className="flex items-center gap-3">
                 <Link to="/braid">
                   <Button variant="secondary" className="transition-all duration-300">
@@ -580,14 +580,14 @@ const Index = () => {
             </h2>
             {fileCount > 0 && (
               <div className="text-muted-foreground  text-sm mt-2">
-                Aggregated from <span className="text-primary">{fileCount.toLocaleString()}</span> files • 
+                Aggregated from <span className="text-primary">{fileCount.toLocaleString()}</span> files •
                 <span className="text-accent"> {totalSongs.toLocaleString()}</span> songs analyzed
               </div>
             )}
           </div>
-          
-          <HarmonicChart 
-            data={currentData} 
+
+          <HarmonicChart
+            data={currentData}
             fileCount={fileCount}
             totalSongs={totalSongs}
             onChordSelect={handleChordSelect}
@@ -607,7 +607,7 @@ const Index = () => {
               Full Novaxe Angular braid with all options, toggle switches, and MSM integration
             </p>
           </div>
-          
+
           {/* Braid Options Info */}
           <div className="mb-4 p-4 bg-gradient-to-r from-green-900/20 to-blue-900/20 rounded-lg border border-green-500/30">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -629,7 +629,7 @@ const Index = () => {
               </div>
             </div>
           </div>
-          
+
           <RealNovaxeBraid
             onBraidTypeChange={(type) => console.log('Braid type changed:', type)}
             onTonalityChange={(tonality) => console.log('Braid tonality changed:', tonality)}

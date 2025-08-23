@@ -9,16 +9,16 @@ import { getNoteMappingForKey } from '@/constants/harmony';
  */
 export function noteToRoman(noteName: string, key?: string): string | null {
   if (!noteName || !key) return null;
-
+  
   const noteMapping = getNoteMappingForKey(key);
-
+  
   // Find the Roman numeral that maps to this note name
   for (const [roman, mappedNote] of Object.entries(noteMapping)) {
     if (mappedNote === noteName || mappedNote.replace(/[♯♭°ø]/g, '') === noteName.replace(/[#b°]/g, '')) {
       return roman;
     }
   }
-
+  
   return null;
 }
 
@@ -27,7 +27,7 @@ export function noteToRoman(noteName: string, key?: string): string | null {
  */
 export function romanToNote(roman: string, key?: string): string | null {
   if (!roman || !key) return null;
-
+  
   const noteMapping = getNoteMappingForKey(key);
   return noteMapping[roman] || null;
 }
@@ -51,17 +51,17 @@ export function createChordMappingForKey(key: string) {
   const noteMapping = getNoteMappingForKey(key);
   const romanToNoteMap = new Map<string, string>();
   const noteToRomanMap = new Map<string, string>();
-
+  
   for (const [roman, note] of Object.entries(noteMapping)) {
     if (note) {
       romanToNoteMap.set(roman, note);
       noteToRomanMap.set(note, roman);
-
+      
       // Also map normalized versions
       const normalizedNote = normalizeChordName(note);
       noteToRomanMap.set(normalizedNote, roman);
     }
   }
-
+  
   return { romanToNoteMap, noteToRomanMap };
 }

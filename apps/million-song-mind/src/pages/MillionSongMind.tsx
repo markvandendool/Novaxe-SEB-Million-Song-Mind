@@ -867,7 +867,7 @@ const MillionSongMind = () => {
           <div className="flex items-center justify-between">
             <div className="space-y-3">
               <h1 className="text-3xl md:text-5xl  font-bold text-foreground tracking-[0.12em] md:tracking-[0.15em] leading-none">
-                MILLION SONG MIND
+                MILLION SONG MIND <span className="text-primary font-black text-4xl md:text-6xl">V1.0</span>
               </h1>
               <p className="text-muted-foreground  text-xs md:text-sm tracking-[0.08em] md:tracking-[0.1em] uppercase">
                 Professional Music Analysis Tool • Industrial Scale Ready • Forensic Grade Precision
@@ -939,7 +939,7 @@ const MillionSongMind = () => {
         {/* Welcome message for first-time users */}
         {isFirstTimeUser && (
           <div className="learning-section">
-            <h3 className="text-responsive-lg font-semibold mb-2">🎵 Welcome to Million Song Mind!</h3>
+            <h3 className="text-responsive-lg font-semibold mb-2">🎵 Welcome to Million Song Mind <span className="font-black text-primary">V1.0</span>!</h3>
             <p className="text-responsive-sm text-muted-foreground mb-4">
               This is your professional music analysis tool. Click the <strong>TUTORIAL</strong> button
               in the header to get started with a guided tour.
@@ -1656,7 +1656,7 @@ const MillionSongMind = () => {
       <footer className="border-t border-border mt-16 py-6">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <p className="text-muted-foreground text-sm">
-            Million Song Mind — built for harmonic exploration at scale
+            Million Song Mind <span className="font-black text-primary">V1.0</span> — built for harmonic exploration at scale
           </p>
         </div>
       </footer>
