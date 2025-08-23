@@ -1740,10 +1740,12 @@ function onPointerUp(e) {
                         // Gentle eased rotation
                         animateQuaternion(targetObj, finalQ, 650);
                         targetObj.userData.rotationIndex = (targetObj.userData.rotationIndex + (delta + 4)) % 4;
+                        updateFaceProxyToneMap(targetObj);
                         // Trigger audio with new orientation slightly after animation starts
                         setTimeout(() => playChordForObject(targetObj), 80);
                     }
                     targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
+                    updateFaceProxyToneMap(targetObj);
                 } else if (hit.face) {
                     // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
                     const normalLocal = hit.face.normal.clone();
@@ -1887,7 +1889,7 @@ function ensureFaceProxies(parentCube) {
             p.quaternion.copy(q);
             p.userData = { isFaceProxy: true, toneIdx, baseNormal: normal.clone(), parent: parentCube };
             // Put on same layer as cube for picking
-            try { p.layers.set( parentCube.layers.mask ); } catch (_) { }
+            try { p.layers.set(parentCube.layers.mask); } catch (_) { }
             return p;
         };
         const half = (cubeSize * (parentCube.scale?.x || parentCube.scale || 1)) / 2 + 0.002;
@@ -1901,6 +1903,8 @@ function ensureFaceProxies(parentCube) {
         proxies.forEach(p => parentCube.add(p));
         if (!parentCube.userData) parentCube.userData = {};
         parentCube.userData.faceProxies = proxies;
+        // Initialize tone mapping based on current rotationIndex
+        updateFaceProxyToneMap(parentCube);
     } catch (_) { }
 }
 
@@ -1917,6 +1921,17 @@ function getTopToneIdxFromProxies(cube) {
         if (best) return best.userData.toneIdx;
     } catch (_) { }
     return null;
+}
+
+function updateFaceProxyToneMap(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies) return;
+        const r = ((cube.userData?.rotationIndex || 0) % 4 + 4) % 4;
+        // Order: 0=bottom,1=right,2=top,3=left
+        const toneByFace = [r, (r + 1) % 4, (r + 2) % 4, (r + 3) % 4];
+        for (let i = 0; i < proxies.length; i++) proxies[i].userData.toneIdx = toneByFace[i];
+        logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, toneByFace });
+    } catch (_) { }
 }
 
 function getBottomToneIdxFromProxies(cube) {
@@ -2784,10 +2799,12 @@ async function animateShelfClickAdd(shelf) {
             clone.userData.animatingIn = false;
             // Apply rotation index delta exactly once
             if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+            updateFaceProxyToneMap(clone);
             reflowLineup();
         }, 470);
         // Play with intended inversion immediately
         if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+        updateFaceProxyToneMap(clone);
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
