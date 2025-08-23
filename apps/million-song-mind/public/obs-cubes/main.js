@@ -1730,6 +1730,8 @@ function onPointerUp(e) {
             let hit = null;
             for (const h of hits) { const o = resolveCubeFromObject(h.object); if (o === targetObj) { hit = h; break; } }
             if (hit) {
+                // If a face proxy was clicked, play that exact tone and exit
+                if (hit.object?.userData?.isFaceProxy) { playProxyTone(targetObj, hit.object); pendingObj = null; return; }
                 // Then overlay/front, then faces
                 const isOverlay = isFrontOverlayHit(hit, targetObj);
                 const normalZ = isOverlay ? 1 : (hit.face?.normal?.z ?? 0);
@@ -1887,7 +1889,7 @@ function ensureFaceProxies(parentCube) {
         if (!parentCube || !parentCube.add) return;
         // If already present, skip
         if (parentCube.userData && parentCube.userData.faceProxies) return;
-        const makeProxy = (w, h, offset, normal, toneIdx) => {
+        const makeProxy = (w, h, offset, normal, faceIdx) => {
             const geo = new THREE.PlaneGeometry(w, h);
             const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0, depthWrite: false });
             const p = new THREE.Mesh(geo, mat);
@@ -1896,7 +1898,7 @@ function ensureFaceProxies(parentCube) {
             const up = new THREE.Vector3(0, 0, 1); // plane faces +z by default; rotate to match desired normal
             const q = new THREE.Quaternion().setFromUnitVectors(up, normal.clone().normalize());
             p.quaternion.copy(q);
-            p.userData = { isFaceProxy: true, toneIdx, baseNormal: normal.clone(), parent: parentCube };
+            p.userData = { isFaceProxy: true, faceIdx, toneIdx: 0, baseNormal: normal.clone(), parent: parentCube };
             // Put on same layer as cube for picking
             try { p.layers.set(parentCube.layers.mask); } catch (_) { }
             return p;
@@ -1904,10 +1906,10 @@ function ensureFaceProxies(parentCube) {
         const half = (cubeSize * (parentCube.scale?.x || parentCube.scale || 1)) / 2 + 0.002;
         const size = cubeSize * 0.98;
         const proxies = [
-            makeProxy(size, size, new THREE.Vector3(0, -half, 0), new THREE.Vector3(0, -1, 0), 0), // bottom/root
-            makeProxy(size, size, new THREE.Vector3(half, 0, 0), new THREE.Vector3(1, 0, 0), 1),   // right/3rd
-            makeProxy(size, size, new THREE.Vector3(0, half, 0), new THREE.Vector3(0, 1, 0), 2),   // top/5th
-            makeProxy(size, size, new THREE.Vector3(-half, 0, 0), new THREE.Vector3(-1, 0, 0), 3), // left/7th
+            makeProxy(size, size, new THREE.Vector3(0, -half, 0), new THREE.Vector3(0, -1, 0), 0), // bottom
+            makeProxy(size, size, new THREE.Vector3(half, 0, 0), new THREE.Vector3(1, 0, 0), 1),   // right
+            makeProxy(size, size, new THREE.Vector3(0, half, 0), new THREE.Vector3(0, 1, 0), 2),   // top
+            makeProxy(size, size, new THREE.Vector3(-half, 0, 0), new THREE.Vector3(-1, 0, 0), 3), // left
         ];
         proxies.forEach(p => parentCube.add(p));
         if (!parentCube.userData) parentCube.userData = {};
@@ -1936,10 +1938,13 @@ function updateFaceProxyToneMap(cube) {
     try {
         const proxies = cube?.userData?.faceProxies; if (!proxies) return;
         const r = ((cube.userData?.rotationIndex || 0) % 4 + 4) % 4;
-        // Order: 0=bottom,1=right,2=top,3=left
-        const toneByFace = [r, (r + 1) % 4, (r + 2) % 4, (r + 3) % 4];
-        for (let i = 0; i < proxies.length; i++) proxies[i].userData.toneIdx = toneByFace[i];
-        logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, toneByFace });
+        // Map tone per proxy based on fixed faceIdx
+        for (let i = 0; i < proxies.length; i++) {
+            const faceIdx = proxies[i].userData.faceIdx; // 0 bottom,1 right,2 top,3 left
+            const toneIdx = (r + faceIdx) % 4;
+            proxies[i].userData.toneIdx = toneIdx;
+        }
+        logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, faces: proxies.map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx })) });
     } catch (_) { }
 }
 
