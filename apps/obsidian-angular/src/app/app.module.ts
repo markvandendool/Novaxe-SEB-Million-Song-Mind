@@ -1,4 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -110,6 +111,7 @@ import { StoreComponent } from './pages/store/store.component';
 import { MidiChordDisplayComponent } from './components/midi-chord-display/midi-chord-display.component';
 import { PremiumAuthComponent } from './components/premium-auth/premium-auth.component';
 import { CurChordModel } from '@models/songmodel/cur-chord-model';
+import { TestSimpleComponent } from './test-simple/test-simple.component';
 
 
 
@@ -173,8 +175,10 @@ import { CurChordModel } from '@models/songmodel/cur-chord-model';
     StoreComponent,
     MidiChordDisplayComponent,
     PremiumAuthComponent,
+    TestSimpleComponent,
   ],
   bootstrap: [AppComponent], imports: [BrowserModule,
+    CommonModule,
     BrowserAnimationsModule,
     AppRoutingModule,
     FormsModule,

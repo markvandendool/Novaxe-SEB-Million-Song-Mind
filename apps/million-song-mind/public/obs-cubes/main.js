@@ -720,6 +720,9 @@ const shelfPickProxies = [];
 let currentSet = 'none';
 let labelMode = 'roman';
 let currentKey = 'C';
+// Verbose debugging flag
+let OBS_VERBOSE = false;
+function dbg(...args) { try { if (OBS_VERBOSE) console.log('[obs-cubes]', ...args); } catch (_) { } }
 // Shelf (back-row) configuration
 const shelfZ = -4.2;
 const shelfY = 1.6;
@@ -1402,6 +1405,11 @@ function onPointerDown(e) {
     // Only honor left-click for selections/drags
     if (typeof e.button === 'number' && e.button !== 0) return;
     const rect = renderer.domElement.getBoundingClientRect();
+    if (OBS_VERBOSE) {
+        const nx0 = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+        const ny0 = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+        dbg('pointerdown', { client: { x: e.clientX, y: e.clientY }, norm: { x: nx0, y: ny0 } });
+    }
     mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
     mouseDownTime = performance.now();
     fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
@@ -1423,8 +1431,10 @@ function onPointerDown(e) {
     raycaster.setFromCamera(pointer, camera);
     raycaster.layers.set(1);
     let hits = raycaster.intersectObjects(cubes, true);
+    if (OBS_VERBOSE) dbg('ray:frontRow', { hits: hits.map(h => ({ name: h.object?.name, isProxy: !!h.object?.userData?.isFaceProxy, faceIdx: h.object?.userData?.faceIdx })) });
     if (hits.length > 0) {
         let obj = resolveCubeFromObject(hits[0].object);
+        if (OBS_VERBOSE) dbg('select:frontRow', { roman: obj?.userData?.roman, isShelf: !!obj?.userData?.isShelf });
         pendingObj = obj;
         controls.enabled = !adjustMode;
         return;
@@ -1445,6 +1455,7 @@ function onPointerDown(e) {
     hits = raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
     if (hits.length > 0) {
         pendingObj = resolveCubeFromObject(hits[0].object);
+        if (OBS_VERBOSE) dbg('select:shelf', { roman: pendingObj?.userData?.roman });
         controls.enabled = !adjustMode;
         if (adjustMode && pendingObj?.userData?.isShelf) lastShelfTarget = pendingObj;
         return;
@@ -1669,6 +1680,7 @@ function onPointerUp(e) {
         const res = fsm.classifyRelease(e.clientX - rect.left, e.clientY - rect.top, now);
         if (res.isClick) {
             const hits = getIntersects(e);
+            if (OBS_VERBOSE) dbg('pointerup:intersects', { count: hits.length, items: hits.map(h => ({ isProxy: !!h.object?.userData?.isFaceProxy, faceIdx: h.object?.userData?.faceIdx, name: h.object?.name })) });
             // Global 3D play button check
             for (const h of hits) { if (h.object?.userData?.isPlayButton) { playFrontRowProgression(); pendingObj = null; return; } }
             // Use screen-space rectangle picking for shelf cubes
@@ -1677,6 +1689,7 @@ function onPointerUp(e) {
             // If we pressed a FRONT-ROW cube on pointerdown, force it as the target for click handling
             const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
             const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
+            if (OBS_VERBOSE) dbg('click:classifier', { frontOverride, fromShelfBand, pendingIsShelf: !!(pendingObj && pendingObj.userData?.isShelf) });
             // If polygon picker already chose a shelf cube at mousedown, trust it
             if (pendingObj && pendingObj.userData?.isShelf) {
                 try {
@@ -1726,6 +1739,7 @@ function onPointerUp(e) {
             } else {
                 targetObj = shelfFromRay || ((pendingObj && pendingObj.userData?.isShelf) ? pendingObj : resolveCubeFromObject(hits[0]?.object));
             }
+            if (OBS_VERBOSE) dbg('click:target', { roman: targetObj?.userData?.roman, isShelf: !!targetObj?.userData?.isShelf });
             if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) {
@@ -1738,6 +1752,18 @@ function onPointerUp(e) {
             }
             if (targetObj.userData?.isShelf) { pendingObj = null; return; }
             // Center play priority for the pressed cube
+            // First, if any face proxy for this cube is directly hit, prefer exact tone audition
+            let directProxy = null;
+            for (const h of hits) {
+                if (h.object?.userData?.isFaceProxy) {
+                    const parent = h.object.userData.parent || resolveCubeFromObject(h.object);
+                    if (parent === targetObj) { directProxy = h.object; break; }
+                }
+            }
+            if (directProxy) {
+                dbg('click:proxyHit', { roman: targetObj.userData?.roman, faceIdx: directProxy.userData?.faceIdx, toneIdx: directProxy.userData?.toneIdx });
+                playProxyTone(targetObj, directProxy); pendingObj = null; return;
+            }
             const centerHit = pickCenterPlay(hits, targetObj);
             if (centerHit) {
                 try { syncRotationIndexFromQuaternion(targetObj); } catch (_) { }
@@ -1759,7 +1785,9 @@ function onPointerUp(e) {
                     const absX = Math.abs(local.x);
                     const absY = Math.abs(local.y);
                     let targetToneIndex; if (absX > absY) targetToneIndex = local.x > 0 ? 1 : 3; else targetToneIndex = local.y > 0 ? 2 : 0;
-                    const r = targetObj.userData.rotationIndex || 0;
+                    dbg('click:frontQuadrant', { roman: targetObj.userData?.roman, local: { x: local.x, y: local.y }, targetToneIndex });
+                    // Use proxy-derived bottom index rather than rotationIndex
+                    const r = getBottomToneIdxFromProxies(targetObj) ?? 0;
                     const cw = (targetToneIndex - r + 4) % 4; const ccw = (r - targetToneIndex + 4) % 4;
                     let angle = 0; let delta = 0;
                     if (cw <= ccw) { angle = -cw * (Math.PI / 2); delta = +cw; } else { angle = ccw * (Math.PI / 2); delta = -ccw; }
@@ -1770,13 +1798,14 @@ function onPointerUp(e) {
                             const model = targetObj.userData?.model;
                             // angle maps: 0=root stays; +90→1st (right→bottom), +180→2nd (top→bottom), -90→3rd (left→bottom)
                             const mapAngleToFace = (a) => {
-                                if (a === 0) return ((targetObj.userData.rotationIndex || 0) % 4 + 4) % 4; // keep current bottom
+                                if (a === 0) return (getBottomToneIdxFromProxies(targetObj) ?? 0);
                                 if (a > 0 && Math.abs(a - Math.PI / 2) < 1e-3) return 1; // right
                                 if (Math.abs(a - Math.PI) < 1e-3) return 2; // top
                                 if (a < 0 && Math.abs(a + Math.PI / 2) < 1e-3) return 3; // left
                                 return 0;
                             };
                             const faceIdx = mapAngleToFace(angle);
+                            dbg('rotate:solve', { roman: targetObj.userData?.roman, fromBottomIdx: r, toFaceIdx: faceIdx, angle });
                             finalQ = model?.rotateFaceToBottom(faceIdx, targetObj) || null;
                         } catch (_) { }
                         if (!finalQ) {
@@ -1786,12 +1815,11 @@ function onPointerUp(e) {
                         if (hasActiveTweenFor(targetObj)) cancelTweensFor(targetObj);
                         // Gentle eased rotation
                         animateQuaternion(targetObj, finalQ, 650);
-                        targetObj.userData.rotationIndex = (targetObj.userData.rotationIndex + (delta + 4)) % 4;
+                        // Re-resolve proxy mapping after rotation
                         updateFaceProxyToneMap(targetObj);
                         // Trigger audio with new orientation slightly after animation starts
                         setTimeout(() => playChordForObject(targetObj), 80);
                     }
-                    targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
                     updateFaceProxyToneMap(targetObj);
                 } else if (hit.face) {
                     // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
@@ -1900,7 +1928,7 @@ function ensureFaceProxies(parentCube) {
             p.quaternion.copy(q);
             p.userData = { isFaceProxy: true, faceIdx, toneIdx: 0, baseNormal: normal.clone(), parent: parentCube };
             // Put on same layer as cube for picking
-            try { p.layers.set(parentCube.layers.mask); } catch (_) { }
+            try { p.layers.set(parentCube?.userData?.isShelf ? 2 : 1); } catch (_) { }
             return p;
         };
         const half = (cubeSize * (parentCube.scale?.x || parentCube.scale || 1)) / 2 + 0.002;
@@ -1914,6 +1942,7 @@ function ensureFaceProxies(parentCube) {
         proxies.forEach(p => parentCube.add(p));
         if (!parentCube.userData) parentCube.userData = {};
         parentCube.userData.faceProxies = proxies;
+        dbg('proxies:ensure', { roman: parentCube.userData?.roman, count: proxies.length, normals: proxies.map(p => ({ faceIdx: p.userData.faceIdx, n: p.userData.baseNormal })) });
         // Initialize tone mapping based on current rotationIndex
         updateFaceProxyToneMap(parentCube);
         // Attach Troika text diamonds for visual perfection (MSDF swap)
@@ -1965,15 +1994,32 @@ function ensureFaceProxies(parentCube) {
 
 function getTopToneIdxFromProxies(cube) {
     try {
-        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const proxies = cube?.userData?.faceProxies;
         const up = new THREE.Vector3(0, 1, 0);
-        let best = null; let bestDot = -Infinity;
-        for (const p of proxies) {
-            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
-            const d = normalWorld.dot(up);
-            if (d > bestDot) { bestDot = d; best = p; }
+        if (proxies && proxies.length) {
+            let best = null; let bestDot = -Infinity;
+            for (const p of proxies) {
+                const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+                const d = normalWorld.dot(up);
+                if (d > bestDot) { bestDot = d; best = p; }
+            }
+            if (best) return best.userData.toneIdx;
+        } else {
+            // Fallback without proxies: map cube quaternion to nearest axis for the top face
+            const axes = [
+                new THREE.Vector3(0, -1, 0), // bottom → 0
+                new THREE.Vector3(1, 0, 0),  // right  → 1
+                new THREE.Vector3(0, 1, 0),  // top    → 2
+                new THREE.Vector3(-1, 0, 0), // left   → 3
+            ];
+            // Evaluate the world-up aligned face (index 2)
+            let bestIdx = 0; let bestDot = -Infinity;
+            for (let j = 0; j < axes.length; j++) {
+                const d = axes[j].clone().applyQuaternion(cube.quaternion).dot(up);
+                if (d > bestDot) { bestDot = d; bestIdx = j; }
+            }
+            return bestIdx;
         }
-        if (best) return best.userData.toneIdx;
     } catch (_) { }
     return null;
 }
@@ -1981,12 +2027,32 @@ function getTopToneIdxFromProxies(cube) {
 function updateFaceProxyToneMap(cube) {
     try {
         const proxies = cube?.userData?.faceProxies; if (!proxies) return;
-        const r = ((cube.userData?.rotationIndex || 0) % 4 + 4) % 4;
-        // Map tone per proxy based on fixed faceIdx
+        // Compute tone mapping purely from current quaternion by matching each face's world normal
+        // to the nearest world axis in the set [down, right, up, left] => toneIdx [0,1,2,3]
+        const axes = [
+            new THREE.Vector3(0, -1, 0), // bottom → root (0)
+            new THREE.Vector3(1, 0, 0),  // right  → 3rd  (1)
+            new THREE.Vector3(0, 1, 0),  // top    → 5th  (2)
+            new THREE.Vector3(-1, 0, 0), // left   → 7th  (3)
+        ];
         for (let i = 0; i < proxies.length; i++) {
-            const faceIdx = proxies[i].userData.faceIdx; // 0 bottom,1 right,2 top,3 left
-            const toneIdx = (r + faceIdx) % 4;
-            proxies[i].userData.toneIdx = toneIdx;
+            const nWorld = proxies[i].userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+            let bestIdx = 0; let bestDot = -Infinity;
+            for (let j = 0; j < axes.length; j++) {
+                const d = nWorld.dot(axes[j]);
+                if (d > bestDot) { bestDot = d; bestIdx = j; }
+            }
+            proxies[i].userData.toneIdx = bestIdx;
+            if (OBS_VERBOSE) {
+                dbg('proxy:map', {
+                    roman: cube.userData?.roman,
+                    faceIdx: proxies[i].userData.faceIdx,
+                    toneIdx: bestIdx,
+                    dot: bestDot,
+                    nWorld: { x: nWorld.x, y: nWorld.y, z: nWorld.z },
+                    quat: { x: cube.quaternion.x, y: cube.quaternion.y, z: cube.quaternion.z, w: cube.quaternion.w }
+                });
+            }
         }
         // Keep MSDF labels in sync with face identity by updating their displayed text when key or roman changes
         try {
@@ -1998,21 +2064,37 @@ function updateFaceProxyToneMap(cube) {
                 if (t.text !== label) { t.text = label; t.sync(); }
             }
         } catch (_) { }
-        logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, faces: proxies.map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx })) });
+        logAudio('proxyToneMap', { roman: cube.userData?.roman, faces: proxies.map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx })) });
     } catch (_) { }
 }
 
 function getBottomToneIdxFromProxies(cube) {
     try {
-        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const proxies = cube?.userData?.faceProxies;
         const down = new THREE.Vector3(0, -1, 0);
-        let best = null; let bestDot = -Infinity;
-        for (const p of proxies) {
-            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
-            const d = normalWorld.dot(down);
-            if (d > bestDot) { bestDot = d; best = p; }
+        if (proxies && proxies.length) {
+            let best = null; let bestDot = -Infinity;
+            for (const p of proxies) {
+                const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+                const d = normalWorld.dot(down);
+                if (d > bestDot) { bestDot = d; best = p; }
+            }
+            if (best) return best.userData.toneIdx;
+        } else {
+            // Fallback without proxies: map cube quaternion to nearest axis for the bottom face
+            const axes = [
+                new THREE.Vector3(0, -1, 0), // bottom → 0
+                new THREE.Vector3(1, 0, 0),  // right  → 1
+                new THREE.Vector3(0, 1, 0),  // top    → 2
+                new THREE.Vector3(-1, 0, 0), // left   → 3
+            ];
+            let bestIdx = 0; let bestDot = -Infinity;
+            for (let j = 0; j < axes.length; j++) {
+                const d = axes[j].clone().applyQuaternion(cube.quaternion).dot(down);
+                if (d > bestDot) { bestDot = d; bestIdx = j; }
+            }
+            return bestIdx;
         }
-        if (best) return best.userData.toneIdx;
     } catch (_) { }
     return null;
 }
@@ -2023,11 +2105,13 @@ function playProxyTone(cube, proxy) {
         const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
         const names = transposeNotes(tones, currentKey);
         const idx = proxy?.userData?.toneIdx ?? 0;
+        const faceIdx = proxy?.userData?.faceIdx ?? -1;
         const name = names[idx];
         const up = new THREE.Vector3(0, 1, 0); const down = new THREE.Vector3(0, -1, 0);
         const nWorld = proxy.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
         const isTop = nWorld.dot(up) > 0.8; const isBottom = nWorld.dot(down) > 0.8;
         const midiOf = (n) => 60 + pcOf(n); // base C4
+        if (OBS_VERBOSE) dbg('click:proxy', { roman: cube.userData?.roman, faceIdx, toneIdx: idx, name, isTop, isBottom, nWorld, quat: cube.quaternion });
         if (isBottom) {
             // Bass register
             let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12;
@@ -2041,7 +2125,7 @@ function playProxyTone(cube, proxy) {
             let m = midiOf(name);
             if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
         }
-        logAudio('proxy:play', { roman: cube.userData?.roman, idx, name, top: isTop, bottom: isBottom });
+        logAudio('proxy:play', { roman: cube.userData?.roman, faceIdx, idx, name, top: isTop, bottom: isBottom });
     } catch (_) { }
 }
 
@@ -2057,8 +2141,23 @@ function playFaceIdxTone(cube, faceIdx) {
             const p = proxies.find(p => p.userData.faceIdx === faceIdx);
             idx = p ? (p.userData.toneIdx ?? 0) : 0;
         } else {
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            idx = (r + faceIdx) % 4;
+            // Fallback without proxies: infer tone by mapping the face's world normal to nearest axis
+            const baseNormals = [
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+            ];
+            const axes = [
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+            ];
+            const nWorld = baseNormals[faceIdx].clone().applyQuaternion(cube.quaternion);
+            let bestIdx = 0; let bestDot = -Infinity;
+            for (let j = 0; j < axes.length; j++) { const d = nWorld.dot(axes[j]); if (d > bestDot) { bestDot = d; bestIdx = j; } }
+            idx = bestIdx;
         }
         const name = names[idx];
         if (faceIdx === 0) {
@@ -2462,6 +2561,19 @@ textureManifest = null;
 (async () => {
     await ensureFontsLoaded();
     readFlagsFromUrl();
+    // Add a visible audio unlock overlay if context is suspended
+    try {
+        const ctx = ensureAudio();
+        if (ctx && ctx.state !== 'running') {
+            const banner = document.createElement('div');
+            banner.textContent = 'Click anywhere to enable audio';
+            banner.style.cssText = 'position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.6);color:#fff;font:600 18px system-ui;z-index:200000;cursor:pointer;';
+            const unlock = async () => { try { await ctx.resume(); } catch (_) { } banner.remove(); };
+            banner.addEventListener('pointerdown', unlock);
+            banner.addEventListener('touchstart', unlock);
+            document.body.appendChild(banner);
+        }
+    } catch (_) { }
     currentSet = 'all';
     await loadSet(currentSet);
     // Ensure shelf is visible by default
@@ -2718,10 +2830,9 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const proxyBottom = getBottomToneIdxFromProxies(obj);
-    const r = proxyBottom != null ? proxyBottom : ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const bottomIdx = getBottomToneIdxFromProxies(obj);
     const rootPc = pcOf(names[0]);
-    const bottomPc = pcOf(names[r]);
+    const bottomPc = pcOf(names[(bottomIdx != null) ? bottomIdx : 0]);
     const baseC2 = 36; // low register
     const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
     const diff = (bottomPc - rootPc + 12) % 12;
@@ -2732,11 +2843,8 @@ function getBassMidiForObject(obj) {
 function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const proxyTop = getTopToneIdxFromProxies(obj);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const topIndex = getTopToneIdxFromProxies(obj);
     const rootPc = pcOf(names[0]);
-    // If proxies are present, trust them entirely for top face identity
-    const topIndex = (proxyTop != null) ? proxyTop : (r + 2) % 4;
     const topPc = pcOf(names[topIndex]);
     const baseC5 = 72; // higher register
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
@@ -2769,15 +2877,15 @@ function makeNumberPlane(text, width = 0.9) {
 function getTopNoteNameForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    return names[(r + 2) % 4];
+    const idx = getTopToneIdxFromProxies(obj);
+    return names[(idx != null) ? idx : 2];
 }
 
 function getTopDegreeForObject(obj) {
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const roman = obj.userData.roman;
     const degs = degreeSets[roman] || ['1', '3', '5', '7'];
-    return degs[(r + 2) % 4];
+    const idx = getTopToneIdxFromProxies(obj);
+    return degs[(idx != null) ? idx : 2];
 }
 
 // Render a large NVX Diamond Font string as a billboard in 3D space
@@ -2804,9 +2912,14 @@ function showNVXDebugText(text) {
     try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
 }
 function playChordForObject(obj) {
-    // Re-verify orientation at replay time to avoid drift
-    syncRotationIndexFromQuaternion(obj);
+    // Re-derive proxies each time to avoid drift; do not rely on rotationIndex
     updateFaceProxyToneMap(obj);
+    if (OBS_VERBOSE) {
+        try {
+            const faces = (obj.userData.faceProxies || []).map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx }));
+            dbg('playChord:start', { roman: obj.userData?.roman, faces, quat: obj.quaternion });
+        } catch (_) { }
+    }
     const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
 
     if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
@@ -2883,7 +2996,7 @@ function playChordForObject(obj) {
             const m = resolveLockedMidi(lockedMelody[idx], obj, 'melody');
             if (typeof m === 'number') melMidi = m;
         }
-        logAudio('play:melody', { i: idx, roman: obj.userData?.roman, midi: melMidi, rIdx: obj.userData?.rotationIndex });
+        logAudio('play:melody', { i: idx, roman: obj.userData?.roman, midi: melMidi });
         if (sfMelody && sfMelody.play) {
             sfMelody.play(melMidi, now, { duration, gain: 0.3 });
         } else {
@@ -2960,15 +3073,11 @@ async function animateShelfClickAdd(shelf) {
         setTimeout(() => {
             if (!lineup.includes(clone)) lineup.push(clone);
             clone.userData.animatingIn = false;
-            // Apply rotation index delta exactly once
-            if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
-            // Re-sync from quaternion to eliminate drift
-            try { syncRotationIndexFromQuaternion(clone); } catch (_) { }
+            // Strict proxy-first: just refresh proxies from final quaternion
             updateFaceProxyToneMap(clone);
             reflowLineup();
         }, 470);
-        // Play with intended inversion immediately
-        if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+        // Play with intended inversion immediately, after proxies are updated
         updateFaceProxyToneMap(clone);
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
@@ -3011,6 +3120,9 @@ function readFlagsFromUrl() {
         const arrows = url.searchParams.get('arrows');
         const bpm = url.searchParams.get('bpm');
         const sf = url.searchParams.get('sf');
+        const verbose = url.searchParams.get('verbose') || url.searchParams.get('debug') || url.searchParams.get('log');
+        if (verbose === '1' || verbose === 'true' || verbose === '' || verbose === 'yes') OBS_VERBOSE = true;
+        try { if (!OBS_VERBOSE) { const ls = localStorage.getItem('obs.debug'); OBS_VERBOSE = (ls === '1' || ls === 'true'); } } catch (_) { }
         if (arrows === '1') progressionEnabled = true;
         if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
         if (sf) { try { setSfBase(sf); } catch (_) { } }
@@ -3326,10 +3438,8 @@ function lockInMelody() {
     // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
     const rotating = lineup.some(c => hasActiveTweenFor(c));
     if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
-    // Re-verify each cube's current orientation → rotationIndex from quaternion
-    for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
-    logAudio('lockInMelody:start', { lineup: lineup.map((c, i) => ({ i, roman: c.userData?.roman, rIdx: c.userData?.rotationIndex })) });
-    // Capture current melody using the freshly verified rotationIndex
+    // Capture current melody purely via proxies + quaternion
+    logAudio('lockInMelody:start', { lineup: lineup.map((c, i) => ({ i, roman: c.userData?.roman })) });
     const snapshot = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
@@ -3338,12 +3448,11 @@ function lockInMelody() {
         const midiTop = (() => {
             const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
             const names = transposeNotes(tones, currentKey);
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topIndex = (proxyTopIdx != null) ? proxyTopIdx : (r + 2) % 4;
+            const topIndex = (proxyTopIdx != null) ? proxyTopIdx : getTopToneIdxFromProxies(cube);
             const topPc = pcOf(names[topIndex]);
             let m = 72 + ((topPc - 0 + 12) % 12);
             while (m > 84) m -= 12; while (m < 60) m += 12;
-            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, rIdx: r, topIdx: proxyTopIdx != null ? proxyTopIdx : (r + 2) % 4, topNote: names[topIndex], midi: m });
+            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, topIdx: topIndex, topNote: names[topIndex], midi: m });
             return m;
         })();
         // Store lightweight faceRef metadata for robustness (faceIdx 2 = top)
@@ -3356,7 +3465,6 @@ function lockInMelody() {
     if (lockedBass && lockedBass.length === lineup.length) {
         setTimeout(() => {
             for (const cube of lineup) {
-                cube.userData.rotationIndex = 0;
                 const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
                 animateQuaternion(cube, to, 280);
             }
@@ -3369,10 +3477,7 @@ function lockInMelody() {
         const xs = computeSlotPositions(lineup.length);
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
-            // Ensure visual index is in sync before deciding topIdx
-            syncRotationIndexFromQuaternion(cube);
-            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topIdx = (rIdx + 2) % 4;
+            const topIdx = getTopToneIdxFromProxies(cube) ?? 2;
             const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
             const ROT_DEGS = [0, 270, 180, 90];
             const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
@@ -3434,7 +3539,6 @@ function lockInBass() {
     if (lockedMelody && lockedMelody.length === lineup.length) {
         setTimeout(() => {
             for (const cube of lineup) {
-                cube.userData.rotationIndex = 0;
                 const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
                 animateQuaternion(cube, to, 280);
             }

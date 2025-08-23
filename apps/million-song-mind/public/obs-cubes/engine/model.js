@@ -6,8 +6,30 @@ export class FaceModel {
         this.faceIdx = faceIdx; // 0 bottom,1 right,2 top,3 left (fixed)
     }
     getToneIdx() {
-        const r = ((this.cube.rotationIndex % 4) + 4) % 4;
-        return (r + this.faceIdx) % 4;
+        // Proxy/quaternion-first mapping: map the face's local normal into world and
+        // pick the nearest axis among [down,right,up,left] -> [0,1,2,3]
+        try {
+            const baseNormals = [
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+            ];
+            const axes = [
+                new THREE.Vector3(0, -1, 0),
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, 1, 0),
+                new THREE.Vector3(-1, 0, 0),
+            ];
+            const faceNormalWorld = baseNormals[this.faceIdx].clone().applyQuaternion(this.cube.obj.quaternion);
+            let bestIdx = 0; let bestDot = -Infinity;
+            for (let j = 0; j < axes.length; j++) { const d = faceNormalWorld.dot(axes[j]); if (d > bestDot) { bestDot = d; bestIdx = j; } }
+            return bestIdx;
+        } catch (_) {
+            // Fallback to rotationIndex if necessary
+            const r = ((this.cube.rotationIndex % 4) + 4) % 4;
+            return (r + this.faceIdx) % 4;
+        }
     }
     getToneName(noteSetsC, transposeNotes, key) {
         const roman = this.cube.roman;
