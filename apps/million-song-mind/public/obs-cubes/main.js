@@ -2888,7 +2888,16 @@ async function animateShelfClickAdd(shelf) {
         // Copy delta chosen on the shelf object (support zero)
         let deltaSteps = (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta') ? (shelf.userData.desiredRotationDelta || 0) : 0);
         deltaSteps = ((deltaSteps % 4) + 4) % 4;
-        const targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
+        // Prefer model-based quaternion solve: map delta→faceIdx and solve for bottom
+        let targetQuat = null;
+        try {
+            const model = clone.userData?.model;
+            const faceIdx = (deltaSteps === 0) ? 0 : (deltaSteps === 1) ? 1 : (deltaSteps === 2) ? 2 : 3;
+            targetQuat = model?.rotateFaceToBottom(faceIdx, clone) || null;
+        } catch (_) { }
+        if (!targetQuat) {
+            targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
+        }
         tweenObject({
             duration: 520, owner: clone, onUpdate: (v) => {
                 // Position ease
@@ -2908,6 +2917,8 @@ async function animateShelfClickAdd(shelf) {
             clone.userData.animatingIn = false;
             // Apply rotation index delta exactly once
             if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+            // Re-sync from quaternion to eliminate drift
+            try { syncRotationIndexFromQuaternion(clone); } catch (_) { }
             updateFaceProxyToneMap(clone);
             reflowLineup();
         }, 470);
