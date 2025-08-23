@@ -1133,12 +1133,12 @@ function decideShelfDeltaScreen(cube, event) {
         const pLocal = (x, y) => new THREE.Vector3(x, y, 0).applyMatrix4(cube.matrixWorld).project(camera);
         const px = pLocal(half, 0);
         const py = pLocal(0, half);
-        const hx = Math.max(8, Math.abs((px.x - center.x) * 0.5 * rect.width));
-        const hy = Math.max(8, Math.abs((py.y - center.y) * 0.5 * rect.height));
+        const hx = Math.max(6, Math.abs((px.x - center.x) * 0.5 * rect.width));
+        const hy = Math.max(6, Math.abs((py.y - center.y) * 0.5 * rect.height));
         const dx = event.clientX - cx;
         const dy = event.clientY - cy;
         const ax = Math.abs(dx), ay = Math.abs(dy);
-        const xThresh = hx * 0.35, yThresh = hy * 0.35;
+        const xThresh = hx * 0.18, yThresh = hy * 0.18; // easier to trigger
         // Lower or center → root
         if (dy > yThresh) return 0;
         // Top dominant → 2nd inversion
@@ -1147,6 +1147,17 @@ function decideShelfDeltaScreen(cube, event) {
         if (ax > xThresh) return dx > 0 ? +1 : -1;
         return 0;
     } catch (_) { return 0; }
+}
+
+// Local-space quadrant decision using normalized local coords (nx, ny in [-1,1])
+function decideShelfDeltaLocal(nx, ny) {
+    const ax = Math.abs(nx), ay = Math.abs(ny);
+    const dead = 0.10; // smaller deadzone
+    if (ax < dead && ay < dead) return 0;
+    // Vertical dominance → top/low bands
+    if (ay >= ax) return ny > 0 ? +2 : 0; // top → 2nd, bottom/center → root
+    // Horizontal dominance → 1st/3rd
+    return nx > 0 ? +1 : -1;
 }
 
 // Ascend from any child (edges, overlay, center) to the owning cube mesh
@@ -1578,7 +1589,14 @@ function onPointerUp(e) {
             const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
             const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
             // If polygon picker already chose a shelf cube at mousedown, trust it
-            if (pendingObj && pendingObj.userData?.isShelf) { try { pendingObj.userData.desiredRotationDelta = 0; } catch (_) {} enqueueShelfAdd(pendingObj); pendingObj = null; return; }
+            if (pendingObj && pendingObj.userData?.isShelf) {
+                try {
+                    const d = decideShelfDeltaScreen(pendingObj, e);
+                    pendingObj.userData.desiredRotationDelta = d;
+                    console.log('[shelf] pending click screen delta =', d, 'for', pendingObj.userData?.roman);
+                } catch (_) { pendingObj.userData.desiredRotationDelta = 0; }
+                enqueueShelfAdd(pendingObj); pendingObj = null; return;
+            }
             // Additional safety: if any shelf cube is directly in the hit stack, prioritize it immediately
             let shelfFromRay = null;
             for (const h of hits) {
@@ -1623,23 +1641,9 @@ function onPointerUp(e) {
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) {
                 try {
-                    // Try local quadrant mapping; fallback to screen-space
-                    let decided = false;
-                    const hits2 = getShelfHits(e);
-                    for (const h2 of hits2) {
-                        const cube2 = resolveCubeFromObject(h2.object);
-                        if (cube2 === targetObj) {
-                            const local = cube2.worldToLocal(h2.point.clone());
-                            const half = (cubeSize * (cube2.scale?.x || cube2.scale || 1)) / 2;
-                            const nx = local.x / (half || 1);
-                            const ny = local.y / (half || 1);
-                            let delta = 0;
-                            if (ny <= -0.25) delta = 0;
-                            else { if (Math.abs(nx) >= Math.abs(ny)) delta = nx > 0 ? +1 : -1; else delta = ny > 0 ? +2 : 0; }
-                            targetObj.userData.desiredRotationDelta = delta; decided = true; break;
-                        }
-                    }
-                    if (!decided) targetObj.userData.desiredRotationDelta = decideShelfDeltaScreen(targetObj, e);
+                    const d = decideShelfDeltaScreen(targetObj, e);
+                    targetObj.userData.desiredRotationDelta = d;
+                    console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
                 } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
                 enqueueShelfAdd(targetObj); pendingObj = null; return;
             }
@@ -2616,7 +2620,9 @@ async function animateShelfClickAdd(shelf) {
         const s0 = clone.scale.x;
         // Smooth position/scale; apply desiredRotationDelta once if provided
         const startQuat = clone.quaternion.clone();
-        let deltaSteps = ((shelf.userData?.desiredRotationDelta || 0) % 4 + 4) % 4;
+        // Copy delta chosen on the shelf object (support zero)
+        let deltaSteps = (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta') ? (shelf.userData.desiredRotationDelta || 0) : 0);
+        deltaSteps = ((deltaSteps % 4) + 4) % 4;
         const targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
         tweenObject({
             duration: 520, owner: clone, onUpdate: (v) => {
@@ -2640,7 +2646,7 @@ async function animateShelfClickAdd(shelf) {
             reflowLineup();
         }, 470);
         // Play with intended inversion immediately
-        if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+        if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
