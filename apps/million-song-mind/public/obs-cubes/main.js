@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { Text as TroikaText } from 'troika-three-text';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
 import { pickCenterPlay, isFrontOverlayHit } from './raycastRouter.js'
@@ -1916,6 +1917,40 @@ function ensureFaceProxies(parentCube) {
         parentCube.userData.faceProxies = proxies;
         // Initialize tone mapping based on current rotationIndex
         updateFaceProxyToneMap(parentCube);
+        // Attach Troika text diamonds for visual perfection (optional step 1)
+        try {
+            const degLabels = degreeSets[parentCube.userData?.roman] || ['1','3','5','7'];
+            const faceCenters = [
+                new THREE.Vector3(0, -half, 0),
+                new THREE.Vector3(half, 0, 0),
+                new THREE.Vector3(0, half, 0),
+                new THREE.Vector3(-half, 0, 0),
+            ];
+            const faceNormals = [new THREE.Vector3(0,-1,0), new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0), new THREE.Vector3(-1,0,0)];
+            parentCube.userData.msdfFaces = parentCube.userData.msdfFaces || [];
+            for (let faceIdx = 0; faceIdx < 4; faceIdx++) {
+                const label = degLabels[faceIdx];
+                const text = new TroikaText();
+                text.text = label;
+                text.font = 'NVXDiamond';
+                text.color = 0x111111;
+                text.fontSize = 0.42 * cubeSize;
+                text.anchorX = 'center'; text.anchorY = 'middle';
+                text.sync();
+                // Position and orient with face
+                const n = faceNormals[faceIdx].clone();
+                const up = new THREE.Vector3(0,0,1);
+                const q = new THREE.Quaternion().setFromUnitVectors(up, n);
+                text.quaternion.copy(q);
+                text.position.copy(faceCenters[faceIdx]);
+                // Diamond background: rotate the text container 45° visually via a parent
+                const group = new THREE.Group();
+                group.add(text);
+                group.rotation.z = Math.PI/4; // diamond
+                parentCube.add(group);
+                parentCube.userData.msdfFaces[faceIdx] = group;
+            }
+        } catch(_) { }
     } catch (_) { }
 }
 
