@@ -189,6 +189,7 @@ function syncRotationIndexFromQuaternion(obj) {
             if (d > bestDot) { bestDot = d; bestIdx = i; }
         }
         obj.userData.rotationIndex = ((bestIdx % 4) + 4) % 4;
+        logAudio('syncRotationIndex', { roman: obj.userData?.roman, bestIdx: obj.userData.rotationIndex, bestDot, q: { x: obj.quaternion.x, y: obj.quaternion.y, z: obj.quaternion.z, w: obj.quaternion.w } });
         // Optional: if very close to exact alignment, snap quaternion to the nearest quarter to stabilize visuals
         const angle = Math.atan2(
             new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).y,
@@ -198,6 +199,7 @@ function syncRotationIndexFromQuaternion(obj) {
         if (Math.abs(snapped - angle) < 0.05) {
             const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snapped);
             obj.quaternion.copy(q);
+            logAudio('snapQuaternion', { to: snapped });
         }
     } catch (_) { /* no-op */ }
 }
@@ -248,6 +250,13 @@ function setViewBelow() {
     animateVector(camera.position, bassCamPos.clone(), 650);
     animateVector(controls.target, bassTarget.clone(), 650);
     pokeInteraction();
+}
+
+// Debug/logging helpers
+const __url = new URL(window.location.href);
+const debugAudio = __url.searchParams.has('debugAudio') || __url.searchParams.has('debugaudio');
+function logAudio(tag, payload) {
+    try { if (debugAudio || window.__obsDebugAudio) console.log(`[obs-cubes:audit] ${tag}`, payload); } catch (_) { }
 }
 
 // Convert accidentals to musical glyphs and tidy typography
@@ -2585,6 +2594,8 @@ function showNVXDebugText(text) {
     try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
 }
 function playChordForObject(obj) {
+    // Re-verify orientation at replay time to avoid drift
+    syncRotationIndexFromQuaternion(obj);
     const ctx = ensureAudio();
     const now = ctx.currentTime;
     const duration = 1.1;
@@ -2611,6 +2622,7 @@ function playChordForObject(obj) {
     const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
     const idxForObj = lineup.indexOf(obj);
     const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
+    logAudio('play:bed', { roman: obj.userData?.roman, bedMidis, droppedTop: (bedMidis.length !== chordMidis.length) });
     if (sfChord && sfChord.play) {
         bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
     } else {
@@ -2622,6 +2634,7 @@ function playChordForObject(obj) {
         let bassMidi = getBassMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') bassMidi = lockedBass[idx].midi;
+        logAudio('play:bass', { i: idx, roman: obj.userData?.roman, midi: bassMidi });
         if (sfBass && sfBass.play) {
             sfBass.play(bassMidi, now, { duration, gain: 0.34 });
         } else {
@@ -2634,6 +2647,7 @@ function playChordForObject(obj) {
         let melMidi = getMelodyMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') melMidi = lockedMelody[idx].midi;
+        logAudio('play:melody', { i: idx, roman: obj.userData?.roman, midi: melMidi, rIdx: obj.userData?.rotationIndex });
         if (sfMelody && sfMelody.play) {
             sfMelody.play(melMidi, now, { duration, gain: 0.3 });
         } else {
@@ -3052,6 +3066,7 @@ function lockInMelody() {
     if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
     // Re-verify each cube's current orientation → rotationIndex from quaternion
     for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
+    logAudio('lockInMelody:start', { lineup: lineup.map((c, i) => ({ i, roman: c.userData?.roman, rIdx: c.userData?.rotationIndex })) });
     // Capture current melody using the freshly verified rotationIndex
     const snapshot = [];
     for (let i = 0; i < lineup.length; i++) {
@@ -3064,6 +3079,7 @@ function lockInMelody() {
             const topPc = pcOf(names[(r + 2) % 4]);
             let m = 72 + ((topPc - 0 + 12) % 12);
             while (m > 84) m -= 12; while (m < 60) m += 12;
+            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, rIdx: r, topNote: names[(r + 2) % 4], midi: m });
             return m;
         })();
         snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
