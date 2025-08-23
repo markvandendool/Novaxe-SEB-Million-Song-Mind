@@ -1750,8 +1750,25 @@ function onPointerUp(e) {
                     let angle = 0; let delta = 0;
                     if (cw <= ccw) { angle = -cw * (Math.PI / 2); delta = +cw; } else { angle = ccw * (Math.PI / 2); delta = -ccw; }
                     if (angle !== 0) {
-                        const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-                        const finalQ = targetObj.quaternion.clone().multiply(extra);
+                        // Prefer model-based quaternion solve to rotate desired face to bottom
+                        let finalQ = null;
+                        try {
+                            const model = targetObj.userData?.model;
+                            // angle maps: 0=root stays; +90→1st (right→bottom), +180→2nd (top→bottom), -90→3rd (left→bottom)
+                            const mapAngleToFace = (a) => {
+                                if (a === 0) return ((targetObj.userData.rotationIndex || 0) % 4 + 4) % 4; // keep current bottom
+                                if (a > 0 && Math.abs(a - Math.PI / 2) < 1e-3) return 1; // right
+                                if (Math.abs(a - Math.PI) < 1e-3) return 2; // top
+                                if (a < 0 && Math.abs(a + Math.PI / 2) < 1e-3) return 3; // left
+                                return 0;
+                            };
+                            const faceIdx = mapAngleToFace(angle);
+                            finalQ = model?.rotateFaceToBottom(faceIdx, targetObj) || null;
+                        } catch (_) {}
+                        if (!finalQ) {
+                            const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+                            finalQ = targetObj.quaternion.clone().multiply(extra);
+                        }
                         if (hasActiveTweenFor(targetObj)) cancelTweensFor(targetObj);
                         // Gentle eased rotation
                         animateQuaternion(targetObj, finalQ, 650);
@@ -1937,6 +1954,7 @@ function ensureFaceProxies(parentCube) {
             for (let faceIdx = 0; faceIdx < 4; faceIdx++) {
                 const label = degLabels[faceIdx];
                 const text = new TroikaText();
+                // Use NVXDiamond ligature strings when label-mode is roman; else letters
                 text.text = label;
                 text.font = 'NVXDiamond';
                 text.color = FACE_COLORS[faceIdx];
