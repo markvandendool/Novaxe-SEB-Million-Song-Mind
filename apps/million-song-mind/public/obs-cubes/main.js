@@ -1089,14 +1089,37 @@ async function loadSet(setName) {
 }
 
 async function updateLabels() {
+    const makeFrontLabel = (cube) => {
+        if (labelMode === 'roman') return cube.userData.roman;
+        // Derive letter label by transposing original C-root to current key while preserving suffix from original letter
+        try {
+            const roman = cube.userData.roman;
+            const orig = cube.userData.letter || '';
+            // Prefer computed root from noteSetsC
+            const rootC = (noteSetsC[roman] || ['C'])[0];
+            const transposedRoot = transposeNotes([rootC], currentKey)[0];
+            // Extract suffix from original letter (drop leading root note token)
+            const m = String(orig).match(/^[A-G](?:#|b)?(.*)$/);
+            const suffix = m ? m[1] : '';
+            return `${transposedRoot}${suffix}`;
+        } catch (_) { return cube.userData.letter; }
+    };
     for (const c of cubes) {
-        const label = c.userData[labelMode];
+        const label = makeFrontLabel(c);
         const materials = await makeMaterials(label, c.userData.roman);
         c.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         c.material = materials;
     }
     for (const s of shelfCubes) {
-        const label = s.userData[labelMode];
+        const label = (labelMode === 'roman') ? s.userData.roman : (() => {
+            try {
+                const rootC = (noteSetsC[s.userData.roman] || ['C'])[0];
+                const transposedRoot = transposeNotes([rootC], currentKey)[0];
+                const m = String(s.userData.letter || '').match(/^[A-G](?:#|b)?(.*)$/);
+                const suffix = m ? m[1] : '';
+                return `${transposedRoot}${suffix}`;
+            } catch (_) { return s.userData.letter; }
+        })();
         const materials = await makeMaterials(label, s.userData.roman);
         if (Array.isArray(s.material)) s.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         s.material = materials;
