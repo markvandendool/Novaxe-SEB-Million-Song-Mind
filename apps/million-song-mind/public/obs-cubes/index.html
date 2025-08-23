@@ -6,6 +6,17 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>OBS Cubes</title>
 	<link rel="stylesheet" href="./styles.css" />
+	<style>
+		@font-face {
+			font-family: 'NVXDiamond';
+			src:
+				url('../fonts/NVX Diamond Font.otf') format('opentype'),
+				url('../fonts/NVX%20Diamond%20Font.otf') format('opentype');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+	</style>
 	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
 </head>
 
@@ -81,6 +92,11 @@
 				<option value="trumpet">Trumpet</option>
 				<option value="cello">Cello</option>
 			</select>
+			<label style="margin-left:12px;">Voice Leading</label>
+			<select id="voice-leading-mode">
+				<option value="vl1" selected>Voice leading 1</option>
+				<option value="vl2">Voice leading 2</option>
+			</select>
 			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
 		</div>
 		<div class="row small">
@@ -93,8 +109,17 @@
 			<label style="margin-left:8px;">Dominant <input type="color" id="color-dom" value="#ff7a45"></label>
 			<label style="margin-left:8px;">Neutral <input type="color" id="color-neu" value="#bfbfbf"></label>
 		</div>
+		<div class="row small" id="giant-toggles">
+			<label>Giant Melody <input type="checkbox" id="show-giant-melody" checked /></label>
+			<label style="margin-left:8px;">Giant Bass <input type="checkbox" id="show-giant-bass" checked /></label>
+			<button id="menu-lock-melody" style="margin-left:12px;">Lock Melody</button>
+			<button id="menu-unlock-melody">Unlock Melody</button>
+			<button id="menu-lock-bass" style="margin-left:12px;">Lock Bass</button>
+			<button id="menu-unlock-bass">Unlock Bass</button>
+		</div>
 	</div>
 	<canvas id="scene"></canvas>
+	<!-- legacy lane-controls removed; lock icons integrated into camera-ui -->
 	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
 
 	<div id="camera-ui">
@@ -110,6 +135,10 @@
 		}
 	}
 	</script>
+	<!-- Tone.js for audio engine aligned with Novaxe stack -->
+	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+	<!-- Tonal for voice-leading utilities (mode 2) -->
+	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
 	<script type="module" src="./chords.js?v=1"></script>
 	<script type="module" src="./main.js?v=1"></script>
 </body>
