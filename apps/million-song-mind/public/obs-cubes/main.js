@@ -2825,11 +2825,35 @@ function playChordForObject(obj) {
         console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
     }
 
-    // Bass: if locked, use locked line; else use cube bottom face
+    // Helper: recompute locked midi from faceRef if available (keeps key and mapping consistent)
+    const resolveLockedMidi = (lockedEntry, cube, role /* 'bass'|'melody' */) => {
+        try {
+            if (!lockedEntry) return null;
+            // If toneIdx present, recompute from current key and role register
+            if (typeof lockedEntry.toneIdx === 'number') {
+                const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+                const names = transposeNotes(tones, currentKey);
+                const name = names[lockedEntry.toneIdx];
+                if (role === 'bass') {
+                    let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12; return m;
+                } else {
+                    let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12; return m;
+                }
+            }
+            // Fallback to stored midi
+            if (typeof lockedEntry.midi === 'number') return lockedEntry.midi;
+        } catch (_) { }
+        return null;
+    };
+
+    // Bass: if locked, use locked line (recomputed from faceRef if present); else use cube bottom face
     if (bassEnabled) {
         let bassMidi = getBassMidiForObject(obj);
         const idx = lineup.indexOf(obj);
-        if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') bassMidi = lockedBass[idx].midi;
+        if (lockedBass && idx >= 0 && lockedBass[idx]) {
+            const m = resolveLockedMidi(lockedBass[idx], obj, 'bass');
+            if (typeof m === 'number') bassMidi = m;
+        }
         logAudio('play:bass', { i: idx, roman: obj.userData?.roman, midi: bassMidi });
         if (sfBass && sfBass.play) {
             sfBass.play(bassMidi, now, { duration, gain: 0.34 });
@@ -2838,11 +2862,14 @@ function playChordForObject(obj) {
         }
     }
 
-    // Melody: if locked, use locked line; else use cube top face
+    // Melody: if locked, use locked line (recomputed from faceRef if present); else use cube top face
     if (melodyEnabled) {
         let melMidi = getMelodyMidiForObject(obj);
         const idx = lineup.indexOf(obj);
-        if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') melMidi = lockedMelody[idx].midi;
+        if (lockedMelody && idx >= 0 && lockedMelody[idx]) {
+            const m = resolveLockedMidi(lockedMelody[idx], obj, 'melody');
+            if (typeof m === 'number') melMidi = m;
+        }
         logAudio('play:melody', { i: idx, roman: obj.userData?.roman, midi: melMidi, rIdx: obj.userData?.rotationIndex });
         if (sfMelody && sfMelody.play) {
             sfMelody.play(melMidi, now, { duration, gain: 0.3 });
@@ -3293,18 +3320,22 @@ function lockInMelody() {
     const snapshot = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
-        // Use helper that references rotationIndex for top face
+        // Prefer proxies for top-face identity
+        const proxyTopIdx = getTopToneIdxFromProxies(cube);
         const midiTop = (() => {
             const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
             const names = transposeNotes(tones, currentKey);
             const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topPc = pcOf(names[(r + 2) % 4]);
+            const topIndex = (proxyTopIdx != null) ? proxyTopIdx : (r + 2) % 4;
+            const topPc = pcOf(names[topIndex]);
             let m = 72 + ((topPc - 0 + 12) % 12);
             while (m > 84) m -= 12; while (m < 60) m += 12;
-            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, rIdx: r, topNote: names[(r + 2) % 4], midi: m });
+            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, rIdx: r, topIdx: proxyTopIdx != null ? proxyTopIdx : (r + 2) % 4, topNote: names[topIndex], midi: m });
             return m;
         })();
-        snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
+        // Store lightweight faceRef metadata for robustness (faceIdx 2 = top)
+        let faceRef = null; try { faceRef = (cube.userData.faceProxies || []).find(p => p.userData.faceIdx === 2) || null; } catch (_) { }
+        snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman), faceIdx: 2, toneIdx: proxyTopIdx, faceRef });
     }
     lockedMelody = snapshot;
     renderMelodyLane();
@@ -3378,9 +3409,11 @@ function lockInBass() {
     lockedBass = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
+        const proxyBottomIdx = getBottomToneIdxFromProxies(cube);
         let midi = getBassMidiForObject(cube);
         while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
-        lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
+        let faceRef = null; try { faceRef = (cube.userData.faceProxies || []).find(p => p.userData.faceIdx === 0) || null; } catch (_) { }
+        lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman), faceIdx: 0, toneIdx: proxyBottomIdx, faceRef });
     }
     renderBassLane();
     bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
