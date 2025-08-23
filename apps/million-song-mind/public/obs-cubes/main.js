@@ -169,6 +169,38 @@ function animateQuaternion(obj, toQuat, duration = 900) {
         }
     });
 }
+
+// Derive rotationIndex from the cube's current quaternion (snap to nearest quadrant)
+function syncRotationIndexFromQuaternion(obj) {
+    try {
+        // Determine which of the four tone faces is currently pointing DOWN (toward world -Y)
+        // Base mapping indices: 0=bottom(-Y)=root, 1=right(+X)=3rd, 2=top(+Y)=5th, 3=left(-X)=7th
+        const worldDown = new THREE.Vector3(0, -1, 0);
+        const baseNormals = [
+            new THREE.Vector3(0, -1, 0), // bottom
+            new THREE.Vector3(1, 0, 0),  // right
+            new THREE.Vector3(0, 1, 0),  // top
+            new THREE.Vector3(-1, 0, 0), // left
+        ];
+        let bestIdx = 0; let bestDot = -Infinity;
+        for (let i = 0; i < 4; i++) {
+            const w = baseNormals[i].clone().applyQuaternion(obj.quaternion);
+            const d = w.dot(worldDown);
+            if (d > bestDot) { bestDot = d; bestIdx = i; }
+        }
+        obj.userData.rotationIndex = ((bestIdx % 4) + 4) % 4;
+        // Optional: if very close to exact alignment, snap quaternion to the nearest quarter to stabilize visuals
+        const angle = Math.atan2(
+            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).y,
+            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).x
+        );
+        const snapped = Math.round(angle / (Math.PI / 2)) * (Math.PI / 2);
+        if (Math.abs(snapped - angle) < 0.05) {
+            const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snapped);
+            obj.quaternion.copy(q);
+        }
+    } catch (_) { /* no-op */ }
+}
 function animateScale(obj, toScalar, duration = 500) {
     const from = obj.scale.clone();
     const to = new THREE.Vector3(toScalar, toScalar, toScalar);
@@ -2990,7 +3022,12 @@ function updateLanePositions() {
 
 function lockInMelody() {
     if (lineup.length === 0) return;
-    // Capture current melody BEFORE any possible normalization using current rotationIndex
+    // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
+    const rotating = lineup.some(c => hasActiveTweenFor(c));
+    if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
+    // Re-verify each cube's current orientation → rotationIndex from quaternion
+    for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
+    // Capture current melody using the freshly verified rotationIndex
     const snapshot = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
@@ -3025,6 +3062,8 @@ function lockInMelody() {
         const xs = computeSlotPositions(lineup.length);
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
+            // Ensure visual index is in sync before deciding topIdx
+            syncRotationIndexFromQuaternion(cube);
             const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
             const topIdx = (rIdx + 2) % 4;
             const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
