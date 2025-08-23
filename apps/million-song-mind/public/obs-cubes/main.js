@@ -1977,6 +1977,9 @@ function ensureFaceProxies(parentCube) {
                 // rendering settings for overlay cleanliness
                 text.renderOrder = 3;
                 try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) { }
+                // Do not intercept raycasts; prefer invisible face proxies for tone identity
+                try { text.raycast = () => {}; } catch (_) { }
+                text.userData = Object.assign({}, text.userData, { isDecorative: true });
                 text.sync();
                 parentCube.add(text);
                 parentCube.userData.msdfFaces[faceIdx] = text;
@@ -2010,6 +2013,16 @@ function updateFaceProxyToneMap(cube) {
             const toneIdx = (r + faceIdx) % 4;
             proxies[i].userData.toneIdx = toneIdx;
         }
+        // Keep MSDF labels in sync with face identity by updating their displayed text when key or roman changes
+        try {
+            const degLabels = degreeSets[cube.userData?.roman] || ['1', '3', '5', '7'];
+            const msdfFaces = cube.userData?.msdfFaces || [];
+            for (let i = 0; i < msdfFaces.length; i++) {
+                const t = msdfFaces[i]; if (!t) continue;
+                const label = degLabels[i] || '';
+                if (t.text !== label) { t.text = label; t.sync(); }
+            }
+        } catch (_) { }
         logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, faces: proxies.map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx })) });
     } catch (_) { }
 }
