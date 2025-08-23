@@ -1,0 +1,8 @@
+BACKUP MANIFEST - 20250822_101532
+================================
+Typography System: src/index.css, tailwind.config.*
+Braid System: BraidTonal.tsx, braid_tonalities.json
+YinYang Scaling: YinYangCircle.tsx (Lovable implementation)
+VIPER ROSE: VIPER_ULTIMATE_UNIFIED.py
+Data Pipeline: cpmlParser.ts
+Documentation: CRITICAL_WORK_RECOVERY_DOCUMENTATION.md

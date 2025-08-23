@@ -1,0 +1,271 @@
+/* Enhanced Ligature Font System - Optimized for nvxFont.otf with GSUB table support */
+
+/* Primary font family with ligature optimization */
+@font-face {
+    font-family: "nvxChord-Enhanced";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+    font-display: swap;
+    font-feature-settings:
+        "liga" 1,
+        /* Common ligatures */
+        "dlig" 1,
+        /* Discretionary ligatures */
+        "calt" 1,
+        /* Contextual alternates */
+        "kern" 1,
+        /* Kerning */
+        "clig" 1;
+    /* Contextual ligatures */
+}
+
+/* Base ligature font class */
+.nvx-ligature-font {
+    font-family: "nvxChord-Enhanced", "nvxChord", "music-font", monospace;
+    font-feature-settings:
+        "liga" on,
+        "dlig" on,
+        "calt" on,
+        "kern" on,
+        "clig" on;
+    font-variant-ligatures: common-ligatures discretionary-ligatures contextual;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-smooth: always;
+
+    /* Prevent text selection artifacts */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Specialized classes for different chord types */
+.nvx-accidentals {
+    letter-spacing: -0.05em;
+    /* Tighter spacing for accidentals */
+}
+
+.nvx-extensions {
+    font-size: 0.95em;
+    /* Slightly smaller for extensions */
+    vertical-align: baseline;
+}
+
+.nvx-diminished {
+    font-weight: 600;
+    /* Bolder for diminished symbols */
+}
+
+.nvx-slash-chord {
+    letter-spacing: -0.02em;
+    /* Tighter for slash chords */
+}
+
+/* Size variants with proper ligature inheritance */
+.nvx-chord-xs {
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.nvx-chord-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.nvx-chord-base {
+    font-size: 1rem;
+    line-height: 1.5rem;
+}
+
+.nvx-chord-lg {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+}
+
+.nvx-chord-xl {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+}
+
+.nvx-chord-2xl {
+    font-size: 1.5rem;
+    line-height: 2rem;
+}
+
+/* Harmonic function color coding */
+.nvx-tonic {
+    color: #2563eb;
+    /* Blue - stable */
+    font-weight: 600;
+}
+
+.nvx-subdominant {
+    color: #16a34a;
+    /* Green - departure */
+    font-weight: 500;
+}
+
+.nvx-dominant {
+    color: #dc2626;
+    /* Red - tension */
+    font-weight: 700;
+}
+
+.nvx-applied {
+    color: #ea580c;
+    /* Orange - applied */
+    font-weight: 500;
+}
+
+.nvx-chromatic {
+    color: #9333ea;
+    /* Purple - chromatic */
+    font-weight: 500;
+}
+
+.nvx-diminished-color {
+    color: #6b7280;
+    /* Gray - diminished */
+    font-weight: 400;
+}
+
+.nvx-augmented {
+    color: #ca8a04;
+    /* Yellow - augmented */
+    font-weight: 500;
+}
+
+/* Interactive states */
+.nvx-chord-interactive {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nvx-chord-interactive:hover {
+    transform: scale(1.05);
+    text-shadow: 0 0 8px currentColor;
+    opacity: 0.8;
+}
+
+.nvx-chord-interactive:active {
+    transform: scale(0.95);
+}
+
+.nvx-chord-selected {
+    background: rgba(59, 130, 246, 0.1);
+    border-radius: 4px;
+    padding: 2px 4px;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+/* Braid-specific positioning */
+.nvx-braid-chord {
+    position: absolute;
+    transform-origin: center;
+    white-space: nowrap;
+    pointer-events: all;
+}
+
+/* Ring-specific styling */
+.nvx-inner-ring {
+    font-size: 1.25rem;
+    font-weight: 700;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+.nvx-middle-ring {
+    font-size: 1rem;
+    font-weight: 600;
+    text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.nvx-outer-ring {
+    font-size: 0.875rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Animation classes */
+.nvx-chord-pulse {
+    animation: nvx-pulse 2s ease-in-out infinite;
+}
+
+@keyframes nvx-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.7;
+        transform: scale(1.1);
+    }
+}
+
+.nvx-chord-glow {
+    animation: nvx-glow 3s ease-in-out infinite alternate;
+}
+
+@keyframes nvx-glow {
+    from {
+        text-shadow: 0 0 5px currentColor;
+    }
+
+    to {
+        text-shadow: 0 0 15px currentColor, 0 0 25px currentColor;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .nvx-ligature-font {
+        font-weight: 700;
+        text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+    }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    .nvx-chord-interactive {
+        transition: none;
+    }
+
+    .nvx-chord-pulse,
+    .nvx-chord-glow {
+        animation: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .nvx-ligature-font {
+        color: black !important;
+        text-shadow: none !important;
+        font-weight: 700 !important;
+    }
+}
+
+/* Fallback for browsers without ligature support */
+.no-ligatures .nvx-ligature-font {
+    font-feature-settings: normal;
+    font-variant-ligatures: none;
+}
+
+/* Debug mode styling */
+.nvx-debug {
+    outline: 1px dashed rgba(255, 0, 0, 0.5);
+    background: rgba(255, 255, 0, 0.1);
+}
+
+.nvx-debug::after {
+    content: attr(data-chord-info);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    font-size: 10px;
+    color: #666;
+    pointer-events: none;
+}

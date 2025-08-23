@@ -1,0 +1,249 @@
+/* Novaxe Braid Component Styles */
+.novaxe-braid-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.displayed-chord {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  font-size: 15px;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+
+.braid {
+  width: 100%;
+  height: 100%;
+}
+
+.braid-controls {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.tonality-select {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+}
+
+.roman-toggle {
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: white;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.roman-toggle:hover {
+  background: #f0f0f0;
+}
+
+/* SVG Element Styles */
+.tona {
+  cursor: pointer;
+}
+
+.tona.simpleShape {
+  cursor: default;
+}
+
+.tona.erase {
+  opacity: 0.3;
+}
+
+.braidBack {
+  fill: url(#greenGradient);
+  stroke: #00a450;
+  stroke-width: 2;
+}
+
+.braidBack.active {
+  fill: url(#greenOrangeGradient);
+  stroke: #f1ded7;
+  filter: url(#f2);
+}
+
+.greenCircle {
+  fill: url(#greenGradient);
+  stroke: #00a450;
+  stroke-width: 2;
+}
+
+.greenCircle.active {
+  fill: url(#greenOrangeGradient);
+  stroke: #f1ded7;
+  filter: url(#f2);
+}
+
+.rect-arrow {
+  fill: url(#greyGradient);
+  stroke: #7f8899;
+  stroke-width: 1;
+}
+
+.rect-arrow.erase {
+  fill: url(#eraseGradient);
+  stroke: #343a40;
+}
+
+.arrows-2 {
+  fill: #f1ded7;
+  stroke: #979da2;
+  stroke-width: 1;
+}
+
+.arrows-2.erase {
+  fill: #343a40;
+  stroke: #343a40;
+}
+
+/* Bubble Styles */
+.medBubble {
+  cursor: pointer;
+}
+
+.smallBubble {
+  cursor: pointer;
+}
+
+.smallBubble.outer {
+  cursor: pointer;
+}
+
+.bub {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.bub:hover {
+  filter: brightness(1.2);
+}
+
+.bub.normal {
+  fill: url(#greyGradient);
+  stroke: #7f8899;
+  stroke-width: 1;
+}
+
+.bub.active {
+  fill: url(#greenOrangeGradient);
+  stroke: #f1ded7;
+  stroke-width: 2;
+  filter: url(#f2);
+}
+
+.bub.erase {
+  fill: url(#eraseGradient);
+  stroke: #343a40;
+  stroke-width: 1;
+}
+
+/* Text Styles */
+text {
+  font-family: 'Fontdec13';
+  font-size: 12px;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+  fill: #ffffff;
+}
+
+text.duo {
+  font-size: 10px;
+}
+
+text.duo.roman {
+  font-size: 10px;
+  font-style: italic;
+}
+
+text.left.duo {
+  text-anchor: end;
+}
+
+text.right.duo {
+  text-anchor: start;
+}
+
+text.left.duo.roman {
+  text-anchor: end;
+  font-style: italic;
+}
+
+text.right.duo.roman {
+  text-anchor: start;
+  font-style: italic;
+}
+
+/* Comma Styles */
+.comma {
+  fill: url(#greyGradient);
+  stroke: #7f8899;
+  stroke-width: 1;
+}
+
+.comma.active {
+  fill: url(#greenOrangeGradient);
+  stroke: #f1ded7;
+  stroke-width: 2;
+  filter: url(#f2);
+}
+
+.comma.erase {
+  fill: url(#eraseGradient);
+  stroke: #343a40;
+  stroke-width: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .braid-controls {
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .tonality-select,
+  .roman-toggle {
+    font-size: 12px;
+    padding: 3px 8px;
+  }
+
+  text {
+    font-size: 10px;
+  }
+
+  text.duo {
+    font-size: 8px;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+
+  .tonality-select,
+  .roman-toggle {
+    background: #2a2a2a;
+    color: #ffffff;
+    border-color: #555;
+  }
+
+  .tonality-select:hover,
+  .roman-toggle:hover {
+    background: #3a3a3a;
+  }
+}

@@ -1,0 +1,82 @@
+/* WORKING NOVAXE FONT - nvxFont.otf with ligatures */
+
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+}
+
+/* Also define music-font with WORKING font */
+@font-face {
+    font-family: "music-font";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+}
+
+/* Angular braid text styling from braid.component.scss */
+section#braid-tonal .smallBubble text {
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    fill: black;
+    font-size: 16px;
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
+}
+
+section#braid-tonal .smallBubble text.duo {
+    font-size: 0.85em;
+}
+
+section#braid-tonal .smallBubble text.duo.roman {
+    font-size: 0.7em;
+}
+
+section#braid-tonal .medBubble text.right {
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
+    fill: black;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.left {
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
+    fill: black;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.center {
+    text-anchor: middle !important;
+    dominant-baseline: central !important;
+    fill: black;
+    font-family: "Times New Roman", "Liberation Serif", serif;
+    font-size: 24px;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.left.roman,
+section#braid-tonal .medBubble text.center.roman {
+    font-size: 0.7em;
+}
+
+section#braid-tonal .medBubble text.right.duo {
+    font-size: 1.4em;
+}
+
+section#braid-tonal .medBubble text.left.duo {
+    font-size: 1.4em;
+}
+
+section#braid-tonal .medBubble text.left.duo.roman {
+    font-size: 1em;
+}
+
+section#braid-tonal .medBubble text.right.duo.roman {
+    font-size: 1.2em;
+}
+
+/* Force all braid text to use nvxChord */
+#braid-tonal svg text {
+    font-family: "nvxChord" !important;
+}

@@ -1,0 +1,2445 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="100%"
+   viewBox="26 -115 100 380"
+   id="svg13760"
+   sodipodi:docname="newbraid3.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata13764">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     id="namedview13762"
+     showgrid="false"
+     inkscape:zoom="6.3013169"
+     inkscape:cx="33.396773"
+     inkscape:cy="276.2287"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg13760" />
+  <defs
+     id="defs12827">
+    <filter
+       id="darkGlow">
+      <!-- COLORS -->
+      <!-- <feFlood flood-color="#343a40" result="COLOR-outline"></feFlood> -->
+      <!-- OUTLINE -->
+      <feMorphology
+         operator="dilate"
+         radius="5"
+         in="SourceAlpha"
+         result="OUTLINE_10"
+         id="feMorphology12800" />
+      <!-- <feComposite operator="in" in="COLOR-outline" in2="OUTLINE_10" result="OUTLINE_20"></feComposite> -->
+      <!-- LIGHTING EFFECTS -->
+      <feGaussianBlur
+         stdDeviation="4"
+         in="SourceAlpha"
+         result="LIGHTING-EFFECTS_10"
+         id="feGaussianBlur12802" />
+      <feSpecularLighting
+         surfaceScale="5"
+         specularConstant="0.8"
+         specularExponent="7.5"
+         lighting-color="#white"
+         in="LIGHTING-EFFECTS_10"
+         result="LIGHTING-EFFECTS_20"
+         id="feSpecularLighting12806">
+        <fePointLight
+           x="-250"
+           y="-50"
+           z="300"
+           id="fePointLight12804" />
+      </feSpecularLighting>
+      <feComposite
+         operator="in"
+         in="LIGHTING-EFFECTS_20"
+         in2="SourceAlpha"
+         result="LIGHTING-EFFECTS_30"
+         id="feComposite12808" />
+      <feComposite
+         in="SourceGraphic"
+         in2="LIGHTING-EFFECTS_30"
+         operator="arithmetic"
+         k1="0"
+         k2="1"
+         k3="1"
+         k4="0"
+         result="LIGHTING-EFFECTS_40"
+         id="feComposite12810" />
+      <!-- COLOR EFFECTS -->
+      <feComponentTransfer
+         in="LIGHTING-EFFECTS_40"
+         result="COLOR-EFFECTS_10"
+         id="feComponentTransfer12818">
+        <feFuncR
+           type="gamma"
+           offset="-0.3"
+           amplitude="1.1"
+           exponent="4.84"
+           id="feFuncR12812" />
+        <feFuncG
+           type="gamma"
+           offset="13.3"
+           amplitude="0.1"
+           exponent="1.84"
+           id="feFuncG12814" />
+        <feFuncB
+           type="gamma"
+           offset="-0.3"
+           amplitude="3.1"
+           exponent="4.84"
+           id="feFuncB12816" />
+      </feComponentTransfer>
+      <feMerge
+         id="feMerge12824">
+        <feMergeNode
+           in="OUTLINE_20"
+           id="feMergeNode12820" />
+        <feMergeNode
+           in="COLOR-EFFECTS_10"
+           id="feMergeNode12822" />
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- CENTER CHORDS -->
+  <g
+     class="token"
+     id="center_up_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,-114.61615 -12.138189,0.0488 -6.025002,10.53625 6.111294,10.485627 z"
+       id="path12829" />
+    <text
+       y="-104.1017"
+       x="68.257904"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12831">G#</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.99968,-114.61615 -12.051894,21.070651 12.138184,-0.04878 6.02501,-10.536271 z"
+       id="path12834" />
+    <text
+       y="-99.076569"
+       x="76.68647"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12836">E#,m</text>
+  </g>
+  <path
+     inkscape:connector-curvature="0"
+     id="path12844"
+     d="M 82.030777,-93.424703 69.97888,-72.35401 82.117059,-72.40279 88.142071,-82.939072 Z"
+     class="center down"
+     style="fill:#878888;fill-opacity:0.99215686" />
+  <g
+     class="token"
+     id="center_up_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.224881,-93.318543 -12.138189,0.04878 -6.025002,10.536282 6.111294,10.485638 z"
+       id="path12839" />
+    <text
+       y="-82.233498"
+       x="69.196266"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12841">C#</text>
+  </g>
+  <text
+     id="text12846"
+     style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:12px;font-family:Fontdec13;-inkscape-font-specification:'Fontdec13, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start"
+     class="braid-chords"
+     x="76.049515"
+     y="-78.18779">A#,m</text>
+  <g
+     class="token"
+     id="center_up_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,-72.023646 -12.138189,0.04878 -6.025002,10.53626 6.111294,10.485619 z"
+       id="path12849" />
+    <text
+       y="-61.114922"
+       x="69.620918"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12851">F#</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,-72.023646 -12.051897,21.070648 12.138179,-0.04879 6.025012,-10.53626 z"
+       id="path12854" />
+    <text
+       y="-56.246048"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12856">D#,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,-50.799363 -12.138189,0.04878 -6.025002,10.536283 6.111294,10.485638 z"
+       id="path12859" />
+    <text
+       y="-40.260189"
+       x="69.319511"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12861">B</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,-50.799363 -12.051897,21.070694 12.138179,-0.04878 6.025012,-10.536284 z"
+       id="path12864" />
+    <text
+       y="-35.175224"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12866">G#,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,-29.469028 -12.138189,0.04878 -6.025002,10.536279 6.111294,10.4856439 z"
+       id="path12869" />
+    <text
+       y="-18.761093"
+       x="69.425674"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12871">E</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="M 81.849551,-29.393964 69.797654,-8.3232661 81.935833,-8.3720544 87.960845,-18.908346 Z"
+       id="path12874" />
+    <text
+       y="-13.78228"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12876">C#,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="M 82.149815,-8.2265511 70.011626,-8.1777628 63.986624,2.3584975 70.097918,12.844117 Z"
+       id="path12879" />
+    <text
+       y="1.9728279"
+       x="68.682564"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12881">A</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="M 81.999683,-8.2265511 69.947786,12.844097 82.085965,12.795309 88.110977,2.259048 Z"
+       id="path12884" />
+    <text
+       y="7.3670492"
+       x="76.898788"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12886">F#,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,13.069656 -12.138189,0.04879 -6.025002,10.536281 6.111294,10.485637 z"
+       id="path12889" />
+    <text
+       y="23.670506"
+       x="69.107201"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12891">D</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="M 81.999683,13.069656 69.947786,34.140347 82.085965,34.091558 88.110977,23.555276 Z"
+       id="path12894" />
+    <text
+       y="28.882401"
+       x="77.323425"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12896">B,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,34.365947 -12.138189,0.04878 -6.025002,10.536261 6.111294,10.485618 z"
+       id="path12899" />
+    <text
+       y="44.511021"
+       x="69.001038"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12901">G</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,34.365947 -12.051897,21.070647 12.138179,-0.04879 6.025012,-10.53626 z"
+       id="path12904" />
+    <text
+       y="50.339172"
+       x="77.535744"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12906">E,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,55.662183 -12.138189,0.04878 -6.025002,10.536284 6.111294,10.485637 z"
+       id="path12909" />
+    <text
+       y="66.116272"
+       x="69.213356"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12911">C</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="M 81.999683,55.662183 69.947786,76.732876 82.085965,76.684088 88.110977,66.147804 Z"
+       id="path12914" />
+    <text
+       y="71.187538"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12916">A,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,76.920565 -12.138189,0.04878 -6.025002,10.536279 6.111294,10.48566 z"
+       id="path12919" />
+    <text
+       y="87.830612"
+       x="69.531845"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12921">F</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="M 81.999683,76.920565 69.947786,97.99126 82.085965,97.94247 88.110977,87.406184 Z"
+       id="path12924" />
+    <text
+       y="92.786942"
+       x="76.898788"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12926">D,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,98.163 -12.138189,0.0488 -6.025002,10.53629 6.111294,10.48564 z"
+       id="path12929" />
+    <text
+       y="108.5899"
+       x="68.894875"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12931">Bb</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,98.163 -12.051897,21.07072 12.138179,-0.0488 6.025012,-10.53629 z"
+       id="path12934" />
+    <text
+       y="114.06527"
+       x="76.898788"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12936">G,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,119.4214 -12.138189,0.0488 -6.025002,10.53628 6.111294,10.48563 z"
+       id="path12939" />
+    <text
+       y="129.63757"
+       x="69.001038"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12941">Eb</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,119.4214 -12.051897,21.07069 12.138179,-0.0488 6.025012,-10.53629 z"
+       id="path12944" />
+    <text
+       y="135.3252"
+       x="77.111107"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12946">C,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,140.66388 -12.138189,0.0488 -6.025002,10.53627 6.111294,10.48561 z"
+       id="path12949" />
+    <text
+       y="150.89182"
+       x="68.257896"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12951">Ab</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,161.96009 -12.051897,21.07069 12.138179,-0.0488 6.025012,-10.53628 z"
+       id="path12954" />
+    <text
+       y="178.10677"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12956">Bb,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,140.66388 -12.051897,21.07065 12.138179,-0.0488 6.025012,-10.53626 z"
+       id="path12959" />
+    <text
+       y="156.71889"
+       x="77.323425"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12961">F,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,161.96009 -12.138189,0.0488 -6.025002,10.53628 6.111294,10.48564 z"
+       id="path12964" />
+    <text
+       y="172.19066"
+       x="68.894859"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12966">Db</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,183.25638 -12.138189,0.0488 -6.025002,10.53625 6.111294,10.48562 z"
+       id="path12969" />
+    <text
+       y="193.37659"
+       x="68.682549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12971">Gb</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,183.25638 -12.051897,21.07065 12.138179,-0.0488 6.025012,-10.53626 z"
+       id="path12974" />
+    <text
+       y="199.41676"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12976">Eb,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_15">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,204.55261 -12.138189,0.0488 -6.025002,10.53628 6.111294,10.48563 z"
+       id="path12979" />
+    <text
+       y="215.15027"
+       x="68.682549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12981">Cb</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_15">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,204.55261 -12.051897,21.07069 12.138179,-0.0488 6.025012,-10.53629 z"
+       id="path12984" />
+    <text
+       y="220.66124"
+       x="76.049515"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12986">Ab,m</text>
+  </g>
+  <g
+     class="token"
+     id="center_up_16">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center up"
+       d="m 82.149815,225.811 -12.138189,0.0488 -6.025002,10.53628 6.111294,10.48565 z"
+       id="path12989" />
+    <text
+       y="236.20213"
+       x="69.107185"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12991">Fb</text>
+  </g>
+  <g
+     class="token"
+     id="center_down_16">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#878888;"
+       class="center down"
+       d="m 81.999683,225.811 -12.051897,21.07069 12.138179,-0.0488 6.025012,-10.53628 z"
+       id="path12994" />
+    <text
+       y="242.26328"
+       x="76.474152"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text12996">Db,m</text>
+  </g>
+  <!-- FIFTHS RIGHT CHORDS -->
+  <g
+     class="token"
+     id="fifth_right_up_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,-93.380713 -12.13819,0.04878 -6.025,10.536249 6.1113,10.485637 z"
+       id="path12999" />
+    <text
+       y="-83.471275"
+       x="103.80918"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13001">B#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,-93.380715 -12.05189,21.070654 12.13817,-0.04878 6.02501,-10.536279 z"
+       id="path13004" />
+    <text
+       y="-78.988449"
+       x="113.14061"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13006">D##,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,-72.097379 -12.13819,0.04878 -6.025,10.536282 6.1113,10.485635 z"
+       id="path13009" />
+    <text
+       y="-62.32201"
+       x="104.09538"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13011">E#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,-72.097379 -12.05189,21.070683 12.13817,-0.04878 6.02501,-10.536282 z"
+       id="path13014" />
+    <text
+       y="-57.969254"
+       x="113.14061"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13016">G##,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,-50.273885 -12.13819,0.04879 -6.025,10.53626 6.1113,10.485619 z"
+       id="path13019" />
+    <text
+       y="-41.110828"
+       x="102.73088"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13021">A#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,-50.273885 -12.05189,21.070648 12.13817,-0.04878 6.02501,-10.536261 z"
+       id="path13024" />
+    <text
+       y="-36.108234"
+       x="112.82204"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13026">C##,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,-29.50486 -12.13819,0.04878 -6.025,10.536283 6.1113,10.4856395 z"
+       id="path13029" />
+    <text
+       y="-19.508789"
+       x="103.79913"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13031">D#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,-29.50486 -12.05189,21.0706949 12.13817,-0.048788 6.02501,-10.5362849 z"
+       id="path13034" />
+    <text
+       y="-15.082069"
+       x="113.14061"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13036">F##,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,-8.246476 -12.13819,0.048788 -6.025,10.5362795 6.1113,10.4856385 z"
+       id="path13039" />
+    <text
+       y="1.3951386"
+       x="103.63087"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13041">G#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,-8.246476 -12.05189,21.070694 12.13817,-0.04879 6.02501,-10.5362876 z"
+       id="path13044" />
+    <text
+       y="6.1008515"
+       x="113.01621"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13046">B#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,12.996006 -12.13819,0.04878 -6.025,10.53627 6.1113,10.485608 z"
+       id="path13049" />
+    <text
+       y="23.665993"
+       x="103.11829"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13051">C#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,12.996006 -12.05189,21.070646 12.13817,-0.04878 6.02501,-10.536259 z"
+       id="path13054" />
+    <text
+       y="27.383919"
+       x="113.14061"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13056">E#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,34.292211 -12.13819,0.04878 -6.025,10.536279 6.1113,10.485639 z"
+       id="path13059" />
+    <text
+       y="44.547203"
+       x="103.68733"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13061">F#,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,34.292211 -12.05189,21.070688 12.13817,-0.04878 6.02501,-10.53628 z"
+       id="path13064" />
+    <text
+       y="47.689091"
+       x="113.14061"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13066">C#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,55.588497 -12.13819,0.04879 -6.025,10.53626 6.1113,10.485619 z"
+       id="path13069" />
+    <text
+       y="65.94809"
+       x="104.38086"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13071">B,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,55.588497 -12.05189,21.070648 12.13817,-0.04878 6.02501,-10.53626 z"
+       id="path13074" />
+    <text
+       y="69.846741"
+       x="113.41413"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13076">D#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,76.884733 -12.13819,0.04878 -6.025,10.53629 6.1113,10.485645 z"
+       id="path13079" />
+    <text
+       y="87.204254"
+       x="104.4885"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13081">E,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,76.884733 -12.05189,21.070699 12.13817,-0.0488 6.02501,-10.536281 z"
+       id="path13084" />
+    <text
+       y="90.172562"
+       x="113.68425"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13086">G#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,98.143122 -12.13819,0.0488 -6.025,10.536318 6.1113,10.48565 z"
+       id="path13089" />
+    <text
+       y="108.76319"
+       x="103.43"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13091">A,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,98.143122 -12.05189,21.070728 12.13817,-0.0488 6.02501,-10.53629 z"
+       id="path13094" />
+    <text
+       y="112.25729"
+       x="113.01621"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13096">C#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,119.38558 -12.13819,0.0488 -6.025,10.53629 6.1113,10.48565 z"
+       id="path13099" />
+    <text
+       y="129.52654"
+       x="104.06695"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13101">D,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,119.38558 -12.05189,21.07072 12.13817,-0.0488 6.02501,-10.5363 z"
+       id="path13104" />
+    <text
+       y="134.09091"
+       x="112.92828"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13106">F#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,140.64399 -12.13819,0.0488 -6.025,10.53628 6.1113,10.48564 z"
+       id="path13109" />
+    <text
+       y="151.28455"
+       x="104.06695"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13111">G,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,140.64399 -12.05189,21.07068 12.13817,-0.0488 6.02501,-10.53629 z"
+       id="path13114" />
+    <text
+       y="154.785"
+       x="113.67143"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13116">B,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,161.88646 -12.13819,0.0488 -6.025,10.53625 6.1113,10.48562 z"
+       id="path13119" />
+    <text
+       y="172.49016"
+       x="103.95257"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13121">C,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,161.88646 -12.05189,21.07065 12.13817,-0.0488 6.02501,-10.53626 z"
+       id="path13124" />
+    <text
+       y="175.7823"
+       x="113.63396"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13126">E,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,183.18267 -12.13819,0.0488 -6.025,10.53628 6.1113,10.48564 z"
+       id="path13129" />
+    <text
+       y="193.47514"
+       x="104.59614"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13131">F,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,183.18267 -12.05189,21.07069 12.13817,-0.0488 6.02501,-10.53628 z"
+       id="path13134" />
+    <text
+       y="196.87447"
+       x="112.23983"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13136">A#,obb7bb3</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_up_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 119.08842,204.47896 -12.13819,0.0488 -6.025,10.53626 6.1113,10.48562 z"
+       id="path13139" />
+    <text
+       y="214.93423"
+       x="103.54237"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13141">Bb,b7b5</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_right_down_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 119.35203,204.47896 -12.05189,21.07065 12.13817,-0.0488 6.02501,-10.53626 z"
+       id="path13144" />
+    <text
+       y="218.33487"
+       x="113.7776"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13146">D,obb7bb3</text>
+  </g>
+  <!-- FIFTHS LEFT CHORDS -->
+  <g
+     class="token"
+     id="fifth_left_up_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631518,-93.336748 -12.138189,0.04879 -6.025002,10.536248 6.111294,10.485638 z"
+       id="path13149" />
+    <text
+       y="-83.163498"
+       x="29.575287"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13151">D#,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.926221,-93.283668 -12.051896,21.070656 12.138178,-0.04879 6.025012,-10.536278 z"
+       id="path13154" />
+    <text
+       y="-77.714493"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13156">F##,bb3b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,-71.945487 -12.138189,0.04878 -6.025002,10.536278 6.111294,10.485634 z"
+       id="path13159" />
+    <text
+       y="-61.335945"
+       x="29.275024"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13161">G#,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,-71.945487 -12.051896,21.070677 12.138178,-0.04878 6.025012,-10.536281 z"
+       id="path13164" />
+    <text
+       y="-57.332298"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13166">B#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,-50.64921 -12.138189,0.04878 -6.025002,10.536261 6.111294,10.485618 z"
+       id="path13169" />
+    <text
+       y="-39.939777"
+       x="29.124893"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13171">C#,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,-50.64921 -12.051896,21.070647 12.138178,-0.04878 6.025012,-10.53626 z"
+       id="path13174" />
+    <text
+       y="-35.152798"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13176">E#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,-29.352974 -12.138189,0.04878 -6.025002,10.536283 6.111294,10.4856392 z"
+       id="path13179" />
+    <text
+       y="-19.633163"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13181">F#,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="M 44.970193,-29.352974 32.918297,-8.2822791 45.056475,-8.3310674 51.081487,-18.867353 Z"
+       id="path13184" />
+    <text
+       y="-15.719025"
+       x="39.082958"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13186">A#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="M 44.631517,-8.0945901 32.493328,-8.0458021 26.468326,2.490477 32.57962,12.976116 Z"
+       id="path13189" />
+    <text
+       y="2.6203654"
+       x="30.325943"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13191">B,b7#11</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="M 44.970193,-8.0945901 32.918297,12.976094 45.056475,12.927306 51.081487,2.3910283 Z"
+       id="path13194" />
+    <text
+       y="7.301909"
+       x="39.088295"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13196">D#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="M 44.631517,13.147881 32.493328,13.196661 26.468326,23.732932 32.57962,34.21854 Z"
+       id="path13199" />
+    <text
+       y="23.695993"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13201">E,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,13.147881 -12.051896,21.070647 12.138178,-0.04879 6.025012,-10.53625 z"
+       id="path13204" />
+    <text
+       y="27.383919"
+       x="39.463623"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13206">G#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,34.444088 -12.138189,0.04878 -6.025002,10.53628 6.111294,10.485638 z"
+       id="path13209" />
+    <text
+       y="44.334885"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13211">A,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="M 44.970193,34.444088 32.918297,55.514775 45.056475,55.465986 51.081487,44.929707 Z"
+       id="path13214" />
+    <text
+       y="48.589878"
+       x="39.313492"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13216">C#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,55.740373 -12.138189,0.04878 -6.025002,10.536261 6.111294,10.485618 z"
+       id="path13219" />
+    <text
+       y="65.468781"
+       x="30.175812"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13221">D,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,55.740373 -12.051896,21.070648 12.138178,-0.04879 6.025012,-10.53626 z"
+       id="path13224" />
+    <text
+       y="70.222069"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13226">F#,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,77.036609 -12.138189,0.04878 -6.025002,10.53629 6.111294,10.485649 z"
+       id="path13229" />
+    <text
+       y="87.200012"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13231">G,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="M 44.970193,77.036609 32.918297,98.107312 45.056475,98.058522 51.081487,87.522236 Z"
+       id="path13234" />
+    <text
+       y="92.129684"
+       x="40.356869"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13236">B,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,98.295002 -12.138189,0.0488 -6.025002,10.536298 6.111294,10.48565 z"
+       id="path13239" />
+    <text
+       y="108.73319"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13241">Cb5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,98.295002 -12.051896,21.070728 12.138178,-0.0488 6.025012,-10.53629 z"
+       id="path13244" />
+    <text
+       y="112.80634"
+       x="40.214279"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13246">E,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,119.53745 -12.138189,0.0488 -6.025002,10.53629 6.111294,10.48565 z"
+       id="path13249" />
+    <text
+       y="129.52654"
+       x="30.476074"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13251">F,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,119.53745 -12.051896,21.07072 12.138178,-0.0488 6.025012,-10.5363 z"
+       id="path13254" />
+    <text
+       y="133.79065"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13256">A,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,140.79586 -12.138189,0.0488 -6.025002,10.53627 6.111294,10.48564 z"
+       id="path13259" />
+    <text
+       y="151.31454"
+       x="30.175812"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13261">B,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,140.79586 -12.051896,21.07068 12.138178,-0.0488 6.025012,-10.53629 z"
+       id="path13264" />
+    <text
+       y="154.99731"
+       x="40.214279"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13266">D,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,162.03834 -12.138189,0.0488 -6.025002,10.53625 6.111294,10.48562 z"
+       id="path13269" />
+    <text
+       y="172.52016"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13271">Eb,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,162.03834 -12.051896,21.07064 12.138178,-0.0488 6.025012,-10.53626 z"
+       id="path13274" />
+    <text
+       y="177.03922"
+       x="39.613754"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13276">G,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,183.33454 -12.138189,0.0488 -6.025002,10.53628 6.111294,10.48564 z"
+       id="path13279" />
+    <text
+       y="193.17488"
+       x="28.824631"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13281">Ab,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,183.33454 -12.051896,21.0707 12.138178,-0.0488 6.025012,-10.53629 z"
+       id="path13284" />
+    <text
+       y="198.556"
+       x="39.932232"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13286">C,bb3b5bb7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_up_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths up"
+       d="m 44.631517,204.63083 -12.138189,0.0488 -6.025002,10.53626 6.111294,10.48562 z"
+       id="path13289" />
+    <text
+       y="214.93423"
+       x="29.875549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13291">Db,b5b7</text>
+  </g>
+  <g
+     class="token"
+     id="fifth_left_down_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#676772;"
+       class="fifths down"
+       d="m 44.970193,204.63083 -12.051896,21.07065 12.138178,-0.0488 6.025012,-10.53626 z"
+       id="path13294" />
+    <text
+       y="218.65334"
+       x="40.356869"
+       class="braid-chords small"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13296">F,bb3b5bb7</text>
+  </g>
+  <!-- RIGHT CHORDS -->
+  <g
+     class="token"
+     id="right_up_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,-82.670082 -12.138196,0.04878 -6.025002,10.536282 6.111294,10.485637 z"
+       id="path13299" />
+    <text
+       y="-71.930176"
+       x="86.307625"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13301">E#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,-82.670082 -12.051903,21.070693 12.138183,-0.04879 6.02502,-10.536283 z"
+       id="path13304" />
+    <text
+       y="-67.454323"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13306">G##,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,-61.373789 -12.138196,0.04878 -6.025002,10.536261 6.111294,10.485618 z"
+       id="path13309" />
+    <text
+       y="-50.336792"
+       x="85.35601"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13311">A#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,-61.373789 -12.051903,21.070647 12.138183,-0.04878 6.02502,-10.53626 z"
+       id="path13314" />
+    <text
+       y="-45.676712"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13316">C##,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,-40.077553 -12.138196,0.04878 -6.025002,10.536283 6.111294,10.485638 z"
+       id="path13319" />
+    <text
+       y="-29.350792"
+       x="85.780647"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13321">D#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,-40.077553 -12.051903,21.070693 12.138183,-0.04878 6.02502,-10.536284 z"
+       id="path13324" />
+    <text
+       y="-24.883827"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13326">F##,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,-18.819171 -12.138196,0.04878 -6.025002,10.5362817 6.111294,10.4856433 z"
+       id="path13329" />
+    <text
+       y="-7.6324463"
+       x="85.35601"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13331">G#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="M 100.67125,-18.819171 88.619347,2.2515226 100.75753,2.2027343 106.78255,-8.3335509 Z"
+       id="path13334" />
+    <text
+       y="-3.8793707"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13336">B#,O</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="M 100.40764,2.4233094 88.269444,2.4720974 82.244442,13.008358 88.355736,23.493975 Z"
+       id="path13339" />
+    <text
+       y="13.036696"
+       x="85.35601"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13341">C#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="M 100.67125,2.4233094 88.619347,23.493956 100.75753,23.445166 106.78255,12.908908 Z"
+       id="path13344" />
+    <text
+       y="17.531242"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13346">E#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,23.719516 -12.138196,0.04878 -6.025002,10.536279 6.111294,10.485638 z"
+       id="path13349" />
+    <text
+       y="34.419518"
+       x="85.903831"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13351">F#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,23.719516 -12.051903,21.070686 12.138183,-0.04879 6.02502,-10.53628 z"
+       id="path13354" />
+    <text
+       y="38.809578"
+       x="95.043839"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13356">A#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,45.015799 -12.138196,0.04878 -6.025002,10.53626 6.111294,10.485619 z"
+       id="path13359" />
+    <text
+       y="55.922554"
+       x="86.842239"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13361">B,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,45.015799 -12.051903,21.070648 12.138183,-0.04878 6.02502,-10.53626 z"
+       id="path13364" />
+    <text
+       y="61.281792"
+       x="95.680794"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13366">D#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="M 100.40764,66.312035 88.110977,66.165492 82.244442,76.897104 88.355736,87.382742 Z"
+       id="path13369" />
+    <text
+       y="77.533112"
+       x="86.842239"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13371">E,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,66.312035 -12.051903,21.070696 12.138183,-0.04878 6.02502,-10.53628 z"
+       id="path13374" />
+    <text
+       y="82.331238"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13376">G#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.32423,87.570422 -12.138197,0.04878 -6.025002,10.536289 6.111294,10.485659 z"
+       id="path13379" />
+    <text
+       y="98.854607"
+       x="86.629921"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13381">A,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,87.570422 -12.051903,21.070718 12.138183,-0.0488 6.02502,-10.536306 z"
+       id="path13384" />
+    <text
+       y="103.31913"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13386">C#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,108.81286 -12.138196,0.0488 -6.025002,10.53629 6.111294,10.48563 z"
+       id="path13389" />
+    <text
+       y="120.44965"
+       x="86.432999"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13391">D,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,108.81286 -12.051903,21.07071 12.138183,-0.0488 6.02502,-10.5363 z"
+       id="path13394" />
+    <text
+       y="125.03743"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13396">F#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,130.07127 -12.138196,0.0488 -6.025002,10.53627 6.111294,10.48564 z"
+       id="path13399" />
+    <text
+       y="141.13417"
+       x="86.432999"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13401">G,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,130.07127 -12.051903,21.07068 12.138183,-0.0488 6.02502,-10.53627 z"
+       id="path13404" />
+    <text
+       y="146.23576"
+       x="96.317749"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13406">B,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,151.31374 -12.138196,0.0488 -6.025002,10.53626 6.111294,10.48562 z"
+       id="path13409" />
+    <text
+       y="162.64021"
+       x="86.94677"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13411">C,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,151.31374 -12.051903,21.07065 12.138183,-0.0488 6.02502,-10.53626 z"
+       id="path13414" />
+    <text
+       y="167.10812"
+       x="96.317749"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13416">E,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,172.60994 -12.138196,0.0488 -6.025002,10.53629 6.111294,10.48563 z"
+       id="path13419" />
+    <text
+       y="184.47545"
+       x="86.962158"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13421">F,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,172.60994 -12.051903,21.0707 12.138183,-0.0488 6.02502,-10.53629 z"
+       id="path13424" />
+    <text
+       y="188.39868"
+       x="95.468475"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13426">A#,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 82.244442,204.49129 6.111294,10.48562 12.051904,-21.07068 -12.138196,0.0488"
+       id="path13429" />
+    <text
+       y="204.70764"
+       x="85.706909"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13431">Bb,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,193.90623 -12.051903,21.07065 12.138183,-0.0488 6.02502,-10.53627 z"
+       id="path13434" />
+    <text
+       y="209.5537"
+       x="95.803978"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13436">D,o</text>
+  </g>
+  <g
+     class="token"
+     id="right_up_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 100.40764,215.20248 -12.138196,0.0488 -6.025002,10.53628 6.111294,10.48564 z"
+       id="path13439" />
+    <text
+       y="226.43863"
+       x="86.008362"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13441">Eb,b7</text>
+  </g>
+  <g
+     class="token"
+     id="right_down_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 100.67125,215.20248 -12.051903,21.07068 12.138183,-0.0488 6.02502,-10.53627 z"
+       id="path13444" />
+    <text
+       y="231.49358"
+       x="95.803978"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13446">G,o</text>
+  </g>
+  <!-- LEFT CHORDS -->
+  <g
+     class="token"
+     id="left_down_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,-82.670082 -12.051896,21.070693 12.13818,-0.04879 6.025011,-10.536283 z"
+       id="path13449" />
+    <text
+       y="-66.784576"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13451">B#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_0">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,-82.670082 -12.138188,0.04878 -6.025002,10.536282 6.111294,10.485637 z"
+       id="path13454" />
+    <text
+       y="-71.780281"
+       x="48.036549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13456">G#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,-61.373789 -12.051896,21.070647 12.13818,-0.04878 6.025011,-10.53626 z"
+       id="path13459" />
+    <text
+       y="-45.452629"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13461">E#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_1">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,-61.373789 -12.138188,0.04878 -6.025002,10.536261 6.111294,10.485618 z"
+       id="path13464" />
+    <text
+       y="-51.047295"
+       x="48.036549"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13466">C#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,-40.077553 -12.051896,21.070693 12.13818,-0.04878 6.025011,-10.536284 z"
+       id="path13469" />
+    <text
+       y="-24.067749"
+       x="58.324474"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13471">A#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_2">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,-40.077553 -12.138188,0.04878 -6.025002,10.536283 6.111294,10.485638 z"
+       id="path13474" />
+    <text
+       y="-28.258224"
+       x="48.565723"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13476">F#,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="M 63.726037,-18.819171 51.674141,2.2515188 63.812321,2.2027305 69.837332,-8.3335509 Z"
+       id="path13479" />
+    <text
+       y="-2.9606085"
+       x="58.289211"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13481">D#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_3">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,-18.819171 -12.138188,0.04878 -6.025002,10.5362817 6.111294,10.4856395 z"
+       id="path13484" />
+    <text
+       y="-8.1306381"
+       x="49.504131"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13486">B,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="M 63.726037,2.4233056 51.674141,23.493952 63.812321,23.445164 69.837332,12.908913 Z"
+       id="path13489" />
+    <text
+       y="19.299263"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13491">G#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_4">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="M 63.462427,2.4233056 51.324239,2.4720939 45.299237,13.008362 51.410531,23.493971 Z"
+       id="path13494" />
+    <text
+       y="13.403192"
+       x="49.928768"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13496">E,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,23.719512 -12.051896,21.070686 12.13818,-0.04878 6.025011,-10.53628 z"
+       id="path13499" />
+    <text
+       y="39.319099"
+       x="58.324474"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13501">C#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_5">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,23.719512 -12.138188,0.04879 -6.025002,10.53628 6.111294,10.485637 z"
+       id="path13504" />
+    <text
+       y="34.804665"
+       x="49.291813"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13506">A,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,45.015796 -12.051896,21.070647 12.13818,-0.04879 6.025011,-10.53626 z"
+       id="path13509" />
+    <text
+       y="60.21595"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13511">F#,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_6">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,45.015796 -12.138188,0.04878 -6.025002,10.536261 6.111294,10.485617 z"
+       id="path13514" />
+    <text
+       y="55.587891"
+       x="49.928768"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13516">D,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,66.312032 -12.051896,21.070695 12.13818,-0.04879 6.025011,-10.53628 z"
+       id="path13519" />
+    <text
+       y="82.358948"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13521">B,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_7">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,66.312032 -12.138188,0.04878 -6.025002,10.536289 6.111294,10.485638 z"
+       id="path13524" />
+    <text
+       y="76.359978"
+       x="49.928768"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13526">G,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,87.570418 -12.051896,21.070722 12.13818,-0.0488 6.025011,-10.536316 z"
+       id="path13529" />
+    <text
+       y="103.2194"
+       x="59.304035"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13531">E,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_8">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,87.570418 -12.138188,0.04878 -6.025002,10.536293 6.111294,10.485659 z"
+       id="path13534" />
+    <text
+       y="98.72287"
+       x="49.399593"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13536">C,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,108.81286 -12.051896,21.07071 12.13818,-0.0488 6.025011,-10.5363 z"
+       id="path13539" />
+    <text
+       y="124.24776"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13541">A,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_9">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,108.81286 -12.138188,0.0488 -6.025002,10.53629 6.111294,10.48563 z"
+       id="path13544" />
+    <text
+       y="119.55784"
+       x="49.522778"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13546">F,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,130.07127 -12.051896,21.07068 12.13818,-0.0488 6.025011,-10.53627 z"
+       id="path13549" />
+    <text
+       y="145.91902"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13551">D,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_10">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,130.07127 -12.138188,0.0488 -6.025002,10.53627 6.111294,10.48564 z"
+       id="path13554" />
+    <text
+       y="140.9684"
+       x="49.098141"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13556">Bb,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,151.31374 -12.051896,21.07065 12.13818,-0.0488 6.025011,-10.53626 z"
+       id="path13559" />
+    <text
+       y="166.63792"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13561">G,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_11">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,151.31374 -12.138188,0.0488 -6.025002,10.53626 6.111294,10.48562 z"
+       id="path13564" />
+    <text
+       y="162.47446"
+       x="49.098141"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13566">Eb,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,172.60994 -12.051896,21.0707 12.13818,-0.0488 6.025011,-10.53629 z"
+       id="path13569" />
+    <text
+       y="188.53535"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13571">C,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_12">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,172.60994 -12.138188,0.0488 -6.025002,10.53629 6.111294,10.48563 z"
+       id="path13574" />
+    <text
+       y="183.15898"
+       x="48.248867"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13576">Ab,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,193.90623 -12.051896,21.07065 12.13818,-0.0488 6.025011,-10.53627 z"
+       id="path13579" />
+    <text
+       y="209.91705"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13581">F,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_13">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,193.90623 -12.138188,0.0488 -6.025002,10.53626 6.111294,10.48562 z"
+       id="path13584" />
+    <text
+       y="204.66487"
+       x="49.098141"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13586">Db,b7</text>
+  </g>
+  <g
+     class="token"
+     id="left_down_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides down"
+       d="m 63.726037,215.20248 -12.051896,21.07068 12.13818,-0.0488 6.025011,-10.53627 z"
+       id="path13589" />
+    <text
+       y="230.92285"
+       x="58.853642"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13591">B,O</text>
+  </g>
+  <g
+     class="token"
+     id="left_up_14">
+    <path
+       style="opacity:1;vector-effect:none;fill-opacity:1;stroke:none;stroke-width:3.21733999;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;paint-order:normal;fill:#6f6f78;"
+       class="sides up"
+       d="m 63.462427,215.20248 -12.138188,0.0488 -6.025002,10.53628 6.111294,10.48564 z"
+       id="path13594" />
+    <text
+       y="226.09419"
+       x="49.098141"
+       class="braid-chords"
+       style="-inkscape-font-specification:'Fontdec13, Normal';font-family:Fontdec13;font-weight:normal;font-style:normal;font-stretch:normal;font-variant:normal;font-size:12px;text-anchor:start;text-align:start;writing-mode:lr;font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;"
+       id="text13596">Gb,b7</text>
+  </g>
+</svg>

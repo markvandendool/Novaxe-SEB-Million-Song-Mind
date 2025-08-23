@@ -1,0 +1,17 @@
+{
+    "name": "millionsongmind",
+    "version": "1.0.0",
+    "description": "MillionSongMind - Complete Novaxe Music Application",
+    "main": "index.html",
+    "dependencies": {
+        "@supabase/supabase-js": "^2.39.0",
+        "@vercel/node": "^3.0.0",
+        "bcryptjs": "^2.4.3",
+        "jsonwebtoken": "^9.0.0"
+    },
+    "scripts": {
+        "start": "vercel dev",
+        "build": "echo 'Static build - no build step needed'",
+        "deploy": "vercel --prod"
+    }
+}

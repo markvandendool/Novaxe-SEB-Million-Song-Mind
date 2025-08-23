@@ -1,0 +1,165 @@
+/* Braid Font System - Original Legacy nvxFont integration */
+
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/Chord_Grid_v2.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Base braid chord text styling - matches original Angular */
+.braid-chord-text {
+    font-family: "nvxChord", monospace;
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Chord quality (nvxChord character) styling */
+.braid-chord-quality {
+    font-family: "nvxChord", monospace;
+    font-size: 14px;
+    color: #9ca3af;
+    margin-left: 2px;
+}
+
+/* Container for chord display */
+.braid-chord-container {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+    position: relative;
+}
+
+/* Positioning utilities for braid layout */
+.braid-position-absolute {
+    position: absolute;
+}
+
+.braid-position-relative {
+    position: relative;
+}
+
+/* Chord hover effects */
+.braid-chord-container:hover .braid-root-note {
+    color: #ffffff;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+}
+
+.braid-chord-container:hover .braid-chord-quality {
+    color: #d1d5db;
+}
+
+/* Chord classification color coding */
+.braid-chord-major {
+    --chord-color: #10b981;
+    /* green */
+}
+
+.braid-chord-minor {
+    --chord-color: #3b82f6;
+    /* blue */
+}
+
+.braid-chord-dominant {
+    --chord-color: #f59e0b;
+    /* amber */
+}
+
+.braid-chord-diminished {
+    --chord-color: #ef4444;
+    /* red */
+}
+
+.braid-chord-halfDiminished {
+    --chord-color: #f97316;
+    /* orange */
+}
+
+.braid-chord-container[data-chord-type="major"] .braid-root-note {
+    color: var(--chord-color);
+}
+
+.braid-chord-container[data-chord-type="minor"] .braid-root-note {
+    color: var(--chord-color);
+}
+
+.braid-chord-container[data-chord-type="dominant"] .braid-root-note {
+    color: var(--chord-color);
+}
+
+.braid-chord-container[data-chord-type="diminished"] .braid-root-note {
+    color: var(--chord-color);
+}
+
+.braid-chord-container[data-chord-type="halfDiminished"] .braid-root-note {
+    color: var(--chord-color);
+}
+
+/* Active/focused chord styling */
+.braid-chord-active {
+    transform: scale(1.1);
+    filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.3));
+    z-index: 10;
+}
+
+.braid-chord-active .braid-root-note {
+    color: #ffffff !important;
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.5);
+}
+
+.braid-chord-active .braid-chord-quality {
+    color: #ffffff !important;
+}
+
+/* Transition animations */
+.braid-chord-container {
+    transition: all 0.25s ease;
+}
+
+.braid-root-note,
+.braid-chord-quality {
+    transition: all 0.2s ease;
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+    .braid-chord-text {
+        font-size: 16px;
+    }
+
+    .braid-root-note {
+        font-size: 14px;
+    }
+
+    .braid-chord-quality {
+        font-size: 12px;
+    }
+}
+
+/* Debug helper - shows original chord on hover */
+.braid-chord-container[data-debug="true"]::after {
+    content: attr(data-original-chord);
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.braid-chord-container[data-debug="true"]:hover::after {
+    opacity: 1;
+}

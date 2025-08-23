@@ -1,0 +1,4 @@
+# MSM System Environment - Mon Aug 18 12:10:26 MDT 2025
+Node.js: v20.19.0
+npm: 10.8.2
+OS: Darwin Marks-Mac-mini.local 24.4.0 Darwin Kernel Version 24.4.0: Wed Mar 19 21:17:25 PDT 2025; root:xnu-11417.101.15~1/RELEASE_ARM64_T6020 arm64

@@ -1,0 +1,78 @@
+/* REAL NOVAXE FONT - Font Jan16.otf from assets/fonts */
+
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+}
+
+/* Also define music-font with REAL font */
+@font-face {
+    font-family: "music-font";
+    src: url("/fonts/REAL_NOVAXE_FONT.otf") format("opentype");
+}
+
+/* Angular braid text styling from braid.component.scss */
+section#braid-tonal .smallBubble text {
+    font-family: "nvxChord";
+    fill: black;
+    font-size: 0.7em;
+    text-anchor: left;
+}
+
+section#braid-tonal .smallBubble text.duo {
+    font-size: 0.85em;
+}
+
+section#braid-tonal .smallBubble text.duo.roman {
+    font-size: 0.7em;
+}
+
+section#braid-tonal .medBubble text.right {
+    text-anchor: start;
+    fill: black;
+    font-family: "nvxChord";
+    font-size: 0.9em;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.left {
+    text-anchor: end;
+    fill: black;
+    font-family: "nvxChord";
+    font-size: 0.9em;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.center {
+    text-anchor: end;
+    fill: black;
+    font-family: "nvxChord";
+    font-size: 0.9em;
+    word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.left.roman,
+section#braid-tonal .medBubble text.center.roman {
+    font-size: 0.7em;
+}
+
+section#braid-tonal .medBubble text.right.duo {
+    font-size: 1.4em;
+}
+
+section#braid-tonal .medBubble text.left.duo {
+    font-size: 1.4em;
+}
+
+section#braid-tonal .medBubble text.left.duo.roman {
+    font-size: 1em;
+}
+
+section#braid-tonal .medBubble text.right.duo.roman {
+    font-size: 1.2em;
+}
+
+/* Force all braid text to use nvxChord */
+#braid-tonal svg text {
+    font-family: "nvxChord" !important;
+}

@@ -1,0 +1,66 @@
+<div id="dico">
+
+  <div class="w-100 d-flex" >
+
+    <ul class="nav nav-tabs">
+      <li class="active">
+        <a data-toggle="tab" href="#piano-icon">
+          <svg class="fas fa-piano" title="Piano analysis"><use xlink:href="assets/img/icons/piano_icon.svg#piano_icon"></use></svg>
+        </a>
+      </li>
+      <li>
+        <a data-toggle="tab" href="#guitar-icon">
+          <i class="fas fa-guitar p-2" title="Guitar analysis"></i>
+        </a>
+      </li>
+    </ul>
+
+    <span style="margin-left:auto">
+      <a class="clickable-row" [routerLink]="['/stats/'+songId]" (click)="$event.stopPropagation()">
+        <i class="fas fa-chart-bar p-2" title="Stats page" aria-hidden="true"></i>
+      </a>
+      <!-- <i class="fas fa-search p-2" title="Search"></i> -->
+      <i class="fas fa-search p-2" (click)="analyseScore_clicked()" title="Analyse"></i>
+      <!-- <i class="fas fa-plus p-2" (click)="add()" title="Add"></i> -->
+      <!-- <i class="fas fa-cog p-2" title="DEBUG"></i> -->
+    </span>
+  </div>
+
+  <div class="tab-content">
+    <div id="piano-icon" class="tab-pane fade in active show">
+      <div class="main_col">
+
+        <div class="card card-body" [attr.id]="'chord_dico_'+filter(chord.value.symbol)" *ngFor="let chord of chords_in_score | keyvalue ">
+
+          <div class="symbol"><h6 class="m-0"><i class="fas fa-play p-2" (click)="play(chord)" title="Play"></i> {{chord.value.symbol}}</h6> 
+          </div>
+          <div class="name">Full Name :   {{chord.value.name}}</div>
+          <div class="type">Type : {{chord.value.type}}</div>
+
+          <app-piano-mini style="position: absolute; top: 0vw; right: 10%; max-width: 17vw; height: 11vh;" 
+            [notes]="chord.value.notes" 
+            [root]="chord.value.root||chord.value.tonic"
+            [intervals]="chord.value.intervals"
+            ></app-piano-mini>
+
+          <div class="d-flex" class="under-piano">
+            <div class="d-flex" class="row">
+              <span class="title">Intervals :</span> 
+              <div class="content"><span *ngFor="let interv of chord.value.intervals" class="interv">{{interv}}</span></div>
+            </div>
+
+            <div class="d-flex" class="row">
+              <span class="title">Notes :</span> 
+              <div class="content"><span *ngFor="let note of chord.value.notes" class="note">{{note}}</span></div>
+            </div>
+          </div>
+
+        </div>
+      </div> <!-- main_col -->
+    </div>
+    <div id="guitar-icon" class="tab-pane fade">
+      <p style="padding: 10px;">Guitar analysis will be availiable soon</p>
+    </div>
+  </div>
+
+</div>

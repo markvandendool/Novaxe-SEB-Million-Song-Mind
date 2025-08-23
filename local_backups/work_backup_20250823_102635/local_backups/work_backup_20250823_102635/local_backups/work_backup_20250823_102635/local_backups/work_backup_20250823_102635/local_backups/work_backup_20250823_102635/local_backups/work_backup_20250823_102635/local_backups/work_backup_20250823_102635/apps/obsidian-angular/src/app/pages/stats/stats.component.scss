@@ -1,0 +1,90 @@
+::ng-deep .canvasjs-chart-credit{color: transparent !important;}
+
+#stats-page{
+	padding-top: 8vh;
+	background-color: #fff;
+	height: 100vh; 
+	display: flex; 
+	flex-direction: column; 
+	justify-content: center;
+}
+
+#stats-page .wrapper{
+	background-color: white; 
+	display: flex; 
+	flex-direction: column; 
+	align-items: center;
+	padding:20px;
+	overflow-y: scroll;
+	overflow-x: hidden;
+
+	.btns{display: flex; flex-direction: row; width: 100%; align-items: center;}
+	.btns button{margin-right: 10px;}
+}
+
+#stats-page .wrapper .general-chart{min-height:570px; width: 100%;}
+		
+#stats-page .wrapper .pchart-wrapper{display:block; width:100%;}
+#stats-page .wrapper .pchart-wrapper .part-chart{
+	min-height:370px; 
+	width: 45%; 
+	margin: 2.5%; 
+	display: inline-block;
+}
+
+#stats-page .wrapper .empty{width: 100%; height: auto; margin: 5%;}
+
+#chartContainer_analysis{width: 100%; justify-content: space-around;}
+
+#chartContainer_pop:after{content: "Popularity";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_dance:after{content: "Danceability";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_energy:after{content: "Energy ";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_loud:after{content: "Loudness";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_speech:after{content: "Speechiness";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_acoustic:after{content: "Acousticness";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_instru:after{content: "Instrumentalness";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_live:after{content: "Liveness";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+#chartContainer_valence:after{content: "Valence";position: absolute;left: 15px;bottom: -10px;background-color: #fff;width: 100%;text-align: center;}
+
+#stats-page .doughnut{height: 100px; width: 100%;}
+
+#stats-page .base span{color: var(--blue_nvx);}
+#stats-page .base span strong{font-size: 25px; color: #000;}
+
+#stats-page .base span.infos strong{font-size: 16px; font-weight: normal;}
+
+#stats-page .base span.editorsInfos{color: var(--red_nvx); font-size: 11px;}
+#stats-page .base span.editorsInfos strong{font-size: 20px; color: var(--red_nvx);}
+#stats-page .base span.editorsInfos i{font-size: 16px; padding-right: 5px;}
+
+
+#stats-page .reco{
+  background-color:var(--light_prim);
+  &.pair{
+    background-color:var(--gray_prim);
+  }
+    color: #000000;
+    opacity: 1 !important;
+    font-size: 1.2em;
+
+}
+#stats-page .reco:hover{filter:drop-shadow(2px 2px 3px black);}
+
+#stats-page th{
+  padding-left: 10px;
+  font-size: 1.5em;
+  font-variant: all-petite-caps;
+}
+
+#stats-page td:first-child {
+  border-top-left-radius: 10px; 
+  border-bottom-left-radius: 10px;
+}
+#stats-page td:last-child {
+    border-bottom-right-radius: 10px; 
+    border-top-right-radius: 10px; 
+}
+
+#stats-page td {
+  padding: 10px;
+}

@@ -1,0 +1,50 @@
+/* EXACT ANGULAR FONT SYSTEM REPLICATION */
+
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+    font-display: swap;
+}
+
+/* Musical text with proper ligature support - CRITICAL */
+.musical-text {
+    font-family: "nvxChord", monospace;
+    font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Braid chord text - matches Angular exactly */
+.braid-chord {
+    font-family: "nvxChord", monospace;
+    font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+}
+
+/* SVG text elements - force ligatures */
+svg text.musical-text,
+svg text.braid-chord,
+#braid-tonal svg text {
+    font-family: "nvxChord", monospace !important;
+    font-feature-settings: "liga" 1, "kern" 1 !important;
+    font-variant-ligatures: common-ligatures !important;
+    text-rendering: optimizeLegibility !important;
+}
+
+/* Specific font sizes from Angular */
+.braid-chord-text {
+    font-family: "nvxChord", monospace;
+    font-feature-settings: "liga" 1, "kern" 1;
+    font-variant-ligatures: common-ligatures;
+    font-size: 0.7em;
+    /* Match Angular sizing */
+}
+
+/* German 6ths and musical symbols */
+.chord-label-custom {
+    font-family: "nvxChord", monospace !important;
+    font-feature-settings: "liga" 1, "kern" 1 !important;
+    font-variant-ligatures: common-ligatures !important;
+}

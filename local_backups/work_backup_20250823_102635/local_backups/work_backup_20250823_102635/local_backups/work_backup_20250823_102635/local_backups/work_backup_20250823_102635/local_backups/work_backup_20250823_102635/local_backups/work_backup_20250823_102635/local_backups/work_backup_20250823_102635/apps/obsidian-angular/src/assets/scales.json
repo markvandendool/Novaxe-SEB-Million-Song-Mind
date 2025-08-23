@@ -1,0 +1,268 @@
+{
+	"chromatic":[
+		{
+			"name":"chromatic",
+			"scale":[1,1,1,1,1,1,1,1,1,1,1,1],
+			"sharp":["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"],
+			"flat":["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"]
+		}
+	],
+	"major":[
+		{
+			"name":"ionian",
+			"scale":		[0,2,2,1,2,2,2,1],
+			"degreeFct":["maj","min","min","maj","maj","min","dim"]
+		},
+		{
+			"name":"dorian",
+			"scale":		[0,2,1,2,2,2,1,2],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"phrygian",
+			"scale":	[0,1,2,2,2,1,2,2],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"lydian",
+			"scale":		[0,2,2,2,1,2,2,1],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"mixolidian",
+			"scale":[0,2,2,1,2,2,1,2],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"aeolian",
+			"scale":		[0,2,1,2,2,1,2,2],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"locrian",
+			"scale":		[0,1,2,2,1,2,2,2],
+			"degreeFct":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+	"melodic-minor":[
+		{
+			"name":"melodic-minor",
+			"scale":			[0,2,1,2,2,2,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"dorian b2",
+			"scale":					[0,1,2,2,2,2,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"lydian-augmented",
+			"scale":	[0,2,2,2,2,1,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"lydian-dominant",
+			"scale":		[0,2,2,2,1,2,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"aeolian-dominant",
+			"scale":	[0,2,2,1,2,1,2,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"half-diminished",
+			"scale":		[0,2,1,2,1,2,2,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{
+			"name":"altered",
+			"scale":						[0,1,2,1,2,2,2,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+	"harmonic-minor":[
+		{	"name":"harmonic-minor",
+			"scale":				[0,2,1,2,2,1,3,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"locrian-nat6",
+			"scale":					[0,1,2,2,1,3,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"major-#5",
+			"scale":							[0,2,2,1,3,1,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"dorian-#5",
+			"scale":							[0,2,1,3,1,2,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"phrygian-dominant",
+			"scale":			[0,1,3,1,2,1,2,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"lydian-sharp2",
+			"scale":					[0,3,1,2,1,2,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"altered-dominant-bb7",
+			"scale":	[0,1,2,1,2,2,1,3],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+	"harmonic-major":[
+		{	"name":"harmonic-major",
+			"scale":				[0,2,2,1,2,1,3,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"dorian-b5",
+			"scale":							[0,2,1,2,1,3,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"phrygian-b4",
+			"scale":						[0,1,2,1,3,1,2,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"lydian-b3",
+			"scale":							[0,2,1,3,1,2,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"mixolidian-b2",
+			"scale":					[0,1,3,1,2,2,1,2],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"lydian-augmented-#2",
+			"scale":		[0,3,1,2,2,1,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"locrian-bb7",
+			"scale":						[0,1,2,2,1,2,1,3],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+	"diminished":[
+		{"name":"diminished",
+		"scale":				[0,2,1,2,1,2,1,2,1],
+		"degree":["I","ii","iii","IV","V","vi","viiø"]
+	},
+		{"name":"inv-diminished",
+		"scale":		[0,1,2,1,2,1,2,1,2],
+		"degree":["I","ii","iii","IV","V","vi","viiø"]
+	}
+	],
+	"whole-tone":[
+		{	"name":"whole-tone",
+			"scale":		[0,2,1,2,1,2,1,2,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+	"augmented":[
+		{	"name":"augmented",
+			"scale":				[0,3,1,3,1,3,1],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		},
+		{	"name":"inv-augmented",
+			"scale":		[0,1,3,1,3,1,3],
+			"degree":["I","ii","iii","IV","V","vi","viiø"]
+		}
+	],
+
+
+	"infos":{
+		"major pentatonic":{"quality":"major"},
+		"ionian pentatonic":{"quality":"major"},
+		"mixolydian pentatonic":{"quality":"major"},
+		"ritusen":{"quality":"major"},
+		"egyptian":{"quality":"major"},
+		"neopolitan major pentatonic":{"quality":"major"},
+		"vietnamese 1":{"quality":"major"},
+		"pelog":{"quality":"major"},
+		"kumoijoshi":{"quality":"major"},
+		"hirajoshi":{"quality":"major"},
+		"iwato":{"quality":"major"},
+		"in-sen":{"quality":"major"},
+		"lydian pentatonic":{"quality":"major"},
+		"malkos raga":{"quality":"major"},
+		"locrian pentatonic":{"quality":"minor"},
+		"minor pentatonic":{"quality":"minor"},
+		"minor six pentatonic":{"quality":"minor"},
+		"flat three pentatonic":{"quality":"major"},
+		"flat six pentatonic":{"quality":"major"},
+		"scriabin":{"quality":"major"},
+		"whole tone pentatonic":{"quality":"major"},
+		"lydian #5P pentatonic":{"quality":"major"},
+		"lydian dominant pentatonic":{"quality":"major"},
+		"minor #7M pentatonic":{"quality":"minor"},
+		"super locrian pentatonic":{"quality":"minor"},
+		"minor hexatonic":{"quality":"minor"},
+		"augmented":{"quality":"major"},
+		"major blues":{"quality":"major"},
+		"piongio":{"quality":"major"},
+		"prometheus neopolitan":{"quality":"major"},
+		"prometheus":{"quality":"major"},
+		"mystery #1":{"quality":"major"},
+		"six tone symmetric":{"quality":"major"},
+		"whole tone":{"quality":"major"},
+		"messiaen's mode #5":{"quality":"major"},
+		"minor blues":{"quality":"minor"},
+		"locrian major":{"quality":"major"},
+		"double harmonic lydian":{"quality":"major"},
+		"harmonic minor":{"quality":"minor"},
+		"altered":{"quality":"major"},
+		"locrian #2":{"quality":"minor"},
+		"mixolydian b6":{"quality":"major"},
+		"lydian dominant":{"quality":"major"},
+		"lydian":{"quality":"major"},
+		"lydian augmented":{"quality":"major"},
+		"dorian b2":{"quality":"minor"},
+		"melodic minor":{"quality":"minor"},
+		"locrian":{"quality":"minor"},
+		"ultralocrian":{"quality":"minor"},
+		"locrian 6":{"quality":"minor"},
+		"augmented heptatonic":{"quality":"major"},
+		"dorian #4":{"quality":"minor"},
+		"lydian diminished":{"quality":"major"},
+		"phrygian":{"quality":"minor"},
+		"leading whole tone":{"quality":"major"},
+		"lydian minor":{"quality":"minor"},
+		"phrygian dominant":{"quality":"minor"},
+		"balinese":{"quality":"major"},
+		"neopolitan major":{"quality":"major"},
+		"aeolian":{"quality":"minor"},
+		"harmonic major":{"quality":"major"},
+		"double harmonic major":{"quality":"major"},
+		"dorian":{"quality":"minor"},
+		"hungarian minor":{"quality":"minor"},
+		"hungarian major":{"quality":"major"},
+		"oriental":{"quality":"major"},
+		"flamenco":{"quality":"major"},
+		"todi raga":{"quality":"major"},
+		"mixolydian":{"quality":"major"},
+		"persian":{"quality":"major"},
+		"major":{"quality":"major"},
+		"enigmatic":{"quality":"major"},
+		"major augmented":{"quality":"major"},
+		"lydian #9":{"quality":"major"},
+		"messiaen's mode #4":{"quality":"major"},
+		"purvi raga":{"quality":"major"},
+		"spanish heptatonic":{"quality":"major"},
+		"bebop":{"quality":"major"},
+		"bebop minor":{"quality":"minor"},
+		"bebop major":{"quality":"major"},
+		"bebop locrian":{"quality":"minor"},
+		"minor bebop":{"quality":"minor"},
+		"diminished":{"quality":"major"},
+		"ichikosucho":{"quality":"major"},
+		"minor six diminished":{"quality":"minor"},
+		"half-whole diminished":{"quality":"major"},
+		"kafi raga":{"quality":"major"},
+		"messiaen's mode #6":{"quality":"major"},
+		"composite blues":{"quality":"minor"},
+		"messiaen's mode #3":{"quality":"major"},
+		"messiaen's mode #7":{"quality":"major"},
+		"chromatic":{"quality":"major"}
+	}
+
+
+}

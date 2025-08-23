@@ -1,0 +1,10 @@
+<div class="col-2" style="margin:10px;border:1px solid black;">
+	<p>guitar works!</p>
+
+	<button class="btn btn-success" type="button" (mousedown)="play_note()">Play note</button>
+
+
+	<select [(ngModel)]="selected_instrument" (change)="guit.load_instrument(selected_instrument)">
+		<option  [ngValue]="i" *ngFor="let instrument of guit.getAllInstruments(); let i = index" >{{guit.getInstrumentInfo(i).title}}</option>
+	</select>
+</div>

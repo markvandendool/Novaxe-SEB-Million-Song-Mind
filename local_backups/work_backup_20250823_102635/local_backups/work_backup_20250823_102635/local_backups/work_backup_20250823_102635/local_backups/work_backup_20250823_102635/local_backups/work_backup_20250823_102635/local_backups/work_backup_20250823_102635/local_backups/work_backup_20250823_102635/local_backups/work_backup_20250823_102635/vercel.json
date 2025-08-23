@@ -1,0 +1,40 @@
+{
+    "version": 2,
+    "buildCommand": "npm run build",
+    "outputDirectory": ".",
+    "public": true,
+    "routes": [
+        {
+            "src": "/api/obsidian/listSongs.php",
+            "dest": "/api/obsidian/listSongs.js"
+        },
+        {
+            "src": "/mysongsApi/signIn.php",
+            "dest": "/api/mysongs/signIn.js"
+        },
+        {
+            "src": "/mysongsApi/createUser.php",
+            "dest": "/api/mysongs/createUser.js"
+        },
+        {
+            "src": "/MusicViz/(.*)",
+            "dest": "/MusicViz/$1"
+        },
+        {
+            "src": "/MusicViz",
+            "dest": "/MusicViz/index.html"
+        },
+        {
+            "src": "/Obsidian/(.*)",
+            "dest": "/Obsidian/$1"
+        },
+        {
+            "src": "/Obsidian",
+            "dest": "/Obsidian/index.html"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/$1"
+        }
+    ]
+}

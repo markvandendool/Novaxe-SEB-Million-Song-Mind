@@ -1,6 +1,16 @@
 import * as THREE from 'three';
+import { Text as TroikaText, preloadFont as troikaPreloadFont } from 'troika-three-text';
+import { CubeModel } from './engine/model.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
+import { pickCenterPlay, isFrontOverlayHit } from './raycastRouter.js'
+import { loadOfficialMap } from './shelfMapService.js'
+import { InteractionFSM } from './interactionFSM.js'
+import { BORDER_RATIO, SERIF_STACK, MUSIC_STACK } from './textureConfig.js'
+// Drop old instrumentManager path; use WebAudioFont primary
+import { setupDiagnostics } from './diagnosticsOverlay.js'
+import { createBridge } from './integration/bridge.js'
+import { setState } from './stateStore.js'
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -8,29 +18,112 @@ renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
+// Absolute font URL so Troika can fetch reliably
+const NVX_FONT_URL = '/fonts/NVX%20Diamond%20Font.otf';
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+let shelfPickCamera = null; // orthographic camera used only for shelf picking
+// CRITICAL: Enable all layers on camera
+try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
 // Melody/Bass presets – lowered angle by ~10°
 const melodyTarget = new THREE.Vector3(0, 1.4, 0);
-const melodyCamPos = new THREE.Vector3(0, 8.9, 7.04);
+const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5);
 const bassTarget = melodyTarget.clone();
-const bassCamPos = new THREE.Vector3(0, -8.9, 7.04);
+const bassCamPos = new THREE.Vector3(0, -5.8, 11.5);
 camera.position.copy(melodyCamPos);
+// Ensure camera renders default, front, and shelf layers
+try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.enablePan = false;
 controls.target.copy(melodyTarget);
 
 // Lighting
-scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambient);
 const dir = new THREE.DirectionalLight(0xffffff, 0.7);
 dir.position.set(3, 5, 4);
 scene.add(dir);
+// Front-row spotlights (off by default)
+const frontSpot = new THREE.PointLight(0xffffff, 0.0, 4.5, 1.6);
+frontSpot.position.set(0, 1.3, 1.6);
+scene.add(frontSpot);
+const frontSpotL = new THREE.PointLight(0xffffff, 0.0, 4.0, 1.6);
+frontSpotL.position.set(-3.6, 1.0, 1.8);
+scene.add(frontSpotL);
+const frontSpotR = new THREE.PointLight(0xffffff, 0.0, 4.0, 1.6);
+frontSpotR.position.set(3.6, 1.0, 1.8);
+scene.add(frontSpotR);
+// Overhead stage spotlight
+const stageSpot = new THREE.SpotLight(0xffffff, 0.0, 6.0, Math.PI / 5, 0.3, 1.0);
+stageSpot.position.set(0, 3.2, 5.2);
+stageSpot.target.position.set(0, 0.6, 0);
+scene.add(stageSpot);
+scene.add(stageSpot.target);
+let stageMode = false;
+let stageTween = null;
+function enterStageMode() {
+    if (stageMode) return; stageMode = true;
+    // Camera to plane-level and head-on
+    const camFrom = camera.position.clone();
+    const camTo = new THREE.Vector3(0, 0.6, 9.5);
+    const tgtFrom = controls.target.clone();
+    const tgtTo = new THREE.Vector3(0, 0.6, 0);
+    const ambFrom = ambient.intensity, ambTo = 0.15;
+    const dirFrom = dir.intensity, dirTo = 0.25;
+    const spotFrom = frontSpot.intensity, spotTo = 2.9; // +~30%
+    const spotLFrom = frontSpotL.intensity, spotLTo = 1.8;
+    const spotRFrom = frontSpotR.intensity, spotRTo = 1.8;
+    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 4.9; // +40%
+    const melFrom = melodyMesh?.position.clone();
+    const bassFrom = bassMesh?.position.clone();
+    const melTo = melFrom ? melFrom.clone().setY(melFrom.y + 0.6) : null;
+    const bassTo = bassFrom ? bassFrom.clone().setY(bassFrom.y - 0.6) : null;
+    if (stageTween) stageTween.cancelled = true;
+    // Keep shelf chord cubes at full strength during performances; do not dim them here
+    try {
+        for (const s of shelfCubes) {
+            const mats = Array.isArray(s.material) ? s.material : [s.material];
+            for (const m of mats) {
+                if (!m) continue; if (!m.userData) m.userData = {};
+                if (m.userData.__baseColor && m.color) m.color.copy(m.userData.__baseColor);
+                if (typeof m.opacity === 'number') { m.transparent = false; m.opacity = 1.0; }
+            }
+        }
+    } catch (_) { }
+    stageTween = tweenObject({
+        duration: 900, owner: camera, onUpdate: (v) => {
+            camera.position.lerpVectors(camFrom, camTo, v);
+            controls.target.lerpVectors(tgtFrom, tgtTo, v);
+            ambient.intensity = ambFrom + (ambTo - ambFrom) * v;
+            dir.intensity = dirFrom + (dirTo - dirFrom) * v;
+            frontSpot.intensity = spotFrom + (spotTo - spotFrom) * v;
+            frontSpotL.intensity = spotLFrom + (spotLTo - spotLFrom) * v;
+            frontSpotR.intensity = spotRFrom + (spotRTo - spotRFrom) * v;
+            stageSpot.intensity = stageSpotFrom + (stageSpotTo - stageSpotFrom) * v;
+            if (melodyMesh && melFrom && melTo) melodyMesh.position.lerpVectors(melFrom, melTo, v);
+            if (bassMesh && bassFrom && bassTo) bassMesh.position.lerpVectors(bassFrom, bassTo, v);
+            // Dim Venn diagram plane opacity to ~10%
+            try { if (shelfPlane?.material) { shelfPlane.material.transparent = true; shelfPlane.material.opacity = 0.10; } } catch (_) { }
+        }
+    });
+}
+function maybeEnterStageMode() {
+    if (lineup.length && lockedMelody && lockedBass && lockedMelody.length === lineup.length && lockedBass.length === lineup.length) enterStageMode();
+}
 
-// Grid plane for visual reference (can be hidden in OBS)
+// Grid and legibility darkening plane
 const grid = new THREE.GridHelper(40, 40, 0x444444, 0x333333);
 grid.position.y = -2.2;
 scene.add(grid);
+// Darkening plane that fades in when camera goes below the ground
+const darkPlaneGeo = new THREE.PlaneGeometry(40, 40);
+const darkPlaneMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, depthWrite: false });
+const darkPlane = new THREE.Mesh(darkPlaneGeo, darkPlaneMat);
+darkPlane.rotation.x = -Math.PI / 2;
+darkPlane.position.set(0, 0.001, 0);
+darkPlane.renderOrder = 0; // keep under text
+scene.add(darkPlane);
 
 // Shared geometry
 const cubeSize = 1.2;
@@ -80,6 +173,40 @@ function animateQuaternion(obj, toQuat, duration = 900) {
         }
     });
 }
+
+// Derive rotationIndex from the cube's current quaternion (snap to nearest quadrant)
+function syncRotationIndexFromQuaternion(obj) {
+    try {
+        // Determine which of the four tone faces is currently pointing DOWN (toward world -Y)
+        // Base mapping indices: 0=bottom(-Y)=root, 1=right(+X)=3rd, 2=top(+Y)=5th, 3=left(-X)=7th
+        const worldDown = new THREE.Vector3(0, -1, 0);
+        const baseNormals = [
+            new THREE.Vector3(0, -1, 0), // bottom
+            new THREE.Vector3(1, 0, 0),  // right
+            new THREE.Vector3(0, 1, 0),  // top
+            new THREE.Vector3(-1, 0, 0), // left
+        ];
+        let bestIdx = 0; let bestDot = -Infinity;
+        for (let i = 0; i < 4; i++) {
+            const w = baseNormals[i].clone().applyQuaternion(obj.quaternion);
+            const d = w.dot(worldDown);
+            if (d > bestDot) { bestDot = d; bestIdx = i; }
+        }
+        obj.userData.rotationIndex = ((bestIdx % 4) + 4) % 4;
+        logAudio('syncRotationIndex', { roman: obj.userData?.roman, bestIdx: obj.userData.rotationIndex, bestDot, q: { x: obj.quaternion.x, y: obj.quaternion.y, z: obj.quaternion.z, w: obj.quaternion.w } });
+        // Optional: if very close to exact alignment, snap quaternion to the nearest quarter to stabilize visuals
+        const angle = Math.atan2(
+            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).y,
+            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).x
+        );
+        const snapped = Math.round(angle / (Math.PI / 2)) * (Math.PI / 2);
+        if (Math.abs(snapped - angle) < 0.05) {
+            const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snapped);
+            obj.quaternion.copy(q);
+            logAudio('snapQuaternion', { to: snapped });
+        }
+    } catch (_) { /* no-op */ }
+}
 function animateScale(obj, toScalar, duration = 500) {
     const from = obj.scale.clone();
     const to = new THREE.Vector3(toScalar, toScalar, toScalar);
@@ -104,6 +231,16 @@ let lastInteraction = performance.now();
 let homing = false;
 let currentStickyView = 'above'; // 'above' | 'below'
 function pokeInteraction() { lastInteraction = performance.now(); homing = false; }
+const diag = setupDiagnostics(() => ({ tweens: activeTweens.length, dragging, lineup: lineup.length }));
+const bridge = createBridge();
+
+function hasActiveTweenFor(obj) {
+    for (let i = 0; i < activeTweens.length; i++) {
+        const tw = activeTweens[i];
+        if (!tw.cancelled && tw.owner === obj) return true;
+    }
+    return false;
+}
 
 // Camera view toggles
 function setViewAbove() {
@@ -119,76 +256,27 @@ function setViewBelow() {
     pokeInteraction();
 }
 
+// Debug/logging helpers
+const __url = new URL(window.location.href);
+const debugAudio = __url.searchParams.has('debugAudio') || __url.searchParams.has('debugaudio');
+function logAudio(tag, payload) {
+    try { if (debugAudio || window.__obsDebugAudio) console.log(`[obs-cubes:audit] ${tag}`, payload); } catch (_) { }
+}
+
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    return String(s)
-        .replace(/#/g, '♯')
-        .replace(/([A-Ga-g])b/g, '$1♭')   // Eb → E♭
+    // Tight kerning around accidentals by removing stray spaces and using narrow no-break space
+    const NNBSP = '\u202F';
+    let out = String(s)
+        .replace(/\s*#\s*/g, NNBSP + '♯')
+        .replace(/([A-Ga-g])\s*b/g, '$1' + NNBSP + '♭')   // Eb → E♭ with tight space
         .replace(/\bb(?=(?:\d|[IViv]))/g, '♭'); // b3/bVI → ♭3/♭VI
+    return out;
 }
 
 // Generate a canvas texture for labels (advanced with stacked superscripts)
-function makeFrontLabelTexture(labelText, romanLabel) {
-    const size = 1024; // extra crisp
-    const c = document.createElement('canvas');
-    c.width = size; c.height = size;
-    const ctx = c.getContext('2d');
-
-    // Wood panel background + frame
-    ctx.fillStyle = '#c89f6a';
-    ctx.fillRect(0, 0, size, size);
-    ctx.strokeStyle = '#2b1c10';
-    ctx.lineWidth = 28;
-    ctx.strokeRect(32, 32, size - 64, size - 64);
-
-    // Parse base and superscripts: e.g., V(7)(b9) → base=V, supers=['7','b9']
-    const supers = [];
-    let base = String(labelText);
-    // Pull out parenthetical tokens
-    const paren = [...base.matchAll(/\(([^)]+)\)/g)].map(m => m[1]);
-    if (paren.length) {
-        supers.push(...paren);
-        base = base.replace(/\([^)]*\)/g, '');
-    }
-    // Trailing simple tokens like I7 or viiº7
-    const m1 = base.match(/^(.*?)(?:([#b]?\d+)|º7)$/);
-    if (m1 && m1[2]) { supers.push(m1[2]); base = m1[1]; }
-    else if (/(º7)$/.test(base)) { supers.push('º7'); base = base.replace(/º7$/, ''); }
-
-    base = base.trim();
-    const basePretty = toMusicalGlyphs(base);
-    const supersPretty = supers.map(toMusicalGlyphs);
-
-    // Main chord text
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#1a1a1a';
-    const baseSize = 420;
-    ctx.font = `700 ${baseSize}px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
-    ctx.fillText(basePretty, size / 2, size / 2 + 10);
-
-    // Right-aligned stacked supers in the top-right corner
-    const supSize = 180;
-    ctx.font = `700 ${supSize}px system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial`;
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'alphabetic';
-    const rightX = size - 64;
-    let y = 140;
-    for (const token of supersPretty) {
-        ctx.fillText(token, rightX, y);
-        y += supSize * 0.95;
-    }
-
-    const tex = new THREE.CanvasTexture(c);
-    tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    tex.generateMipmaps = true;
-    tex.minFilter = THREE.LinearMipmapLinearFilter;
-    tex.magFilter = THREE.LinearFilter;
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.needsUpdate = true;
-    return tex;
-}
+// (legacy makeFrontLabelTexture removed; styled renderer is used exclusively)
 
 function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const size = 1024;
@@ -199,7 +287,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // inner frame with border color tied to roman family
     const color = borderColorForRoman(romanLabel);
     const strokeColor = `#${(color).toString(16).padStart(6, '0')}`;
-    const borderPx = Math.max(10, Math.round(size / 15)); // 1/15 width
+    const borderPx = Math.max(10, Math.round(size / BORDER_RATIO)); // 1/15 width
     // Draw a SOLID band border (four filled rects) for maximum visibility
     ctx.fillStyle = strokeColor;
     // Top
@@ -226,16 +314,18 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const trailing = base.match(/^(.*?)([#b]?\d+)$/);
     if (trailing) { base = trailing[1]; supers.push(trailing[2]); }
 
-    const basePretty = toMusicalGlyphs(base.trim());
-    const supersPretty = supers.map(s => toMusicalGlyphs(s));
+    const baseTrim = base.trim();
+    const basePretty = toMusicalGlyphs(baseTrim);
+    let supersPretty = supers.map(s => toMusicalGlyphs(s));
 
     // Embossed text color: EXACT same as border color (per requirement)
     const fill = strokeColor;
 
-    // Typography base (Cochin for everything primary)
-    const centerX = size / 2; const baselineY = size / 2 + 24;
-    const baseSize = 440;
-    const cochin = `'Cochin', 'Cochin-Bold', 'Times New Roman', serif`;
+    // Typography base (Cochin/Times)
+    const centerX = size / 2; const baselineY = size / 2 + 6;
+    const baseSize = 430;
+    const cochin = SERIF_STACK;
+    // Draw centered base (without leading accidental token)
     ctx.save();
     ctx.fillStyle = fill;
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
@@ -247,17 +337,19 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     ctx.strokeText(basePretty, centerX, baselineY - 2);
     ctx.restore();
 
-    // Supers: Finale Numerics (music), large and clear
-    if (supersPretty.length) {
-        const supSize = 240;
-        const supFamily = `900 ${supSize}px 'Finale Numerics', 'Bravura Text', 'Noto Music', 'Cochin', 'Times New Roman', serif`;
-        const rightX = size - 70; let y = 170;
+    // (No global accidental/ø repositioning; special alignment remains only for specific labels like '#ivø')
+
+    // Supers: Finale Numerics (music), large and clear; include ø/º as supers
+    if (supersPretty.length && romanLabel !== '#ivø') {
+        const supSize = 220;
+        const supFamily = `900 ${supSize}px ${MUSIC_STACK}, ${SERIF_STACK}`;
+        const rightX = size - 90; let y = 170;
         for (const token of supersPretty) {
             const text = String(token);
             ctx.save();
             // Light capsule for contrast
             ctx.font = supFamily; const w = ctx.measureText(text).width;
-            const padX = 14, padY = 10; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
+            const padX = 10, padY = 8; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
             ctx.fillStyle = 'rgba(255,255,255,0.12)';
             ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 4;
             ctx.beginPath(); ctx.rect(rectX, rectY, w + padX * 2, supSize + padY * 1.2); ctx.fill(); ctx.stroke();
@@ -267,7 +359,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
             ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
             ctx.font = supFamily; ctx.fillText(text, rightX, y);
             ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 5;
+            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 4;
             ctx.strokeText(text, rightX, y - 1);
             ctx.restore();
             y += supSize * 0.92;
@@ -278,11 +370,12 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     const annotation = annotationForRoman(romanLabel);
     if (annotation) {
         const a = toMusicalGlyphs(annotation).replace(/ of /g, ' of ');
-        ctx.font = `800 120px 'Finale Numerics', 'Bravura Text', 'Noto Music', 'Cochin', 'Times New Roman', serif`;
+        ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = fill;
         ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
-        ctx.fillText(`[${a}]`, size / 2, size - 110);
+        const annY = size - 105;
+        ctx.fillText(`[${a}]`, size / 2, annY);
         ctx.shadowColor = 'transparent';
     }
 
@@ -290,6 +383,25 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter;
     tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; return tex;
+}
+
+// Minimal wood panel painter if not present
+function makeWoodPanel(ctx, size) {
+    // soft tan base
+    const grd = ctx.createLinearGradient(0, 0, 0, size);
+    grd.addColorStop(0, '#d5b38a');
+    grd.addColorStop(1, '#b88d5f');
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, size, size);
+    // subtle grain lines
+    ctx.strokeStyle = 'rgba(90,60,30,0.08)';
+    ctx.lineWidth = 4;
+    for (let y = 40; y < size; y += 52) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.bezierCurveTo(size * 0.25, y + 6, size * 0.5, y - 6, size, y + 4);
+        ctx.stroke();
+    }
 }
 
 function hexToRgb(hex) {
@@ -351,41 +463,20 @@ function candidatePngNamesForRoman(roman) {
 }
 
 function loadFaceTexture(label, romanLabel) {
-    // Attempt multiple PNG name candidates before falling back to manifest or canvas
-    const candidates = candidatePngNamesForRoman(romanLabel).map(n => `./${encodeURIComponent(n)}`);
-    const tryLoad = (idx) => new Promise((resolve) => {
-        if (idx >= candidates.length) {
-            // Manifest secondary fallback
-            const url = textureManifest && textureManifest[label];
-            if (!url) return resolve(makeFrontLabelTexture(label, romanLabel));
-            const loader2 = new THREE.TextureLoader();
-            loader2.load(url, tex => {
-                tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-                tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
-                resolve(tex);
-            }, undefined, () => resolve(makeFrontLabelTexture(label, romanLabel)));
-            return;
-        }
-        const loader = new THREE.TextureLoader();
-        loader.load(candidates[idx], tex => {
-            tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-            tex.generateMipmaps = true; tex.minFilter = THREE.LinearMipmapLinearFilter; tex.magFilter = THREE.LinearFilter; tex.colorSpace = THREE.SRGBColorSpace;
-            resolve(tex);
-        }, undefined, () => resolve(tryLoad(idx + 1)));
-    });
-    return tryLoad(0);
+    // Always use canvas-rendered texture; no PNGs
+    return makeFrontLabelTextureStyled(label, romanLabel);
 }
 
-function makeCircleDiamondFace(text, color, rotateDeg = 0) {
+function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false, drawText = true) {
     const size = 512; // higher res for crisp edges
     const canvas = document.createElement('canvas');
     canvas.width = size; canvas.height = size;
     const ctx = canvas.getContext('2d');
+    // Restore original: rotate whole face (including text) to match established cube orientation
     ctx.translate(size / 2, size / 2);
     ctx.rotate((rotateDeg * Math.PI) / 180);
     ctx.translate(-size / 2, -size / 2);
-    ctx.fillStyle = '#f0e6d8';
-    ctx.fillRect(0, 0, size, size);
+    if (!transparentBg) { ctx.fillStyle = '#f0e6d8'; ctx.fillRect(0, 0, size, size); }
     ctx.fillStyle = color;
     ctx.beginPath();
     ctx.arc(size / 2, size / 2, size * 0.45, 0, Math.PI * 2);
@@ -397,13 +488,14 @@ function makeCircleDiamondFace(text, color, rotateDeg = 0) {
     const d = size * 0.64;
     ctx.fillRect(-d / 2, -d / 2, d, d);
     ctx.restore();
-    ctx.fillStyle = '#111';
-    // Use music-capable fonts first if present
-    const pretty = toMusicalGlyphs(text);
-    ctx.font = '700 160px "Bravura Text", "Noto Music", "Arial Unicode MS", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(pretty, size / 2, size / 2);
+    if (drawText) {
+        ctx.fillStyle = '#111';
+        const pretty = toMusicalGlyphs(text);
+        ctx.font = '700 160px "Bravura Text", "Noto Music", "Arial Unicode MS", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pretty, size / 2, size / 2);
+    }
     const tex = new THREE.CanvasTexture(canvas);
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
     tex.generateMipmaps = true;
@@ -490,10 +582,10 @@ function makeShelfTexture() {
     }
     // REST centered at top center of the top circle (anchor ~ -90°)
     drawCurvedWord('REST', top.x, top.y, top.r - 22, -Math.PI / 2, { fill: '#223', spacingDeg: 14 });
-    // MOTION centered around ~2 o'clock on the right circle (anchor ~ 30°)
-    drawCurvedWord('MOTION', right.x, right.y, right.r - 28, Math.PI / 6, { fill: '#222', spacingDeg: 12 });
-    // TENSION centered around ~10 o'clock on the left circle (anchor ~ 150°)
-    drawCurvedWord('TENSION', left.x, left.y, left.r - 28, (5 * Math.PI) / 6, { fill: '#222', spacingDeg: 12 });
+    // MOTION centered around ~2 o'clock on the right circle (anchor ~ 60°)
+    drawCurvedWord('MOTION', right.x, right.y, right.r - 28, Math.PI / 3, { fill: '#222', spacingDeg: 12 });
+    // TENSION centered around ~10 o'clock on the left circle (anchor ~ 120°)
+    drawCurvedWord('TENSION', left.x, left.y, left.r - 28, (2 * Math.PI) / 3, { fill: '#222', spacingDeg: 12 });
     const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
 }
 
@@ -510,6 +602,7 @@ function createShelfPlane() {
 
 // Epic titles
 let bgTitleMesh = null;
+let versionMesh = null;
 let melodyMesh = null; let melodyMat = null;
 let bassMesh = null; let bassMat = null;
 
@@ -549,6 +642,14 @@ function addEpicTitles() {
         bgTitleMesh.position.set(0, 12, -60);
         bgTitleMesh.lookAt(new THREE.Vector3(0, 6, 0));
         scene.add(bgTitleMesh);
+        // Add version label (starts at V1.0)
+        const vTex = makeTitleTexture(['V1.0'], { width: 2048, height: 1024, size: 600, weight: 1000 });
+        const vMat = new THREE.MeshBasicMaterial({ map: vTex, transparent: true, opacity: 0.7, depthWrite: false, color: 0xffffff });
+        const vGeo = new THREE.PlaneGeometry(24, 10);
+        versionMesh = new THREE.Mesh(vGeo, vMat);
+        versionMesh.position.set(0, 7.5, -35);
+        versionMesh.lookAt(new THREE.Vector3(0, 6, 0));
+        scene.add(versionMesh);
     }
     if (!melodyMesh) {
         const tex = makeTitleTexture(['MELODY'], { width: 4096, height: 1024, size: 420, weight: 1000 });
@@ -558,6 +659,29 @@ function addEpicTitles() {
         melodyMesh.rotation.x = -Math.PI / 2; // on ground, readable from above
         melodyMesh.position.set(0, 0.002, 2.8);
         scene.add(melodyMesh);
+        // Add 3D lock icons flanking the word MELODY
+        const lockMatOpen = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
+        const lockMatClosed = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
+        const iconGeo = new THREE.PlaneGeometry(1.2, 1.2);
+        melodyLockLeft = new THREE.Mesh(iconGeo.clone(), lockMatOpen.clone());
+        melodyLockRight = new THREE.Mesh(iconGeo.clone(), lockMatOpen.clone());
+        const iconTexOpen = makeTitleTexture(['🔓'], { width: 256, height: 256, size: 200, weight: 900 });
+        const iconTexClosed = makeTitleTexture(['🔒'], { width: 256, height: 256, size: 200, weight: 900 });
+        melodyLockLeft.material.map = iconTexOpen; melodyLockLeft.material.needsUpdate = true;
+        melodyLockRight.material.map = iconTexOpen; melodyLockRight.material.needsUpdate = true;
+        melodyLockLeft.rotation.x = -Math.PI / 2; melodyLockRight.rotation.x = -Math.PI / 2;
+        // Place as if next character after the title word
+        melodyLockLeft.position.set(-6.2, 0.01, 2.8);
+        melodyLockRight.position.set(6.2, 0.01, 2.8);
+        // Match title tint
+        melodyLockLeft.material.color.setHex(0xaaaaaa);
+        melodyLockRight.material.color.setHex(0xaaaaaa);
+        melodyLockLeft.renderOrder = 10; melodyLockRight.renderOrder = 10;
+        melodyLockLeft.material.depthWrite = false; melodyLockRight.material.depthWrite = false;
+        melodyLockLeft.userData = { isUi: true, kind: 'melody-lock', state: 'open', openTex: iconTexOpen, closedTex: iconTexClosed };
+        melodyLockRight.userData = { isUi: true, kind: 'melody-lock', state: 'open', openTex: iconTexOpen, closedTex: iconTexClosed };
+        scene.add(melodyLockLeft); scene.add(melodyLockRight);
+        uiPickables.push(melodyLockLeft, melodyLockRight);
     }
     if (!bassMesh) {
         const tex = makeTitleTexture(['BASSLINE'], { width: 4096, height: 1024, size: 420, weight: 1000 });
@@ -567,18 +691,47 @@ function addEpicTitles() {
         // readable from below: flip to face downward without mirroring
         bassMesh.rotation.x = Math.PI / 2;
         bassMesh.position.set(0, 0.002, 2.8);
+        bassMesh.renderOrder = 1; // draw after darkening plane
         scene.add(bassMesh);
+        // Bass locks
+        const iconGeo2 = new THREE.PlaneGeometry(1.2, 1.2);
+        const iconTexOpen2 = makeTitleTexture(['🔓'], { width: 256, height: 256, size: 200, weight: 900 });
+        const iconTexClosed2 = makeTitleTexture(['🔒'], { width: 256, height: 256, size: 200, weight: 900 });
+        bassLockLeft = new THREE.Mesh(iconGeo2.clone(), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false, map: iconTexOpen2 }));
+        bassLockRight = new THREE.Mesh(iconGeo2.clone(), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false, map: iconTexOpen2 }));
+        bassLockLeft.rotation.x = Math.PI / 2; bassLockRight.rotation.x = Math.PI / 2;
+        bassLockLeft.position.set(-6.2, 0.01, 2.8);
+        bassLockRight.position.set(6.2, 0.01, 2.8);
+        bassLockLeft.material.color.setHex(0xaaaaaa);
+        bassLockRight.material.color.setHex(0xaaaaaa);
+        bassLockLeft.renderOrder = 10; bassLockRight.renderOrder = 10;
+        bassLockLeft.material.depthWrite = false; bassLockRight.material.depthWrite = false;
+        bassLockLeft.userData = { isUi: true, kind: 'bass-lock', state: 'open', openTex: iconTexOpen2, closedTex: iconTexClosed2 };
+        bassLockRight.userData = { isUi: true, kind: 'bass-lock', state: 'open', openTex: iconTexOpen2, closedTex: iconTexClosed2 };
+        scene.add(bassLockLeft); scene.add(bassLockRight);
+        uiPickables.push(bassLockLeft, bassLockRight);
     }
 }
 
 // State
 const cubes = [];
+// Dedicated list for shelf proxies added later
+const shelfPickProxies = [];
 let currentSet = 'none';
 let labelMode = 'roman';
 let currentKey = 'C';
 // Shelf (back-row) configuration
 const shelfZ = -4.2;
 const shelfY = 1.6;
+// Initialize orthographic shelf picking camera now that shelfY/Z are known
+try {
+    const aspect = window.innerWidth / window.innerHeight;
+    const halfH = 5;
+    shelfPickCamera = new THREE.OrthographicCamera(-aspect * halfH, aspect * halfH, halfH, -halfH, 0.1, 1000);
+    shelfPickCamera.position.set(0, shelfY, 10);
+    shelfPickCamera.lookAt(0, shelfY, shelfZ);
+    shelfPickCamera.layers.enable(2); // view shelf layer
+} catch (_) { }
 // Shelf anchor map. If shelf_map.json exists or localStorage has an override,
 // we will load into this at runtime. Otherwise we start with approximations.
 let shelfSlots = {
@@ -617,19 +770,66 @@ let shelfSlots = {
     'II': new THREE.Vector3(3.2, shelfY - 0.7, shelfZ),
     'VII': new THREE.Vector3(-3.2, shelfY - 0.7, shelfZ),
 };
+// Color families (approximated from reference image; can be overridden later)
+let COLOR_TONIC = 0x62d1e6;      // cyan/teal for I/vi family
+let COLOR_SUBDOMINANT = 0x6b46c1; // purple for IV/ii family
+let COLOR_DOMINANT = 0xff7a45;    // coral/orange for V/VII family
+let COLOR_NEUTRAL = 0xbfbfbf;     // grey for iii and unclassified
+
+// Locked exact colors derived from template PNGs (border/text)
+// Major
 const borderColorByRoman = {
-    'I': 0x7fdfff, 'vi': 0x7fdfff, 'I7': 0x7fdfff,
-    'IV': 0x6f42c1, 'ii': 0x6f42c1, 'iv': 0x6f42c1, '#ivø': 0x6f42c1,
-    'V': 0xff7f50, 'viiø': 0xff7f50, '#vº': 0xff7f50, 'VII': 0xff7f50,
-    'iii': 0xbfbfbf,
+    'I': 0x52b9d5,
+    'ii': 0x44255c,
+    'iii': 0x8caaaa,
+    'IV': 0x623978,
+    'V': 0xe28a5a,
+    'vi': 0x6c9cc4,
+    'viiø': 0xc24a2e,
+    // Applied
+    'I7': 0xa4324a,
+    'iiiø': 0xba5847,
+    'II(7)': 0xad6f71,
+    '#ivø': 0xad6f71,
+    'III(7)': 0xaf505d,
+    '#vº': 0xad6f71,
+    'VI(7)': 0xad6f71,
+    '#iº': 0xad6f71,
+    'VII(7)': 0xb3394a,
+    '#iiº': 0xad6f71,
+    // Minor
+    'i': 0x409abe,
+    'iiø': 0xba5847,
+    'bIII': 0x6673ab,
+    'iv': 0x884a7c,
+    'v': 0xab8c71,
+    'bVI': 0x5f5199,
+    'bVII': 0xb77046,
+    'V(7)(b9)': 0xe28a5a, // paired to dominant neighbor
+    'viiº7': 0xc24a2e,
+    // Extras present in assets, map reasonably
+    'viio': 0xc24a2e,
+    'VII': 0xe28a5a
 };
 function borderColorForRoman(roman) {
     if (borderColorByRoman[roman]) return borderColorByRoman[roman];
-    // Family heuristics to match legacy PNG palette
-    if (/IV|iv|\bii\b|#iv/.test(roman)) return 0x6f42c1; // purple family
-    if (/\bV\b|\bv\b|VII|#v/.test(roman)) return 0xff7f50; // coral dominants
-    if (/\bI\b|\bvi\b|I7/.test(roman)) return 0x7fdfff; // cyan tonics
-    return 0xbfbfbf; // neutral
+    // Applied-chord: color by target of annotation ([... of X]) so ø/º match their neighbor in the stack
+    const ann = annotationForRoman(roman);
+    if (ann) {
+        const m = ann.match(/ of ([IViv]+|vi|iii)/);
+        const target = m && m[1] ? m[1] : null;
+        if (target) {
+            if (/^(IV|iv|ii)$/.test(target)) return COLOR_SUBDOMINANT;
+            if (/^(V|v|VII)$/.test(target)) return COLOR_DOMINANT;
+            if (/^(I|vi)$/.test(target)) return COLOR_TONIC;
+            if (/^(iii)$/.test(target)) return COLOR_NEUTRAL;
+        }
+    }
+    // Family heuristics fallback
+    if (/IV|iv|\bii\b|#iv/.test(roman)) return COLOR_SUBDOMINANT;
+    if (/\bV\b|\bv\b|VII|#v/.test(roman)) return COLOR_DOMINANT;
+    if (/\bI\b|\bvi\b|I7/.test(roman)) return COLOR_TONIC;
+    return COLOR_NEUTRAL;
 }
 const shelfCubes = [];
 let scaleByRoman = {
@@ -648,23 +848,19 @@ const shelfOriginByRoman = {};
 // --- Adjustable shelf map: load/save ---
 const MAP_STORAGE_KEY = 'obsCubes.shelfMap.v1';
 async function loadShelfMap() {
-    // Always prefer the official map on load
+    // Hard purge any saved overrides – ALWAYS use the official map
     try {
-        const res = await fetch('./Shelf%20Map%20Official.json');
-        if (res.ok) {
-            const json = await res.json();
-            applyShelfMap(json);
-            return;
-        }
+        localStorage.removeItem(MAP_STORAGE_KEY);
+        localStorage.removeItem('obsCubes.shelfMap');
+        localStorage.removeItem('obsCubes.map');
+        localStorage.removeItem('shelf_map');
     } catch { }
-    // Fallback to any saved local adjustments
     try {
-        const raw = localStorage.getItem(MAP_STORAGE_KEY);
-        if (raw) {
-            const parsed = JSON.parse(raw);
-            applyShelfMap(parsed);
-        }
+        const json = await loadOfficialMap('./Shelf%20Map%20Official.json');
+        applyShelfMap(json);
+        return;
     } catch { }
+    // If fetch fails, keep built-in defaults; do not read localStorage
 }
 
 function applyShelfMap(json) {
@@ -700,35 +896,34 @@ function exportShelfMap() {
     URL.revokeObjectURL(url);
 }
 
-function saveShelfMapToLocalStorage() {
-    const positions = {};
-    for (const [k, v] of Object.entries(shelfSlots)) {
-        positions[k] = { x: v.x, y: v.y, z: v.z };
-    }
-    const json = { positions, scales: scaleByRoman };
-    try { localStorage.setItem(MAP_STORAGE_KEY, JSON.stringify(json)); } catch { }
-}
+function saveShelfMapToLocalStorage() { /* disabled – official map only */ }
 
 // Ensure web fonts are available before drawing to canvas
 async function ensureFontsLoaded() {
     if (window.__obsFontsLoaded) return window.__obsFontsLoaded;
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'https://fonts.googleapis.com/css2?family=Lobster&family=Noto+Music&family=Noto+Sans+SC:wght@700;900&display=swap';
+    link.href = 'https://fonts.googleapis.com/css2?family=Noto+Music&display=swap';
     document.head.appendChild(link);
+    // Preload NVX Diamond via absolute URL for Troika
+    try {
+        const preload = document.createElement('link');
+        preload.rel = 'preload'; preload.as = 'font'; preload.type = 'font/otf';
+        preload.href = NVX_FONT_URL; preload.crossOrigin = 'anonymous';
+        document.head.appendChild(preload);
+    } catch (_) { }
+    const loads = [
+        // Serif stack (Cochin/Times)
+        `700 430px ${SERIF_STACK}`,
+        // Music stack (Noto Music/Finale/Bravura)
+        `900 220px ${MUSIC_STACK}`,
+        `800 130px ${MUSIC_STACK}`,
+    ].map(spec => {
+        try { return document.fonts.load(spec); } catch (_) { return Promise.resolve(); }
+    });
     window.__obsFontsLoaded = Promise.race([
-        (async () => {
-            try {
-                await document.fonts.ready;
-                await Promise.all([
-                    document.fonts.load('900 440px "Lobster"'),
-                    document.fonts.load('900 240px "Noto Music"'),
-                    document.fonts.load('900 440px "Noto Sans SC"')
-                ]);
-            } catch (_) { /* ignore */ }
-            return true;
-        })(),
-        new Promise(resolve => setTimeout(() => resolve(true), 1200))
+        (async () => { try { await Promise.all(loads); } catch (_) { } try { if (troikaPreloadFont) await troikaPreloadFont({ font: NVX_FONT_URL, characters: '01234567rb#ºø+-() ' }); } catch (_) { } return true; })(),
+        new Promise(resolve => setTimeout(() => resolve(true), 1600))
     ]);
     return window.__obsFontsLoaded;
 }
@@ -742,6 +937,8 @@ const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let pendingObj = null;
 let mouseDownPos = new THREE.Vector2();
 let mouseDownTime = 0;
+// Initialize FSM with inline thresholds to avoid TDZ on consts declared later
+const fsm = new InteractionFSM({ DRAG_START_PX: 8, CLICK_MAX_PX: 5, CLICK_MAX_MS: 250 });
 // Additional drag tracking for shelf pulls
 let dragStartScreenY = 0;
 let dragStartZ = 0;
@@ -783,6 +980,8 @@ function reflowLineup() {
         if (Math.abs(cube.scale.x - FRONT_ROW_SCALE) > 1e-3) cube.scale.setScalar(FRONT_ROW_SCALE);
         animatePosition(cube, target, 400);
     });
+    try { bridge.emit('lineupChanged', { lineup: lineup.map(c => c.userData?.roman), key: currentKey }); } catch (_) { }
+    try { setState({ lineup: lineup.map(c => c.userData?.roman) }); } catch (_) { }
 }
 
 function previewMakeWay(insertIndex) {
@@ -864,12 +1063,31 @@ async function createShelfCube(roman) {
     const pos = (shelfSlots[roman] || new THREE.Vector3(0, 0, shelfZ)).clone();
     m.position.copy(pos);
     m.userData = { roman, letter: item.letter, rotationIndex: 0, isShelf: true };
+    try { m.userData.model = new CubeModel({ roman, key: currentKey, threeObject: m }); } catch (_) { }
     addBorder(m, borderColorForRoman(roman));
-    addQuadrantOverlay(m);
+    // Shelf cubes live on layer 2
+    setCubeLayerRecursive(m, 2);
+    // Do NOT add quadrant overlays to shelf cubes to avoid occluding clicks
     shelfCubes.push(m);
+    ensureFaceProxies(m);
+    // Add an invisible, raycast-only proxy just in front of the shelf cube
+    try {
+        const sclr = m.scale?.x || m.scale || 1;
+        const proxyGeo = new THREE.PlaneGeometry(cubeSize * sclr * 1.08, cubeSize * sclr * 1.08);
+        const proxyMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide });
+        const proxy = new THREE.Mesh(proxyGeo, proxyMat);
+        proxy.position.set(m.position.x, m.position.y, m.position.z + 0.001);
+        proxy.userData = { isShelfProxy: true, parent: m };
+        proxy.layers.set(2);
+        scene.add(proxy);
+        shelfPickProxies.push(proxy);
+        m.userData.pickProxy = proxy;
+    } catch (_) { }
     // Record exact origin
     shelfOriginByRoman[roman] = { position: pos.clone(), scale: s, quaternion: m.quaternion.clone() };
     scene.add(m);
+    // Ensure shelf layer assignment
+    try { setCubeLayerRecursive(m, 2); } catch (_) { }
     return m;
 }
 
@@ -891,19 +1109,50 @@ async function loadSet(setName) {
         'I7', 'iiiø', 'II(7)', '#ivø', 'III(7)', '#vº', 'VI(7)', '#iº', 'VII(7)', '#iiº'
     ];
     for (const r of shelfRomans) await createShelfCube(r);
+    // Ensure camera sees both layers by default
+    try { camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
+    // Safety: ensure visibility and repopulate if something went wrong
+    if (shelfCubes.length === 0) {
+        for (const r of shelfRomans) await createShelfCube(r);
+    }
+    for (const s of shelfCubes) { s.visible = true; }
     // Start with empty front row
     lineup = [];
+    try { ensureTempoUi(); } catch (_) { }
 }
 
 async function updateLabels() {
+    const makeFrontLabel = (cube) => {
+        if (labelMode === 'roman') return cube.userData.roman;
+        // Derive letter label by transposing original C-root to current key while preserving suffix from original letter
+        try {
+            const roman = cube.userData.roman;
+            const orig = cube.userData.letter || '';
+            // Prefer computed root from noteSetsC
+            const rootC = (noteSetsC[roman] || ['C'])[0];
+            const transposedRoot = transposeNotes([rootC], currentKey)[0];
+            // Extract suffix from original letter (drop leading root note token)
+            const m = String(orig).match(/^[A-G](?:#|b)?(.*)$/);
+            const suffix = m ? m[1] : '';
+            return `${transposedRoot}${suffix}`;
+        } catch (_) { return cube.userData.letter; }
+    };
     for (const c of cubes) {
-        const label = c.userData[labelMode];
+        const label = makeFrontLabel(c);
         const materials = await makeMaterials(label, c.userData.roman);
         c.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         c.material = materials;
     }
     for (const s of shelfCubes) {
-        const label = s.userData[labelMode];
+        const label = (labelMode === 'roman') ? s.userData.roman : (() => {
+            try {
+                const rootC = (noteSetsC[s.userData.roman] || ['C'])[0];
+                const transposedRoot = transposeNotes([rootC], currentKey)[0];
+                const m = String(s.userData.letter || '').match(/^[A-G](?:#|b)?(.*)$/);
+                const suffix = m ? m[1] : '';
+                return `${transposedRoot}${suffix}`;
+            } catch (_) { return s.userData.letter; }
+        })();
         const materials = await makeMaterials(label, s.userData.roman);
         if (Array.isArray(s.material)) s.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         s.material = materials;
@@ -911,29 +1160,296 @@ async function updateLabels() {
 }
 
 // Raycast helpers
+function setCubeLayerRecursive(root, layer) {
+    if (!root) return;
+    root.traverse?.((o) => { try { o.layers.set(layer); } catch (_) { } });
+}
+
 function getIntersects(event) {
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(pointer, camera);
-    return raycaster.intersectObjects([...cubes, ...shelfCubes], false);
+    // CRITICAL: reset layers every time for a full-scene pick
+    try {
+        raycaster.layers.set(0);
+        raycaster.layers.enable(1);
+        raycaster.layers.enable(2);
+    } catch (_) { }
+    // Include children so center-play overlays are hittable before rotation logic
+    return raycaster.intersectObjects([...cubes, ...shelfCubes], true);
+}
+
+function getFrontRowHits(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(1); // front row layer
+    return raycaster.intersectObjects(cubes, true);
+}
+
+function getShelfHits(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(2); // shelf layer
+    return raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
+}
+
+// Orthographic shelf picking – parallel rays avoid large-cube dominance
+function getShelfHitsOrtho(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    if (!shelfPickCamera) return [];
+    raycaster.setFromCamera(pointer, shelfPickCamera);
+    raycaster.layers.set(2);
+    return raycaster.intersectObjects(shelfCubes, true);
+}
+
+// Robust screen-space quadrant decision for shelf inversion
+function decideShelfDeltaScreen(cube, event) {
+    try {
+        const rect = renderer.domElement.getBoundingClientRect();
+        // Project cube center
+        const center = cube.position.clone().project(camera);
+        const cx = rect.left + (center.x + 1) * 0.5 * rect.width;
+        const cy = rect.top + (1 - (center.y + 1) * 0.5) * rect.height;
+        // Estimate projected half extents by projecting offsets along local X/Y
+        const half = (cubeSize * (cube.scale?.x || cube.scale || 1)) / 2;
+        const pLocal = (x, y) => new THREE.Vector3(x, y, 0).applyMatrix4(cube.matrixWorld).project(camera);
+        const px = pLocal(half, 0);
+        const py = pLocal(0, half);
+        const hx = Math.max(6, Math.abs((px.x - center.x) * 0.5 * rect.width));
+        const hy = Math.max(6, Math.abs((py.y - center.y) * 0.5 * rect.height));
+        const dx = event.clientX - cx;
+        const dy = event.clientY - cy;
+        const ax = Math.abs(dx), ay = Math.abs(dy);
+        const xThresh = hx * 0.18, yThresh = hy * 0.18; // easier to trigger
+        // Lower or center → root
+        if (dy > yThresh) return 0;
+        // Top dominant → 2nd inversion
+        if (dy < -yThresh && ay >= ax) return +2;
+        // Side dominant → 1st/3rd
+        if (ax > xThresh) return dx > 0 ? +1 : -1;
+        return 0;
+    } catch (_) { return 0; }
+}
+
+// Local-space quadrant decision using normalized local coords (nx, ny in [-1,1])
+function decideShelfDeltaLocal(nx, ny) {
+    const ax = Math.abs(nx), ay = Math.abs(ny);
+    const dead = 0.10; // smaller deadzone
+    if (ax < dead && ay < dead) return 0;
+    // Vertical dominance → top/low bands
+    if (ay >= ax) return ny > 0 ? +2 : 0; // top → 2nd, bottom/center → root
+    // Horizontal dominance → 1st/3rd
+    return nx > 0 ? +1 : -1;
+}
+
+// Ascend from any child (edges, overlay, center) to the owning cube mesh
+function resolveCubeFromObject(obj) {
+    if (!obj) return null;
+    // If overlay/center play exposes parent in userData
+    if (obj.userData?.parent) return obj.userData.parent;
+    let cur = obj;
+    while (cur && !(cur.userData && (cur.userData.roman || cur.userData.isShelf))) {
+        cur = cur.parent;
+    }
+    return cur || obj;
+}
+
+// Debug overlay for shelf picking
+let debugEnabled = new URLSearchParams(window.location.search).has('debug');
+let debugOverlay = null;
+function createDebugOverlay() {
+    if (!debugEnabled || debugOverlay) return;
+    debugOverlay = document.createElement('div');
+    debugOverlay.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:420px;pointer-events:none;';
+    document.body.appendChild(debugOverlay);
+}
+function updateDebugOverlay(info) { if (debugOverlay) debugOverlay.innerHTML = info; }
+
+// Helper: point in polygon (ray casting)
+function pointInPolygon(x, y, polygon) {
+    let inside = false;
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+        const intersect = ((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / ((yj - yi) || 1e-6) + xi);
+        if (intersect) inside = !inside;
+    }
+    return inside;
+}
+function polygonArea(poly) {
+    let area = 0;
+    for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) area += (poly[j].x + poly[i].x) * (poly[j].y - poly[i].y);
+    return Math.abs(area / 2);
+}
+function distanceToLineSegment(x, y, p1, p2) {
+    const dx = p2.x - p1.x, dy = p2.y - p1.y; const len2 = dx * dx + dy * dy;
+    if (len2 === 0) return Math.hypot(x - p1.x, y - p1.y);
+    let t = ((x - p1.x) * dx + (y - p1.y) * dy) / len2; t = Math.max(0, Math.min(1, t));
+    const px = p1.x + t * dx, py = p1.y + t * dy; return Math.hypot(x - px, y - py);
+}
+function distanceToPolygon(x, y, poly) {
+    let min = Infinity; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) min = Math.min(min, distanceToLineSegment(x, y, poly[j], poly[i]));
+    return min;
+}
+
+// Improved shelf picking using projected front-face quad
+function pickShelfCubeByProjectedArea(event) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const x = event.clientX - rect.left; const y = event.clientY - rect.top;
+    const candidates = [];
+    for (const cube of shelfCubes) {
+        if (!cube.visible) continue;
+        const box = new THREE.Box3().setFromObject(cube);
+        // Four corners of the front face at z = box.max.z (toward camera for shelf)
+        const corners = [
+            new THREE.Vector3(box.min.x, box.min.y, box.max.z),
+            new THREE.Vector3(box.max.x, box.min.y, box.max.z),
+            new THREE.Vector3(box.max.x, box.max.y, box.max.z),
+            new THREE.Vector3(box.min.x, box.max.y, box.max.z)
+        ];
+        const screenCorners = corners.map(c => {
+            const p = c.clone().project(camera);
+            return { x: (p.x + 1) * 0.5 * rect.width, y: (-p.y + 1) * 0.5 * rect.height };
+        });
+        let inside = pointInPolygon(x, y, screenCorners);
+        const area = polygonArea(screenCorners);
+        const distance = inside ? 0 : distanceToPolygon(x, y, screenCorners);
+        // Tap tolerance: treat near-edge taps as inside to help smaller blocks
+        if (!inside && distance <= 12) inside = true;
+        candidates.push({ cube, roman: cube.userData.roman, inside, area, distance });
+    }
+    if (!candidates.length) return null;
+    candidates.sort((a, b) => {
+        if (a.inside !== b.inside) return a.inside ? -1 : 1;
+        if (a.inside && b.inside) return a.area - b.area; // smaller wins when overlapping
+        return a.distance - b.distance;
+    });
+    if (debugEnabled) {
+        const info = `<b>Pointer:</b> ${x.toFixed(0)}, ${y.toFixed(0)}<br>` +
+            `<b>Top:</b> ${candidates.slice(0, 5).map((c, i) => `${i + 1}. ${c.roman} ${c.inside ? 'INSIDE' : 'out'} A=${c.area.toFixed(0)} D=${c.distance.toFixed(1)}`).join('<br>')}`;
+        updateDebugOverlay(info);
+    }
+    return candidates[0].cube || null;
+}
+// Pick the intended shelf cube under the pointer using screen-space rectangles
+function pickShelfCubeAtPointer(e) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const px = (e.clientX - rect.left);
+    const py = (e.clientY - rect.top);
+    // Helper: convert world point to screen pixels
+    const toScreen = (vec3) => {
+        const v = vec3.clone();
+        v.project(camera);
+        return { x: (v.x * 0.5 + 0.5) * rect.width, y: (-v.y * 0.5 + 0.5) * rect.height };
+    };
+    // Estimate pixel size for 1 world unit at shelfZ by projecting a delta along X
+    const p0 = new THREE.Vector3(0, 0, shelfZ);
+    const p1 = new THREE.Vector3(1, 0, shelfZ);
+    const s0 = toScreen(p0);
+    const s1 = toScreen(p1);
+    const pxPerWorld = Math.max(1, Math.hypot(s1.x - s0.x, s1.y - s0.y));
+    // First pass: any rect contains pointer → choose smallest area rect
+    const candidates = [];
+    for (const s of shelfCubes) {
+        if (!s.visible) continue;
+        const center = toScreen(new THREE.Vector3(s.position.x, s.position.y, shelfZ));
+        const halfWorld = (cubeSize * (s.scale?.x || s.scale || 1)) / 2;
+        const halfPx = halfWorld * pxPerWorld;
+        const left = center.x - halfPx, right = center.x + halfPx, top = center.y - halfPx, bottom = center.y + halfPx;
+        const contains = (px >= left && px <= right && py >= top && py <= bottom);
+        if (contains) {
+            const area = (2 * halfPx) * (2 * halfPx);
+            candidates.push({ s, area });
+        }
+    }
+    if (candidates.length > 0) {
+        candidates.sort((a, b) => a.area - b.area);
+        return candidates[0].s;
+    }
+    // Fallback: nearest center with size penalty
+    let best = null; let bestScore = Infinity;
+    for (const s of shelfCubes) {
+        if (!s.visible) continue;
+        const center = toScreen(new THREE.Vector3(s.position.x, s.position.y, shelfZ));
+        const dist = Math.hypot(center.x - px, center.y - py);
+        const size = (s.scale?.x || s.scale || 1);
+        const score = dist + size * 18; // penalize larger blocks more in screen-space
+        if (score < bestScore) { bestScore = score; best = s; }
+    }
+    return best;
+}
+
+function isPointerOverShelf(e) {
+    // Heuristic: if the pointer is within a vertical band around the shelf Y at shelfZ in screen space, treat as shelf click
+    const rect = renderer.domElement.getBoundingClientRect();
+    const px = (e.clientX - rect.left);
+    const py = (e.clientY - rect.top);
+    const shelfPoint = new THREE.Vector3(0, shelfY, shelfZ);
+    const scr = shelfPoint.project(camera);
+    const shelfPy = (-scr.y * 0.5 + 0.5) * rect.height;
+    const band = Math.max(60, rect.height * 0.08); // 8% of screen height or 60px
+    return Math.abs(py - shelfPy) <= band;
 }
 
 function onPointerDown(e) {
-    const hits = getIntersects(e);
+    // Only honor left-click for selections/drags
+    if (typeof e.button === 'number' && e.button !== 0) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
+    mouseDownTime = performance.now();
+    fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
+    try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
+
+    // Temporary: check UI locks first; if hit, set guard and disable controls
+    try {
+        const rect0 = renderer.domElement.getBoundingClientRect();
+        pointer.x = ((e.clientX - rect0.left) / rect0.width) * 2 - 1;
+        pointer.y = -((e.clientY - rect0.top) / rect0.height) * 2 + 1;
+        raycaster.setFromCamera(pointer, camera);
+        const uiHits0 = raycaster.intersectObjects(uiPickables.filter(Boolean), true);
+        if (uiHits0.length) { uiLockClick = true; controls.enabled = false; pendingObj = null; return; }
+    } catch (_) { }
+
+    // Front-row first (layer 1)
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(pointer, camera);
+    raycaster.layers.set(1);
+    let hits = raycaster.intersectObjects(cubes, true);
     if (hits.length > 0) {
-        let obj = hits[0].object;
-        // If we clicked the invisible overlay, act on its parent cube
-        if (obj.userData?.isOverlay && obj.userData.parent) obj = obj.userData.parent;
+        let obj = resolveCubeFromObject(hits[0].object);
         pendingObj = obj;
-        mouseDownTime = performance.now();
-        const rect = renderer.domElement.getBoundingClientRect();
-        mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
         controls.enabled = !adjustMode;
-        if (adjustMode && pendingObj.userData?.isShelf) {
-            lastShelfTarget = pendingObj;
-        }
+        return;
     }
+
+    // Shelf second (layer 2): precise screen-projected polygon picker first (no band gating)
+    try {
+        const shelfPick = pickShelfCubeByProjectedArea(e);
+        if (shelfPick && shelfPick.userData?.isShelf) {
+            pendingObj = shelfPick;
+            controls.enabled = !adjustMode;
+            if (adjustMode) lastShelfTarget = pendingObj;
+            return;
+        }
+    } catch (_) { }
+    // Fallback: shelf proxies/cubes raycast with perspective camera
+    raycaster.layers.set(2);
+    hits = raycaster.intersectObjects([...(shelfPickProxies || []), ...shelfCubes], true);
+    if (hits.length > 0) {
+        pendingObj = resolveCubeFromObject(hits[0].object);
+        controls.enabled = !adjustMode;
+        if (adjustMode && pendingObj?.userData?.isShelf) lastShelfTarget = pendingObj;
+        return;
+    }
+    pendingObj = null;
 }
 
 function onPointerMove(e) {
@@ -944,10 +1460,8 @@ function onPointerMove(e) {
     raycaster.setFromCamera(pointer, camera);
     const worldPoint = new THREE.Vector3();
     if (!dragging && pendingObj) {
-        // Check drag threshold
-        const dx = (e.clientX - rect.left) - mouseDownPos.x;
-        const dy = (e.clientY - rect.top) - mouseDownPos.y;
-        if (Math.hypot(dx, dy) > DRAG_START_PX) {
+        // Check drag threshold via FSM
+        if (fsm.movementExceeded(e.clientX - rect.left, e.clientY - rect.top)) {
             // Begin drag
             if (!adjustMode && pendingObj.userData.isShelf) {
                 // Move the actual shelf object; duplicate later after it rests in front row
@@ -1033,8 +1547,20 @@ function onPointerMove(e) {
 
 function onPointerUp(e) {
     const now = performance.now();
+    try { renderer.domElement.releasePointerCapture?.(e.pointerId); } catch (_) { }
     if (dragging) {
         const r = dragging.userData.roman;
+        // Adjust mode: persist shelf edits and do not snap
+        if (adjustMode && dragging.userData?.isShelf) {
+            // Persist position and scale into the live map and origin
+            shelfSlots[r] = dragging.position.clone();
+            if (!shelfOriginByRoman[r]) shelfOriginByRoman[r] = { position: new THREE.Vector3(), scale: dragging.scale.x, quaternion: dragging.quaternion.clone() };
+            shelfOriginByRoman[r].position.copy(dragging.position);
+            shelfOriginByRoman[r].scale = dragging.scale.x;
+            shelfOriginByRoman[r].quaternion.copy(dragging.quaternion);
+            saveShelfMapToLocalStorage();
+            dragging = null; controls.enabled = true; return;
+        }
         // Quick flick upward to shelf using dragStartScreenY baseline
         const dyScreen = dragStartScreenY - e.clientY; // positive if moved up
         const totalMs = now - mouseDownTime;
@@ -1065,6 +1591,7 @@ function onPointerUp(e) {
             dragging.userData.isShelf = false;
             dragging.userData.fromShelf = false;
             if (!cubes.includes(dragging)) cubes.push(dragging);
+            setCubeLayerRecursive(dragging, 1);
             // Ensure shelf has a canonical cube for this roman if we pulled it from the shelf
             if (dragging.userData.wasPulledFromShelf) {
                 dragging.userData.wasPulledFromShelf = false;
@@ -1081,52 +1608,204 @@ function onPointerUp(e) {
             removeFromLineup(dragging);
             const ci = cubes.indexOf(dragging); if (ci >= 0) cubes.splice(ci, 1);
             if (!shelfCubes.includes(dragging)) shelfCubes.push(dragging);
+            setCubeLayerRecursive(dragging, 2);
+            // Close gaps in lineup immediately after removal
+            reflowLineup();
         }
         dragging = null;
         controls.enabled = true;
         return;
     }
+    // 3D UI lock icon picking (before cube click handling)
+    try {
+        raycaster.setFromCamera(pointer, camera);
+        const uiHits = raycaster.intersectObjects(uiPickables.filter(Boolean), true);
+        if (uiHits.length) {
+            const obj = uiHits[0].object;
+            const ud = obj.userData || {};
+            if (ud.kind === 'melody-lock') {
+                const locking = (ud.state === 'open');
+                if (locking) {
+                    console.log('[locks] melody lock click');
+                    showNVXDebugText('3r 5b3rd 7 2b7th');
+                    shimmerMelodyTopFaces();
+                    setTimeout(() => {
+                        console.log('[locks] lockInMelody start');
+                        lockInMelody();
+                        // Ensure start at -PI/2, then animate to 0
+                        if (melodyLaneGroup) melodyLaneGroup.children.forEach((p, i) => { p.rotation.x = -Math.PI / 2; });
+                        console.log('[locks] spinMelodyLane for visibility');
+                        spinMelodyLane(10000, 6);
+                        console.log('[locks] shimmer lane');
+                        shimmerMelodyLane();
+                    }, 240);
+                    setMelodyLockVisual('closed');
+                    try { playLockSound(); } catch (_) { }
+                } else {
+                    lockedMelody = null; renderMelodyLane(); setMelodyLockVisual('open');
+                }
+            } else if (ud.kind === 'bass-lock') {
+                const locking = (ud.state === 'open');
+                if (locking) {
+                    shimmerBassBottomFaces();
+                    setTimeout(() => { lockInBass(); animateStandUpLanes(); }, 240);
+                    setBassLockVisual('closed');
+                    try { playLockSound(); } catch (_) { }
+                } else {
+                    lockedBass = null; renderBassLane(); setBassLockVisual('open');
+                }
+            }
+            pendingObj = null; uiLockClick = false; controls.enabled = true; e.stopPropagation?.(); e.preventDefault?.();
+            return;
+        }
+    } catch (_) { }
+
+    // If we had a UI-lock click but pointerup missed it, swallow to avoid shelf/cube selection
+    if (uiLockClick) { uiLockClick = false; controls.enabled = true; return; }
+
     // Rotation click if minimal move/time (only front-face quadrant behavior)
     if (pendingObj) {
         const rect = renderer.domElement.getBoundingClientRect();
-        const dx = (e.clientX - rect.left) - mouseDownPos.x;
-        const dy = (e.clientY - rect.top) - mouseDownPos.y;
-        const moved = Math.hypot(dx, dy);
-        const elapsed = now - mouseDownTime;
-        if (moved <= CLICK_MAX_PX && elapsed <= CLICK_MAX_MS) {
+        const res = fsm.classifyRelease(e.clientX - rect.left, e.clientY - rect.top, now);
+        if (res.isClick) {
+            const hits = getIntersects(e);
+            // Global 3D play button check
+            for (const h of hits) { if (h.object?.userData?.isPlayButton) { playFrontRowProgression(); pendingObj = null; return; } }
+            // Use screen-space rectangle picking for shelf cubes
+            let shelfHit = null;
+            try { shelfHit = pickShelfCubeAtPointer(e); } catch (_) { }
+            // If we pressed a FRONT-ROW cube on pointerdown, force it as the target for click handling
+            const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
+            const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
+            // If polygon picker already chose a shelf cube at mousedown, trust it
+            if (pendingObj && pendingObj.userData?.isShelf) {
+                try {
+                    const d = decideShelfDeltaScreen(pendingObj, e);
+                    pendingObj.userData.desiredRotationDelta = d;
+                    console.log('[shelf] pending click screen delta =', d, 'for', pendingObj.userData?.roman);
+                } catch (_) { pendingObj.userData.desiredRotationDelta = 0; }
+                enqueueShelfAdd(pendingObj); pendingObj = null; return;
+            }
+            // Additional safety: if any shelf cube is directly in the hit stack, prioritize it immediately
+            let shelfFromRay = null;
+            for (const h of hits) {
+                const o = resolveCubeFromObject(h.object);
+                // Treat shelf proxy as its parent cube
+                const shelfCandidate = (h.object?.userData?.isShelfProxy && h.object.userData.parent) ? h.object.userData.parent : o;
+                if (shelfCandidate?.userData?.isShelf) { shelfFromRay = shelfCandidate; break; }
+            }
+            // If we're over the shelf region, try a strict shelf-only raycast first (unless frontOverride)
+            let targetObj = null;
+            if (frontOverride) {
+                targetObj = pendingObj;
+            } else if (fromShelfBand) {
+                const shelfHits = (() => {
+                    const rect = renderer.domElement.getBoundingClientRect();
+                    const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                    const ny = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                    const rc = new THREE.Raycaster();
+                    rc.setFromCamera(new THREE.Vector2(nx, ny), camera);
+                    return rc.intersectObjects(shelfCubes, true);
+                })();
+                if (shelfHits && shelfHits.length) {
+                    // Prefer the shelf cube whose footprint contains the hit point; break ties by smaller size
+                    let chosen = null; let bestSize = Infinity;
+                    for (const h of shelfHits) {
+                        const o = resolveCubeFromObject(h.object);
+                        if (!o?.userData?.isShelf) continue;
+                        const half = (cubeSize * (o.scale?.x || o.scale || 1)) / 2;
+                        if (Math.abs(h.point.x - o.position.x) <= half && Math.abs(h.point.y - o.position.y) <= half) {
+                            const sz = (o.scale?.x || o.scale || 1);
+                            if (sz < bestSize) { bestSize = sz; chosen = o; }
+                        }
+                    }
+                    targetObj = chosen || resolveCubeFromObject(shelfHits[0].object);
+                } else {
+                    targetObj = shelfHit || pendingObj;
+                }
+            } else {
+                targetObj = shelfFromRay || ((pendingObj && pendingObj.userData?.isShelf) ? pendingObj : resolveCubeFromObject(hits[0]?.object));
+            }
+            if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
-            if (!adjustMode && pendingObj.userData?.isShelf) {
-                enqueueShelfAdd(pendingObj);
+            if (!adjustMode && targetObj.userData?.isShelf) {
+                try {
+                    const d = decideShelfDeltaScreen(targetObj, e);
+                    targetObj.userData.desiredRotationDelta = d;
+                    console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
+                } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
+                enqueueShelfAdd(targetObj); pendingObj = null; return;
+            }
+            if (targetObj.userData?.isShelf) { pendingObj = null; return; }
+            // Center play priority for the pressed cube
+            const centerHit = pickCenterPlay(hits, targetObj);
+            if (centerHit) {
+                try { syncRotationIndexFromQuaternion(targetObj); } catch (_) { }
+                try { updateFaceProxyToneMap(targetObj); } catch (_) { }
+                playChordForObject(targetObj);
                 pendingObj = null; return;
             }
-            // Do NOT rotate shelf cubes under any circumstance
-            if (pendingObj.userData?.isShelf) { pendingObj = null; return; }
-            const hits = getIntersects(e);
+            // Find a hit belonging to the pressed cube (overlay or face)
             let hit = null;
-            for (const h of hits) {
-                if (h.object === pendingObj || h.object === pendingObj.userData?.overlay || h.object.parent === pendingObj) { hit = h; break; }
-            }
+            for (const h of hits) { const o = resolveCubeFromObject(h.object); if (o === targetObj) { hit = h; break; } }
             if (hit) {
-                const isOverlay = (hit.object === pendingObj.userData?.overlay || hit.object.parent === pendingObj);
+                // If a face proxy was clicked, play that exact tone and exit
+                if (hit.object?.userData?.isFaceProxy) { playProxyTone(targetObj, hit.object); pendingObj = null; return; }
+                // Then overlay/front, then faces
+                const isOverlay = isFrontOverlayHit(hit, targetObj);
                 const normalZ = isOverlay ? 1 : (hit.face?.normal?.z ?? 0);
                 if (Math.abs(normalZ - 1) < 0.5) {
-                    const local = pendingObj.worldToLocal(hit.point.clone());
+                    const local = targetObj.worldToLocal(hit.point.clone());
                     const absX = Math.abs(local.x);
                     const absY = Math.abs(local.y);
                     let targetToneIndex; if (absX > absY) targetToneIndex = local.x > 0 ? 1 : 3; else targetToneIndex = local.y > 0 ? 2 : 0;
-                    const r = pendingObj.userData.rotationIndex || 0;
+                    const r = targetObj.userData.rotationIndex || 0;
                     const cw = (targetToneIndex - r + 4) % 4; const ccw = (r - targetToneIndex + 4) % 4;
                     let angle = 0; let delta = 0;
                     if (cw <= ccw) { angle = -cw * (Math.PI / 2); delta = +cw; } else { angle = ccw * (Math.PI / 2); delta = -ccw; }
                     if (angle !== 0) {
-                        const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
-                        const finalQ = pendingObj.quaternion.clone().multiply(extra);
-                        animateQuaternion(pendingObj, finalQ, 700);
-                        pendingObj.userData.rotationIndex = (pendingObj.userData.rotationIndex + (delta + 4)) % 4;
-                        // Trigger audio with new orientation
-                        playChordForObject(pendingObj);
+                        // Prefer model-based quaternion solve to rotate desired face to bottom
+                        let finalQ = null;
+                        try {
+                            const model = targetObj.userData?.model;
+                            // angle maps: 0=root stays; +90→1st (right→bottom), +180→2nd (top→bottom), -90→3rd (left→bottom)
+                            const mapAngleToFace = (a) => {
+                                if (a === 0) return ((targetObj.userData.rotationIndex || 0) % 4 + 4) % 4; // keep current bottom
+                                if (a > 0 && Math.abs(a - Math.PI / 2) < 1e-3) return 1; // right
+                                if (Math.abs(a - Math.PI) < 1e-3) return 2; // top
+                                if (a < 0 && Math.abs(a + Math.PI / 2) < 1e-3) return 3; // left
+                                return 0;
+                            };
+                            const faceIdx = mapAngleToFace(angle);
+                            finalQ = model?.rotateFaceToBottom(faceIdx, targetObj) || null;
+                        } catch (_) { }
+                        if (!finalQ) {
+                            const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
+                            finalQ = targetObj.quaternion.clone().multiply(extra);
+                        }
+                        if (hasActiveTweenFor(targetObj)) cancelTweensFor(targetObj);
+                        // Gentle eased rotation
+                        animateQuaternion(targetObj, finalQ, 650);
+                        targetObj.userData.rotationIndex = (targetObj.userData.rotationIndex + (delta + 4)) % 4;
+                        updateFaceProxyToneMap(targetObj);
+                        // Trigger audio with new orientation slightly after animation starts
+                        setTimeout(() => playChordForObject(targetObj), 80);
                     }
-                    pendingObj.userData.rotationIndex = ((pendingObj.userData.rotationIndex % 4) + 4) % 4;
+                    targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
+                    updateFaceProxyToneMap(targetObj);
+                } else if (hit.face) {
+                    // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
+                    const normalLocal = hit.face.normal.clone();
+                    const normalWorld = normalLocal.transformDirection(targetObj.matrixWorld);
+                    const up = new THREE.Vector3(0, 1, 0);
+                    const dotY = normalWorld.dot(up);
+                    const down = new THREE.Vector3(0, -1, 0);
+                    const right = new THREE.Vector3(1, 0, 0);
+                    const left = new THREE.Vector3(-1, 0, 0);
+                    if (dotY > 0.7) { playFaceIdxTone(targetObj, 2); pendingObj = null; return; }
+                    if (normalWorld.dot(down) > 0.7) { playFaceIdxTone(targetObj, 0); pendingObj = null; return; }
+                    if (normalWorld.dot(right) > 0.7) { playFaceIdxTone(targetObj, 1); pendingObj = null; return; }
+                    if (normalWorld.dot(left) > 0.7) { playFaceIdxTone(targetObj, 3); pendingObj = null; return; }
                 }
             }
         }
@@ -1175,18 +1854,225 @@ function makeQuadrantOverlayMaterial() {
     const tex = new THREE.CanvasTexture(c);
     tex.needsUpdate = true;
     const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
-    mat.opacity = 0; // invisible but present for reference if needed
+    try {
+        const u = new URL(window.location.href);
+        const showX = u.searchParams.has('showX') || u.searchParams.has('showx');
+        mat.opacity = showX ? 0.6 : 0.0;
+    } catch (_) { mat.opacity = 0.0; }
     return mat;
 }
 
 function addQuadrantOverlay(parentCube) {
-    const overlayGeom = new THREE.PlaneGeometry(1.15, 1.15); // slightly smaller than face
+    const overlayGeom = new THREE.PlaneGeometry(0.98, 0.98); // tighter than face to reduce occlusion
     const overlayMat = makeQuadrantOverlayMaterial();
     const overlay = new THREE.Mesh(overlayGeom, overlayMat);
     overlay.position.set(0, 0, (cubeSize / 2) + 0.002); // sit just above +z face
     parentCube.add(overlay);
+    overlay.layers.mask = parentCube.layers.mask; // inherit layer
     parentCube.userData.overlay = overlay;
     overlay.userData = { isOverlay: true, parent: parentCube };
+    // Center play circle (half the face width); never triggers rotation
+    const radius = (1.15 * 0.5) / 2; // half the square width
+    const circleGeom = new THREE.CircleGeometry(radius, 48);
+    const circleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
+    const centerCircle = new THREE.Mesh(circleGeom, circleMat);
+    centerCircle.position.set(0, 0, (cubeSize / 2) + 0.006);
+    centerCircle.userData = { isCenterPlay: true, parent: parentCube };
+    parentCube.add(centerCircle);
+    centerCircle.layers.mask = parentCube.layers.mask; // inherit layer
+    parentCube.userData.centerPlay = centerCircle;
+}
+
+// Create raycastable face proxies (invisible planes) for robust picking and tone identity
+function ensureFaceProxies(parentCube) {
+    try {
+        if (!parentCube || !parentCube.add) return;
+        // If already present, skip
+        if (parentCube.userData && parentCube.userData.faceProxies) return;
+        const makeProxy = (w, h, offset, normal, faceIdx) => {
+            const geo = new THREE.PlaneGeometry(w, h);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x00ff00, transparent: true, opacity: 0.0, depthWrite: false });
+            const p = new THREE.Mesh(geo, mat);
+            p.position.copy(offset.clone());
+            // Orient so its normal equals provided local normal
+            const up = new THREE.Vector3(0, 0, 1); // plane faces +z by default; rotate to match desired normal
+            const q = new THREE.Quaternion().setFromUnitVectors(up, normal.clone().normalize());
+            p.quaternion.copy(q);
+            p.userData = { isFaceProxy: true, faceIdx, toneIdx: 0, baseNormal: normal.clone(), parent: parentCube };
+            // Put on same layer as cube for picking
+            try { p.layers.set(parentCube.layers.mask); } catch (_) { }
+            return p;
+        };
+        const half = (cubeSize * (parentCube.scale?.x || parentCube.scale || 1)) / 2 + 0.002;
+        const size = cubeSize * 0.98;
+        const proxies = [
+            makeProxy(size, size, new THREE.Vector3(0, -half, 0), new THREE.Vector3(0, -1, 0), 0), // bottom
+            makeProxy(size, size, new THREE.Vector3(half, 0, 0), new THREE.Vector3(1, 0, 0), 1),   // right
+            makeProxy(size, size, new THREE.Vector3(0, half, 0), new THREE.Vector3(0, 1, 0), 2),   // top
+            makeProxy(size, size, new THREE.Vector3(-half, 0, 0), new THREE.Vector3(-1, 0, 0), 3), // left
+        ];
+        proxies.forEach(p => parentCube.add(p));
+        if (!parentCube.userData) parentCube.userData = {};
+        parentCube.userData.faceProxies = proxies;
+        // Initialize tone mapping based on current rotationIndex
+        updateFaceProxyToneMap(parentCube);
+        // Attach Troika text diamonds for visual perfection (MSDF swap)
+        try {
+            const degLabels = degreeSets[parentCube.userData?.roman] || ['1', '3', '5', '7'];
+            const faceCenters = [
+                new THREE.Vector3(0, -half, 0),
+                new THREE.Vector3(half, 0, 0),
+                new THREE.Vector3(0, half, 0),
+                new THREE.Vector3(-half, 0, 0),
+            ];
+            const faceNormals = [new THREE.Vector3(0, -1, 0), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(-1, 0, 0)];
+            const FACE_COLORS = [0x2ecc71, 0xe74c3c, 0x3498db, 0xbdc3c7]; // root,3rd,5th,7th
+            const ROT_DEGS = [0, 270, 180, 90];
+            parentCube.userData.msdfFaces = parentCube.userData.msdfFaces || [];
+            for (let faceIdx = 0; faceIdx < 4; faceIdx++) {
+                // Map fixed face order (0 bottom=1, 1 right=3, 2 top=5, 3 left=7)
+                const label = degLabels[(0 + faceIdx) % 4];
+                const text = new TroikaText();
+                // Use NVXDiamond ligature strings when label-mode is roman; else letters
+                text.text = label;
+                text.font = NVX_FONT_URL;
+                text.color = FACE_COLORS[faceIdx];
+                text.fontSize = 0.42 * cubeSize;
+                text.anchorX = 'center'; text.anchorY = 'middle';
+                // orient text to the face normal and then rotate around local Z so glyphs are upright
+                // Position and orient with face
+                const n = faceNormals[faceIdx].clone();
+                const up = new THREE.Vector3(0, 0, 1);
+                const q = new THREE.Quaternion().setFromUnitVectors(up, n);
+                text.quaternion.copy(q);
+                // Keep glyphs upright per established canvas rotation convention
+                const rotRad = -THREE.MathUtils.degToRad(ROT_DEGS[faceIdx]);
+                text.rotation.z = rotRad;
+                text.position.copy(faceCenters[faceIdx]);
+                // rendering settings for overlay cleanliness
+                text.renderOrder = 3;
+                try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) { }
+                // Do not intercept raycasts; prefer invisible face proxies for tone identity
+                try { text.raycast = () => { }; } catch (_) { }
+                text.userData = Object.assign({}, text.userData, { isDecorative: true });
+                text.sync();
+                parentCube.add(text);
+                parentCube.userData.msdfFaces[faceIdx] = text;
+            }
+        } catch (_) { }
+    } catch (_) { }
+}
+
+function getTopToneIdxFromProxies(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const up = new THREE.Vector3(0, 1, 0);
+        let best = null; let bestDot = -Infinity;
+        for (const p of proxies) {
+            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+            const d = normalWorld.dot(up);
+            if (d > bestDot) { bestDot = d; best = p; }
+        }
+        if (best) return best.userData.toneIdx;
+    } catch (_) { }
+    return null;
+}
+
+function updateFaceProxyToneMap(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies) return;
+        const r = ((cube.userData?.rotationIndex || 0) % 4 + 4) % 4;
+        // Map tone per proxy based on fixed faceIdx
+        for (let i = 0; i < proxies.length; i++) {
+            const faceIdx = proxies[i].userData.faceIdx; // 0 bottom,1 right,2 top,3 left
+            const toneIdx = (r + faceIdx) % 4;
+            proxies[i].userData.toneIdx = toneIdx;
+        }
+        // Keep MSDF labels in sync with face identity by updating their displayed text when key or roman changes
+        try {
+            const degLabels = degreeSets[cube.userData?.roman] || ['1', '3', '5', '7'];
+            const msdfFaces = cube.userData?.msdfFaces || [];
+            for (let i = 0; i < msdfFaces.length; i++) {
+                const t = msdfFaces[i]; if (!t) continue;
+                const label = degLabels[i] || '';
+                if (t.text !== label) { t.text = label; t.sync(); }
+            }
+        } catch (_) { }
+        logAudio('proxyToneMap', { roman: cube.userData?.roman, rIdx: r, faces: proxies.map(p => ({ faceIdx: p.userData.faceIdx, toneIdx: p.userData.toneIdx })) });
+    } catch (_) { }
+}
+
+function getBottomToneIdxFromProxies(cube) {
+    try {
+        const proxies = cube?.userData?.faceProxies; if (!proxies || !proxies.length) return null;
+        const down = new THREE.Vector3(0, -1, 0);
+        let best = null; let bestDot = -Infinity;
+        for (const p of proxies) {
+            const normalWorld = p.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+            const d = normalWorld.dot(down);
+            if (d > bestDot) { bestDot = d; best = p; }
+        }
+        if (best) return best.userData.toneIdx;
+    } catch (_) { }
+    return null;
+}
+
+function playProxyTone(cube, proxy) {
+    try {
+        const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
+        const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const idx = proxy?.userData?.toneIdx ?? 0;
+        const name = names[idx];
+        const up = new THREE.Vector3(0, 1, 0); const down = new THREE.Vector3(0, -1, 0);
+        const nWorld = proxy.userData.baseNormal.clone().applyQuaternion(cube.quaternion);
+        const isTop = nWorld.dot(up) > 0.8; const isBottom = nWorld.dot(down) > 0.8;
+        const midiOf = (n) => 60 + pcOf(n); // base C4
+        if (isBottom) {
+            // Bass register
+            let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12;
+            if (sfBass && sfBass.play) sfBass.play(m, now, { duration, gain: 0.34 });
+        } else if (isTop) {
+            // Melody register
+            let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12;
+            if (sfMelody && sfMelody.play) sfMelody.play(m, now, { duration, gain: 0.30 });
+        } else {
+            // Side faces: simple chord voice audition in mid register
+            let m = midiOf(name);
+            if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
+        }
+        logAudio('proxy:play', { roman: cube.userData?.roman, idx, name, top: isTop, bottom: isBottom });
+    } catch (_) { }
+}
+
+// Fallback: play tone by face index using proxies if available
+function playFaceIdxTone(cube, faceIdx) {
+    try {
+        const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
+        const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        let idx = 0;
+        const proxies = cube?.userData?.faceProxies;
+        if (proxies && proxies.length) {
+            const p = proxies.find(p => p.userData.faceIdx === faceIdx);
+            idx = p ? (p.userData.toneIdx ?? 0) : 0;
+        } else {
+            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+            idx = (r + faceIdx) % 4;
+        }
+        const name = names[idx];
+        if (faceIdx === 0) {
+            let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12;
+            if (sfBass && sfBass.play) sfBass.play(m, now, { duration, gain: 0.34 });
+        } else if (faceIdx === 2) {
+            let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12;
+            if (sfMelody && sfMelody.play) sfMelody.play(m, now, { duration, gain: 0.30 });
+        } else {
+            let m = 60 + pcOf(name);
+            if (sfChord && sfChord.play) sfChord.play(m, now, { duration, gain: 0.20 });
+        }
+        logAudio('faceIdx:play', { roman: cube.userData?.roman, faceIdx, idx, name });
+    } catch (_) { }
 }
 
 function animateYZToFrontRow(obj, duration = 350) {
@@ -1265,6 +2151,11 @@ renderer.domElement.addEventListener('pointermove', onPointerMove);
 window.addEventListener('pointerup', onPointerUp);
 renderer.domElement.addEventListener('pointerdown', pokeInteraction);
 renderer.domElement.addEventListener('wheel', pokeInteraction, { passive: true });
+// Right-click toggles between Melody (above) and Bassline (below) views
+renderer.domElement.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    if (currentStickyView === 'above') setViewBelow(); else setViewAbove();
+});
 
 // Scale shelf cubes with the mouse wheel in adjust mode
 renderer.domElement.addEventListener('wheel', (e) => {
@@ -1289,19 +2180,136 @@ let audioCtx = null;
 let withSeventh = false;
 let bassEnabled = true;
 let melodyEnabled = false;
-let chordInst = 'acoustic_grand_piano';
-let bassInst = 'acoustic_bass';
-let melodyInst = 'flute';
+let instrumentsReady = false;
+let wafPlayer = null;
 let sfChord = null, sfBass = null, sfMelody = null;
+// Back-compat guards: some older handlers referenced these names directly
+let chordInst = null, bassInst = null, melodyInst = null;
+// Voice-leading state for closest-octave selection
+let lastBassMidi = null, lastMelodyMidi = null;
+let voiceLeadingMode = 'vl1'; // 'vl1' nearest-octave, 'vl2' tonal.js assisted
+let lockedMelody = null; // [{ roman, midi, color } ...]
+let lockedBass = null;   // [{ roman, midi, color } ...]
+let melodyLaneGroup = null, bassLaneGroup = null;
+let melodyGiantGroup = null; // large ground-visible duplicates for melody
+let bassGiantGroup = null;   // large duplicates for bass
+// 3D lock icons near ground titles
+let melodyLockLeft = null, melodyLockRight = null;
+let bassLockLeft = null, bassLockRight = null;
+const uiPickables = [];
+let uiLockClick = false; // true only between pointerdown/up when clicking a lock
+
+function setMelodyLockVisual(state /* 'open' | 'closed' */) {
+    if (melodyLockLeft && melodyLockLeft.userData) {
+        melodyLockLeft.userData.state = state;
+        const tex = state === 'closed' ? melodyLockLeft.userData.closedTex : melodyLockLeft.userData.openTex;
+        melodyLockLeft.material.map = tex; melodyLockLeft.material.needsUpdate = true;
+    }
+    if (melodyLockRight && melodyLockRight.userData) {
+        melodyLockRight.userData.state = state;
+        const tex = state === 'closed' ? melodyLockRight.userData.closedTex : melodyLockRight.userData.openTex;
+        melodyLockRight.material.map = tex; melodyLockRight.material.needsUpdate = true;
+    }
+}
+
+function setBassLockVisual(state /* 'open' | 'closed' */) {
+    if (bassLockLeft && bassLockLeft.userData) {
+        bassLockLeft.userData.state = state;
+        const tex = state === 'closed' ? bassLockLeft.userData.closedTex : bassLockLeft.userData.openTex;
+        bassLockLeft.material.map = tex; bassLockLeft.material.needsUpdate = true;
+    }
+    if (bassLockRight && bassLockRight.userData) {
+        bassLockRight.userData.state = state;
+        const tex = state === 'closed' ? bassLockRight.userData.closedTex : bassLockRight.userData.openTex;
+        bassLockRight.material.map = tex; bassLockRight.material.needsUpdate = true;
+    }
+}
+const WAF_PRESETS = {
+    chord: { url: 'https://surikov.github.io/webaudiofontdata/sound/0480_FluidR3_GM_sf2_file.js', var: '_tone_0480_FluidR3_GM_sf2_file' },
+    bass: { url: 'https://surikov.github.io/webaudiofontdata/sound/0430_FluidR3_GM_sf2_file.js', var: '_tone_0430_FluidR3_GM_sf2_file' },
+    melody: { url: 'https://surikov.github.io/webaudiofontdata/sound/0400_FluidR3_GM_sf2_file.js', var: '_tone_0400_FluidR3_GM_sf2_file' },
+};
+
+function initializeWebAudioFont() {
+    console.warn('[obs-cubes] WebAudioFont path disabled; using Tone.js engine');
+}
+
+// Tone.js-based instrument loading to mirror Novaxe stack
 async function loadInstruments() {
     try {
-        if (window.Soundfont) {
-            const ac = ensureAudio();
-            sfChord = await window.Soundfont.instrument(ac, chordInst);
-            sfBass = await window.Soundfont.instrument(ac, bassInst);
-            sfMelody = await window.Soundfont.instrument(ac, melodyInst);
+        // Prepare a user-gesture unlock for mobile/browsers
+        const setupToneUnlock = () => {
+            const unlock = async () => {
+                try { if (window.Tone && window.Tone.context?.state !== 'running') { await window.Tone.start(); console.log('[obs-cubes] Tone.js audio unlocked'); } } catch (_) { }
+                document.removeEventListener('pointerdown', unlock);
+                document.removeEventListener('touchstart', unlock);
+            };
+            document.addEventListener('pointerdown', unlock);
+            document.addEventListener('touchstart', unlock);
+        };
+
+        if (window.Tone) {
+            setupToneUnlock();
+            // Create a simple mix bus similar to previous WebAudio gains
+            // Output chain: Master → Compressor → Limiter → Destination
+            const limiter = new window.Tone.Limiter(-1).toDestination();
+            const compressor = new window.Tone.Compressor({ threshold: -18, ratio: 3, attack: 0.01, release: 0.1 }).connect(limiter);
+            const toneMaster = new window.Tone.Gain(0.95).connect(compressor);
+            const chordBus = new window.Tone.Gain(0.22).connect(toneMaster);
+            const bassBus = new window.Tone.Gain(0.85).connect(toneMaster);
+            const melodyBus = new window.Tone.Gain(0.28).connect(toneMaster);
+
+            // Create light-weight synths
+            const chordSynth = new window.Tone.PolySynth(window.Tone.Synth, {
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.01, decay: 0.08, sustain: 0.5, release: 0.3 }
+            }).connect(chordBus);
+            // Monophonic bass with punchy lowpass and envelope
+            const bassSynth = new window.Tone.MonoSynth({
+                oscillator: { type: 'sawtooth' },
+                filter: { type: 'lowpass', Q: 1 },
+                filterEnvelope: { attack: 0.002, decay: 0.08, sustain: 0.2, release: 0.2, baseFrequency: 80, octaves: 2.5 },
+                envelope: { attack: 0.002, decay: 0.12, sustain: 0.7, release: 0.28 }
+            }).connect(bassBus);
+            const melodySynth = new window.Tone.PolySynth(window.Tone.Synth, {
+                oscillator: { type: 'triangle' },
+                envelope: { attack: 0.005, decay: 0.06, sustain: 0.4, release: 0.25 }
+            }).connect(melodyBus);
+
+            const makeTonePlayable = (synth) => ({
+                play(midi, time, opts = {}) {
+                    const ctx = ensureAudio();
+                    const nowCtx = ctx.currentTime;
+                    const offset = Math.max(0, (time ?? nowCtx) - nowCtx);
+                    const when = window.Tone.now() + offset;
+                    const duration = opts.duration ?? 0.5;
+                    const velocity = 1.0; // use bus gains for mix; ensure audibility
+                    try {
+                        synth.triggerAttackRelease(window.Tone.Frequency(midi, 'midi'), duration, when, velocity);
+                    } catch (e) { console.warn('[obs-cubes] Tone play error', e); }
+                }
+            });
+
+            sfChord = makeTonePlayable(chordSynth);
+            sfBass = makeTonePlayable(bassSynth);
+            sfMelody = makeTonePlayable(melodySynth);
+            // legacy aliases
+            chordInst = sfChord; bassInst = sfBass; melodyInst = sfMelody;
+
+            // If Tone uses any async loading (samples), wait; with Synth there's nothing to load.
+            if (typeof window.Tone.loaded === 'function') {
+                try { await window.Tone.loaded(); } catch (_) { }
+            }
+            instrumentsReady = true;
+            console.log('[obs-cubes] Tone.js instruments ready');
+        } else {
+            console.warn('[obs-cubes] Tone.js not available; audio disabled');
+            instrumentsReady = false;
         }
-    } catch (_) { }
+    } catch (err) {
+        console.error('[obs-cubes] Failed to initialize Tone instruments', err);
+        instrumentsReady = false;
+    }
 }
 
 // UI wiring
@@ -1315,25 +2323,90 @@ const chordInstEl = document.getElementById('chord-inst');
 const bassInstEl = document.getElementById('bass-inst');
 const melodyInstEl = document.getElementById('melody-inst');
 const playProgBtn = document.getElementById('play-progression');
+const resetBtn = document.getElementById('reset-btn');
+const voiceLeadingSelect = document.getElementById('voice-leading-mode');
+const melodyLockIcon = document.getElementById('melody-lock');
+const bassLockIcon = document.getElementById('bass-lock');
+const showGiantMelodyEl = document.getElementById('show-giant-melody');
+const showGiantBassEl = document.getElementById('show-giant-bass');
+const menuLockMelodyBtn = document.getElementById('menu-lock-melody');
+const menuUnlockMelodyBtn = document.getElementById('menu-unlock-melody');
+const menuLockBassBtn = document.getElementById('menu-lock-bass');
+const menuUnlockBassBtn = document.getElementById('menu-unlock-bass');
 // Initialize labelMode from current UI so startup respects it
 labelMode = labelSelect ? labelSelect.value : labelMode;
 withSeventh = !!(with7th && with7th.checked);
 bassEnabled = !!(bassEnabledEl && bassEnabledEl.checked);
 melodyEnabled = !!(melodyEnabledEl && melodyEnabledEl.checked);
-chordInst = chordInstEl?.value || chordInst;
-bassInst = bassInstEl?.value || bassInst;
-melodyInst = melodyInstEl?.value || melodyInst;
-with7th?.addEventListener('change', () => { withSeventh = !!with7th.checked; });
-bassEnabledEl?.addEventListener('change', () => { bassEnabled = !!bassEnabledEl.checked; });
-melodyEnabledEl?.addEventListener('change', () => { melodyEnabled = !!melodyEnabledEl.checked; });
-chordInstEl?.addEventListener('change', async () => { chordInst = chordInstEl.value; await loadInstruments(); });
-bassInstEl?.addEventListener('change', async () => { bassInst = bassInstEl.value; await loadInstruments(); });
-melodyInstEl?.addEventListener('change', async () => { melodyInst = melodyInstEl.value; await loadInstruments(); });
+// Instrument dropdowns are currently cosmetic with WebAudioFont presets
+try { setState({ key: currentKey, withSeventh, bassEnabled, melodyEnabled }); } catch (_) { }
+with7th?.addEventListener('change', () => {
+    withSeventh = !!with7th.checked;
+    try { setState({ withSeventh }); bridge.emit('settingsChanged', { withSeventh }); } catch (_) { }
+});
+bassEnabledEl?.addEventListener('change', () => {
+    bassEnabled = !!bassEnabledEl.checked;
+    try { setState({ bassEnabled }); bridge.emit('settingsChanged', { bassEnabled }); } catch (_) { }
+});
+melodyEnabledEl?.addEventListener('change', () => {
+    melodyEnabled = !!melodyEnabledEl.checked;
+    try { setState({ melodyEnabled }); bridge.emit('settingsChanged', { melodyEnabled }); } catch (_) { }
+});
+showGiantMelodyEl?.addEventListener('change', () => { if (melodyGiantGroup) melodyGiantGroup.visible = !!showGiantMelodyEl.checked; });
+showGiantBassEl?.addEventListener('change', () => { if (bassGiantGroup) bassGiantGroup.visible = !!showGiantBassEl.checked; });
+menuLockMelodyBtn?.addEventListener('click', () => { try { lockInMelody(); setMelodyLockVisual('closed'); } catch (_) { } });
+menuUnlockMelodyBtn?.addEventListener('click', () => { try { lockedMelody = null; renderMelodyLane(); setMelodyLockVisual('open'); } catch (_) { } });
+menuLockBassBtn?.addEventListener('click', () => { try { lockInBass(); setBassLockVisual('closed'); } catch (_) { } });
+menuUnlockBassBtn?.addEventListener('click', () => { try { lockedBass = null; renderBassLane(); setBassLockVisual('open'); } catch (_) { } });
+voiceLeadingSelect?.addEventListener('change', () => {
+    voiceLeadingMode = voiceLeadingSelect.value;
+});
+melodyLockIcon?.addEventListener('click', async () => {
+    const locked = melodyLockIcon.textContent === '🔒';
+    if (locked) { lockedMelody = null; renderMelodyLane(); melodyLockIcon.textContent = '🔓'; return; }
+    lockInMelody(); melodyLockIcon.textContent = '🔒'; await playLockSound();
+});
+bassLockIcon?.addEventListener('click', async () => {
+    const locked = bassLockIcon.textContent === '🔒';
+    if (locked) { lockedBass = null; renderBassLane(); bassLockIcon.textContent = '🔓'; return; }
+    lockInBass(); bassLockIcon.textContent = '🔒'; await playLockSound();
+});
+// Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
+resetBtn?.addEventListener('click', () => {
+    // Return all active cubes to their shelf origin and clear lineup
+    for (const c of [...lineup]) {
+        const r = c.userData.roman;
+        const origin = shelfOriginByRoman[r];
+        if (origin?.position) {
+            c.position.copy(origin.position);
+            c.scale.setScalar(origin.scale ?? c.scale.x);
+        } else {
+            c.position.set((shelfSlots[r] || new THREE.Vector3()).x, (shelfSlots[r] || new THREE.Vector3()).y, shelfZ);
+        }
+        c.userData.isShelf = true;
+        if (!shelfCubes.includes(c)) shelfCubes.push(c);
+        const ci = cubes.indexOf(c); if (ci >= 0) cubes.splice(ci, 1);
+    }
+    lineup = [];
+    // Also clear any locked lanes to avoid leftover markers
+    try { clearLockedLines(); setMelodyLockVisual('open'); setBassLockVisual('open'); } catch (_) { }
+});
+
+// Lock icon events handled above via melodyLockIcon/bassLockIcon
 
 setSelect.addEventListener('change', () => {
-    currentSet = setSelect.value;
-    loadSet(currentSet);
+    // Toggle shelf visibility only; default shows all
+    const val = setSelect.value;
+    currentSet = val;
+    const show = new Set();
+    if (val === 'major') chordSetsC.major.forEach(c => show.add(c.roman));
+    else if (val === 'minor') chordSetsC.minor.forEach(c => show.add(c.roman));
+    else if (val === 'applied') chordSetsC.applied.forEach(c => show.add(c.roman));
+    else {
+        [...chordSetsC.major, ...chordSetsC.minor, ...chordSetsC.applied].forEach(c => show.add(c.roman));
+    }
+    for (const s of shelfCubes) { s.visible = show.has(s.userData.roman); }
 });
 
 labelSelect.addEventListener('change', () => {
@@ -1343,6 +2416,7 @@ labelSelect.addEventListener('change', () => {
 keySelect?.addEventListener('change', () => {
     currentKey = keySelect.value;
     updateLabels();
+    try { setState({ key: currentKey }); bridge.emit('settingsChanged', { key: currentKey }); } catch (_) { }
 });
 
 // Adjust mode UI
@@ -1385,7 +2459,38 @@ window.addEventListener('resize', onResize);
 
 // Initial: start immediately with canvas-rendered labels (no PNG manifest)
 textureManifest = null;
-(async () => { await ensureFontsLoaded(); await loadSet(currentSet); await updateLabels(); await loadInstruments(); setViewAbove(); })();
+(async () => {
+    await ensureFontsLoaded();
+    readFlagsFromUrl();
+    currentSet = 'all';
+    await loadSet(currentSet);
+    // Ensure shelf is visible by default
+    for (const s of shelfCubes) s.visible = true;
+    // Re-enable camera layers after load
+    try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
+    await updateLabels();
+    await loadInstruments();
+    setViewAbove();
+    createPlayButton();
+    createDebugOverlay();
+    // Color calibrators
+    const tonicEl = document.getElementById('color-tonic');
+    const subEl = document.getElementById('color-sub');
+    const domEl = document.getElementById('color-dom');
+    const neuEl = document.getElementById('color-neu');
+    const applyColors = async () => {
+        const hexToInt = (hex) => parseInt(hex.replace('#', ''), 16);
+        if (tonicEl?.value) COLOR_TONIC = hexToInt(tonicEl.value);
+        if (subEl?.value) COLOR_SUBDOMINANT = hexToInt(subEl.value);
+        if (domEl?.value) COLOR_DOMINANT = hexToInt(domEl.value);
+        if (neuEl?.value) COLOR_NEUTRAL = hexToInt(neuEl.value);
+        await updateLabels();
+    };
+    tonicEl?.addEventListener('change', applyColors);
+    subEl?.addEventListener('change', applyColors);
+    domEl?.addEventListener('change', applyColors);
+    neuEl?.addEventListener('change', applyColors);
+})();
 
 // Animation loop
 function animate() {
@@ -1396,18 +2501,50 @@ function animate() {
         const done = activeTweens[i].tick(now);
         if (done) activeTweens.splice(i, 1);
     }
+    diag.update && diag.update();
     // Harmonized drag smoothing
     tickDragSmoothing();
     // Enforce two rest zones for all non-dragging cubes
     enforceRestZones();
+    // Keep locked lanes following cubes as lineup reflows
+    updateLanePositions();
+    // Normalize giants orientation permanently to stored uprightZ
+    try {
+        const enforce = (root) => {
+            root.traverse(o => {
+                if (!(o && o.isMesh && o.geometry && o.material)) return;
+                if (typeof o.userData?.uprightZ !== 'number') return;
+                o.rotation.z = o.userData.uprightZ;
+            });
+        };
+        if (melodyGiantGroup) enforce(melodyGiantGroup);
+        if (bassGiantGroup) enforce(bassGiantGroup);
+    } catch (_) { }
+    // Show only appropriate locks per camera (melody above, bass below)
+    try {
+        const toTarget = camera.position.clone().sub(controls.target);
+        const horiz = Math.hypot(toTarget.x, toTarget.z);
+        const angle = Math.atan2(toTarget.y, horiz); // >0 above, <0 below
+        const above = angle > 0.1;
+        const showMel = above; const showBass = !above;
+        [melodyLockLeft, melodyLockRight].forEach(o => { if (o) o.visible = showMel; });
+        [bassLockLeft, bassLockRight].forEach(o => { if (o) o.visible = showBass; });
+    } catch (_) { }
+    // TEMP DEBUG: log one pivot angle occasionally
+    try {
+        if (melodyLaneGroup && melodyLaneGroup.children.length) {
+            const a = melodyLaneGroup.children[0].rotation.x;
+            if ((Math.floor(now / 300) % 10) === 0) { /* throttle */ }
+        }
+    } catch (_) { }
     // Update ground title opacities based on camera angle relative to plane y=0
     let belowAlpha = 0;
     if (melodyMat && bassMat) {
         const toTarget = camera.position.clone().sub(controls.target);
         const horiz = Math.hypot(toTarget.x, toTarget.z);
-        const angle = Math.atan2(Math.abs(toTarget.y), horiz); // radians above/below plane
-        const deg = angle * (180 / Math.PI);
-        const t = Math.min(1, deg / 30);
+        const angle = Math.atan2(toTarget.y, horiz); // signed radians (positive above, negative below)
+        const absDeg = Math.abs(angle) * (180 / Math.PI);
+        const t = Math.min(1, absDeg / 30);
         const alpha = 0.4 * t;
         if (toTarget.y >= 0) { // above plane
             melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
@@ -1421,6 +2558,18 @@ function animate() {
         shelfPlane.material.opacity = Math.max(shelfPlane.material.opacity ?? 0, belowAlpha);
         // When above plane, keep the original texture fully visible (no forced fade)
         if (belowAlpha === 0) shelfPlane.material.opacity = 1.0;
+    }
+    // Darkening plane: smoothly increase up to 0.20 opacity at -25° and below
+    if (darkPlane && darkPlane.material) {
+        const toTarget = camera.position.clone().sub(controls.target);
+        const horiz = Math.hypot(toTarget.x, toTarget.z);
+        const angle = Math.atan2(toTarget.y, horiz); // signed
+        let darkT = 0;
+        if (angle < 0) {
+            const deg = Math.abs(angle) * (180 / Math.PI);
+            darkT = Math.min(1, deg / 25);
+        }
+        darkPlane.material.opacity = 0.20 * darkT;
     }
     // Subtle shimmer for background title (non-intrusive)
     if (bgTitleMesh && bgTitleMesh.material) {
@@ -1488,13 +2637,26 @@ function enforceRestZones() {
             // Front row exact plane
             c.position.y = 0;
             c.position.z = 0;
+            // Only snap rotation when not animating and already near a quadrant
+            if (!hasActiveTweenFor(c)) {
+                const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
+                const z = e.z;
+                const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
+                if (Math.abs(snappedZ - z) < 0.02) {
+                    const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
+                    c.quaternion.copy(q);
+                }
+            }
         } else if (c.userData?.isShelf) {
+            if (adjustMode) continue; // allow free placement while editing the shelf map
             // Exact shelf origin if available
             const r = c.userData.roman;
             const origin = shelfOriginByRoman[r];
             if (origin?.position) {
                 c.position.copy(origin.position);
                 c.scale.setScalar(origin.scale ?? c.scale.x);
+                // Ensure shelf rotation restored
+                if (origin.quaternion) c.quaternion.copy(origin.quaternion);
             } else {
                 c.position.z = shelfZ;
             }
@@ -1503,7 +2665,10 @@ function enforceRestZones() {
 }
 
 // Simple WebAudio chord playback
-function ensureAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); return audioCtx; }
+function ensureAudio() {
+    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    return audioCtx;
+}
 const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
 function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
 function parseNoteName(name) {
@@ -1511,51 +2676,148 @@ function parseNoteName(name) {
     const n = name.replace(/[^A-G#b]/g, '');
     const idx = NOTE_INDEX[n] ?? 0; return { idx, octave: 4 };
 }
-function getFaceOrder(rotationIndex, includeSeventh) {
-    const r = ((rotationIndex % 4) + 4) % 4;
-    const b = r; // bottom
-    const right = (r + 1) % 4;
-    const top = (r + 2) % 4;
-    const left = (r + 3) % 4; // 7th face
-    if (includeSeventh) return [b, right, left, top];
-    return [b, right, top];
+// Pitch-class helpers
+function pcOf(name) { return parseNoteName(name).idx; }
+function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
+
+// Snap a target MIDI note to the octave closest to a reference MIDI
+function nearestOctave(targetMidi, referenceMidi) {
+    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+    const k = Math.round((referenceMidi - targetMidi) / 12);
+    return targetMidi + 12 * k;
 }
-function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
-    const ctx = ensureAudio();
+
+// Voice leading 2 (tonal-assisted): prefer interval steps up to a 3rd/4th; fallback to nearest octave
+function voiceLeadMidi(targetMidi, referenceMidi) {
+    if (voiceLeadingMode !== 'vl2') return nearestOctave(targetMidi, referenceMidi);
+    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+    // Evaluate target in a window of +/- 2 octaves and pick minimal absolute semitone distance
+    let best = targetMidi, bestDist = Infinity;
+    for (let o = -2; o <= 2; o++) {
+        const cand = targetMidi + o * 12;
+        const d = Math.abs(cand - referenceMidi);
+        if (d < bestDist) { bestDist = d; best = cand; }
+    }
+    return best;
+}
+
+// Chord bed: lock voices into C4..C5 regardless of chord
+function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const order = getFaceOrder(rotationIndex || 0, includeSeventh);
-    // Map to ascending MIDI
-    const baseOct = 4;
-    const midiOf = (name) => {
-        const { idx, octave } = parseNoteName(name);
-        return idx + 12 * (octave || baseOct);
-    };
-    const semis = order.map(i => midiOf(names[i]));
-    const asc = [];
-    let prev = semis[0];
-    asc.push(prev);
-    for (let k = 1; k < semis.length; k++) {
-        let m = semis[k];
-        while (m < prev) m += 12;
-        asc.push(m);
-        prev = m;
-    }
-    return asc.map(m => 440 * Math.pow(2, (m - (9 + 12 * 4)) / 12));
+    const use = includeSeventh ? names.slice(0, 4) : names.slice(0, 3);
+    const baseC4 = 60; // MIDI C4
+    const midis = use.map(n => baseC4 + pcOf(n));
+    midis.sort((a, b) => a - b);
+    // Ensure within [60, 71]
+    return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+}
+
+// Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
+function getBassMidiForObject(obj) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const proxyBottom = getBottomToneIdxFromProxies(obj);
+    const r = proxyBottom != null ? proxyBottom : ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const rootPc = pcOf(names[0]);
+    const bottomPc = pcOf(names[r]);
+    const baseC2 = 36; // low register
+    const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
+    const diff = (bottomPc - rootPc + 12) % 12;
+    return rootBaseMidi + diff; // within one octave above root
+}
+
+// Melody: map top-face tone into a higher octave anchored to the chord root
+function getMelodyMidiForObject(obj) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const proxyTop = getTopToneIdxFromProxies(obj);
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const rootPc = pcOf(names[0]);
+    // If proxies are present, trust them entirely for top face identity
+    const topIndex = (proxyTop != null) ? proxyTop : (r + 2) % 4;
+    const topPc = pcOf(names[topIndex]);
+    const baseC5 = 72; // higher register
+    const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
+    const diff = (topPc - rootPc + 12) % 12;
+    return rootBaseMidi + diff;
+}
+
+function makeNumberPlane(text, width = 0.9) {
+    const size = 512;
+    const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, size, size);
+    ctx.fillStyle = '#111';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 360px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+    ctx.strokeStyle = '#111'; ctx.lineWidth = 8; ctx.strokeText(text, size / 2, size / 2 + 20);
+    ctx.fillText(text, size / 2, size / 2 + 20);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+    const aspect = 1.0;
+    const h = width / aspect;
+    const geo = new THREE.PlaneGeometry(width, h);
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.z = 0.002;
+    return mesh;
+}
+
+// Helper: get transposed top-face note name for a cube in current key
+function getTopNoteNameForObject(obj) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    return names[(r + 2) % 4];
+}
+
+function getTopDegreeForObject(obj) {
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const roman = obj.userData.roman;
+    const degs = degreeSets[roman] || ['1', '3', '5', '7'];
+    return degs[(r + 2) % 4];
+}
+
+// Render a large NVX Diamond Font string as a billboard in 3D space
+function showNVXDebugText(text) {
+    try { if (nvxDebugTextMesh) { scene.remove(nvxDebugTextMesh); nvxDebugTextMesh.material?.map?.dispose?.(); nvxDebugTextMesh.material?.dispose?.(); nvxDebugTextMesh.geometry?.dispose?.(); nvxDebugTextMesh = null; } } catch (_) { }
+    const w = 2048, h = 512;
+    const c = document.createElement('canvas'); c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, w, h);
+    ctx.fillStyle = '#000000';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = '900 300px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+    ctx.fillText(text, w / 2, h / 2);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+    const aspect = w / h; const width = 10; const height = width / aspect;
+    const geo = new THREE.PlaneGeometry(width, height);
+    nvxDebugTextMesh = new THREE.Mesh(geo, mat);
+    nvxDebugTextMesh.position.set(0, 1.8, 0.6);
+    nvxDebugTextMesh.renderOrder = 6;
+    scene.add(nvxDebugTextMesh);
+    // Expose a helper for manual updates
+    try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
 }
 function playChordForObject(obj) {
-    const ctx = ensureAudio();
-    const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
-    const now = ctx.currentTime;
-    const duration = 1.25;
+    // Re-verify orientation at replay time to avoid drift
+    syncRotationIndexFromQuaternion(obj);
+    updateFaceProxyToneMap(obj);
+    const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 0.9;
+
+    if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
 
     // Master
-    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    const master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
 
     // Layers
-    const chordBus = ctx.createGain(); chordBus.gain.value = 0.22; chordBus.connect(master);
-    const bassBus = ctx.createGain(); bassBus.gain.value = 0.28; bassBus.connect(master);
-    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.24; melodyBus.connect(master);
+    const chordBus = ctx.createGain(); chordBus.gain.value = 0.18; chordBus.connect(master);
+    const bassBus = ctx.createGain(); bassBus.gain.value = 0.3; bassBus.connect(master);
+    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.26; melodyBus.connect(master);
 
     // Envelope helper
     const env = (g, t0, d) => {
@@ -1565,40 +2827,70 @@ function playChordForObject(obj) {
         g.gain.linearRampToValueAtTime(0.0, t0 + d);
     };
 
-    // Determine bottom/top for bass/melody layers
-    const lowest = freqsAsc[0];
-    const highest = freqsAsc[freqsAsc.length - 1];
-
-    // Chord bed (triad or with 7th) – same set regardless of inversion, just pitched ascending
-    freqsAsc.forEach((f, i) => {
-        const osc = ctx.createOscillator();
-        const g = ctx.createGain();
-        osc.type = i === 3 ? 'triangle' : 'sine';
-        osc.frequency.value = f;
-        osc.connect(g).connect(chordBus);
-        const t0 = now;
-        const d = duration;
-        env(g, t0, d);
-        osc.start(t0); osc.stop(t0 + d + 0.02);
-    });
-
-    // Bass layer – lowest face
-    if (lowest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.value = lowest;
-        osc.connect(g).connect(bassBus);
-        env(g, now, duration);
-        osc.start(now); osc.stop(now + duration + 0.02);
+    // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
+    const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
+    const idxForObj = lineup.indexOf(obj);
+    const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
+    logAudio('play:bed', { roman: obj.userData?.roman, bedMidis, droppedTop: (bedMidis.length !== chordMidis.length) });
+    if (sfChord && sfChord.play) {
+        bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+    } else {
+        console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
     }
 
-    // Melody layer – top face
-    if (highest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'square'; osc.frequency.value = highest;
-        osc.connect(g).connect(melodyBus);
-        env(g, now, duration);
-        osc.start(now); osc.stop(now + duration + 0.02);
+    // Helper: recompute locked midi from faceRef if available (keeps key and mapping consistent)
+    const resolveLockedMidi = (lockedEntry, cube, role /* 'bass'|'melody' */) => {
+        try {
+            if (!lockedEntry) return null;
+            // If toneIdx present, recompute from current key and role register
+            if (typeof lockedEntry.toneIdx === 'number') {
+                const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+                const names = transposeNotes(tones, currentKey);
+                const name = names[lockedEntry.toneIdx];
+                if (role === 'bass') {
+                    let m = 36 + pcOf(name); while (m < 36) m += 12; while (m > 55) m -= 12; return m;
+                } else {
+                    let m = 72 + pcOf(name); while (m < 60) m += 12; while (m > 84) m -= 12; return m;
+                }
+            }
+            // Fallback to stored midi
+            if (typeof lockedEntry.midi === 'number') return lockedEntry.midi;
+        } catch (_) { }
+        return null;
+    };
+
+    // Bass: if locked, use locked line (recomputed from faceRef if present); else use cube bottom face
+    if (bassEnabled) {
+        let bassMidi = getBassMidiForObject(obj);
+        const idx = lineup.indexOf(obj);
+        if (lockedBass && idx >= 0 && lockedBass[idx]) {
+            const m = resolveLockedMidi(lockedBass[idx], obj, 'bass');
+            if (typeof m === 'number') bassMidi = m;
+        }
+        logAudio('play:bass', { i: idx, roman: obj.userData?.roman, midi: bassMidi });
+        if (sfBass && sfBass.play) {
+            sfBass.play(bassMidi, now, { duration, gain: 0.34 });
+        } else {
+            console.error('[obs-cubes] Bass instrument missing; skipping bass note.');
+        }
     }
+
+    // Melody: if locked, use locked line (recomputed from faceRef if present); else use cube top face
+    if (melodyEnabled) {
+        let melMidi = getMelodyMidiForObject(obj);
+        const idx = lineup.indexOf(obj);
+        if (lockedMelody && idx >= 0 && lockedMelody[idx]) {
+            const m = resolveLockedMidi(lockedMelody[idx], obj, 'melody');
+            if (typeof m === 'number') melMidi = m;
+        }
+        logAudio('play:melody', { i: idx, roman: obj.userData?.roman, midi: melMidi, rIdx: obj.userData?.rotationIndex });
+        if (sfMelody && sfMelody.play) {
+            sfMelody.play(melMidi, now, { duration, gain: 0.3 });
+        } else {
+            console.error('[obs-cubes] Melody instrument missing; skipping melody note.');
+        }
+    }
+    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
 }
 
 // Shelf-click sequencing
@@ -1619,18 +2911,65 @@ async function processShelfQueue() {
 async function animateShelfClickAdd(shelf) {
     try {
         const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
-        clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0 };
+        clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0, desiredRotationDelta: (shelf.userData?.desiredRotationDelta || 0) };
+        // Start exactly at shelf origin
         clone.position.copy(shelf.position);
         clone.scale.copy(shelf.scale);
+        // CRITICAL: front-row layer for clones
+        try { setCubeLayerRecursive(clone, 1); } catch (_) { }
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
+        ensureFaceProxies(clone);
+        try { clone.userData.model = new CubeModel({ roman: clone.userData.roman, key: currentKey, threeObject: clone }); } catch (_) { }
+        // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
         const xs = computeSlotPositions(lineup.length + 1);
         const targetX = xs[lineup.length];
-        lineup.push(clone);
-        animateScale(clone, FRONT_ROW_SCALE, 280);
-        animatePosition(clone, new THREE.Vector3(targetX, 0, 0), 300);
-        reflowLineup();
+        // Animate from shelf Y/Z to front row smoothly with scale normalization
+        clone.userData.animatingIn = true;
+        const s0 = clone.scale.x;
+        // Smooth position/scale; apply desiredRotationDelta once if provided
+        const startQuat = clone.quaternion.clone();
+        // Copy delta chosen on the shelf object (support zero)
+        let deltaSteps = (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta') ? (shelf.userData.desiredRotationDelta || 0) : 0);
+        deltaSteps = ((deltaSteps % 4) + 4) % 4;
+        // Prefer model-based quaternion solve: map delta→faceIdx and solve for bottom
+        let targetQuat = null;
+        try {
+            const model = clone.userData?.model;
+            const faceIdx = (deltaSteps === 0) ? 0 : (deltaSteps === 1) ? 1 : (deltaSteps === 2) ? 2 : 3;
+            targetQuat = model?.rotateFaceToBottom(faceIdx, clone) || null;
+        } catch (_) { }
+        if (!targetQuat) {
+            targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
+        }
+        tweenObject({
+            duration: 520, owner: clone, onUpdate: (v) => {
+                // Position ease
+                clone.position.x = THREE.MathUtils.lerp(clone.position.x, targetX, v);
+                clone.position.y = THREE.MathUtils.lerp(clone.position.y, 0, v);
+                clone.position.z = THREE.MathUtils.lerp(clone.position.z, 0, v);
+                // Scale ease toward front-row normalized size
+                const s = THREE.MathUtils.lerp(s0, FRONT_ROW_SCALE, v);
+                clone.scale.setScalar(s);
+                // Rotation ease (none)
+                clone.quaternion.slerpQuaternions(startQuat, targetQuat, v);
+            }
+        });
+        // After animation completes, add to lineup and reflow
+        setTimeout(() => {
+            if (!lineup.includes(clone)) lineup.push(clone);
+            clone.userData.animatingIn = false;
+            // Apply rotation index delta exactly once
+            if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+            // Re-sync from quaternion to eliminate drift
+            try { syncRotationIndexFromQuaternion(clone); } catch (_) { }
+            updateFaceProxyToneMap(clone);
+            reflowLineup();
+        }, 470);
+        // Play with intended inversion immediately
+        if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+        updateFaceProxyToneMap(clone);
         playChordForObject(clone);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
@@ -1641,15 +2980,101 @@ let progressionEnabled = false;
 let progressionArrows = [];
 let progressionPoints = [];
 let playButtonMesh = null;
+let progressionBpm = 30; // 30 BPM → 2s per chord by default
+// Smooth camera follow of active chord
+let cameraFocusTween = null;
+function focusCameraOnCube(cube, durationMs = 700) {
+    try {
+        const p = new THREE.Vector3(); cube.getWorldPosition(p);
+        const camFrom = camera.position.clone();
+        const tgtFrom = controls.target.clone();
+        // Dolly with the active chord: slide horizontally and push in closer on Z
+        const targetTo = new THREE.Vector3(p.x, 0.6, 0);
+        const cameraTo = new THREE.Vector3(p.x, 0.85, 7.6);
+        if (cameraFocusTween) cameraFocusTween.cancelled = true;
+        cameraFocusTween = tweenObject({
+            duration: durationMs, owner: camera, onUpdate: (v) => {
+                camera.position.lerpVectors(camFrom, cameraTo, v);
+                controls.target.lerpVectors(tgtFrom, targetTo, v);
+            }
+        });
+    } catch (_) { }
+}
+// Metronome/tempo UI + engine
+let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
+let metroOn = false; let metroSynth = null; let metroLoop = null;
+let transportBridge = null;
+
+function readFlagsFromUrl() {
+    try {
+        const url = new URL(window.location.href);
+        const arrows = url.searchParams.get('arrows');
+        const bpm = url.searchParams.get('bpm');
+        const sf = url.searchParams.get('sf');
+        if (arrows === '1') progressionEnabled = true;
+        if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
+        if (sf) { try { setSfBase(sf); } catch (_) { } }
+    } catch (_) { /* ignore */ }
+}
+
+// Tempo/Metronome UI
+function ensureTempoUi() {
+    if (tempoUi) return;
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
+    const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
+    const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
+    const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
+    slider.oninput = () => {
+        progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120));
+        val.textContent = `${progressionBpm} BPM`;
+        try {
+            if (window.Tone) window.Tone.Transport.bpm.value = progressionBpm;
+            if (!transportBridge) transportBridge = createBridge?.('transport');
+            transportBridge?.emit('bpm', { bpm: progressionBpm });
+        } catch (_) { }
+    };
+    const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
+    btn.onclick = async () => {
+        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
+        if (!metroLoop && window.Tone) {
+            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
+        }
+        if (!metroOn) {
+            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
+            btn.textContent = 'Metronome: On'; metroOn = true;
+            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('start', { bpm: progressionBpm }); } catch (_) { }
+        } else {
+            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
+            btn.textContent = 'Metronome: Off'; metroOn = false;
+            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('stop', {}); } catch (_) { }
+        }
+    };
+    box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+    document.body.appendChild(box);
+    tempoUi = box; tempoSlider = slider; metroBtn = btn;
+}
 
 function createPlayButton() {
     if (playButtonMesh) return;
-    const geo = new THREE.ConeGeometry(0.35, 0.5, 24);
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffd34d, emissive: 0x222200, metalness: 0.3, roughness: 0.4 });
+    // Flat 2D button on the ground near the bottom center
+    const size = 1.6;
+    const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0, 0, 256, 256);
+    // background circle
+    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI * 2); ctx.fill();
+    // play triangle
+    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(108, 84); ctx.lineTo(108, 172); ctx.lineTo(180, 128); ctx.closePath(); ctx.fill();
+    const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
+    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+    const geo = new THREE.PlaneGeometry(size, size);
     playButtonMesh = new THREE.Mesh(geo, mat);
-    playButtonMesh.rotation.z = -Math.PI / 2; // like a play icon
-    playButtonMesh.position.set(0, 0.25, 1.1);
+    playButtonMesh.rotation.x = -Math.PI / 2; // flat to ground
+    playButtonMesh.position.set(0, 0.001, -6.2); // below titles nearer bottom
     playButtonMesh.userData.isPlayButton = true;
+    playButtonMesh.renderOrder = 5;
     scene.add(playButtonMesh);
 }
 
@@ -1688,14 +3113,443 @@ function updateProgressionArrows() {
     for (let i = 0; i < progressionPoints.length - 1; i++) drawArrow(progressionPoints[i], progressionPoints[i + 1]);
 }
 
-async function playFrontRowProgression() {
-    if (lineup.length === 0) return;
-    for (let i = 0; i < lineup.length; i++) {
-        const c = lineup[i];
-        playChordForObject(c);
-        addProgressionPointFromCube(c);
-        await new Promise(r => setTimeout(r, 450));
+// Active chord highlight effects
+const activeHighlights = [];
+function highlightChordEffect(cube, durationMs = 800) {
+    try {
+        const p = new THREE.Vector3(); cube.getWorldPosition(p);
+        const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
+        const ringGeo = new THREE.RingGeometry(0.62, 0.82, 48);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+        const ring = new THREE.Mesh(ringGeo, mat);
+        ring.position.set(p.x, p.y, p.z + half + 0.01);
+        ring.rotation.set(0, 0, 0);
+        ring.renderOrder = 6;
+        scene.add(ring);
+        activeHighlights.push(ring);
+        // Animate scale/opacity out
+        const fromScale = 0.1; const toScale = 1.4;
+        ring.scale.set(fromScale, fromScale, fromScale);
+        tweenObject({ duration: durationMs, owner: ring, onUpdate: (v) => { try { const sc = fromScale + (toScale - fromScale) * v; ring.scale.set(sc, sc, sc); mat.opacity = 0.95 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); mat.dispose(); } catch (_) { } } });
+        // Spark burst
+        for (let i = 0; i < 12; i++) {
+            const d = Math.random() * 0.45 + 0.35; const dir = (Math.PI * 2 * i) / 12 + Math.random() * 0.2;
+            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, p.z + half + 0.012), new THREE.Vector3(p.x + Math.cos(dir) * d, p.y + Math.sin(dir) * d, p.z + half + 0.012)]);
+            const lineMat = new THREE.LineBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+            const line = new THREE.Line(lineGeo, lineMat); line.renderOrder = 7; scene.add(line); activeHighlights.push(line);
+            tweenObject({ duration: durationMs * 0.9, owner: line, onUpdate: (v) => { try { lineMat.opacity = 0.9 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(line); line.geometry.dispose(); lineMat.dispose(); } catch (_) { } } });
+        }
+    } catch (_) { }
+}
+
+function pulseGiantAt(index, durationMs = 600) {
+    try {
+        const pulse = (group) => { const node = group?.children?.[index]; const mesh = node?.children?.[0]; const mat = mesh?.material; if (!mat) return; const base = mat.opacity ?? 1; tweenObject({ duration: durationMs, owner: mat, onUpdate: (v) => { try { mat.transparent = true; mat.opacity = base * (0.6 + 0.4 * Math.sin(v * Math.PI)); } catch (_) { } }, onComplete: () => { try { mat.opacity = base; } catch (_) { } } }); };
+        if (melodyGiantGroup) pulse(melodyGiantGroup); if (bassGiantGroup) pulse(bassGiantGroup);
+    } catch (_) { }
+}
+
+function shimmerMaterial(mat) {
+    if (!mat) return;
+    const hadTransparent = !!mat.transparent;
+    const origOpacity = typeof mat.opacity === 'number' ? mat.opacity : 1;
+    try { mat.transparent = true; mat.opacity = Math.max(0, Math.min(1, origOpacity * 0.6)); } catch (_) { }
+    setTimeout(() => { try { mat.opacity = origOpacity; mat.transparent = hadTransparent; } catch (_) { } }, 160);
+}
+
+function shimmerMelodyTopFaces() {
+    for (const cube of lineup) {
+        try {
+            const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
+            const topMat = mats[2] || mats[0];
+            shimmerMaterial(topMat);
+        } catch (_) { }
     }
 }
+
+function shimmerBassBottomFaces() {
+    for (const cube of lineup) {
+        try {
+            const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
+            const bottomMat = mats[3] || mats[0];
+            shimmerMaterial(bottomMat);
+        } catch (_) { }
+    }
+}
+
+function shimmerMelodyLane() {
+    if (!melodyLaneGroup) return;
+    try {
+        melodyLaneGroup.children.forEach(node => {
+            // child[1] is the diamond mesh in makeLaneNode
+            const diamond = node.children?.[1];
+            if (diamond && diamond.material) shimmerMaterial(diamond.material);
+        });
+    } catch (_) { }
+}
+
+function makeLaneDiamond(colorHex = 0xffffff) {
+    const g = new THREE.CircleGeometry(0.08, 4);
+    const m = new THREE.MeshBasicMaterial({ color: colorHex });
+    const mesh = new THREE.Mesh(g, m);
+    mesh.rotation.z = Math.PI / 4; // diamond look
+    return mesh;
+}
+
+function makeLaneNode(roman, colorHex) {
+    const group = new THREE.Group();
+    const circle = new THREE.Mesh(new THREE.CircleGeometry(0.11, 24), new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 }));
+    const diamond = makeLaneDiamond(0xffffff);
+    group.add(circle); group.add(diamond);
+    group.userData = { roman };
+    return group;
+}
+
+function clearLockedLines() {
+    lockedMelody = null; lockedBass = null;
+    if (melodyLaneGroup) { scene.remove(melodyLaneGroup); melodyLaneGroup = null; }
+    if (bassLaneGroup) { scene.remove(bassLaneGroup); bassLaneGroup = null; }
+    if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
+}
+
+function renderMelodyLane() {
+    if (melodyLaneGroup) {
+        try { melodyLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
+        scene.remove(melodyLaneGroup); melodyLaneGroup = null;
+    }
+    melodyLaneGroup = new THREE.Group();
+    for (let i = 0; i < lineup.length; i++) {
+        const cube = lineup[i];
+        const p = new THREE.Vector3(); cube.getWorldPosition(p);
+        const color = borderColorForRoman(cube.userData.roman);
+        const pivot = new THREE.Group();
+        const node = makeLaneNode(cube.userData.roman, color);
+        node.position.set(0, 0.3, 0); // hinge at bottom tip (feet)
+        node.renderOrder = 3; // draw atop ground
+        node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
+        pivot.add(node);
+        const half = (cubeSize * cube.scale.x) / 2;
+        // Offset a hair away from cube to avoid z-fighting when rotating
+        pivot.position.set(p.x, 0.001, p.z - half - 0.08);
+        // Start flat on ground; animate to stand up (to 0)
+        pivot.rotation.x = -Math.PI / 2;
+        melodyLaneGroup.add(pivot);
+    }
+    scene.add(melodyLaneGroup);
+}
+
+function renderBassLane() {
+    if (bassLaneGroup) {
+        try { bassLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
+        scene.remove(bassLaneGroup); bassLaneGroup = null;
+    }
+    bassLaneGroup = new THREE.Group();
+    for (let i = 0; i < lineup.length; i++) {
+        const cube = lineup[i];
+        const p = new THREE.Vector3(); cube.getWorldPosition(p);
+        const color = borderColorForRoman(cube.userData.roman);
+        const pivot = new THREE.Group();
+        const node = makeLaneNode(cube.userData.roman, color);
+        node.position.set(0, -0.3, 0); // hinge at top tip (head)
+        node.renderOrder = 3; node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
+        pivot.add(node);
+        const half = (cubeSize * cube.scale.x) / 2;
+        pivot.position.set(p.x, 0.001, p.z + half + 0.02); // front edge
+        // Start flat; animate to +PI/2 when locking bass
+        pivot.rotation.x = Math.PI / 2;
+        bassLaneGroup.add(pivot);
+    }
+    scene.add(bassLaneGroup);
+}
+
+function animateStandUpLanes() {
+    // Animate melody pivots to stand up 90° and bass pivots to stand down 90° from ground
+    if (melodyLaneGroup) {
+        for (const pivot of melodyLaneGroup.children) {
+            const from = pivot.rotation.x;
+            const to = 0; // stand vertical from flat start (-PI/2)
+            tweenObject({
+                duration: 800, owner: pivot, onUpdate: (v) => {
+                    pivot.rotation.x = from + (to - from) * v;
+                    // Debug: briefly scale up to confirm animation
+                    const s = 1 + 0.02 * Math.sin(v * Math.PI);
+                    pivot.scale.set(s, s, s);
+                }
+            });
+        }
+    }
+    if (bassLaneGroup) {
+        for (const pivot of bassLaneGroup.children) {
+            const from = pivot.rotation.x;
+            const to = 0; // stand vertical from +PI/2
+            tweenObject({ duration: 800, owner: pivot, onUpdate: (v) => { pivot.rotation.x = from + (to - from) * v; } });
+        }
+    }
+}
+
+// TEST: spin melody lane pivots for visibility diagnostics
+function spinMelodyLane(durationMs = 10000, rotations = 6) {
+    if (!melodyLaneGroup) return;
+    for (const pivot of melodyLaneGroup.children) {
+        const from = pivot.rotation.x;
+        const to = from + Math.PI * 2 * rotations;
+        cancelTweensFor(pivot);
+        tweenObject({
+            duration: durationMs, owner: pivot, onUpdate: (v) => {
+                pivot.rotation.x = from + (to - from) * v;
+            }
+        });
+    }
+}
+
+function updateLanePositions() {
+    if (melodyLaneGroup && melodyLaneGroup.children.length === lineup.length) {
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i]; const pivot = melodyLaneGroup.children[i];
+            const p = new THREE.Vector3(); cube.getWorldPosition(p);
+            const half = (cubeSize * cube.scale.x) / 2;
+            pivot.position.set(p.x, 0.001, p.z - half - 0.02);
+        }
+    }
+    if (bassLaneGroup && bassLaneGroup.children.length === lineup.length) {
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i]; const pivot = bassLaneGroup.children[i];
+            const p = new THREE.Vector3(); cube.getWorldPosition(p);
+            const half = (cubeSize * cube.scale.x) / 2;
+            pivot.position.set(p.x, 0.001, p.z + half + 0.02);
+        }
+    }
+}
+
+function lockInMelody() {
+    if (lineup.length === 0) return;
+    // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
+    const rotating = lineup.some(c => hasActiveTweenFor(c));
+    if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
+    // Re-verify each cube's current orientation → rotationIndex from quaternion
+    for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
+    logAudio('lockInMelody:start', { lineup: lineup.map((c, i) => ({ i, roman: c.userData?.roman, rIdx: c.userData?.rotationIndex })) });
+    // Capture current melody using the freshly verified rotationIndex
+    const snapshot = [];
+    for (let i = 0; i < lineup.length; i++) {
+        const cube = lineup[i];
+        // Prefer proxies for top-face identity
+        const proxyTopIdx = getTopToneIdxFromProxies(cube);
+        const midiTop = (() => {
+            const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+            const names = transposeNotes(tones, currentKey);
+            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+            const topIndex = (proxyTopIdx != null) ? proxyTopIdx : (r + 2) % 4;
+            const topPc = pcOf(names[topIndex]);
+            let m = 72 + ((topPc - 0 + 12) % 12);
+            while (m > 84) m -= 12; while (m < 60) m += 12;
+            logAudio('lockInMelody:capture', { i, roman: cube.userData.roman, rIdx: r, topIdx: proxyTopIdx != null ? proxyTopIdx : (r + 2) % 4, topNote: names[topIndex], midi: m });
+            return m;
+        })();
+        // Store lightweight faceRef metadata for robustness (faceIdx 2 = top)
+        let faceRef = null; try { faceRef = (cube.userData.faceProxies || []).find(p => p.userData.faceIdx === 2) || null; } catch (_) { }
+        snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman), faceIdx: 2, toneIdx: proxyTopIdx, faceRef });
+    }
+    lockedMelody = snapshot;
+    renderMelodyLane();
+    melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
+    if (lockedBass && lockedBass.length === lineup.length) {
+        setTimeout(() => {
+            for (const cube of lineup) {
+                cube.userData.rotationIndex = 0;
+                const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
+                animateQuaternion(cube, to, 280);
+            }
+            maybeEnterStageMode();
+        }, 1000);
+    }
+    try {
+        if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
+        melodyGiantGroup = new THREE.Group();
+        const xs = computeSlotPositions(lineup.length);
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i];
+            // Ensure visual index is in sync before deciding topIdx
+            syncRotationIndexFromQuaternion(cube);
+            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+            const topIdx = (rIdx + 2) % 4;
+            const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+            const ROT_DEGS = [0, 270, 180, 90];
+            const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+            const symbol = degs[topIdx];
+            const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true, false);
+            try { faceMat.side = THREE.DoubleSide; } catch (_) { }
+            const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
+            // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+            const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
+            const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
+            plane.rotation.z = melUpright;
+            plane.userData.uprightZ = melUpright;
+            plane.position.z = 0.002;
+            // Overlay MSDF glyph using NVXDiamond
+            const msdf = new TroikaText();
+            msdf.text = symbol;
+            msdf.font = NVX_FONT_URL;
+            msdf.color = FACE_COLORS[topIdx];
+            msdf.fontSize = 0.44 * cubeSize;
+            msdf.anchorX = 'center'; msdf.anchorY = 'middle';
+            msdf.rotation.z = melUpright;
+            msdf.position.z = 0.004;
+            msdf.renderOrder = 5;
+            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) { }
+            msdf.userData.uprightZ = melUpright;
+            msdf.sync();
+            const group = new THREE.Group();
+            group.add(plane);
+            group.add(msdf);
+            const p = new THREE.Vector3(); cube.getWorldPosition(p);
+            const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
+            const zBack = p.z - half - 0.002;
+            const yTop = p.y + half;
+            const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+            const centerY = yTop + diamondHalf;
+            group.position.set(p.x, centerY, zBack);
+            group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
+            melodyGiantGroup.add(group);
+        }
+        melodyGiantGroup.visible = !!(showGiantMelodyEl?.checked ?? true);
+        scene.add(melodyGiantGroup);
+    } catch (_) { }
+}
+
+function lockInBass() {
+    if (lineup.length === 0) return;
+    lockedBass = [];
+    for (let i = 0; i < lineup.length; i++) {
+        const cube = lineup[i];
+        const proxyBottomIdx = getBottomToneIdxFromProxies(cube);
+        let midi = getBassMidiForObject(cube);
+        while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
+        let faceRef = null; try { faceRef = (cube.userData.faceProxies || []).find(p => p.userData.faceIdx === 0) || null; } catch (_) { }
+        lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman), faceIdx: 0, toneIdx: proxyBottomIdx, faceRef });
+    }
+    renderBassLane();
+    bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
+    // If both voices locked, normalize all cubes to root-down orientation for easy reading
+    if (lockedMelody && lockedMelody.length === lineup.length) {
+        setTimeout(() => {
+            for (const cube of lineup) {
+                cube.userData.rotationIndex = 0;
+                const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
+                animateQuaternion(cube, to, 280);
+            }
+            maybeEnterStageMode();
+        }, 1000);
+    }
+    // Giant duplicates for bass using exact bottom-face renderer
+    try {
+        if (bassGiantGroup) { scene.remove(bassGiantGroup); bassGiantGroup = null; }
+        bassGiantGroup = new THREE.Group();
+        const xs = computeSlotPositions(lineup.length);
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i];
+            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+            const bottomIdx = rIdx; // bottom face degree index
+            const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+            const symbol = (labelMode === 'roman') ? degs[bottomIdx] : transposeNotes(noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'], currentKey)[bottomIdx];
+            const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+            const ROT_DEGS = [0, 270, 180, 90];
+            // Match cube face orientation exactly for bass giants
+            const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true, false);
+            try { mat.side = THREE.DoubleSide; } catch (_) { }
+            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), mat);
+            // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+            const extraFlipB = (bottomIdx === 1 || bottomIdx === 3) ? Math.PI : 0;
+            const bassUpright = (-(ROT_DEGS[bottomIdx] || 0) * (Math.PI / 180)) + extraFlipB;
+            mesh.rotation.z = bassUpright;
+            mesh.userData.uprightZ = bassUpright;
+            // Overlay MSDF glyph using NVXDiamond
+            const msdf = new TroikaText();
+            msdf.text = symbol;
+            msdf.font = NVX_FONT_URL;
+            msdf.color = FACE_COLORS[bottomIdx];
+            msdf.fontSize = 0.44 * cubeSize;
+            msdf.anchorX = 'center'; msdf.anchorY = 'middle';
+            msdf.rotation.z = bassUpright;
+            msdf.position.z = 0.004;
+            msdf.renderOrder = 5;
+            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) { }
+            msdf.userData.uprightZ = bassUpright;
+            msdf.sync();
+            // Center on cube and place so the diamond top tip touches the cube's front-bottom edge
+            const p = new THREE.Vector3(); cube.getWorldPosition(p);
+            const s = cube.scale?.x || cube.scale || 1;
+            const half = (cubeSize * s) / 2;
+            const zFront = p.z + half + 0.002; // just in front of cube face
+            const yBottom = p.y - half; // bottom edge of cube
+            // distance from center of our plane to diamond's top tip; we used d=size*0.64 for the square, so half-diagonal is (d/2)*sqrt(2)
+            const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+            const centerY = yBottom - diamondHalf;
+            const group = new THREE.Group();
+            group.add(mesh);
+            group.add(msdf);
+            group.position.set(p.x, centerY, zFront);
+            group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
+            bassGiantGroup.add(group);
+        }
+        bassGiantGroup.visible = !!(showGiantBassEl?.checked ?? true);
+        scene.add(bassGiantGroup);
+    } catch (_) { }
+}
+
+async function playLockSound() {
+    try {
+        if (!window.Tone) return;
+        await window.Tone.start();
+        const t = window.Tone.now();
+        const synth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.25, sustain: 0.0, release: 0.05 } }).toDestination();
+        synth.triggerAttackRelease('C2', 0.12, t, 0.9);
+        const click = new window.Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).toDestination();
+        click.triggerAttackRelease(0.02, t + 0.06);
+        setTimeout(() => synth.dispose(), 400);
+        setTimeout(() => click.dispose(), 200);
+    } catch (_) { }
+}
+
+async function playFrontRowProgression() {
+    if (lineup.length === 0) return;
+    const msPerBeat = Math.round(60000 / progressionBpm);
+    const perChordMs = 1000; // 1 second per chord per request
+    for (let i = 0; i < lineup.length; i++) {
+        const c = lineup[i];
+        // Resync face proxies before each step
+        try { syncRotationIndexFromQuaternion(c); updateFaceProxyToneMap(c); } catch (_) { }
+        // Ultra-flashy active chord highlight + camera dolly follow
+        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); focusCameraOnCube(c, 600); } catch (_) { }
+        if (lockedMelody || lockedBass) {
+            // Use locked lines if present; fallback to face-derived where missing
+            const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
+            const roman = c.userData.roman;
+            // chord bed stays the same
+            const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
+            if (sfChord && sfChord.play) chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+            // bass
+            if (bassEnabled) {
+                let bassMidi = lockedBass?.[i]?.midi ?? getBassMidiForObject(c);
+                while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+                if (sfBass && sfBass.play) { sfBass.play(bassMidi, now, { duration, gain: 0.34 }); lastBassMidi = bassMidi; }
+            }
+            // melody
+            if (melodyEnabled) {
+                let melMidi = lockedMelody?.[i]?.midi ?? getMelodyMidiForObject(c);
+                while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
+                if (sfMelody && sfMelody.play) { sfMelody.play(melMidi, now, { duration, gain: 0.3 }); lastMelodyMidi = melMidi; }
+            }
+        } else {
+            playChordForObject(c);
+        }
+        addProgressionPointFromCube(c);
+        await new Promise(r => setTimeout(r, perChordMs));
+    }
+}
+
+// Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()
 
 

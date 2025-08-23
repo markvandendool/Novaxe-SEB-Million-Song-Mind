@@ -1,0 +1,195 @@
+<!-- Premium Authentication Page -->
+<div class="premium-auth-container">
+  <!-- Background Effects -->
+  <div class="bg-effects">
+    <div class="music-notes">
+      <div class="note note1">♪</div>
+      <div class="note note2">♫</div>
+      <div class="note note3">♪</div>
+      <div class="note note4">♬</div>
+      <div class="note note5">♪</div>
+      <div class="note note6">♫</div>
+    </div>
+    <div class="gradient-orbs">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="auth-content">
+    <!-- Header -->
+    <div class="auth-header">
+      <div class="logo-section">
+        <img src="assets/img/music-placeholder-glowtitled.png" alt="Million Song Mind" class="logo-image">
+        <h1 class="app-title">Million Song Mind</h1>
+        <p class="app-subtitle">Where Musical Genius Meets Technology</p>
+      </div>
+    </div>
+
+    <!-- Authentication Card -->
+    <div class="auth-card">
+      <div class="card-header">
+        <h2 class="auth-title">{{ isSignUp ? 'Create Your Musical Journey' : 'Welcome Back, Maestro' }}</h2>
+        <p class="auth-subtitle">{{ isSignUp ? 'Join thousands of musicians creating incredible scores' : 'Continue your musical exploration' }}</p>
+      </div>
+
+      <!-- Quick Access Buttons -->
+      <div class="quick-access">
+        <button type="button" class="btn-bypass" (click)="bypassAuth()">
+          <i class="fas fa-rocket"></i>
+          <span>Enter Demo Mode</span>
+          <small>Skip authentication & explore now</small>
+        </button>
+        
+        <button type="button" class="btn-demo" (click)="useDemoCredentials()">
+          <i class="fas fa-magic"></i>
+          <span>Use Demo Credentials</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Authentication Form -->
+      <form class="auth-form" (ngSubmit)="onSubmit()" #authForm="ngForm">
+        
+        <!-- Success/Error Messages -->
+        <div class="message success-message" *ngIf="successMessage">
+          <i class="fas fa-check-circle"></i>
+          {{ successMessage }}
+        </div>
+        
+        <div class="message error-message" *ngIf="errorMessage">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ errorMessage }}
+        </div>
+
+        <!-- Email Field -->
+        <div class="input-group">
+          <div class="input-wrapper">
+            <i class="fas fa-envelope input-icon"></i>
+            <input 
+              type="email" 
+              id="email"
+              name="email"
+              [(ngModel)]="email"
+              placeholder="Enter your email address"
+              class="form-input"
+              [class.error]="errorMessage && !email"
+              required>
+            <label for="email" class="input-label">Email Address</label>
+          </div>
+        </div>
+
+        <!-- Nickname Field (Sign Up Only) -->
+        <div class="input-group" *ngIf="isSignUp">
+          <div class="input-wrapper">
+            <i class="fas fa-user input-icon"></i>
+            <input 
+              type="text" 
+              id="nickname"
+              name="nickname"
+              [(ngModel)]="nickname"
+              placeholder="Choose a nickname"
+              class="form-input"
+              [class.error]="errorMessage && !nickname">
+            <label for="nickname" class="input-label">Nickname</label>
+          </div>
+        </div>
+
+        <!-- Password Field -->
+        <div class="input-group">
+          <div class="input-wrapper">
+            <i class="fas fa-lock input-icon"></i>
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+              class="form-input"
+              [class.error]="errorMessage && !password"
+              required>
+            <label for="password" class="input-label">Password</label>
+            <button 
+              type="button" 
+              class="password-toggle"
+              (click)="togglePasswordVisibility()">
+              <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirm Password Field (Sign Up Only) -->
+        <div class="input-group" *ngIf="isSignUp">
+          <div class="input-wrapper">
+            <i class="fas fa-lock input-icon"></i>
+            <input 
+              [type]="showPassword ? 'text' : 'password'"
+              id="confirmPassword"
+              name="confirmPassword"
+              [(ngModel)]="confirmPassword"
+              placeholder="Confirm your password"
+              class="form-input"
+              [class.error]="errorMessage && password !== confirmPassword">
+            <label for="confirmPassword" class="input-label">Confirm Password</label>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit" 
+          class="btn-primary"
+          [class.loading]="isLoading"
+          [disabled]="isLoading">
+          <div class="btn-content">
+            <div class="spinner" *ngIf="isLoading"></div>
+            <i class="fas fa-music" *ngIf="!isLoading"></i>
+            <span>{{ isSignUp ? 'Create Account' : 'Sign In' }}</span>
+          </div>
+        </button>
+      </form>
+
+      <!-- Toggle Auth Mode -->
+      <div class="auth-toggle">
+        <p>
+          {{ isSignUp ? 'Already have an account?' : 'New to Million Song Mind?' }}
+          <button type="button" class="link-button" (click)="toggleAuthMode()">
+            {{ isSignUp ? 'Sign In' : 'Sign Up' }}
+          </button>
+        </p>
+      </div>
+
+      <!-- Features Preview -->
+      <div class="features-preview" *ngIf="isSignUp">
+        <h3>What awaits you:</h3>
+        <div class="features-grid">
+          <div class="feature-item">
+            <i class="fas fa-music"></i>
+            <span>Advanced Score Editor</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-piano"></i>
+            <span>Virtual Piano</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-chart-line"></i>
+            <span>Music Theory Tools</span>
+          </div>
+          <div class="feature-item">
+            <i class="fas fa-cloud-download-alt"></i>
+            <span>Export & Share</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="auth-footer">
+      <p>&copy; 2025 Million Song Mind. Crafted with ♪ for musicians worldwide.</p>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,20 @@
+43c9e3cf OBS Cubes: precise shelf picking via screen-projected polygons (no band gating); fallback raycast; docs update
+4fdb20de OBS Cubes: restore reliable clicking via layered picking; reset raycaster layers; assign layers to clones/overlays; enable camera layers; simplify pointerdown; changelog update
+2cba26e5 🔧 FIX: Resolve TypeScript errors - noteMap→romanToAlpha, window types, selectedChords conversion
+77c60231 ✨ UPGRADE: Professional full-screen App.css - remove Vite restrictions
+47370490 OBS Cubes: fix rotation targeting; smooth eased rotation; restore animation; add non-intrusive 2D ground play button and include in raycast; diagnostics and integration improvements
+a037e314 OBS Cubes: lock official Shelf Map; purge/disable local overrides; ensure center play overlays; keep rotation anims
+74c52123 OBS Cubes: lock per-chord colors; unify styled renderer; font loader hardening; revert official shelf map; restore Adjust mode; docs update
+ae6af0ff FINAL LOVABLE HANDOFF: Comprehensive project documentation and branch setup
+d170f39b FONT FIX: Restored original FontDec13 font for chord integer numbers
+e9835c56 OBS Cubes: restore stable loop; center play circle; face audition; compact chord bed; bass octave anchoring; audio toggles + instruments; progression playback + arrows; docs changelog
+7d9fb16e CRITICAL FIX: Fixed Set<string> TypeScript compatibility
+c8d192ea CRITICAL FIX: Fixed Set vs Array bug in chord selection
+c1728775 REAL FIX: Fixed Roman/Note name mismatch in bubble selection
+9cd2630f CRITICAL FIX: Found and fixed the real mapping bug
+38717369 IMPLEMENT: Live braid-harmonic bidirectional mapping
+e8f579cd DEFINITIVE: Implement user-specified braid to harmonic mappings
+db496071 OBS Cubes: unified drag smoother; fixed-plane X mapping; magnetic make-way; strict two-zone rest; flick-to-shelf; dynamic label render; webfont gate; docs: OBS_CUBES_TECH_REPORT.md
+dac622bf Phase B: Migrated LearnFifthsComponent - build+visual gates passed
+09b14d9d 🎵 COLOSSAL MILESTONE: Complete Million Song Mind Resurrection
+b71a5e9e STRATEGIC ANALYSIS COMPLETE: Angular 12 Knowledge Base + Strategic Migration Analysis for Claude

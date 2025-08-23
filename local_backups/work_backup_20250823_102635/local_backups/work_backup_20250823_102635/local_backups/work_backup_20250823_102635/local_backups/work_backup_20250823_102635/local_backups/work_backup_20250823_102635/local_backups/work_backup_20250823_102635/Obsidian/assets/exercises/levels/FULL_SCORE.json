@@ -1,0 +1,40 @@
+{
+  "TEMPLATE": "FULL_SCORE",
+  "HIDE_CHORD": true,
+  "HIDE_FUNCTION": true,
+  "DEBUG_MODE": true,
+  "FILE":"rag",
+ "global_gen_params": {
+    "duration": 1,
+    "measures": 4,
+    "meter": "4/4",
+    "clef_G": true,
+    "clef_F": true,
+    "clef_OR": false,
+    "tempo": 90,
+    "sound": true,
+    "timed": true
+  },
+  
+  "voices_params":{
+    "left_hand":{
+      "clef":"F",
+      "proba_rest":0.5,
+      "proba_note":0.5,
+      "proba_interv":0.5,
+      "proba_chord":0.5
+    },
+    "right_hand":{
+      "clef":"G",
+      "proba_rest":0.5,
+      "proba_note":0.5,
+      "proba_interv":0.5,
+      "proba_chord":0.5
+    }
+  },
+  "exercise_types_selected": {
+    "reading_untimed": false,
+    "reading_timed": true,
+    "hearing": false
+  }
+}

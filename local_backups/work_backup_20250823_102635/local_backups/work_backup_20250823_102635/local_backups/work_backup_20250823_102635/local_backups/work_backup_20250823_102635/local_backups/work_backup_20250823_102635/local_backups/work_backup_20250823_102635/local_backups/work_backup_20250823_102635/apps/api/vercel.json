@@ -1,0 +1,36 @@
+{
+    "version": 2,
+    "builds": [
+        {
+            "src": "**/*",
+            "use": "@vercel/static"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/$1"
+        }
+    ],
+    "functions": {
+        "api/auth/signup.js": {
+            "runtime": "nodejs18.x"
+        },
+        "api/auth/signin.js": {
+            "runtime": "nodejs18.x"
+        },
+        "api/songs/save.js": {
+            "runtime": "nodejs18.x"
+        },
+        "api/songs/load.js": {
+            "runtime": "nodejs18.x"
+        },
+        "api/songs/list.js": {
+            "runtime": "nodejs18.x"
+        }
+    }
+}

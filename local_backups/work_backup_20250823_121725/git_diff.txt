@@ -1,0 +1,230 @@
+diff --git a/apps/million-song-mind/public/obs-cubes/main.js b/apps/million-song-mind/public/obs-cubes/main.js
+index b9506bf7..7e5f050f 100644
+--- a/apps/million-song-mind/public/obs-cubes/main.js
++++ b/apps/million-song-mind/public/obs-cubes/main.js
+@@ -1,5 +1,6 @@
+ import * as THREE from 'three';
+ import { Text as TroikaText } from 'troika-three-text';
++import { CubeModel } from './engine/model.js';
+ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+ import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
+ import { pickCenterPlay, isFrontOverlayHit } from './raycastRouter.js'
+@@ -464,7 +465,7 @@ function loadFaceTexture(label, romanLabel) {
+     return makeFrontLabelTextureStyled(label, romanLabel);
+ }
+ 
+-function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false) {
++function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false, drawText = true) {
+     const size = 512; // higher res for crisp edges
+     const canvas = document.createElement('canvas');
+     canvas.width = size; canvas.height = size;
+@@ -485,12 +486,14 @@ function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false
+     const d = size * 0.64;
+     ctx.fillRect(-d / 2, -d / 2, d, d);
+     ctx.restore();
+-    ctx.fillStyle = '#111';
+-    const pretty = toMusicalGlyphs(text);
+-    ctx.font = '700 160px "Bravura Text", "Noto Music", "Arial Unicode MS", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+-    ctx.textAlign = 'center';
+-    ctx.textBaseline = 'middle';
+-    ctx.fillText(pretty, size / 2, size / 2);
++    if (drawText) {
++        ctx.fillStyle = '#111';
++        const pretty = toMusicalGlyphs(text);
++        ctx.font = '700 160px "Bravura Text", "Noto Music", "Arial Unicode MS", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
++        ctx.textAlign = 'center';
++        ctx.textBaseline = 'middle';
++        ctx.fillText(pretty, size / 2, size / 2);
++    }
+     const tex = new THREE.CanvasTexture(canvas);
+     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
+     tex.generateMipmaps = true;
+@@ -1051,6 +1054,7 @@ async function createShelfCube(roman) {
+     const pos = (shelfSlots[roman] || new THREE.Vector3(0, 0, shelfZ)).clone();
+     m.position.copy(pos);
+     m.userData = { roman, letter: item.letter, rotationIndex: 0, isShelf: true };
++    try { m.userData.model = new CubeModel({ roman, key: currentKey, threeObject: m }); } catch (_) { }
+     addBorder(m, borderColorForRoman(roman));
+     // Shelf cubes live on layer 2
+     setCubeLayerRecursive(m, 2);
+@@ -1917,40 +1921,45 @@ function ensureFaceProxies(parentCube) {
+         parentCube.userData.faceProxies = proxies;
+         // Initialize tone mapping based on current rotationIndex
+         updateFaceProxyToneMap(parentCube);
+-        // Attach Troika text diamonds for visual perfection (optional step 1)
++        // Attach Troika text diamonds for visual perfection (MSDF swap)
+         try {
+-            const degLabels = degreeSets[parentCube.userData?.roman] || ['1','3','5','7'];
++            const degLabels = degreeSets[parentCube.userData?.roman] || ['1', '3', '5', '7'];
+             const faceCenters = [
+                 new THREE.Vector3(0, -half, 0),
+                 new THREE.Vector3(half, 0, 0),
+                 new THREE.Vector3(0, half, 0),
+                 new THREE.Vector3(-half, 0, 0),
+             ];
+-            const faceNormals = [new THREE.Vector3(0,-1,0), new THREE.Vector3(1,0,0), new THREE.Vector3(0,1,0), new THREE.Vector3(-1,0,0)];
++            const faceNormals = [new THREE.Vector3(0, -1, 0), new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(-1, 0, 0)];
++            const FACE_COLORS = [0x2ecc71, 0xe74c3c, 0x3498db, 0xbdc3c7]; // root,3rd,5th,7th
++            const ROT_DEGS = [0, 270, 180, 90];
+             parentCube.userData.msdfFaces = parentCube.userData.msdfFaces || [];
+             for (let faceIdx = 0; faceIdx < 4; faceIdx++) {
+                 const label = degLabels[faceIdx];
+                 const text = new TroikaText();
+                 text.text = label;
+                 text.font = 'NVXDiamond';
+-                text.color = 0x111111;
++                text.color = FACE_COLORS[faceIdx];
+                 text.fontSize = 0.42 * cubeSize;
+                 text.anchorX = 'center'; text.anchorY = 'middle';
+-                text.sync();
++                // orient text to the face normal and then rotate around local Z so glyphs are upright
+                 // Position and orient with face
+                 const n = faceNormals[faceIdx].clone();
+-                const up = new THREE.Vector3(0,0,1);
++                const up = new THREE.Vector3(0, 0, 1);
+                 const q = new THREE.Quaternion().setFromUnitVectors(up, n);
+                 text.quaternion.copy(q);
++                // Keep glyphs upright per established canvas rotation convention
++                const rotRad = -THREE.MathUtils.degToRad(ROT_DEGS[faceIdx]);
++                text.rotation.z = rotRad;
+                 text.position.copy(faceCenters[faceIdx]);
+-                // Diamond background: rotate the text container 45° visually via a parent
+-                const group = new THREE.Group();
+-                group.add(text);
+-                group.rotation.z = Math.PI/4; // diamond
+-                parentCube.add(group);
+-                parentCube.userData.msdfFaces[faceIdx] = group;
++                // rendering settings for overlay cleanliness
++                text.renderOrder = 3;
++                try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) {}
++                text.sync();
++                parentCube.add(text);
++                parentCube.userData.msdfFaces[faceIdx] = text;
+             }
+-        } catch(_) { }
++        } catch (_) { }
+     } catch (_) { }
+ }
+ 
+@@ -2845,6 +2854,7 @@ async function animateShelfClickAdd(shelf) {
+         scene.add(clone);
+         cubes.push(clone);
+         ensureFaceProxies(clone);
++        try { clone.userData.model = new CubeModel({ roman: clone.userData.roman, key: currentKey, threeObject: clone }); } catch (_) { }
+         // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
+         const xs = computeSlotPositions(lineup.length + 1);
+         const targetX = xs[lineup.length];
+@@ -2915,6 +2925,7 @@ function focusCameraOnCube(cube, durationMs = 700) {
+ // Metronome/tempo UI + engine
+ let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
+ let metroOn = false; let metroSynth = null; let metroLoop = null;
++let transportBridge = null;
+ 
+ function readFlagsFromUrl() {
+     try {
+@@ -2936,7 +2947,15 @@ function ensureTempoUi() {
+     const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
+     const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
+     const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
+-    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
++    slider.oninput = () => {
++        progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120));
++        val.textContent = `${progressionBpm} BPM`;
++        try {
++            if (window.Tone) window.Tone.Transport.bpm.value = progressionBpm;
++            if (!transportBridge) transportBridge = createBridge?.('transport');
++            transportBridge?.emit('bpm', { bpm: progressionBpm });
++        } catch (_) {}
++    };
+     const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
+     btn.onclick = async () => {
+         try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+@@ -2947,9 +2966,11 @@ function ensureTempoUi() {
+         if (!metroOn) {
+             try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
+             btn.textContent = 'Metronome: On'; metroOn = true;
++            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('start', { bpm: progressionBpm }); } catch (_) {}
+         } else {
+             try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
+             btn.textContent = 'Metronome: Off'; metroOn = false;
++            try { if (!transportBridge) transportBridge = createBridge?.('transport'); transportBridge?.emit('stop', {}); } catch (_) {}
+         }
+     };
+     box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+@@ -3274,7 +3295,7 @@ function lockInMelody() {
+             const ROT_DEGS = [0, 270, 180, 90];
+             const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+             const symbol = degs[topIdx];
+-            const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
++            const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true, false);
+             try { faceMat.side = THREE.DoubleSide; } catch (_) { }
+             const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
+             // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+@@ -3283,8 +3304,22 @@ function lockInMelody() {
+             plane.rotation.z = melUpright;
+             plane.userData.uprightZ = melUpright;
+             plane.position.z = 0.002;
++            // Overlay MSDF glyph using NVXDiamond
++            const msdf = new TroikaText();
++            msdf.text = symbol;
++            msdf.font = 'NVXDiamond';
++            msdf.color = FACE_COLORS[topIdx];
++            msdf.fontSize = 0.44 * cubeSize;
++            msdf.anchorX = 'center'; msdf.anchorY = 'middle';
++            msdf.rotation.z = melUpright;
++            msdf.position.z = 0.004;
++            msdf.renderOrder = 5;
++            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) {}
++            msdf.userData.uprightZ = melUpright;
++            msdf.sync();
+             const group = new THREE.Group();
+             group.add(plane);
++            group.add(msdf);
+             const p = new THREE.Vector3(); cube.getWorldPosition(p);
+             const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
+             const zBack = p.z - half - 0.002;
+@@ -3336,7 +3371,7 @@ function lockInBass() {
+             const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+             const ROT_DEGS = [0, 270, 180, 90];
+             // Match cube face orientation exactly for bass giants
+-            const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true);
++            const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true, false);
+             try { mat.side = THREE.DoubleSide; } catch (_) { }
+             const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), mat);
+             // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+@@ -3344,6 +3379,19 @@ function lockInBass() {
+             const bassUpright = (-(ROT_DEGS[bottomIdx] || 0) * (Math.PI / 180)) + extraFlipB;
+             mesh.rotation.z = bassUpright;
+             mesh.userData.uprightZ = bassUpright;
++            // Overlay MSDF glyph using NVXDiamond
++            const msdf = new TroikaText();
++            msdf.text = symbol;
++            msdf.font = 'NVXDiamond';
++            msdf.color = FACE_COLORS[bottomIdx];
++            msdf.fontSize = 0.44 * cubeSize;
++            msdf.anchorX = 'center'; msdf.anchorY = 'middle';
++            msdf.rotation.z = bassUpright;
++            msdf.position.z = 0.004;
++            msdf.renderOrder = 5;
++            try { if (msdf.material) { msdf.material.depthWrite = false; msdf.material.depthTest = true; } } catch (_) {}
++            msdf.userData.uprightZ = bassUpright;
++            msdf.sync();
+             // Center on cube and place so the diamond top tip touches the cube's front-bottom edge
+             const p = new THREE.Vector3(); cube.getWorldPosition(p);
+             const s = cube.scale?.x || cube.scale || 1;
+@@ -3353,9 +3401,12 @@ function lockInBass() {
+             // distance from center of our plane to diamond's top tip; we used d=size*0.64 for the square, so half-diagonal is (d/2)*sqrt(2)
+             const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+             const centerY = yBottom - diamondHalf;
+-            mesh.position.set(p.x, centerY, zFront);
+-            mesh.renderOrder = 4; if (mesh.material) mesh.material.depthWrite = false;
+-            bassGiantGroup.add(mesh);
++            const group = new THREE.Group();
++            group.add(mesh);
++            group.add(msdf);
++            group.position.set(p.x, centerY, zFront);
++            group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
++            bassGiantGroup.add(group);
+         }
+         bassGiantGroup.visible = !!(showGiantBassEl?.checked ?? true);
+         scene.add(bassGiantGroup);

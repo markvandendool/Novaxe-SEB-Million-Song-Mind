@@ -1,0 +1,299 @@
+<section id="editor" (contextmenu)="$event.preventDefault();" tabindex="2"><!-- MAIN -->
+
+	<!-- tab -->
+	<!-- 	<div class="tab " [ngClass]="{editOn:display==true}" 
+	(contextmenu)="display=!display;$event.preventDefault();" 
+	(click)="display=!display">
+	<i class="fas fa-edit" style="font-weight:400;"></i>
+	</div>
+	-->
+
+	<div class="main_col">
+
+		<div class="w-100 d-flex icons">
+			<i class="fas fa-copy p-2" (click)="copySelection()" title="Copy"></i>
+			<i class="fas fa-paste p-2" (click)="paste_only_chords()" title="Paste only chords"></i>
+			<!-- <i class="fas fa-file-audio p-2" (click)="pasteSelection()" title="Paste with audio zones and chords"></i> -->
+			<i class="fas fa-plus p-2" style="color:var(--green_nvx);" (click)="addNextPart()" title="Add part"></i>
+			<i class="fas fa-plus p-2" style="color:var(--red_nvx);" (click)="addMeasure()" title="Add measure"></i>
+			<i class="fas fa-search p-2" (click)="analysePopup()" title="Analyse"></i>
+			<i class="p-2 display" (click)="switch_chords_display()" title="Change display">I</i> 
+			<i class="fas fa-save p-2" (click)="save()" title="Save"></i>
+			<!-- <i class="fas fa-cog p-2" (click)="debug()" title="DEBUG"></i> -->
+		</div>
+
+		<div id="score_infos">
+			<a class="collapsible" data-toggle="collapse" href="#collapseScoreinfo" role="button" aria-expanded="false" aria-controls="collapseScoreinfo">
+				Score informations
+			</a>
+
+			<div class="collapse " id="collapseScoreinfo">
+				<div class="card card-body content score_infos"> 
+					<span class="box_informations"> 
+						<label for="title">Title</label> 								
+						<input  (change)="render(0,0,'header'); getAlbumItems()" [(ngModel)]="song.title" class="form-control input-xs" id="title" name="title" type="text"> 
+					</span>
+					<span > 
+						<label for="artist">Artist</label> 							
+						<input  (change)="render(0,0,'header'); getAlbumItems()" [(ngModel)]="song.artist" class="form-control input-xs" id="artist" name="artist" type="text"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="album">Album</label>
+						<input  (change)="render(0,0,'header')" [(ngModel)]="song.album" class="form-control input-xs" id="album" name="album" type="text"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="album">Style</label>
+						<input  (change)="render(0,0,'header')" [(ngModel)]="song.style" class="form-control input-xs" id="style" name="style" type="text"> 
+					</span>
+					<span > 
+						<label for="tonality">Tonality</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.tonality" class="form-control input-xs" id="tonality" name="tonality" type="text"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="tonality">Signature</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.signature" class="form-control input-xs" id="signature" name="signature" type="text"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="default_dur">Default dur</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.default_duration" class="form-control input-xs" id="default_dur" name="default_dur" type="text"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="clef">Clef</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.clef" class="form-control input-xs" id="clef" name="clef" type="text"> 
+					</span>
+					<span > 
+						<label for="transposition">Transposition</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.transpose" class="form-control input-xs" id="transpose" name="transpose" type="number"> 
+					</span>
+					<span class="box_informations"> 
+						<label for="m_per_l">Measures per line</label> 
+						<input (change)="render(0,0,'header')"  [(ngModel)]="song.m_per_l" class="form-control input-xs" id="m_per_l" name="m_per_l" type="text"> 
+					</span>
+					 <!-- ********************STORE TODO:DISPLAY***************** -->
+					<!-- <span class="box_informations"> 
+						<label for="price">Score price (CAD)</label> 
+						<input (change)="render(0,0,'header'); showImgUpload($event)"  [(ngModel)]="song.price" class="form-control input-xs" id="price" name="price" type="text" min="0">
+					</span> -->
+					<span class="box_informations" style="flex-direction: column;"> 
+						<div class="d-flex" style="flex-direction: row; width: 100%;">
+							<label for="img">Cover image link</label> 
+							<input (change)="render(0,0,'header')" [(ngModel)]="song.img" class="form-control input-xs" id="img" name="img" type="text" min="0">
+						</div>
+						<div class="row d-flex w-100" style="justify-content: center; padding: 20px 20px 0; align-items:center;">
+							<a id="prev" [hidden]="autoSearch==false || i_img==0" (click)="getAlbumImage($event)" style="cursor:pointer;">
+	                    		<i class="fas fa-angle-left" style="font-size:40px;"></i>
+	                    	</a>
+
+	                    	<img src="{{(!song.img || song.img.endsWith('/spacer.gif'))? '../assets/img/empty_score.png' : song.img}}" onerror="this.src='../assets/img/empty_score.png'" alt="Album image">
+
+	                    	<a id="next" [hidden]="autoSearch==false || i_img==49" (click)="getAlbumImage($event)" style="cursor:pointer;">
+	                    		<i class="fas fa-angle-right" style="font-size:40px;"></i>
+	                    	</a>
+	                    </div>
+					</span>
+				</div>
+			</div>
+		</div>
+
+
+
+
+		<div class="cutting">
+
+			<a class="collapsible" data-toggle="collapse">Parts</a>
+
+			<div class="parts_container collapse show" id="collapseScoreparts">
+				
+				<div class="card card-body content">
+
+					<div class="part"
+							 [attr.id]="'part_'+p_idx" 
+							 tabindex="0" 
+							 (click)="selectPart(p_idx)" 
+							 (keydown.control.c)="copySelection()" 
+							 (keydown.control.v)="paste_only_chords()" 
+							 (keydown.delete)="deletePart(p_idx)"
+							 *ngFor="let p of this.parts; let p_idx = index"> 
+
+
+							<!-- PARTS SPACE -->
+
+							<!-- ONE PART -->
+							<div class="part-container">
+								<span class="part-content d-flex collapsible collapsed"
+											data-toggle="collapse" 
+											[attr.href]="'#collapseMeasures'+p_idx" 
+											data-parent="#collapseBigGroup"
+											aria-expanded="true" 
+											[attr.aria-control]="'collapseMeasures'+p_idx">
+
+											<a><i class="fas collapsible fa-angle-double-up p-1"></i></a>
+								</span>
+
+								<span class="title">
+									<input class="form-control input-xs title-input"
+												 placeholder="Title" 
+												 (change)="render(p_idx,0,'header')" 
+												 [(ngModel)]="p.title" 
+												 [attr.id]="'part_'+p_idx+'_title'" 
+												 name="title" 
+												 type="text">
+								</span>
+
+								<span class="ml-auto d-flex" >
+									<span class="key">
+										<input class="form-control input-xs ml-1 key-input" 
+													 placeholder="Key" 
+													 (change)="render(p_idx,0,'header')" 
+													 [(ngModel)]="p.tonality" 
+													 [attr.id]="'part_'+p_idx+'_tonality'" 
+													 name="title" 
+													 type="text"> 
+									</span>
+
+									<span class="meter">
+										<input class="form-control input-xs ml-1 meter-input"
+													 placeholder="Meter" 
+													 (change)="change_signature_in_model_rerender(p_idx)" 
+													 [(ngModel)]="p.meter"  
+													 [attr.id]="'part_'+p_idx+'_signature'" 
+													 name="signature" 
+													 type="text"> 
+									</span>
+
+									<i class="ml-2 fas fa-window-close p-1" (click)="deletePart(p_idx)"></i> 
+								</span>
+							</div><!-- part-container -->
+
+
+							<div id="collapseBigGroup">
+
+								<div class="collapse card card-body content" [attr.id]="'collapseMeasures'+p_idx">
+
+									<div [attr.id]="'measure_'+p_idx+'_'+i" 
+											 class="measure" 
+											 tabindex="1"
+											 (click)="selectMeasure(p_idx,i)" 
+											 (keydown.control.c)="copySelection()" 
+											 (keydown.control.v)="paste_only_chords()" 
+											 (keydown.delete)="deleteSelection(p,m)"
+											 *ngFor="let m of p.getMeasures(); let i = index">
+
+										<span class="w100 measures collapsed" 
+													data-toggle="collapse" 
+													[attr.href]="'#measure_hidden_'+p_idx+'_'+i" 
+													aria-expanded="false" 
+													[attr.aria-controls]="'measure_hidden_'+p_idx+'_'+i"
+													(click)="collapse_measure(p_idx,i);">
+
+													<span class="measures-idx">
+														<i class="fas collapsible fa-angle-double-up"></i>
+														<div class="idx">{{getMeasureIdxs(m)}}</div>
+														<i class="fas fa-play m-1" (click)="playMeasure(p,m)"></i>
+													</span>
+
+													<!-- CHORD INPUT LINE -->
+													<div class="measure_chords">
+														<input placeholder="Chords" 
+																	 autocomplete="off" 
+																	 (keydown.shift.space)="playPauseMeasure(p,m)"
+																	 (change)="render(p,m,'chords');" 
+																	 [attr.name]="'chords_row_'+i" 
+																	 [(ngModel)]="m.chords" 
+																	 (focus)="selectMeasure(p_idx,i)"
+																	 class="form-control input-sm" 
+																	 type="text"> 
+													</div>
+
+													<!-- <i [ngClass]="{'active':m.hasOwnProperty('audioRegion')}" (click)="addMarkerToSelection(p,m)" class="fas fa-thumbtack"> </i> -->
+													<i (click)="deleteSelection(p,m)" class="ml-2 fas fa-window-close"></i>
+										</span>
+
+										<div [attr.id]="'measure_hidden_'+p_idx+'_'+i" class="collapse">
+											<div class="measure_row" >
+												<!-- <label [attr.for]="'notes_row_'+p_idx+'_'+i">Notes:</label>  -->
+												<input placeholder="Notes" 
+															 autocomplete="off" 
+															 (change)="render(p,m,'notes')" 
+															 [attr.name]="'notes_row_'+i" 
+															 [(ngModel)]="m.notes" 
+															 class="form-control input-sm" 
+															 type="text">
+											</div>
+
+											<!-- <div class="measure_row" >
+												<label [attr.for]="'lyrics_row_'+p_idx+'_'+i">Lyrics:</label> 
+												<input placeholder="Lyrics" 
+												autocomplete="off" 
+												(change)="render(p,m,'lyrics')" 
+												[attr.name]="'lyrics_row_'+i" 
+												[(ngModel)]="m.lyrics"
+												class="form-control input-sm" 
+												type="text">
+											</div> -->
+
+											<div class="measure_row" >
+												<!-- <label [attr.for]="'analysis_row_'+p_idx+'_'+i">Analysis :</label>  -->
+												<input placeholder="Analysis" 
+															 autocomplete="off" 
+															 (change)="render(p,m,'analysis')" 
+															 [attr.name]="'analysis_row_'+i" 
+															 [(ngModel)]="m.analysis" 
+															 class="form-control input-sm" 
+															 type="text">
+											</div>
+
+											<div class="measure_row" >
+												<label [attr.for]="'line_row_'+p_idx+'_'+i">Go to line</label> 
+												<input (change)="render(p,m,'eol')" 
+															 [attr.name]="'gotoline_row_'+i" 
+															 [(ngModel)]="m.eol" 
+															 class="form-control input-sm" 
+															 type="checkbox">
+											</div>
+
+											<div class="measure_row" >
+												<!-- <label [attr.for]="'analysis_row_'+p_idx+'_'+i">Analysis :</label>  -->
+												<!-- <input placeholder="" autocomplete="off" (change)="" [(ngModel)]="m.analysis" class="form-control input-sm" type="text"> -->
+												<app-scale-selector 
+													[scale_tona]="m.scale.scale_tona"
+													[scale_type]="m.scale.scale_type"
+													[measure]="m"
+													[caged_position]="m.scale.caged_position">
+												</app-scale-selector>
+											</div>
+
+										</div><!-- collapse -->
+									</div><!-- measure -->
+								</div> <!-- parts collapsible -->
+							</div> <!-- #collapse-big-group -->
+					</div><!-- part -->
+				</div><!-- card -->
+			</div><!-- parts_container -->
+		</div><!-- cutting -->
+	</div> <!-- main_col -->
+
+<!--------------------------------->
+<!--------- MODAL ANALYSE CONTROLS-->
+<!--------------------------------->
+<div class="fakebook-modal modal" id="analyse-modal" [hidden]="modalAnalyse==false" tabindex="-1" role="dialog" aria-labelledby="analyse-modal-label" aria-hidden="true">
+	<div class="modal-dialog" role="document">
+	  <div class="modal-content">
+		<div class="modal-header">
+		  <h5 class="modal-title" id="analyse-modal-label">Analyse</h5>
+		  <button type="button" class="close" data-dismiss="modal" aria-label="Close" (click)="modalAnalyse=false">
+			<span aria-hidden="true">&times;</span>
+		  </button>
+		</div>
+		<div class="modal-body">
+		  <!-- <textarea [(ngModel)]="exported_controls" readonly></textarea> -->
+		  <pre>Analysing will replace your own analyse. You sure ?</pre>
+		</div>
+		<div class="modal-footer">
+		  <button type="button" class="btn btn-primary" (click)="modalAnalyse=false;analyse();" data-dismiss="modal">Analyse</button>
+		</div>
+	  </div>
+	</div>
+  </div>
+</section><!-- MAIN -->
+

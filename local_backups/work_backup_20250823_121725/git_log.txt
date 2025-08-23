@@ -1,0 +1,20 @@
+d8c32b31 v1.1: MSDF swap for face labels and giants; Tone.js transport bridge hooks
+4c84a476 v1.1: integrate Troika-three-text MSDF path and attach per-face NVXDiamond labels (phase 1)
+87ccb6f5 obs-cubes: correct proxy face→tone mapping (0 bottom,1 right,2 top,3 left) and hard-bind proxy clicks
+56755bb9 obs-cubes: hard-bind face proxy clicks to exact tones; add V1.0 title; backup hooks next
+65447113 obs-cubes: fix regression – map face proxies to tones from rotationIndex; update proxy maps on rotation and after shelf pull; use proxies in note derivation
+0eee30d7 obs-cubes: introduce face proxies for robust tone identity; use proxies for bass/melody note derivation; attach proxies to shelf and clones
+81a9e7e2 obs-cubes: add debugAudio logs; re-verify rotationIndex on replay; log bed/bass/melody midis
+680404f5 logs: nightly update - lock melody fix, key labels, audio separation
+b8b1fdd8 obs-cubes: when melody is locked, remove highest bed voice so top melody plays actual locked note
+0d19359f obs-cubes: key-aware letter labels; lock melody fix retained
+7f36f9e5 obs-cubes: fix Lock Melody mismatch by face-normal sync + lock deferral; add rotationIndex sync from quaternion
+c2e29e1b Nightly log, backup: stage mode, highlights, metronome, camera dolly; note chord V inversion edge case
+219b5387 Wire camera dolly follow inside playFrontRowProgression loop
+33b5ab04 Dolly camera with active chord (closer Z) for smoother follow
+6f76f1f1 Add smooth camera follow for active chord during progression
+e5c8485a Add flashy active chord highlight effects and giants pulse; add Tempo/Metronome UI with Tone.js loop; hook tempo to progression; wire UI creation on loadSet; keep inversion mapping screen-space only
+9b03e6d5 Stage mode lighting tuned; Venn 10%; giants orientation fixed (3rd/7th +180°, pinned); fast screen-space shelf inversion mapping with logs; note: chord V edge case still noncompliant
+a278f7c3 Revert shelf inversion mapping to root-only pull; keep quadrant logic removed to avoid forbidden shelf map; stage spotlight +40%
+21791698 Stage mode: spotlight front row; dim Venn to 10%; keep shelf cubes 100%; fix giants orientation (3rd/7th +180°); permanent upright; lighting boosts; shelf inversion reverted; performance camera delay
+4d63b932 Phase B: Migrated LearnFifthsComponent - build+visual gates passed

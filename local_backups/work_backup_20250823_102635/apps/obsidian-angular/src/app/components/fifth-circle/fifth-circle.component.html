@@ -1,0 +1,105 @@
+<section id="thcircle">
+<div class="wrapper">
+	<svg height="100%" width="100%" version="1.1" viewBox="-20 -20 410 410" xmlns="http://www.w3.org/2000/svg">
+		<defs>
+			<g id='triangle' style="transform: translate(96px, 60px);">
+				<path d="M 89.048118,125.60966 140.66796,-64.182915 c 0,0 -48.656768,-14.347508 -101.992068,-0.311902 9.980874,36.18067 50.372226,190.104477 50.372226,190.104477 z"></path>
+			</g>
+		</defs>
+
+		<circle transform="translate(0 -165)" cx="184" cy="354" r="160" class="back-circle"/>
+
+		<use xlink:href="#triangle" class="selection_background" [ngClass]="{'active':selected_fifth=='C' || selected_mfifth=='Am' }"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='G' || selected_mfifth=='Em' }" transform="rotate(30)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='D' || selected_mfifth=='Bm' }" transform="rotate(60)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='A' || selected_mfifth=='F#m' || selected_mfifth=='Gbm' }" transform="rotate(90)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='E' || selected_mfifth=='C#m' || selected_mfifth=='Dbm' }" transform="rotate(120)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='B' || selected_mfifth=='G#m' || selected_mfifth=='Abm' }" transform="rotate(150)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='Gb' || selected_mfifth=='Ebm' }" transform="rotate(180)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='Db' || selected_mfifth=='Bbm' }" transform="rotate(210)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='Ab' || selected_mfifth=='Fm' }" transform="rotate(240)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='Eb' || selected_mfifth=='Cm' }" transform="rotate(270)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='Bb' || selected_mfifth=='Gm' }" transform="rotate(300)"/>
+		<use xlink:href="#triangle" style="transform-origin: 185px 188px;" class="selection_background" [ngClass]="{'active':selected_fifth=='F' || selected_mfifth=='Dm' }" transform="rotate(330)"/>
+
+		<g id="path" #path_group>
+			<circle class="path_point" cx="183" cy="98" r="1.85"   [ngClass]="{'active':selected_fifth=='C' || selected_mfifth=='Am' }"/>
+			<circle class="path_point" cx="229" cy="110.9" r="1.85" [ngClass]="{'active':selected_fifth=='G' || selected_mfifth=='Em' }"/>
+			<circle class="path_point" cx="259" cy="145" r="1.85"  [ngClass]="{'active':selected_fifth=='D' || selected_mfifth=='Bm' }"/>
+			<circle class="path_point" cx="272" cy="190" r="1.85"  [ngClass]="{'active':selected_fifth=='A' || selected_mfifth=='F#m' || selected_mfifth=='Gbm' }"/>
+			<circle class="path_point" cx="262" cy="232" r="1.85"  [ngClass]="{'active':selected_fifth=='E' || selected_mfifth=='C#m' || selected_mfifth=='Dbm' }"/>
+			<circle class="path_point" cx="231" cy="268" r="1.85"  [ngClass]="{'active':selected_fifth=='B' || selected_mfifth=='G#m' || selected_mfifth=='Abm' }"/>
+			<circle class="path_point" cx="184" cy="279" r="1.85"  [ngClass]="{'active':selected_fifth=='Gb' || selected_mfifth=='Ebm' }"/>
+			<circle class="path_point" cx="135" cy="268" r="1.85"  [ngClass]="{'active':selected_fifth=='Db' || selected_mfifth=='Bbm' }"/>
+			<circle class="path_point" cx="105" cy="233" r="1.85"  [ngClass]="{'active':selected_fifth=='Ab' || selected_mfifth=='Fm' }"/>
+			<circle class="path_point" cx="93.8" cy="187" r="1.85" [ngClass]="{'active':selected_fifth=='Eb' || selected_mfifth=='Cm' }" />
+			<circle class="path_point" cx="108" cy="143" r="1.85"  [ngClass]="{'active':selected_fifth=='Bb' || selected_mfifth=='Gm' }"/>
+			<circle class="path_point" cx="138" cy="111" r="1.85"  [ngClass]="{'active':selected_fifth=='F' || selected_mfifth=='Dm' }"/>
+		</g>
+
+		<g transform="translate(0 -165)">
+			<g id="major">
+				<text [ngClass]="{'active':selected_fifth=='C'}" x="176" y="188.36215" class="fifths">C</text>
+				<text [ngClass]="{'active':selected_fifth=='G'}" x="260" y="210.36215" class="fifths">G</text>
+				<text [ngClass]="{'active':selected_fifth=='D'}" x="328" y="275.36218" class="fifths">D</text>
+				<text [ngClass]="{'active':selected_fifth=='A'}" x="350" y="365.36218" class="fifths">A</text>
+				<text [ngClass]="{'active':selected_fifth=='E'}" x="330" y="450.36218" class="fifths">E</text>
+				<text [ngClass]="{'active':selected_fifth=='B'}" x="263" y="520.36218" class="fifths">B</text>
+				<text [ngClass]="{'active':selected_fifth=='Gb'}" x="170" y="542.36218" class="fifths">Gb</text>
+				<text [ngClass]="{'active':selected_fifth=='Db'}" x="80" y="520.36218" class="fifths">Db</text>
+				<text [ngClass]="{'active':selected_fifth=='Ab'}" x="15" y="448.36218" class="fifths">Ab</text>
+				<text [ngClass]="{'active':selected_fifth=='Eb'}" x="-5" y="360.36218" class="fifths">Eb</text>
+				<text [ngClass]="{'active':selected_fifth=='Bb'}" x="20" y="273.36218" class="fifths">Bb</text>
+				<text [ngClass]="{'active':selected_fifth=='F'}" x="90" y="210.36215" class="fifths">F</text>
+
+				<text [ngClass]="{'active':selected_fifth=='C'}" x="190" y="188.36215" id="fifths_ext_C" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='G'}" x="276" y="210.36215" id="fifths_ext_G" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='D'}" x="341" y="270.36218" id="fifths_ext_D" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='A'}" x="360" y="355.36218" id="fifths_ext_A" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='E'}" x="344" y="444.36218" id="fifths_ext_E" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='B'}" x="279" y="508.36218" id="fifths_ext_B" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='Gb'}" x="198" y="530.36218" id="fifths_ext_Gb" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='Db'}" x="119" y="503.36218" id="fifths_ext_Db" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='Ab'}" x="50" y="444.36218" id="fifths_ext_Ab" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='Eb'}" x="24" y="355.36218" id="fifths_ext_Eb" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='Bb'}" x="52" y="273.36218" id="fifths_ext_Bb" class="fifths_ext"></text>
+				<text [ngClass]="{'active':selected_fifth=='F'}" x="100" y="209.36215" id="fifths_ext_F" class="fifths_ext"></text>
+			</g>
+
+			<g id="minor">
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Am'}" x="175.41632" y="220.34468"><tspan x="175.41632" y="220.34468" >Am</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Dm'}" x="105.00448" y="240.70085"><tspan x="105.00448" y="240.70085" >Dm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Gm'}" x="50.500919" y="292.64285"><tspan x="50.500919" y="292.64285" >Gm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Cm'}" x="30.585354" y="358.73105"><tspan x="30.585354" y="358.73105" >Cm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Fm'}" x="48.601101" y="427.13083"><tspan x="48.601101" y="427.13083" >Fm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Bbm'}" x="98.86298" y="480.49033"><tspan x="98.86298" y="480.49033" >Bbm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Ebm'}" x="170.39803" y="502.32037"><tspan x="170.39803" y="502.32037" >Ebm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='G#m'}" x="240.19267" y="482.47498"><tspan x="240.19267" y="482.47498" >G#m</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='C#m'}" x="292.24832" y="430.80945"><tspan x="292.24832" y="430.80945" >C#m</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='F#m'}" x="315.58072" y="361.58005"><tspan x="315.58072" y="361.58005" >F#m</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Bm'}" x="300.17484" y="292.56714"><tspan x="300.17484" y="292.56714" >Bm</tspan></text>
+				<text class="fifths_m" [ngClass]="{'active':selected_mfifth=='Em'}" x="246.66835" y="238.64746"><tspan x="246.66835" y="238.64746" >Em</tspan></text>
+			</g>
+
+			<g id="alter">
+				<text [ngClass]="{'active':selected_fifth=='F'||selected_mfifth=='Dm'}" x="125.66895" y="260.15071"><tspan x="125.66895" y="260.15071">b</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='Bb'||selected_mfifth=='Gm'}" x="79.568993" y="303.22482"><tspan x="79.568993" y="303.22482">2 b</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='Eb'||selected_mfifth=='Cm'}" x="63.265617" y="355.16306"><tspan x="63.265617" y="355.16306">3 b</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='Ab'||selected_mfifth=='Fm'}" x="73.656746" y="412.06149"><tspan x="73.656746" y="412.06149">4 b</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='Db'||selected_mfifth=='Bbm'}" x="120.36554" y="454.85345"><tspan x="120.36554" y="454.85345">5 b</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='Gb'||selected_mfifth=='Ebm'}" x="174.23462" y="470.00009"><tspan x="174.23462" y="470.00009">6 #</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='B'||selected_mfifth=='G#m'}" x="236.70181" y="453.86963"><tspan x="236.70181" y="453.86963">5 #</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='E'||selected_mfifth=='C#m'}" x="275.71313" y="412.83527"><tspan x="275.71313" y="412.83527">4 #</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='A'||selected_mfifth=='F#m'}" x="290.86569" y="357.06415"><tspan x="290.86569" y="357.06415">3 #</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='D'||selected_mfifth=='Bm'}" x="278.18771" y="300.59937"><tspan x="278.18771" y="300.59937">2 #</tspan></text>
+				<text [ngClass]="{'active':selected_fifth=='G'||selected_mfifth=='Em'}" x="238.54335" y="260.36159"><tspan x="238.54335" y="260.36159">#</tspan></text>
+			</g>
+		</g>
+	</svg>
+
+<!-- <button class="btn btn-primary" (click)="next_fifth()">next_fifth()</button>
+<button class="btn btn-primary" (click)="next_fourth()">next_fourth()</button>
+<button class="btn btn-primary" (click)="toggle_mode()">toggle_mode()</button>
+ -->
+</div>
+</section>

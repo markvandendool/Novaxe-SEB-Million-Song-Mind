@@ -1,0 +1,357 @@
+/* You can add global styles to this file, and also import other style files */
+// @import "../node_modules/uikit/dist/css/uikit.min.css";
+// @import "../node_modules/uikit/dist/css/uikit.css";
+// @import "../node_modules/uikit/dist/css/uikit-core.css";
+@import url("https://fonts.googleapis.com/css?family=Staatliches");
+body {
+  // font-family: Staatliches !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+
+a {
+  text-decoration: none;
+}
+
+h1 {
+  font-family: Staatliches;
+  font-size: 120px;
+}
+
+#category {
+  font-family: Staatliches;
+  font-weight: 500;
+}
+
+#title {
+  letter-spacing: 0.4px;
+  font-size: 22px;
+  font-size: 1.375rem;
+  line-height: 1.13636;
+}
+
+#banner {
+  margin: 20px;
+  height: 800px;
+}
+
+#editor {
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+#dico {
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+#options {
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.uk-navbar-container {
+  background: #fff !important;
+  font-family: Staatliches;
+}
+
+// img:hover {
+//   opacity: 1;
+//   transition: opacity 0.25s cubic-bezier(0.39, 0.575, 0.565, 1);
+// }
+
+// ===============================================================
+//                          SLIDER SCROLLBAR
+// ===============================================================
+
+  /* width */
+::-webkit-scrollbar {
+  width: 10px;
+  
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  // background: #888; 
+  // background:linear-gradient(180deg,#ff8a00,#e52e71);
+  background:linear-gradient(180deg,#28a745, #343a40);
+
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555; 
+}
+.modal-backdrop {
+  z-index: 0 !important;
+  color:red;
+}
+
+
+
+// ===============================================================
+//                          GLOW
+// ===============================================================
+
+
+/* Glow effect for texts */
+@-webkit-keyframes glow-text {
+     from {
+    text-shadow: 0 0 20px currentColor, 0 0 30px currentColor, 0 0 40px currentColor, 0 0 50px currentColor, 0 0 60px currentColor, 0 0 70px currentColor;
+  }
+  
+  to {
+    text-shadow: 0 0 20px #00000000, 0 0 30px #00000000, 0 0 40px #00000000, 0 0 50px #00000000, 0 0 60px #00000000, 0 0 70px #00000000;
+  }
+
+}
+
+.text-glow {
+  // animation: glow-text 1.5s infinite ease-in-out; 
+  -webkit-animation: glow-text 2s ease-in-out infinite alternate;
+  -moz-animation: glow-text 2s ease-in-out infinite alternate;
+  animation: glow-text 2s ease-in-out infinite alternate;
+}
+
+
+/* Glow effect for buttons */
+@keyframes red {
+  0%, 100% {
+    box-shadow: 1px 0px 19px 20px #ff0000, inset 0px 0px 10px rgba(255, 255, 255, 0.7); }
+
+  50% {
+    box-shadow: 0px 0px 0px 0px rgba(255, 0, 0, 1), inset 0px 0px 0px rgba(255, 255, 255, 0.5); } }
+
+@keyframes green {
+  0%, 100% {
+    box-shadow: 1px 0px 19px 20px #00ff00, inset 0px 0px 10px rgba(255, 255, 255, 255); 
+  }
+
+  50% {
+    box-shadow: 0px 0px 0px 0px rgba(0, 255, 0, 1), inset 0px 0px 0px rgba(255, 255, 255, 255); 
+  } 
+}
+
+
+
+.green:focus {
+  animation: green 2s infinite; 
+}
+
+.red:focus {
+  animation: red 0.5s infinite ease-in-out; 
+}
+
+// ===============================================================
+//                          BUTTONS
+// ===============================================================
+/* Gif effect for buttons */
+.btn{
+  // padding: 20px 30px !important;
+  font-weight: bold !important;
+}
+
+.btn-gif {
+  z-index: -2;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('assets/gif/cadre2.gif');
+  background-size: 100px 60px;
+  background-position: center;
+  color: #007BFF !important; 
+  border: none !important;
+  background-repeat: no-repeat;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+.btn-gif-hover {
+  position: relative;
+  z-index: 1;
+  outline: 0;
+  -webkit-font-smoothing: antialiased;
+  border: none !important;
+}
+
+.btn-gif-hover:hover {
+  z-index: -2;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('assets/gif/cadre2.gif');
+  background-size: 100px 60px;
+  background-position: center;
+  color: #007BFF !important; 
+  border: none !important;
+  background-repeat: no-repeat;
+  background-color: transparent !important;
+  transition: none !important;
+}
+
+
+// ===============================================================
+//                          MODALS
+// ===============================================================
+.modal .modal-body{font-size: 1.2em;}
+
+.modal .btn-secondary{background-color: var(--gray_sec);border-color: var(--gray_sec);padding: 10px;}
+.modal .btn-secondary:hover{background-color: #c0c0c0; border-color: #c0c0c0;}
+.modal .btn-primary{background-color: var(--blue_nvx);border-color: var(--blue_nvx);padding: 10px;}
+.modal .btn-primary:hover {background-color: #3b4ec5;border-color: #3b4ec5;}
+
+
+// ===============================================================
+//                          COLORS
+// ===============================================================
+
+
+// EXAMPLE OF USE : var(--dark_prim)
+:root 
+{
+  --dark_prim: #000000;
+  --light_prim: #ffffff;
+  --gray_prim: #efefef;
+  --gray_sec: #8f8f8f;
+
+  --gray_nvx: #49525b;
+  --darkgray_nvx: #343a40;
+
+  --red_nvx: #ed1c24;
+  --green_nvx: #28a745;
+  --blue_nvx: #2b3990;
+  --yellow_nvx: #ffff92;
+
+  --lightred_nvx: #ff7a7e;
+  --lightblue_nvx:#798aff;
+  --lightgreen_nvx:#34ff00;
+  
+  --font_warn:Staatliches;
+
+  --selection:#008000ff;
+  --selection-transparent:#00800038;
+}
+
+// ===============================================================
+//                          SELECTION
+// ===============================================================
+
+::selection {
+  background-color: #00800078 !important;
+}
+
+// ===============================================================
+
+
+// ===============================================================
+//                          FONTS
+// ===============================================================
+
+.font1{
+  font-family: var(--font_warn);
+}
+
+@font-face {
+  font-family: "nvxScale";
+  // src: url("../../res/NVXScaleDegreeFont.otf");
+  src: url("assets/font/NovaxeSDCTFont.otf");
+}
+
+// ===============================================================
+//                          TOOLTIPS
+// ===============================================================
+/* Tooltip container */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.tooltip .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  padding: 5px 0;
+  border-radius: 6px;
+
+  /* Position the tooltip text */
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+
+  /* Fade in tooltip */
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* Tooltip arrow */
+.tooltip .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+
+
+
+[tooltip]:hover:after {
+  font-family: var(--font_warn);
+  opacity: 1;
+  transition: all 0.1s ease 0.5s;
+  visibility: visible;
+}
+[tooltip]:after {
+  content: attr(tooltip);
+  position: absolute;
+  bottom: -1.6em;
+  left: 100%;
+  padding: 4px 4px 4px 8px;
+  color: #666;
+  white-space: nowrap;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  -moz-box-shadow: 0px 0px 4px #666;
+  -webkit-box-shadow: 0px 0px 4px #666;
+  box-shadow: 0px 0px 4px #666;
+  // background-image: -moz-linear-gradient(top, #f0eded, #bfbdbd);
+  // background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0, #f0eded), color-stop(1, #bfbdbd));
+  // background-image: -webkit-linear-gradient(top, #f0eded, #bfbdbd);
+  // background-image: -moz-linear-gradient(top, #f0eded, #bfbdbd);
+  // background-image: -ms-linear-gradient(top, #f0eded, #bfbdbd);
+  // background-image: -o-linear-gradient(top, #f0eded, #bfbdbd);
+  background-color:var(--dark_prim);
+  color:white;
+  opacity: 1;
+  z-index: 99999;
+  visibility: hidden;
+}
+[tooltip] {
+  position: relative;
+}
+
+
+text{fill:black;} 

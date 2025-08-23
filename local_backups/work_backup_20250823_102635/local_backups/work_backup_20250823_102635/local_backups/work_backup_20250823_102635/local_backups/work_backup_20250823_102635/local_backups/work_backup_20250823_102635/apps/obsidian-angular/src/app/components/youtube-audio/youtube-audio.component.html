@@ -1,0 +1,128 @@
+<section id="yt-audio">
+
+<div class="youtube-audio-container" 
+	[ngClass]="{show:(visible==true&&display_Y==false),show_mas:(visible==true&&display_Y==true)}" 
+	[hidden]="visible==false" 
+	tabindex="0"
+	(mouseenter) ="focus($event)"
+	(keydown.shift)="keyPressed($event,true)" 
+	(keyup.shift)="keyPressed($event,false)" 
+	(contextmenu)="$event.preventDefault();" >
+
+	<div id="global-waveform" class="waveform-container">
+		<!-- spining/youtube link -->
+		<div  [ngClass]="{zindexzero:audio_loaded}" class="spining">
+			
+			<!-- SPINNER -->
+			<div [hidden]="!loading_wheel" class="spinner3">
+				<div class="double-bounce1"><img src="assets/img/music-placeholder-glow.png"></div>
+					<div class="double-bounce2"><img src="assets/img/music-placeholder-glow.png"></div>
+			</div>
+			
+			<!-- Media Source Selection -->
+			<div [hidden]="audio_loaded" class="media-source-container">
+				<!-- YouTube URL Input -->
+				<div class="link_row">
+					<!-- <input type="text" placeholder="YouTube link or local file" [(ngModel)]="link" (keydown.enter)="loadYouTubeUrl()"/>
+					<button class="btn btn-primary" (click)="loadYouTubeUrl()" title="Load YouTube URL">
+						<i class="fab fa-youtube"></i>
+					</button> -->
+				</div>
+				
+				<!-- File Upload Section -->
+				<div class="file-upload-section">
+					<button class="btn btn-secondary file-upload-btn" (click)="toggleFileUpload()" title="Upload local file">
+						<i class="fas fa-upload"></i> Upload File
+					</button>
+					
+					<div class="file-upload-interface" [hidden]="!showFileUpload">
+						<input type="file" 
+							   id="fileInput" 
+							   accept="audio/*,video/*" 
+							   (change)="onFileSelected($event)" 
+							   style="display: none;">
+						<label for="fileInput" class="btn btn-success file-input-label">
+							<i class="fas fa-music"></i> Choose Audio/Video File
+						</label>
+						<button class="btn btn-outline-secondary" (click)="toggleFileUpload()">
+							<i class="fas fa-times"></i> Cancel
+						</button>
+					</div>
+				</div>
+				
+				<!-- Current Media Display -->
+				<div class="current-media-display" [hidden]="!uploadedFileName && !videoId">
+					<div class="media-info">
+						<span *ngIf="uploadedFileName" class="file-name">
+							<i class="fas fa-file-audio"></i> {{uploadedFileName}}
+						</span>
+						<span *ngIf="videoId" class="youtube-info">
+							<i class="fab fa-youtube"></i> YouTube Video
+						</span>
+					</div>
+					<button class="btn btn-outline-danger btn-sm" (click)="clearCurrentMedia()" title="Clear current media">
+						<i class="fas fa-trash"></i>
+					</button>
+				</div>
+			</div>
+		</div> <!-- spining -->
+
+		<div id="wave-timeline" [hidden]="timeline_hidden" ></div> <!-- waveform timeline -->
+		<div id="waveform" style="touch-action: none;"></div>
+	</div>
+</div>
+
+<span class="top_row" >
+	<span class="playerIcons">
+		<i role="button" [ngClass]="{'active':(playerState!=2&&playerState!=1)}"	class="fas fa-stop p-2" (click)="stopAudio()" title="Stop audio"></i>
+		<i role="button" [ngClass]="{'active':playerState==2}"	class="fas fa-pause p-2" (click)="pauseAudio()" title="Pause audio"></i>
+		<i role="button" [ngClass]="{'active':playerState==1}"	class="fas fa-play p-2" (click)="resumeAudio()" title="Play audio"></i>
+		
+		<i role="button" [class.active]="follow" title="Audio follow" class="p-2" (click)="toggleFollow()">f</i>
+		<i role="button" [class.active]="center" title="Center score" class="p-2 fas fa-indent" (click)="toggleCenter()"></i>
+		<i role="button" class="fas fa-volume-up p-2" (mouseover)='show_volume(true)' (mouseout)='show_volume(false)' title="Audio volume">
+			<div class="vertical-slider-wrapper vol" (mouseover)='show_volume(true)' (mouseout)='show_volume(false)'>
+				<input class="col-2" type="range" min="0.0001" max="0.8" step="0.01" class="slider" id="myVolume_audio" (change)="set_volume()" (input)="set_volume()" [(ngModel)]="volume" >
+			</div>
+		</i>
+		<i role="button" class="p-2" (mouseover)='show_m_volume(true)' (mouseout)='show_m_volume(false)' title="Metronome volume">
+			<img src="assets/img/metronome_ico.svg">
+			<div class="vertical-slider-wrapper m-vol" (mouseover)='show_m_volume(true)' (mouseout)='show_m_volume(false)'>
+				<input class="col-2" type="range" min="0.0001" max="0.8" step="0.01" class="slider" id="metro_vol" [(ngModel)]="cm.metroVolume">
+			</div>
+		</i>	
+	</span>
+
+	<span class="displayed-chord"
+		  [style.font-family]="cm.novaxe_notation_on?'nvxChord':''"
+		  [style.font-size]="cm.novaxe_notation_on?'30px':'35px'"
+		  [style.right]="cm.novaxe_notation_on?'20px':'0'"
+		  style="width:0px;margin-right: 20%;"
+		  [style.bottom]="cm.novaxe_notation_on?'5px':'0'">
+		  {{displayed_chord}}
+	</span>
+
+	<span class="center-col">
+		<span>Repeat</span> 
+
+		<input type="number" (change)="updateRepeat()" min="0" [(ngModel)]="repeat.start">
+		<input type="number" (change)="updateRepeat()" min="0" [(ngModel)]="repeat.end">
+
+		<i [ngClass]="{'active':repeat.active==true}" class="fa fa-undo " (click)="repeat.active=!repeat.active;updateRepeat()"></i>
+
+		<img src="assets/img/loop_part.png" role="button" [class.inactive]="edit==false" class="p-2" (click)="setRepeatPart()"/>
+
+		<i role="button" [class.active]="drag" [class.inactive]="edit==false" class="fas fa-arrows-alt fa p-2" (click)="drag_toggle(!drag)"></i>
+		<i role="button" [class.inactive]="edit==false" class="p-2" (click)="addNextPart()">p</i>
+		<i role="button" [class.inactive]="edit==false" class="p-2" (click)="addNextRegion()">m</i>
+		<i [ngClass]="{'active':ghost==true}" class="fas fa-ghost " (click)="ghost=!ghost;updateGhost()"></i>
+		<i [ngClass]="{'active':stretch==true}" class="fas fa-arrows-alt-h " (click)="stretch=!stretch;updateStretch()"></i>
+	</span>
+
+	<i id="beatC_button" role="button" class="p-2" (click)="setAllBeatsFromModel()">b</i>
+	<i id="beatM_button" role="button" class="p-2" (click)="setAllMeasuresFromModel()">m</i>
+</span>
+
+</section>
+
+

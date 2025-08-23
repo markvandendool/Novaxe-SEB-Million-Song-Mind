@@ -1,0 +1,54 @@
+/* EXACT WORKING NOVAXE FONT - nvxFont.otf with ligatures */
+
+@font-face {
+    font-family: 'music-font';
+    src: url("/fonts/nvxFont.otf") format("opentype");
+}
+
+/* nvxChord alias - WORKING FONT WITH LIGATURES */
+@font-face {
+    font-family: "nvxChord";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+}
+
+/* Fontdec13 using WORKING FONT WITH LIGATURES */
+@font-face {
+    font-family: "Fontdec13";
+    src: url("/fonts/nvxFont.otf") format("opentype");
+}
+
+/* Base braid chord text styling - NO FALLBACKS - FORCE FONT LOADING ERRORS */
+.braid-chord-text {
+    font-family: "nvxChord";
+    font-size: 18px;
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: 0;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "liga" 1, "kern" 1;
+}
+
+/* Force font loading for all text elements - NO FALLBACKS */
+.fontdec13-force-load {
+    font-family: "Fontdec13";
+    font-display: swap;
+}
+
+/* Container for chord display */
+.braid-chord-container {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+    position: relative;
+}
+
+/* Positioning utilities for braid layout */
+.braid-position-absolute {
+    position: absolute;
+}
+
+.braid-position-relative {
+    position: relative;
+}

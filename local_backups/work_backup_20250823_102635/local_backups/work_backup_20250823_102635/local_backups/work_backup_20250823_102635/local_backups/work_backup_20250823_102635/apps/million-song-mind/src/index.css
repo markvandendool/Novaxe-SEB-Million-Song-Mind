@@ -1,0 +1,625 @@
+/* PROFESSIONAL IOS-SAFE FONT SYSTEM */
+/* Custom fonts ONLY for x-axis and braid elements - everything else uses system fonts */
+
+/* Musical Font Face Declarations - EXACT ANGULAR REPLICA */
+@font-face {
+  font-family: "nvxChord";
+  src: url('/fonts/nvxFont.otf') format('opentype');
+  font-display: swap;
+  font-feature-settings: "liga" on, "kern" on, "calt" on;
+}
+
+@font-face {
+  font-family: "FontDec13";
+  src: url('/fonts/nvxFont.otf') format('opentype');
+  font-display: swap;
+  font-feature-settings: "liga" on, "kern" on, "calt" on;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Million Song Mind - Premium Dark Design System */
+
+@layer base {
+
+  /* Premium iOS-Safe Typography System */
+  * {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "SF Pro Display", system-ui, sans-serif;
+  }
+
+  :root {
+    /* Premium Dark Theme - Deeper, cleaner */
+    --background: 218 27% 4%;
+    --foreground: 210 40% 98%;
+
+    --card: 218 25% 6%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 218 25% 6%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Harmonic Blue Primary - More refined */
+    --primary: 217 91% 59%;
+    --primary-foreground: 218 27% 4%;
+
+    /* Professional Gray Secondary - Better contrast */
+    --secondary: 218 20% 12%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 218 20% 8%;
+    --muted-foreground: 215 25% 70%;
+
+    /* Audio Engineering Accent - Softer green */
+    --accent: 142 65% 50%;
+    --accent-foreground: 218 27% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 218 20% 12%;
+    --input: 218 20% 8%;
+    --ring: 217 91% 59%;
+
+    --radius: 0.5rem;
+
+    /* Premium typography scale - Mobile-first responsive */
+    --text-scale-xs: clamp(0.7rem, 2vw, 0.75rem);
+    --text-scale-sm: clamp(0.8rem, 2.5vw, 0.875rem);
+    --text-scale-base: clamp(0.9rem, 3vw, 1rem);
+    --text-scale-lg: clamp(1rem, 3.5vw, 1.125rem);
+    --text-scale-xl: clamp(1.1rem, 4vw, 1.25rem);
+    --text-scale-2xl: clamp(1.3rem, 5vw, 1.5rem);
+    --text-scale-3xl: clamp(1.6rem, 6vw, 1.875rem);
+    --text-scale-4xl: clamp(2rem, 8vw, 2.25rem);
+
+    /* Touch-friendly spacing - 44px minimum touch targets */
+    --touch-target-min: 44px;
+    --spacing-touch: 0.75rem;
+    --spacing-comfortable: 1.5rem;
+    --spacing-section: 2rem;
+
+    /* Custom Harmonic Analysis Colors - Refined palette */
+    --harmonic-root: 142 65% 50%;
+    --harmonic-first: 0 75% 58%;
+    --harmonic-second: 217 91% 59%;
+    --harmonic-third: 215 25% 60%;
+
+    /* Professional Gradients - Subtler, more premium */
+    --gradient-primary: linear-gradient(135deg, hsl(var(--primary) / 0.8), hsl(217 91% 70% / 0.6));
+    --gradient-surface: linear-gradient(180deg, hsl(var(--card)), hsl(218 25% 4%));
+    --gradient-accent: linear-gradient(90deg, hsl(var(--accent) / 0.1), hsl(142 65% 55% / 0.05));
+
+    /* Precise Shadows - More depth */
+    --shadow-professional: 0 20px 60px -15px hsl(218 27% 2% / 0.7);
+    --shadow-card: 0 8px 30px -8px hsl(218 27% 2% / 0.4);
+    --shadow-chart: 0 4px 20px hsl(217 91% 59% / 0.15);
+
+    /* Smooth Transitions */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-chart: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+    /* Search interface enhancements */
+    --search-background: hsl(218 20% 10%);
+    --search-border: hsl(218 20% 15%);
+    --search-focus: hsl(217 91% 59% / 0.3);
+
+    /* Harmonic Chart Animations */
+    --glow-primary: 0 0 20px hsl(var(--primary) / 0.6);
+    --glow-accent: 0 0 15px hsl(var(--accent) / 0.5);
+    --glow-intense: 0 0 30px hsl(var(--primary) / 0.8), 0 0 60px hsl(var(--accent) / 0.3);
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* NVX braid color tokens (used by vendor CSS) */
+    --green_nvx: hsl(142 65% 50%);
+    --lightblue_nvx: hsl(217 91% 68%);
+    --yellow_nvx: hsl(49 95% 58%);
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Keyframes for Harmonic Chart */
+@keyframes bar-rise {
+  0% {
+    transform: scaleY(0);
+    opacity: 0;
+  }
+
+  50% {
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.5));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 15px hsl(var(--primary) / 0.8)) drop-shadow(0 0 25px hsl(var(--accent) / 0.4));
+  }
+}
+
+@keyframes chord-highlight {
+  0% {
+    background-color: hsl(var(--background));
+  }
+
+  50% {
+    background-color: hsl(var(--primary) / 0.1);
+  }
+
+  100% {
+    background-color: hsl(var(--background));
+  }
+}
+
+@keyframes flame-flicker {
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: translateY(0) scale(1);
+  }
+
+  25% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.05);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: translateY(-1px) scale(0.98);
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateY(-3px) scale(1.02);
+  }
+}
+
+/* Game-like pulsing animation for chord counters */
+@keyframes pulse {
+  0% {
+    transform: skew(-12deg, 0deg) scale(1.1, 1);
+  }
+
+  100% {
+    transform: skew(-12deg, 0deg) scale(1.15, 1.05);
+  }
+}
+
+/* Harmonic Chart Enhancements */
+.harmonic-bar {
+  animation: bar-rise 0.8s ease-out;
+  transform-origin: bottom;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  /* clickable across chart and braid */
+}
+
+.harmonic-bar:hover {
+  filter: brightness(1.2) drop-shadow(var(--glow-primary));
+  transform: translateY(-2px);
+}
+
+.harmonic-bar.selected {
+  filter: brightness(1.4) drop-shadow(var(--glow-intense));
+  transform: translateY(-4px) scale(1.02);
+}
+
+/* SVG-specific: static outlines, no transform; glow on hover/selected */
+svg .harmonic-bar {
+  stroke: hsl(var(--border));
+  stroke-width: 1.25;
+  paint-order: stroke fill;
+  animation: none !important;
+  transform: none !important;
+  transition: none !important;
+}
+
+svg .harmonic-bar:hover {
+  transform: none !important;
+  stroke: hsl(var(--primary));
+  filter: drop-shadow(var(--glow-primary));
+}
+
+svg .harmonic-bar.selected {
+  transform: none !important;
+  stroke: hsl(var(--primary));
+  filter: drop-shadow(var(--glow-primary));
+}
+
+/* Ensure text labels don't block clicks inside SVG */
+svg text {
+  pointer-events: none;
+}
+
+/* RESTRICTED CUSTOM FONT USAGE - ONLY FOR MUSICAL ELEMENTS */
+/* Custom fonts ONLY applied to x-axis chord labels and braid visualization */
+
+/* MUSICAL FONT USAGE - EXACT ANGULAR REPLICA */
+.harmonic-chart .chord-label-custom {
+  font-family: "nvxChord", monospace !important;
+  font-feature-settings: "liga" on, "kern" on, "calt" on !important;
+  font-variant-ligatures: common-ligatures contextual !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* Braid visualization text - MUSICAL SYMBOLS ONLY */
+#braid-tonal svg text,
+.braid-chord-text {
+  font-family: "nvxChord", monospace !important;
+  font-feature-settings: "liga" on, "kern" on, "calt" on !important;
+  font-variant-ligatures: common-ligatures contextual !important;
+  text-rendering: optimizeLegibility !important;
+}
+
+/* All other UI elements use iOS-safe system fonts by default */
+
+.flame-effect {
+  animation: flame-flicker 2s ease-in-out infinite;
+}
+
+/* Inversion bar glow effect */
+.inversion-bar {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.inversion-bar::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -1px;
+  right: -1px;
+  bottom: -2px;
+  background: inherit;
+  filter: blur(4px);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+}
+
+.harmonic-bar:hover .inversion-bar::after {
+  opacity: 0.6;
+}
+
+/* Fraction Usage Animations for HarmonicChart */
+@keyframes fraction-throb-soft {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes fraction-throb-medium {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fraction-throb-strong {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+}
+
+@keyframes fraction-combo-celebrate {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 6px hsl(var(--primary));
+  }
+
+  25% {
+    transform: scale(1.15);
+    text-shadow: 0 0 10px hsl(var(--accent));
+  }
+
+  50% {
+    transform: scale(1.08);
+    text-shadow: 0 0 14px hsl(var(--primary));
+  }
+
+  75% {
+    transform: scale(1.18);
+    text-shadow: 0 0 16px hsl(var(--accent)), 0 0 10px hsl(var(--primary));
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.fraction-usage-zero .fraction-text,
+.fraction-usage-zero .fraction-subtitle {
+  opacity: 0.2;
+  filter: drop-shadow(0 0 2px hsl(var(--muted-foreground) / 0.2));
+}
+
+.fraction-usage-low .fraction-text,
+.fraction-usage-low .fraction-subtitle {
+  opacity: 0.6;
+  animation: fraction-throb-soft 2.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.4));
+}
+
+.fraction-usage-med .fraction-text,
+.fraction-usage-med .fraction-subtitle {
+  opacity: 0.8;
+  animation: fraction-throb-soft 1.8s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px hsl(var(--accent) / 0.5));
+}
+
+.fraction-usage-high .fraction-text,
+.fraction-usage-high .fraction-subtitle {
+  opacity: 0.95;
+  animation: fraction-throb-medium 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px hsl(var(--primary) / 0.7)) drop-shadow(0 0 6px hsl(var(--accent) / 0.4));
+}
+
+.fraction-usage-hype .fraction-text,
+.fraction-usage-hype .fraction-subtitle {
+  opacity: 1;
+  animation: fraction-throb-strong 1.1s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px hsl(var(--primary))) drop-shadow(0 0 8px hsl(var(--accent)));
+}
+
+.fraction-usage-max .fraction-text,
+.fraction-usage-max .fraction-subtitle {
+  opacity: 1;
+  animation: fraction-combo-celebrate 1.2s ease-in-out infinite;
+  filter: drop-shadow(0 0 14px hsl(var(--primary))) drop-shadow(0 0 10px hsl(var(--accent)));
+}
+
+/* Highest chord special styling */
+.highest-chord-glow {
+  filter: drop-shadow(0 0 12px hsl(0 0% 100% / 0.8)) !important;
+  box-shadow: 0 0 20px hsl(0 0% 100% / 0.6), inset 0 0 10px hsl(0 0% 100% / 0.2) !important;
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    filter: drop-shadow(0 0 12px hsl(0 0% 100% / 0.8));
+    box-shadow: 0 0 20px hsl(0 0% 100% / 0.6), inset 0 0 10px hsl(0 0% 100% / 0.2);
+  }
+
+  50% {
+    filter: drop-shadow(0 0 20px hsl(0 0% 100% / 1));
+    box-shadow: 0 0 30px hsl(0 0% 100% / 0.9), inset 0 0 15px hsl(0 0% 100% / 0.3);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* =================================================================== */
+/* MOBILE-FIRST RESPONSIVE DESIGN & ACCESSIBILITY IMPROVEMENTS */
+/* =================================================================== */
+
+/* Touch-friendly base styles */
+@layer components {
+
+  /* Touch targets - minimum 44px */
+  .touch-target {
+    min-height: var(--touch-target-min);
+    min-width: var(--touch-target-min);
+    padding: var(--spacing-touch);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+  }
+
+  .touch-target:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .touch-target:active {
+    transform: translateY(0);
+    transition: all 0.1s ease;
+  }
+
+  /* Responsive containers */
+  .container-mobile {
+    width: 100%;
+    max-width: 100%;
+    padding: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    .container-mobile {
+      max-width: 768px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container-mobile {
+      max-width: 1024px;
+      padding: 2rem;
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .container-mobile {
+      max-width: 1280px;
+    }
+  }
+
+  /* HARMONIC CHART CONTAINER: Allow horizontal scroll for wide charts */
+  .harmonic-chart {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .harmonic-chart .relative {
+    min-width: fit-content;
+  }
+
+  /* Educational scaffolding */
+  .learning-section {
+    border-left: 4px solid hsl(var(--accent));
+    padding: var(--spacing-comfortable);
+    margin: var(--spacing-section) 0;
+    background: hsl(var(--card));
+    border-radius: 8px;
+  }
+
+  .learning-tip {
+    background: hsl(var(--accent) / 0.1);
+    border: 1px solid hsl(var(--accent) / 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    font-size: var(--text-scale-sm);
+    margin: 1rem 0;
+  }
+
+  .learning-tip::before {
+    content: "💡 ";
+    font-size: 1.2em;
+    margin-right: 0.5rem;
+  }
+
+  /* Accessibility improvements */
+  .focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+}
+
+/* Mobile-specific harmonic chart improvements */
+@media (max-width: 768px) {
+  .harmonic-chart {
+    min-height: 300px;
+    padding: 1rem;
+  }
+
+  .harmonic-chart svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .chord-button {
+    min-height: 44px;
+    min-width: 44px;
+    font-size: 0.9rem;
+    margin: 2px;
+  }
+
+  .braid-visualization {
+    padding: 1rem;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  .braid-circle {
+    min-width: 60px;
+    min-height: 60px;
+    font-size: 0.8rem;
+  }
+
+  /* Make header responsive */
+  header h1 {
+    font-size: var(--text-scale-3xl) !important;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  header p {
+    font-size: var(--text-scale-sm) !important;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+}

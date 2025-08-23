@@ -1,0 +1,21 @@
+# =============================================================================
+# NOVAXE DIAMOND PROTECTION PROTOCOL
+# =============================================================================
+# 
+# WARNING: THIS DIRECTORY IS ABSOLUTELY READ-ONLY
+# 
+# The "NovaxeSEB prod_fix DIAMOND" directory contains the immutable canonical 
+# source of truth for all Novaxe development. 
+#
+# DO NOT MODIFY, EDIT, OR TOUCH ANYTHING IN THIS DIRECTORY
+#
+# File permissions: 444 (read-only)
+# Directory permissions: 555 (read/execute only)
+# Git status: Ignored to prevent accidental commits
+#
+# Purpose: Template reference for MSM recreation
+# =============================================================================
+
+# Protect the DIAMOND directory from any Git operations
+NovaxeSEB prod_fix DIAMOND/
+!/NovaxeSEB prod_fix DIAMOND/README_DIAMOND.md

@@ -1,0 +1,305 @@
+/* Converted from vendor/gitlab_braid/braid.component.scss */
+
+section#braid-tonal .greenCircle {
+  opacity: 0.5;
+  vector-effect: none;
+  fill: none;
+  fill-opacity: 1;
+  stroke: #769987;
+  stroke-width: 22.09639931;
+  stroke-linecap: butt;
+  stroke-linejoin: round;
+  stroke-miterlimit: 4;
+  stroke-dasharray: none;
+  stroke-dashoffset: 0;
+  stroke-opacity: 1;
+  transition: all 0.25s ease;
+}
+
+section#braid-tonal .greenCircle.active {
+  stroke: var(--green_nvx) !important;
+  filter: url(#f2) saturate(2.5) drop-shadow(2px 4px 6px black);
+}
+
+section#braid-tonal .largeCircle {
+  fill: none;
+  stroke-miterlimit: 5.9;
+  stroke-width: 0.15;
+  stroke: #000;
+}
+
+section#braid-tonal .rect-arrow {
+  fill: url("#greyGradient");
+  stroke-width: 0.15px;
+}
+
+section#braid-tonal .rect-arrow.erase {
+  fill: #343a40;
+  stroke: #000;
+  animation: transitionClassic 0.25s forwards;
+}
+
+@keyframes transitionClassic {
+  0% {
+    fill: url("#greyGradient");
+  }
+
+  8% {
+    fill: url("#greyGradient0");
+  }
+
+  16% {
+    fill: url("#greyGradient1");
+  }
+
+  24% {
+    fill: url("#greyGradient2");
+  }
+
+  32% {
+    fill: url("#greyGradient3");
+  }
+
+  40% {
+    fill: url("#greyGradient4");
+  }
+
+  48% {
+    fill: url("#greyGradient5");
+  }
+
+  56% {
+    fill: url("#greyGradient6");
+  }
+
+  64% {
+    fill: url("#greyGradient7");
+  }
+
+  72% {
+    fill: url("#greyGradient8");
+  }
+
+  80% {
+    fill: url("#greyGradient9");
+  }
+
+  88% {
+    fill: url("#eraseGradient");
+  }
+
+  96% {
+    fill: url("#eraseGradient");
+  }
+
+  100% {
+    fill: url("#eraseGradient");
+    stroke: #000;
+  }
+}
+
+section#braid-tonal .bub {
+  cursor: default;
+}
+
+section#braid-tonal .bub.zoom {
+  transform: scale(2) translate(2px, -15px);
+  transition: 0.5s;
+}
+
+section#braid-tonal .bub.zoom .comma {
+  z-index: 9998;
+}
+
+section#braid-tonal .bub.zoom text {
+  /* font-size: 0.9em; DISABLED - using natural Fontdec13 sizing */
+  transition: 2s;
+  z-index: 9999;
+}
+
+section#braid-tonal .smallBubble {
+  fill: url("#greyGradient");
+}
+
+/* Clickable comma halves should use outline like harmonic bars */
+section#braid-tonal .harmonic-bar {
+  cursor: pointer;
+}
+
+section#braid-tonal .harmonic-bar.selected {
+  /* glow handled globally, keep here for specificity if needed */
+}
+
+/* Font family is now handled by braid-angular-exact.css */
+section#braid-tonal .smallBubble text {
+  fill: black;
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
+}
+
+/* DISABLED: Artificial font-size manipulation - using natural Fontdec13 */
+section#braid-tonal .smallBubble text.duo {
+  /* font-size: 0.85em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .smallBubble text.duo.roman {
+  /* font-size: 0.7em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble {
+  fill: url("#greyGradient");
+  transition: all 0.25s ease;
+}
+
+section#braid-tonal .medBubble circle {
+  fill: red;
+  paint-order: markers fill stroke;
+  stroke-linecap: round;
+  stroke-width: 2;
+  stroke: #fb6161;
+}
+
+section#braid-tonal .medBubble text.right {
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
+  fill: black;
+  word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.left {
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
+  fill: black;
+  word-spacing: 0px;
+}
+
+section#braid-tonal .medBubble text.center {
+  text-anchor: middle !important;
+  dominant-baseline: central !important;
+  fill: black;
+  word-spacing: 0px;
+}
+
+/* Font family is handled by braid-angular-exact.css */
+
+/* DISABLED: All artificial font-size manipulation - using natural Fontdec13 */
+section#braid-tonal .medBubble text.left.roman,
+section#braid-tonal .medBubble text.center.roman {
+  /* font-size: 0.7em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble text.right.duo {
+  /* font-size: 1.4em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble text.left.duo {
+  /* font-size: 1.4em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble text.left.duo.roman {
+  /* font-size: 1em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble text.right.duo.roman {
+  /* font-size: 1.2em; DISABLED - using natural Fontdec13 sizing */
+}
+
+section#braid-tonal .medBubble.active {
+  fill: var(--lightblue_nvx) !important;
+  filter: url(#f2) drop-shadow(4.5px 3px 3.5px var(--lightblue_nvx)) drop-shadow(-4.5px -3px 3.5px var(--lightblue_nvx)) !important;
+}
+
+section#braid-tonal .medBubble.midi_active {
+  fill: var(--yellow_nvx) !important;
+  filter: url(#f2) drop-shadow(4.5px 3px 3.5px var(--yellow_nvx)) drop-shadow(-4.5px -3px 3.5px var(--yellow_nvx)) !important;
+}
+
+section#braid-tonal .medBubble.midi_active_green {
+  fill: var(--yellow_nvx) !important;
+  filter: url(#f2) drop-shadow(4.5px 3px 3.5px var(--green_nvx)) drop-shadow(-4.5px -3px 3.5px var(--green_nvx)) !important;
+}
+
+section#braid-tonal .medBubble.erase {
+  animation: transitionClassic 0.25s forwards;
+}
+
+section#braid-tonal .medBubble.erasenot {
+  filter: drop-shadow(3px 4px 6px black) drop-shadow(-3px 4px 6px black);
+}
+
+section#braid-tonal .arrows-2 {
+  fill: #3f4683;
+  stroke-width: 0.15px;
+  transition: all 0.25s ease;
+}
+
+section#braid-tonal .arrows-2.erase {
+  fill: #343a40;
+  stroke: #000;
+}
+
+section#braid-tonal .active .arrows-2 {
+  fill: #1f27ff;
+  filter: drop-shadow(0px 2px 4px #fff);
+}
+
+section#braid-tonal .midi_active .arrows-2 {
+  fill: #f8f8b9;
+  filter: drop-shadow(0px 2px 4px #fff);
+}
+
+section#braid-tonal .midi_active_green .arrows-2 {
+  fill: #1f27ff;
+  filter: drop-shadow(0px 2px 4px #fff);
+}
+
+section#braid-tonal .simpleShape {
+  fill: none;
+  stroke-miterlimit: 5.9;
+  stroke-width: 0.15;
+  stroke: #000;
+}
+
+section#braid-tonal .tona.erase .greenCircle {
+  stroke: #424a52;
+}
+
+/*
+Usage-driven visual system (temporarily disabled on braid per request)
+section#braid-tonal .harmonic-bar, 
+section#braid-tonal .bub text {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes throb-soft {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+@keyframes throb-medium {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.06); }
+}
+@keyframes throb-strong {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.09); }
+}
+@keyframes combo-celebrate {
+  0% { transform: scale(1); filter: drop-shadow(0 0 6px var(--yellow_nvx)); }
+  25% { transform: scale(1.12); filter: drop-shadow(0 0 12px var(--green_nvx)); }
+  50% { transform: scale(1.06); filter: drop-shadow(0 0 16px var(--lightblue_nvx)); }
+  75% { transform: scale(1.14); filter: drop-shadow(0 0 18px var(--yellow_nvx)) drop-shadow(0 0 10px var(--green_nvx)); }
+  100% { transform: scale(1); }
+}
+
+section#braid-tonal .usage-zero .harmonic-bar { opacity: 0.2; filter: drop-shadow(0 0 2px rgba(0,0,0,0.25)); animation: none; }
+section#braid-tonal .usage-zero text { opacity: 0.2; }
+section#braid-tonal .usage-low .harmonic-bar { opacity: 0.35; filter: drop-shadow(0 0 2px hsl(var(--muted-foreground) / 0.25)); animation: throb-soft 2.4s ease-in-out infinite; }
+section#braid-tonal .usage-low text { opacity: 0.6; }
+section#braid-tonal .usage-med .harmonic-bar { opacity: 0.6; filter: drop-shadow(0 0 4px var(--lightblue_nvx)); animation: throb-soft 1.8s ease-in-out infinite; }
+section#braid-tonal .usage-high .harmonic-bar { opacity: 0.85; filter: url(#f2) drop-shadow(0 0 6px var(--yellow_nvx)) drop-shadow(0 0 10px var(--yellow_nvx)); animation: throb-medium 1.4s ease-in-out infinite; }
+section#braid-tonal .usage-hype .harmonic-bar { opacity: 1; filter: url(#f2) drop-shadow(0 0 8px var(--green_nvx)) drop-shadow(0 0 14px var(--green_nvx)); animation: throb-strong 1.1s ease-in-out infinite; }
+section#braid-tonal .usage-hype text { opacity: 1; }
+section#braid-tonal .usage-max .harmonic-bar { opacity: 1; filter: url(#f2) drop-shadow(0 0 10px var(--yellow_nvx)) drop-shadow(0 0 18px var(--green_nvx)) drop-shadow(0 0 22px var(--lightblue_nvx)); animation: combo-celebrate 1.3s ease-in-out infinite; }
+section#braid-tonal .usage-max text { opacity: 1; }
+*/

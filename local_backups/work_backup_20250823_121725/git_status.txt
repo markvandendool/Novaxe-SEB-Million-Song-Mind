@@ -1,0 +1,15 @@
+On branch v1.1
+Your branch is up to date with 'origin/v1.1'.
+
+Changes not staged for commit:
+	modified:   apps/million-song-mind/src/components/HarmonicChart.tsx
+	modified:   apps/million-song-mind/src/pages/MillionSongMind.tsx
+
+Untracked files:
+	apps/million-song-mind/public/obs-cubes/engine/
+	apps/million-song-mind/src/components/FontSelector.tsx
+	apps/million-song-mind/src/utils/fontSelector.ts
+	local_backups/work_backup_20250823_102635/
+	local_backups/work_backup_20250823_121725/
+
+no changes added to commit

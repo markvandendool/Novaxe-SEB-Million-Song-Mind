@@ -1,0 +1,13 @@
+<div class="tab" [ngClass]="{editOn:edit==true}" (contextmenu)="edit=!edit;$event.preventDefault();" style="" (click)="edit=!edit"><div style="transform: rotate(-90deg) translate(-24px, -39px); width: 5em;">Parse tab</div></div>
+
+<div [hidden]="edit==false" (contextmenu)="edit=false;$event.preventDefault();" >
+	<textarea style="position:fixed;top:100px;height: 400px;width:800px;opacity:.6"
+	[(ngModel)]="tab"
+	placeholder="Enter tab here" (input)="onChange(tab)" 
+	 ></textarea>
+	 <textarea style="position:fixed;top:500px;height: 400px;width:800px;opacity:.6"
+	 [(ngModel)]="parsed_tab"
+	 placeholder="waiting for some to parse..." 
+	  ></textarea>
+
+</div>

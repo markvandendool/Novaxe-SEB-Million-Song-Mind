@@ -1,0 +1,19 @@
+.tab{
+	font-size: 1.1em;
+	width: 40px;
+	height: 100px;
+	position: fixed;
+	top: 100px;
+	border: 1px solid black;
+	border-radius: 12px;
+	border-left: none;
+	background-color: #2a2a2a;
+	border-top-left-radius: 0px;
+	border-bottom-left-radius: 0px;
+	color: white;
+	padding-left: 0.6em;
+	
+  &.editOn{
+  	left : 798px;
+  	}
+  }

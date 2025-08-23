@@ -1,0 +1,78 @@
+# OS
+.DS_Store
+
+# Node
+**/node_modules/
+**/dist/
+**/.angular/
+**/.vite/
+**/.turbo/
+**/.next/
+**/.cache/
+
+# Logs
+**/npm-debug.log*
+**/yarn-debug.log*
+**/yarn-error.log*
+**/pnpm-debug.log*
+
+# SENSITIVE DOCUMENTS - Exclude all folders starting with 'z' from git sync
+documents/[Zz]*/
+**/[Zz]*/
+
+# Protected audit storage - contains sensitive analysis
+documents/AUDIT_SYSTEMS_SUMMARIES/
+
+# Embedded git repositories - prevent submodule conflicts  
+Novaxe A20 Oracle React/
+Novaxe SEB/
+novaxe-seb-ng11/
+verification/
+
+# Chat logs and sensitive data
+logs/
+documents/logs/
+chat-capture*.log
+*.log
+.vercel
+
+# Sensitive/Large Files
+Onboarding/
+*.csv
+*macpro_chordonomicon*
+Top\ 20\ Macros.txt
+*access*token*
+
+# Credentials and Secrets Directory - NEVER COMMIT
+.credentials/
+**/.env
+**/.env.local
+**/.env.production
+**/.env.development
+**/config/secrets/
+**/credentials/
+**/*secret*
+**/*token*
+**/*key*
+**/*password*
+# =============================================================================
+# NOVAXE DIAMOND PROTECTION PROTOCOL
+# =============================================================================
+# 
+# WARNING: THIS DIRECTORY IS ABSOLUTELY READ-ONLY
+# 
+# The "NovaxeSEB prod_fix DIAMOND" directory contains the immutable canonical 
+# source of truth for all Novaxe development. 
+#
+# DO NOT MODIFY, EDIT, OR TOUCH ANYTHING IN THIS DIRECTORY
+#
+# File permissions: 444 (read-only)
+# Directory permissions: 555 (read/execute only)
+# Git status: Ignored to prevent accidental commits
+#
+# Purpose: Template reference for MSM recreation
+# =============================================================================
+
+# Protect the DIAMOND directory from any Git operations
+NovaxeSEB prod_fix DIAMOND/
+!/NovaxeSEB prod_fix DIAMOND/README_DIAMOND.md
