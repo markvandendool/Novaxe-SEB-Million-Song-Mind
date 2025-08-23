@@ -3139,8 +3139,8 @@ async function playFrontRowProgression() {
     const perChordMs = 1000; // 1 second per chord per request
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
-        // Ultra-flashy active chord highlight
-        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); } catch (_) { }
+        // Ultra-flashy active chord highlight + camera dolly follow
+        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); focusCameraOnCube(c, 600); } catch (_) { }
         if (lockedMelody || lockedBass) {
             // Use locked lines if present; fallback to face-derived where missing
             const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
