@@ -2607,10 +2607,12 @@ function playChordForObject(obj) {
         g.gain.linearRampToValueAtTime(0.0, t0 + d);
     };
 
-    // Chord bed: locked octave C4..C5
+    // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
     const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
+    const idxForObj = lineup.indexOf(obj);
+    const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
     if (sfChord && sfChord.play) {
-        chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+        bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
     } else {
         console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
     }
