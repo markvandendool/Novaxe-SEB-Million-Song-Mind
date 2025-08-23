@@ -1956,7 +1956,8 @@ function ensureFaceProxies(parentCube) {
             const ROT_DEGS = [0, 270, 180, 90];
             parentCube.userData.msdfFaces = parentCube.userData.msdfFaces || [];
             for (let faceIdx = 0; faceIdx < 4; faceIdx++) {
-                const label = degLabels[faceIdx];
+                // Map fixed face order (0 bottom=1, 1 right=3, 2 top=5, 3 left=7)
+                const label = degLabels[(0 + faceIdx) % 4];
                 const text = new TroikaText();
                 // Use NVXDiamond ligature strings when label-mode is roman; else letters
                 text.text = label;
@@ -1978,7 +1979,7 @@ function ensureFaceProxies(parentCube) {
                 text.renderOrder = 3;
                 try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) { }
                 // Do not intercept raycasts; prefer invisible face proxies for tone identity
-                try { text.raycast = () => {}; } catch (_) { }
+                try { text.raycast = () => { }; } catch (_) { }
                 text.userData = Object.assign({}, text.userData, { isDecorative: true });
                 text.sync();
                 parentCube.add(text);
@@ -2728,9 +2729,10 @@ function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
     const proxyTop = getTopToneIdxFromProxies(obj);
-    const r = proxyTop != null ? ((proxyTop + 2) % 4) : ((obj.userData.rotationIndex || 0) % 4 + 4) % 4; // if proxyTop is actual top index, equivalent topPc uses proxyTop
+    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const rootPc = pcOf(names[0]);
-    const topIndex = proxyTop != null ? proxyTop : (r + 2) % 4;
+    // If proxies are present, trust them entirely for top face identity
+    const topIndex = (proxyTop != null) ? proxyTop : (r + 2) % 4;
     const topPc = pcOf(names[topIndex]);
     const baseC5 = 72; // higher register
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
