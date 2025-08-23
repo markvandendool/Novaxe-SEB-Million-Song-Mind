@@ -2666,14 +2666,16 @@ function focusCameraOnCube(cube, durationMs = 700) {
         const p = new THREE.Vector3(); cube.getWorldPosition(p);
         const camFrom = camera.position.clone();
         const tgtFrom = controls.target.clone();
-        // Keep stage-view distance; slide horizontally to track the active cube
+        // Dolly with the active chord: slide horizontally and push in closer on Z
         const targetTo = new THREE.Vector3(p.x, 0.6, 0);
-        const cameraTo = new THREE.Vector3(p.x, 0.8, 9.5);
+        const cameraTo = new THREE.Vector3(p.x, 0.85, 7.6);
         if (cameraFocusTween) cameraFocusTween.cancelled = true;
-        cameraFocusTween = tweenObject({ duration: durationMs, owner: camera, onUpdate:(v)=>{
-            camera.position.lerpVectors(camFrom, cameraTo, v);
-            controls.target.lerpVectors(tgtFrom, targetTo, v);
-        }});
+        cameraFocusTween = tweenObject({
+            duration: durationMs, owner: camera, onUpdate: (v) => {
+                camera.position.lerpVectors(camFrom, cameraTo, v);
+                controls.target.lerpVectors(tgtFrom, targetTo, v);
+            }
+        });
     } catch (_) { }
 }
 // Metronome/tempo UI + engine
