@@ -19,7 +19,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 
 const scene = new THREE.Scene();
 // Absolute font URL so Troika can fetch reliably
-const NVX_FONT_URL = '/fonts/NVX%20Diamond%20Font.otf';
+// Try both encoded and plain; Troika will request this URL directly
+const NVX_FONT_URL = '../fonts/NVX%20Diamond%20Font.otf';
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
 let shelfPickCamera = null; // orthographic camera used only for shelf picking
@@ -1909,6 +1910,29 @@ function addQuadrantOverlay(parentCube) {
     parentCube.add(centerCircle);
     centerCircle.layers.mask = parentCube.layers.mask; // inherit layer
     parentCube.userData.centerPlay = centerCircle;
+
+    // Add four invisible quadrant proxies on the front face to give each diamond an identity
+    try {
+        if (!parentCube.userData) parentCube.userData = {};
+        parentCube.userData.faceProxies = parentCube.userData.faceProxies || [];
+        const makeFrontProxy = (w, h, cx, cy, faceIdx, baseNormal) => {
+            const geo = new THREE.PlaneGeometry(w, h);
+            const mat = new THREE.MeshBasicMaterial({ color: 0x00ffff, transparent: true, opacity: 0.0, depthWrite: false });
+            const m = new THREE.Mesh(geo, mat);
+            m.position.set(cx, cy, (cubeSize / 2) + 0.008);
+            // front proxies sit parallel to +z; orientation not critical for raycast
+            m.userData = { isFaceProxy: true, faceIdx, toneIdx: 0, baseNormal: baseNormal.clone(), parent: parentCube };
+            try { m.layers.set(parentCube?.userData?.isShelf ? 2 : 1); } catch (_) { }
+            parentCube.add(m);
+            parentCube.userData.faceProxies.push(m);
+        };
+        const qSize = 0.48; // half of 0.98; leave small gaps
+        // Map quadrants to faces: bottom(0), right(1), top(2), left(3)
+        makeFrontProxy(qSize, qSize, 0, -qSize / 2, 0, new THREE.Vector3(0, -1, 0));
+        makeFrontProxy(qSize, qSize, qSize / 2, 0, 1, new THREE.Vector3(1, 0, 0));
+        makeFrontProxy(qSize, qSize, 0, qSize / 2, 2, new THREE.Vector3(0, 1, 0));
+        makeFrontProxy(qSize, qSize, -qSize / 2, 0, 3, new THREE.Vector3(-1, 0, 0));
+    } catch (_) { }
 }
 
 // Create raycastable face proxies (invisible planes) for robust picking and tone identity

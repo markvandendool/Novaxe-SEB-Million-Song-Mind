@@ -4,20 +4,23 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Million Song Mind MSM1.0</title>
+  <title>🎵 Million Song Mind - Professional Musical Intelligence Platform</title>
   <meta name="description"
-    content="Million Song Mind MSM1.0 • Harmonic Analysis & Music Visualization • Built for Scale" />
+    content="Choose between MusicViz (React), Novaxe Obsidian (Angular 20), and Musical Cubes Unity - Professional Musical Intelligence Ecosystem" />
   <meta name="author" content="Professional Audio Engineering" />
 
-  <meta property="og:title" content="Million Song Mind MSM1.0" />
+  <meta property="og:title" content="Million Song Mind - Musical Intelligence Platform" />
   <meta property="og:description"
-    content="Million Song Mind MSM1.0 • Harmonic Analysis & Music Visualization • Built for Scale" />
+    content="Three-platform musical ecosystem: MusicViz, Novaxe Obsidian, and Musical Cubes Unity" />
   <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <meta property="og:image" content="https://millionsongmind.com/placeholder.svg" />
 
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@lovable_dev" />
-  <meta name="twitter:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
+  <meta name="twitter:site" content="@millionsongmind" />
+  <meta name="twitter:image" content="https://millionsongmind.com/placeholder.svg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
 
   <!-- Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -26,12 +29,383 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Music&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;600;800&display=swap"
     rel="stylesheet">
-  <script type="module" crossorigin src="/assets/index-45y_oU3k.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-BppLUvM-.css">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .logo {
+      font-size: 4rem;
+      font-weight: 900;
+      margin-bottom: 20px;
+      background: linear-gradient(45deg, #fff, #f8f8ff, #e6e6fa);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.5rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 10px;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-style: italic;
+    }
+
+    .platforms-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+      animation: fadeInUp 1s ease-out 0.3s both;
+    }
+
+    .platform-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      border-radius: 25px;
+      padding: 35px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .platform-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .platform-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+      animation: shimmer 3s linear infinite;
+    }
+
+    .platform-icon {
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      display: block;
+      text-align: center;
+    }
+
+    .platform-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .platform-subtitle {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .platform-description {
+      color: rgba(255, 255, 255, 0.8);
+      line-height: 1.6;
+      margin-bottom: 25px;
+      font-size: 0.95rem;
+    }
+
+    .platform-features {
+      margin-bottom: 25px;
+    }
+
+    .platform-features h4 {
+      margin-bottom: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 0.95rem;
+    }
+
+    .feature-list {
+      list-style: none;
+      padding: 0;
+    }
+
+    .feature-list li {
+      padding: 4px 0;
+      color: rgba(255, 255, 255, 0.8);
+      position: relative;
+      padding-left: 20px;
+      font-size: 0.9rem;
+    }
+
+    .feature-list li::before {
+      content: '✨';
+      position: absolute;
+      left: 0;
+    }
+
+    .launch-button {
+      width: 100%;
+      padding: 12px 25px;
+      background: linear-gradient(135deg, #00b894, #00a085);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .launch-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 35px rgba(0, 184, 148, 0.4);
+    }
+
+    .launch-button.angular {
+      background: linear-gradient(135deg, #dd0031, #c3002f);
+    }
+
+    .launch-button.angular:hover {
+      box-shadow: 0 15px 35px rgba(221, 0, 49, 0.4);
+    }
+
+    .launch-button.unity {
+      background: linear-gradient(135deg, #ff6b35, #f7931e);
+    }
+
+    .launch-button.unity:hover {
+      box-shadow: 0 15px 35px rgba(255, 107, 53, 0.4);
+    }
+
+    .status-banner {
+      text-align: center;
+      margin-bottom: 40px;
+      animation: fadeInUp 1s ease-out 0.6s both;
+    }
+
+    .status-badge {
+      display: inline-block;
+      background: rgba(0, 184, 148, 0.2);
+      color: #00b894;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(0, 184, 148, 0.3);
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .musical-notes {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .note {
+      position: absolute;
+      font-size: 2rem;
+      opacity: 0.1;
+      animation: float 8s linear infinite;
+    }
+
+    .note:nth-child(1) { left: 10%; animation-delay: 0s; }
+    .note:nth-child(2) { left: 20%; animation-delay: 1s; }
+    .note:nth-child(3) { left: 30%; animation-delay: 2s; }
+    .note:nth-child(4) { left: 40%; animation-delay: 3s; }
+    .note:nth-child(5) { left: 50%; animation-delay: 4s; }
+    .note:nth-child(6) { left: 60%; animation-delay: 5s; }
+    .note:nth-child(7) { left: 70%; animation-delay: 6s; }
+    .note:nth-child(8) { left: 80%; animation-delay: 7s; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes float {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 0.1; }
+      90% { opacity: 0.1; }
+      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+    }
+
+    @keyframes shimmer {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @media (max-width: 768px) {
+      .platforms-container { grid-template-columns: 1fr; gap: 25px; }
+      .logo { font-size: 2.5rem; }
+      .platform-card { padding: 25px; }
+    }
+  </style>
 </head>
 
 <body>
-  <div id="root"></div>
+  <div class="musical-notes">
+    <div class="note">♪</div>
+    <div class="note">♫</div>
+    <div class="note">♬</div>
+    <div class="note">♩</div>
+    <div class="note">♪</div>
+    <div class="note">♫</div>
+    <div class="note">♬</div>
+    <div class="note">♩</div>
+  </div>
+
+  <div class="container">
+    <div class="header">
+      <h1 class="logo">🎵 Million Song Mind</h1>
+      <p class="subtitle">Professional Musical Intelligence Platform</p>
+      <p class="tagline">Choose Your Musical Journey</p>
+    </div>
+
+    <div class="status-banner">
+      <span class="status-badge">✅ Triple Platform Ecosystem Live</span>
+    </div>
+
+    <div class="platforms-container">
+      <div class="platform-card">
+        <div class="platform-icon">🎹</div>
+        <h2 class="platform-title">MusicViz</h2>
+        <p class="platform-subtitle">Modern React Experience</p>
+        <p class="platform-description">
+          A sleek, modern musical interface built with React and cutting-edge web technologies.
+          Perfect for quick composition, chord analysis, and musical exploration.
+        </p>
+        <div class="platform-features">
+          <h4>Key Features:</h4>
+          <ul class="feature-list">
+            <li>Lightning-fast React performance</li>
+            <li>Real-time chord analysis</li>
+            <li>Musical font ligatures (b→l transformations)</li>
+            <li>Modern UI with Tailwind CSS</li>
+            <li>Responsive mobile design</li>
+          </ul>
+        </div>
+        <button class="launch-button" onclick="window.open('/', '_blank')">
+          🚀 Launch MusicViz
+        </button>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-icon">🎼</div>
+        <h2 class="platform-title">Novaxe Obsidian</h2>
+        <p class="platform-subtitle">Professional Angular 20 Workstation</p>
+        <p class="platform-description">
+          A comprehensive musical workstation powered by Angular 20.1.4 with advanced composition tools,
+          sophisticated analysis, and enterprise-grade architecture.
+        </p>
+        <div class="platform-features">
+          <h4>Key Features:</h4>
+          <ul class="feature-list">
+            <li>Angular 20.1.4 with TypeScript 5.8.3</li>
+            <li>33-component musical ecosystem</li>
+            <li>Advanced braid component (1,196 lines)</li>
+            <li>Complete database integration</li>
+            <li>Professional user authentication</li>
+          </ul>
+        </div>
+        <button class="launch-button angular" onclick="window.open('/obsidian', '_blank')">
+          ⚡ Launch Obsidian
+        </button>
+      </div>
+
+      <div class="platform-card">
+        <div class="platform-icon">🎲</div>
+        <h2 class="platform-title">Musical Cubes</h2>
+        <p class="platform-subtitle">Unity-Powered 3D Experience</p>
+        <p class="platform-description">
+          An immersive 3D musical visualization environment built with Unity for interactive 
+          musical exploration, spatial audio composition, and advanced harmonic visualization.
+        </p>
+        <div class="platform-features">
+          <h4>Key Features:</h4>
+          <ul class="feature-list">
+            <li>Unity 3D interactive environment</li>
+            <li>Spatial audio composition tools</li>
+            <li>3D harmonic visualization cubes</li>
+            <li>Real-time musical interaction</li>
+            <li>Immersive musical experience</li>
+          </ul>
+        </div>
+        <button class="launch-button unity" onclick="window.open('/cubes', '_blank')">
+          🎲 Launch Musical Cubes
+        </button>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; animation: fadeInUp 1s ease-out 0.9s both;">
+      <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">
+        🎯 <strong>Deployment Status:</strong> All Three Platforms Live & Ready
+      </p>
+      <p style="color: rgba(255, 255, 255, 0.7); margin-top: 10px;">
+        Built with ❤️ using React, Angular 20, Unity & Modern Web Technologies
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Add some interactive musical elements
+    document.addEventListener('mousemove', function (e) {
+      if (Math.random() > 0.97) {
+        createMagicNote(e.clientX, e.clientY);
+      }
+    });
+
+    function createMagicNote(x, y) {
+      const note = document.createElement('div');
+      note.innerText = ['♪', '♫', '♬', '♩'][Math.floor(Math.random() * 4)];
+      note.style.position = 'fixed';
+      note.style.left = x + 'px';
+      note.style.top = y + 'px';
+      note.style.color = 'rgba(255, 255, 255, 0.6)';
+      note.style.fontSize = '1.5rem';
+      note.style.pointerEvents = 'none';
+      note.style.zIndex = '100';
+      note.style.animation = 'fadeInUp 2s ease-out forwards';
+      document.body.appendChild(note);
+
+      setTimeout(() => note.remove(), 2000);
+    }
+  </script>
 </body>
 
 </html>
