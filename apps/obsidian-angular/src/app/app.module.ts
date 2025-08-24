@@ -121,6 +121,10 @@ import { ModernTabService } from './services/modern-tab/modern-tab.service';
 import { AudioManagerService } from './services/audio-manager/audio-manager.service';
 import { TabIntegrationService } from './components/modern-tabs/tab-integration.service';
 
+// Simple Tab System Imports  
+import { SimpleTabService } from './services/simple-tab/simple-tab.service';
+import { SimpleWorkingTabsComponent } from './components/simple-working-tabs/simple-working-tabs.component';
+
 
 
 @NgModule({
@@ -187,6 +191,7 @@ import { TabIntegrationService } from './components/modern-tabs/tab-integration.
     PremiumAuthComponent,
     TestSimpleComponent,
     ModernTabsComponent,
+    SimpleWorkingTabsComponent,
   ],
   bootstrap: [AppComponent], imports: [BrowserModule,
     CommonModule,
@@ -221,6 +226,7 @@ import { TabIntegrationService } from './components/modern-tabs/tab-integration.
       ModernTabService,
       AudioManagerService,
       TabIntegrationService,
+      SimpleTabService,
       provideHttpClient(withInterceptorsFromDi())
     ]
 })

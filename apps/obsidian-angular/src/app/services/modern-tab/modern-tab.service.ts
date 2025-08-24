@@ -56,7 +56,7 @@ export class ModernTabService {
             id: 'cubes',
             name: 'Cubes Arena',
             icon: '🎮',
-            component: 'cubes',
+            component: 'CubesComponent',
             description: 'Enter the 3D Cube Universe',
             ps5Theme: 'neon-blue',
             soundEffect: 'cube-portal',
@@ -72,7 +72,7 @@ export class ModernTabService {
             id: 'braid',
             name: 'Harmonic Braid',
             icon: '🌊',
-            component: 'braid',
+            component: 'BraidComponent',
             description: 'Navigate the Musical Fabric',
             ps5Theme: 'electric-purple',
             soundEffect: 'harmonic-wave',
@@ -88,7 +88,7 @@ export class ModernTabService {
             id: 'fifths',
             name: 'Circle of Fifths',
             icon: '⭕',
-            component: 'fifth-circle',
+            component: 'FifthCircleComponent',
             description: 'Master Musical Relationships',
             ps5Theme: 'golden-ring',
             soundEffect: 'circle-chime',
@@ -104,7 +104,7 @@ export class ModernTabService {
             id: 'editor',
             name: 'Score Editor',
             icon: '📝',
-            component: 'editor',
+            component: 'EditorComponent',
             description: 'Create Musical Masterpieces',
             ps5Theme: 'silver-chrome',
             soundEffect: 'editor-click',
@@ -120,7 +120,7 @@ export class ModernTabService {
             id: 'metronome',
             name: 'Rhythm Engine',
             icon: '🥁',
-            component: 'metro',
+            component: 'MetroComponent',
             description: 'Lock into Perfect Time',
             ps5Theme: 'rhythmic-red',
             soundEffect: 'metronome-tick',
@@ -136,7 +136,7 @@ export class ModernTabService {
             id: 'dictionary',
             name: 'Chord Library',
             icon: '📚',
-            component: 'dico',
+            component: 'DicoComponent',
             description: 'Explore Musical Knowledge',
             ps5Theme: 'wisdom-green',
             soundEffect: 'library-open',
@@ -182,23 +182,23 @@ export class ModernTabService {
         console.log('🔧 ModernTabService.getAllTabs called');
         console.log('🔧 Tab registry size:', this.tabs.size);
         console.log('🔧 Tab registry keys:', Array.from(this.tabs.keys()));
-        
+
         const tabsArray = Array.from(this.tabs.values());
         console.log('🔧 Raw tabs array length:', tabsArray.length);
-        
+
         if (tabsArray.length === 0) {
             console.error('🔧 CRITICAL: No tabs in registry! Service initialization may have failed.');
             return [];
         }
-        
+
         const sortedTabs = tabsArray.sort((a, b) => a.position - b.position);
-        console.log('🔧 Sorted tabs:', sortedTabs.map(t => ({ 
-            id: t.id, 
-            name: t.name, 
+        console.log('🔧 Sorted tabs:', sortedTabs.map(t => ({
+            id: t.id,
+            name: t.name,
             component: t.component,
-            position: t.position 
+            position: t.position
         })));
-        
+
         return sortedTabs;
     }
 
@@ -346,7 +346,7 @@ export class ModernTabService {
     public getCurrentState(): TabState {
         return this.tabStateSubject.value;
     }
-    
+
     // Angular community debugging helper - verify service health
     public verifyServiceHealth(): boolean {
         const health = {
@@ -355,12 +355,12 @@ export class ModernTabService {
             stateSubjectExists: !!this.tabStateSubject,
             currentState: this.tabStateSubject?.value
         };
-        
+
         console.log('🏥 ModernTabService Health Check:', health);
-        
-        const isHealthy = this.tabs.size > 0 && 
-                         !!this.tabStateSubject;
-                         
+
+        const isHealthy = this.tabs.size > 0 &&
+            !!this.tabStateSubject;
+
         console.log('🏥 Service is healthy:', isHealthy);
         return isHealthy;
     }
