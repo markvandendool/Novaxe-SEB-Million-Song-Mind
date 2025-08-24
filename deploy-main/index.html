@@ -29,7 +29,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600;700&family=Noto+Music&family=Share+Tech+Mono&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;600;800&display=swap"
     rel="stylesheet">
-  
+
   <style>
     * {
       margin: 0;
@@ -244,36 +244,101 @@
       animation: float 8s linear infinite;
     }
 
-    .note:nth-child(1) { left: 10%; animation-delay: 0s; }
-    .note:nth-child(2) { left: 20%; animation-delay: 1s; }
-    .note:nth-child(3) { left: 30%; animation-delay: 2s; }
-    .note:nth-child(4) { left: 40%; animation-delay: 3s; }
-    .note:nth-child(5) { left: 50%; animation-delay: 4s; }
-    .note:nth-child(6) { left: 60%; animation-delay: 5s; }
-    .note:nth-child(7) { left: 70%; animation-delay: 6s; }
-    .note:nth-child(8) { left: 80%; animation-delay: 7s; }
+    .note:nth-child(1) {
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .note:nth-child(2) {
+      left: 20%;
+      animation-delay: 1s;
+    }
+
+    .note:nth-child(3) {
+      left: 30%;
+      animation-delay: 2s;
+    }
+
+    .note:nth-child(4) {
+      left: 40%;
+      animation-delay: 3s;
+    }
+
+    .note:nth-child(5) {
+      left: 50%;
+      animation-delay: 4s;
+    }
+
+    .note:nth-child(6) {
+      left: 60%;
+      animation-delay: 5s;
+    }
+
+    .note:nth-child(7) {
+      left: 70%;
+      animation-delay: 6s;
+    }
+
+    .note:nth-child(8) {
+      left: 80%;
+      animation-delay: 7s;
+    }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes float {
-      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
-      10% { opacity: 0.1; }
-      90% { opacity: 0.1; }
-      100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.1;
+      }
+
+      90% {
+        opacity: 0.1;
+      }
+
+      100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+      }
     }
 
     @keyframes shimmer {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
     }
 
     @media (max-width: 768px) {
-      .platforms-container { grid-template-columns: 1fr; gap: 25px; }
-      .logo { font-size: 2.5rem; }
-      .platform-card { padding: 25px; }
+      .platforms-container {
+        grid-template-columns: 1fr;
+        gap: 25px;
+      }
+
+      .logo {
+        font-size: 2.5rem;
+      }
+
+      .platform-card {
+        padding: 25px;
+      }
     }
   </style>
 </head>
@@ -353,7 +418,7 @@
         <h2 class="platform-title">Musical Cubes</h2>
         <p class="platform-subtitle">Unity-Powered 3D Experience</p>
         <p class="platform-description">
-          An immersive 3D musical visualization environment built with Unity for interactive 
+          An immersive 3D musical visualization environment built with Unity for interactive
           musical exploration, spatial audio composition, and advanced harmonic visualization.
         </p>
         <div class="platform-features">

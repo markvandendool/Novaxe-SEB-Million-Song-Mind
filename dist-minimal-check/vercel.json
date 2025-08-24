@@ -12,12 +12,16 @@
         {
             "src": "/obsidian/(.*)",
             "status": 308,
-            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/$1" }
+            "headers": {
+                "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/$1"
+            }
         },
         {
             "src": "/obsidian",
             "status": 308,
-            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/" }
+            "headers": {
+                "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/"
+            }
         },
         {
             "src": "/api/(.*)",

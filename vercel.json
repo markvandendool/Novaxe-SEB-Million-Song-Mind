@@ -18,12 +18,30 @@
         {
             "src": "/obsidian/(.*)",
             "status": 308,
-            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/$1" }
+            "headers": {
+                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/$1"
+            }
         },
         {
             "src": "/obsidian",
             "status": 308,
-            "headers": { "Location": "https://millionsongmindweb-f10utabb1-markvandendools-projects.vercel.app/" }
+            "headers": {
+                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/"
+            }
+        },
+        {
+            "src": "/dist-obsidian/(.*)",
+            "status": 308,
+            "headers": {
+                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/$1"
+            }
+        },
+        {
+            "src": "/dist-obsidian",
+            "status": 308,
+            "headers": {
+                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/"
+            }
         },
         {
             "src": "/api/(.*)",
