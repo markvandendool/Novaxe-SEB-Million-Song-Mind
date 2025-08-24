@@ -115,6 +115,12 @@ import { PremiumAuthComponent } from './components/premium-auth/premium-auth.com
 import { CurChordModel } from '@models/songmodel/cur-chord-model';
 import { TestSimpleComponent } from './test-simple/test-simple.component';
 
+// Modern Tab System Imports
+import { ModernTabsComponent } from './components/modern-tabs/modern-tabs.component';
+import { ModernTabService } from './services/modern-tab/modern-tab.service';
+import { AudioManagerService } from './services/audio-manager/audio-manager.service';
+import { TabIntegrationService } from './components/modern-tabs/tab-integration.service';
+
 
 
 @NgModule({
@@ -180,6 +186,7 @@ import { TestSimpleComponent } from './test-simple/test-simple.component';
     MidiChordDisplayComponent,
     PremiumAuthComponent,
     TestSimpleComponent,
+    ModernTabsComponent,
   ],
   bootstrap: [AppComponent], imports: [BrowserModule,
     CommonModule,
@@ -211,6 +218,9 @@ import { TestSimpleComponent } from './test-simple/test-simple.component';
       SpotifyService,
       CurTonalityModel,
       CurChordModel,
+      ModernTabService,
+      AudioManagerService,
+      TabIntegrationService,
       provideHttpClient(withInterceptorsFromDi())
     ]
 })

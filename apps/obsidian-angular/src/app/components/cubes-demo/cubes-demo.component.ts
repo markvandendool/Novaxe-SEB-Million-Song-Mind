@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 
 @Component({
-  selector: 'app-cubes-demo',
-  template: `
+    selector: 'app-cubes-demo',
+    template: `
     <div class="cubes-demo-page">
       <h1>Cubes Component Demo</h1>
       <p>Interactive 3D musical cubes with full transport synchronization</p>
@@ -36,7 +36,7 @@ import { Component, OnInit } from '@angular/core';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .cubes-demo-page {
       padding: 20px;
       max-width: 1000px;
@@ -79,18 +79,18 @@ import { Component, OnInit } from '@angular/core';
       border-radius: 4px;
     }
   `],
-  standalone: false
+    standalone: false
 })
 export class CubesDemoComponent implements OnInit {
 
-  currentKey: string = 'C';
-  currentChord: string = 'C';
+    currentKey: string = 'C';
+    currentChord: string = 'C';
 
-  keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
-  chords = ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim', 'Cmaj7', 'Dm7', 'Em7'];
+    keys = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    chords = ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim', 'Cmaj7', 'Dm7', 'Em7'];
 
-  constructor() { }
+    constructor() { }
 
-  ngOnInit(): void {
-  }
+    ngOnInit(): void {
+    }
 }

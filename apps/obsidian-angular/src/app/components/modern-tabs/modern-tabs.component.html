@@ -1,0 +1,114 @@
+<!-- Modern Tab System Container -->
+<div class="modern-tabs-container" [class.position-right]="position === 'right'"
+    [class.position-left]="position === 'left'">
+
+    <!-- Tab Navigation Icons - PS5/Guitar Hero Style -->
+    <div class="tab-strip">
+        <div *ngFor="let tab of tabs; trackBy: trackByTabId; let i = index" class="modern-tab"
+            [class.active]="tabState.activeTabId === tab.id" [class.ps5-neon-blue]="tab.ps5Theme === 'neon-blue'"
+            [class.ps5-electric-purple]="tab.ps5Theme === 'electric-purple'"
+            [class.ps5-golden-ring]="tab.ps5Theme === 'golden-ring'"
+            [class.ps5-silver-chrome]="tab.ps5Theme === 'silver-chrome'"
+            [class.ps5-rhythmic-red]="tab.ps5Theme === 'rhythmic-red'"
+            [class.ps5-wisdom-green]="tab.ps5Theme === 'wisdom-green'" [class.rhythm-pulse]="rhythmPulse"
+            [style.top.px]="getTabPosition(i)" [@tabHighlight]="getTabAnimationState(tab.id)"
+            (click)="onTabClick(tab.id)" (mouseenter)="onTabHover(tab.id)" (mouseleave)="onTabLeave(tab.id)"
+            [attr.data-tab-id]="tab.id" [attr.aria-label]="tab.name + ' - ' + tab.description" role="button"
+            tabindex="0">
+
+            <!-- Tab Icon -->
+            <div class="tab-icon">
+                {{ tab.icon }}
+            </div>
+
+            <!-- Tab Title -->
+            <div class="tab-title">{{ tab.name.split(' ')[0] }}</div>
+
+            <!-- PS5 Hover Description -->
+            <div class="tab-description">
+                <strong>{{ tab.name }}</strong><br>
+                {{ tab.description }}
+            </div>
+
+            <!-- Active indicator -->
+            <div class="active-indicator" *ngIf="tabState.activeTabId === tab.id"></div>
+        </div>
+
+        <!-- Sound Toggle Button -->
+        <div class="sound-toggle-tab" [class.sound-enabled]="tabState.soundEnabled"
+            [style.top.px]="getTabPosition(tabs.length + 0.5)" (click)="toggleSound()" role="button" tabindex="0"
+            aria-label="Toggle sound effects">
+            <i class="fas fa-volume-up" *ngIf="tabState.soundEnabled" aria-hidden="true"></i>
+            <i class="fas fa-volume-mute" *ngIf="!tabState.soundEnabled" aria-hidden="true"></i>
+        </div>
+    </div>
+
+    <!-- Slide-Out Content Panel -->
+    <div class="slide-panel" [class.visible]="tabState.activeTabId"
+        [class.cubes-mode]="tabState.activeTabId === 'cubes'" [style.width]="getSlideWidth()"
+        [@slideOut]="getSlideAnimationState()">
+
+        <!-- Panel Header -->
+        <div class="panel-header" *ngIf="tabState.activeTabId">
+            <h3 class="panel-title">
+                {{ getTab(tabState.activeTabId)?.name }}
+            </h3>
+
+            <button class="close-button" (click)="closeCurrentTab()" aria-label="Close panel"
+                [disabled]="tabState.isAnimating">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+
+        <!-- Dynamic Component Content -->
+        <div class="panel-content">
+            <!-- DEBUG INFO -->
+            <div style="background: #000; color: #0f0; padding: 10px; margin: 10px; font-family: monospace;" 
+                 *ngIf="tabState.activeTabId">
+                <strong>🔍 DEBUG INFO:</strong><br>
+                Active Tab ID: {{ tabState.activeTabId }}<br>
+                Component: {{ getActiveComponent() }}<br>
+                Tab State: {{ tabState | json }}
+            </div>
+
+            <!-- Cubes Component -->
+            <app-cubes *ngIf="getActiveComponent() === 'cubes'" 
+                       [showControls]="true" 
+                       [enableInteraction]="true"
+                       class="cubes-fullscreen">
+            </app-cubes>
+
+            <!-- Braid Component -->
+            <app-braid *ngIf="getActiveComponent() === 'braid'">
+            </app-braid>
+
+            <!-- Fifth Circle Component -->
+            <app-fifth-circle *ngIf="getActiveComponent() === 'fifth-circle'">
+            </app-fifth-circle>
+
+            <!-- Editor Component -->
+            <app-editor *ngIf="getActiveComponent() === 'editor'">
+            </app-editor>
+
+            <!-- Metro Component -->
+            <app-metro *ngIf="getActiveComponent() === 'metro'" 
+                       [metro_volume]="0.6">
+            </app-metro>
+
+            <!-- Dictionary Component -->
+            <app-dico *ngIf="getActiveComponent() === 'dico'">
+            </app-dico>
+
+            <!-- Fallback when no match -->
+            <div *ngIf="tabState.activeTabId && !getActiveComponent()" 
+                 style="padding: 20px; color: red; background: #333;">
+                ❌ ERROR: No component found for "{{ tabState.activeTabId }}"
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay for closing panel (click outside) -->
+    <div class="panel-overlay" *ngIf="tabState.activeTabId && tabState.activeTabId !== 'cubes'"
+        (click)="closeCurrentTab()"></div>
+
+</div>
