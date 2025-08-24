@@ -1,0 +1,38 @@
+<div #cubesContainer class="cubes-container" 
+     [style.width.px]="containerWidth" 
+     [style.height.px]="containerHeight">
+  
+  <!-- Transport controls integration - following chordstrip pattern -->
+  <div class="transport-controls" *ngIf="showControls">
+    <div class="playback-info">
+      <span class="beat-display">{{ currentBeat + 1 }}.{{ currentMeasure + 1 }}</span>
+      <span class="bpm-display">{{ currentBpm }} BPM</span>
+      <span class="playing-indicator" [class.active]="isPlaying">
+        {{ isPlaying ? '▶' : '⏸' }}
+      </span>
+    </div>
+    
+    <div class="chord-info">
+      <span class="current-key">Key: {{ currentKey }}</span>
+      <span class="current-chord">Chord: {{ currentChord }}</span>
+      <span class="current-inversion" *ngIf="currentInversion > 0">
+        Inv: {{ currentInversion }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Three.js canvas will be injected here by the component -->
+  
+  <!-- Cube interaction overlay - for click detection -->
+  <div class="cube-overlay" *ngIf="enableInteraction">
+    <div *ngFor="let cube of cubes; let i = index" 
+         class="cube-hit-area"
+         [attr.data-note]="CHROMATIC_NOTES[i]"
+         [class.active]="getCubeActive(i)"
+         (click)="onCubeClick(i)"
+         [style.transform]="getCubeOverlayPosition(i)">
+      <span class="note-label">{{ CHROMATIC_NOTES[i] }}</span>
+    </div>
+  </div>
+
+</div>

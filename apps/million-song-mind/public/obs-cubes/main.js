@@ -40,6 +40,15 @@ scene.add(ambient);
 const dir = new THREE.DirectionalLight(0xffffff, 0.7);
 dir.position.set(3, 5, 4);
 scene.add(dir);
+// Double front-row spotlight (soft key + fill)
+const frontKey = new THREE.SpotLight(0xffffff, 0.85, 12.0, Math.PI / 6, 0.35, 1.2);
+frontKey.position.set(0, 4.8, 5.6);
+frontKey.target.position.set(0, 0, 0);
+scene.add(frontKey); scene.add(frontKey.target);
+const frontFill = new THREE.SpotLight(0xffffff, 0.45, 10.0, Math.PI / 4, 0.5, 1.0);
+frontFill.position.set(-3.5, 3.8, 6.2);
+frontFill.target.position.set(0, 0, 0);
+scene.add(frontFill); scene.add(frontFill.target);
 // Front-row spotlights (off by default)
 const frontSpot = new THREE.PointLight(0xffffff, 0.0, 4.5, 1.6);
 frontSpot.position.set(0, 1.3, 1.6);
@@ -1234,10 +1243,23 @@ let debugOverlay = null;
 function createDebugOverlay() {
     if (!debugEnabled || debugOverlay) return;
     debugOverlay = document.createElement('div');
-    debugOverlay.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:420px;pointer-events:none;';
+    debugOverlay.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:420px;pointer-events:none;text-align:right;';
     document.body.appendChild(debugOverlay);
 }
 function updateDebugOverlay(info) { if (debugOverlay) debugOverlay.innerHTML = info; }
+
+function ensureDebugOverlayPosition() {
+    if (!debugOverlay) return;
+    try {
+        debugOverlay.style.position = 'fixed';
+        debugOverlay.style.bottom = '10px';
+        debugOverlay.style.top = '';
+        debugOverlay.style.right = '10px';
+        debugOverlay.style.left = '';
+        debugOverlay.style.textAlign = 'right';
+        debugOverlay.style.whiteSpace = 'pre';
+    } catch (_) { }
+}
 
 // Helper: point in polygon (ray casting)
 function pointInPolygon(x, y, polygon) {
@@ -2158,6 +2180,17 @@ bassLockIcon?.addEventListener('click', async () => {
 });
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
+
+// Optional URL controls: ?bpm=120&bpc=4
+(function readPerfParams() {
+    try {
+        const params = new URLSearchParams(window.location.search);
+        const bpm = parseInt(params.get('bpm') || '');
+        const bpc = parseInt(params.get('bpc') || '');
+        if (!isNaN(bpm) && bpm > 20 && bpm < 400) progressionBpm = bpm;
+        if (!isNaN(bpc) && bpc >= 1 && bpc <= 16) beatsPerChord = bpc;
+    } catch (_) { }
+})();
 resetBtn?.addEventListener('click', () => {
     // Return all active cubes to their shelf origin and clear lineup
     for (const c of [...lineup]) {
@@ -2302,7 +2335,7 @@ function animate() {
             const names = transposeNotes(tones, currentKey);
             hudLines.push(`${i}:${cube.userData.roman} B=${names[bottomIdx]}(${bottomIdx}) T=${names[topIdx]}(${topIdx})`);
         }
-        if (debugEnabled) updateDebugOverlay(`Key=${currentKey}\n` + hudLines.join('\n'));
+        if (debugEnabled) { ensureDebugOverlayPosition(); updateDebugOverlay(`Key=${currentKey}\n` + hudLines.join('\n')); }
     } catch (_) { }
     diag.update && diag.update();
     // Harmonized drag smoothing
@@ -2332,6 +2365,19 @@ function animate() {
         const showMel = above; const showBass = !above;
         [melodyLockLeft, melodyLockRight].forEach(o => { if (o) o.visible = showMel; });
         [bassLockLeft, bassLockRight].forEach(o => { if (o) o.visible = showBass; });
+        // When camera is below plane (bass view), darken the scene like performance mode
+        const below = !above;
+        // Fade a darkening plane and adjust lights for bass view
+        if (below) {
+            try { darkPlane.material.opacity = 0.55; } catch (_) { }
+            if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
+            stageSpot.intensity = 2.2;
+            dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
+        } else {
+            try { darkPlane.material.opacity = 0.0; } catch (_) { }
+            stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
+            dir.intensity = 0.7; frontFill.intensity = 0.45; frontKey.intensity = 0.85;
+        }
     } catch (_) { }
     // TEMP DEBUG: log one pivot angle occasionally
     try {
@@ -2732,8 +2778,10 @@ async function animateShelfClickAdd(shelf) {
 let progressionEnabled = false;
 let progressionArrows = [];
 let progressionPoints = [];
+let progressionBpm = 120; // default metronome BPM
+let beatsPerChord = 4;    // 4 beats per chord default
 let playButtonMesh = null;
-let progressionBpm = 30; // 30 BPM → 2s per chord by default
+// legacy var removed (we now compute via bpm & beatsPerChord)
 // Smooth camera follow of active chord
 let cameraFocusTween = null;
 function focusCameraOnCube(cube, durationMs = 700) {
@@ -2930,6 +2978,49 @@ function shimmerMelodyLane() {
     } catch (_) { }
 }
 
+// Ultra flash: big radial ring + confetti pulse at center of lineup
+function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
+    try {
+        const ringGeo = new THREE.RingGeometry(0.2, 0.22, 48);
+        const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.position.set(0, 0.01, 0);
+        ring.rotation.x = -Math.PI / 2;
+        scene.add(ring);
+        tweenObject({
+            duration: durationMs, owner: ring, onUpdate: (v) => {
+                try { ring.scale.setScalar(1 + v * 6); ringMat.opacity = 0.8 * (1 - v); } catch (_) { }
+            }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); ring.material.dispose(); } catch (_) { } }
+        });
+
+        // Confetti sprinkles
+        for (let i = 0; i < 24; i++) {
+            const c = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.02), new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+            c.position.set((Math.random() - 0.5) * 0.8, 0.02, (Math.random() - 0.5) * 0.8);
+            c.rotation.x = -Math.PI / 2; c.rotation.z = Math.random() * Math.PI;
+            scene.add(c);
+            const dx = (Math.random() - 0.5) * 3.5; const dz = (Math.random() - 0.5) * 3.5;
+            const start = c.position.clone(); const end = start.clone().add(new THREE.Vector3(dx, 0, dz));
+            tweenObject({
+                duration: 620 + Math.random() * 260, owner: c, onUpdate: (v) => {
+                    try { c.position.lerpVectors(start, end, v); c.material.opacity = 0.9 * (1 - v); c.rotation.z += 0.4; } catch (_) { }
+                }, onComplete: () => { try { scene.remove(c); c.geometry.dispose(); c.material.dispose(); } catch (_) { } }
+            });
+        }
+    } catch (_) { }
+}
+
+function pulseLockIcons(kind, durationMs = 400) {
+    try {
+        const targets = kind === 'melody' ? [melodyLockLeft, melodyLockRight] : [bassLockLeft, bassLockRight];
+        targets.forEach(node => {
+            if (!node) return;
+            const s0 = node.scale.x;
+            tweenObject({ duration: durationMs, owner: node, onUpdate: (v) => { try { const s = s0 * (1 + 0.3 * Math.sin(v * Math.PI)); node.scale.setScalar(s); } catch (_) { } }, onComplete: () => { try { node.scale.setScalar(s0); } catch (_) { } } });
+        });
+    } catch (_) { }
+}
+
 function makeLaneDiamond(colorHex = 0xffffff) {
     const g = new THREE.CircleGeometry(0.08, 4);
     const m = new THREE.MeshBasicMaterial({ color: colorHex });
@@ -3088,6 +3179,8 @@ function lockInMelody() {
     }
     lockedMelody = snapshot;
     renderMelodyLane();
+    ultraFlash(0x66ccff, 540);
+    pulseLockIcons('melody');
     melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
     if (lockedBass && lockedBass.length === lineup.length) {
         setTimeout(() => {
@@ -3149,6 +3242,8 @@ function lockInBass() {
         lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
     }
     renderBassLane();
+    ultraFlash(0xffcc66, 540);
+    pulseLockIcons('bass');
     bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
     // If both voices locked, normalize all cubes to root-down orientation for easy reading
     if (lockedMelody && lockedMelody.length === lineup.length) {
@@ -3218,11 +3313,29 @@ async function playLockSound() {
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
     const msPerBeat = Math.round(60000 / progressionBpm);
-    const perChordMs = 1000; // 1 second per chord per request
+    const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         // Ultra-flashy active chord highlight + camera dolly follow
-        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); focusCameraOnCube(c, 600); } catch (_) { }
+        try {
+            highlightChordEffect(c, 900); pulseGiantAt(i, 700);
+            // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
+            const tDur = 700;
+            const fromPos = camera.position.clone();
+            const fromTgt = controls.target.clone();
+            const toTgt = new THREE.Vector3(c.position.x, 0, 0);
+            const toPos = toTgt.clone().add(new THREE.Vector3(0, currentStickyView === 'below' ? -8.9 : 8.9, 7.04));
+            const tStart = performance.now();
+            const tween = {
+                owner: camera, tick: (now) => {
+                    const v = Math.min(1, (now - tStart) / tDur);
+                    camera.position.lerpVectors(fromPos, toPos, v);
+                    controls.target.lerpVectors(fromTgt, toTgt, v);
+                    return v >= 1;
+                }, cancelled: false
+            };
+            activeTweens.push(tween);
+        } catch (_) { }
         if (lockedMelody || lockedBass) {
             // Use locked lines if present; fallback to face-derived where missing
             const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;

@@ -32,11 +32,12 @@ import { PageArtistComponent } from '@pages/page-artist/page-artist.component';
 import { PageAlbumComponent } from '@pages/page-album/page-album.component';
 import { PageStyleComponent } from '@pages/page-style/page-style.component';
 import { PageAuthorComponent } from '@pages/page-author/page-author.component';
-import { PageKeyComponent } from '@pages/page-key/page-key.component';
-import { ResetPasswordComponent } from '@pages/reset-password/reset-password.component';
+// import { PageKeyComponent } from '@pages/page-key/page-key.component';
+// import { ResetPasswordComponent } from '@pages/reset-password/reset-password.component';
 import { StatsComponent } from '@pages/stats/stats.component';
 import { StoreComponent } from '@pages/store/store.component';
 import { PremiumAuthComponent } from '@components/premium-auth/premium-auth.component';
+import { CubesDemoComponent } from '@components/cubes-demo/cubes-demo.component';
 
 @Injectable()
 export class SongResolver {
@@ -81,6 +82,7 @@ const routes: Routes = [
   { path: 'metronome', component: MetroPageComponent, pathMatch: 'prefix' },
   { path: 'fifths', component: PageFifthCircleComponent, pathMatch: 'prefix' },
   { path: 'chord-detect', component: MidiChordDetectSimpleComponent, pathMatch: 'prefix' },
+  { path: 'cubes', component: CubesDemoComponent, pathMatch: 'prefix' },
   { path: 'learn-fifths', component: LearnFifthsComponent, pathMatch: 'prefix' },
   { path: 'learn-rythm', component: AbcCheckerComponent, pathMatch: 'prefix' },
   { path: 'full-score', component: AbcCheckerFullScoreComponent, pathMatch: 'prefix' },
@@ -100,8 +102,8 @@ const routes: Routes = [
   { path: 'album/:album', component: PageAlbumComponent, pathMatch: 'prefix' },
   { path: 'style/:style', component: PageStyleComponent, pathMatch: 'prefix' },
   { path: 'author/:author', component: PageAuthorComponent, pathMatch: 'prefix' },
-  { path: 'key/:key', component: PageKeyComponent, pathMatch: 'prefix' },
-  { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'prefix' },
+  // { path: 'key/:key', component: PageKeyComponent, pathMatch: 'prefix' },
+  // { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'prefix' },
   { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home', pathMatch: 'full' },
   // { path: '**', component: TestpageComponent } , // always at the bottom !

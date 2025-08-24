@@ -1,7 +1,9 @@
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { CookieModule } from 'ngx-cookie';
 
 import abcjs from 'abcjs';
 declare global {
@@ -53,7 +55,6 @@ import { SpotifyService } from '@services/spotify/spotify.service';
 
 import { GuitarComponent } from '@components/guitar/guitar.component';
 import { TestpageComponent } from '@components/testpage/testpage.component';
-import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { TabParserComponent } from '@components/tab-parser/tab-parser.component';
 import { ChordsFromYoutubeComponent } from '@components/chords-from-youtube/chords-from-youtube.component';
 import { FifthCircleComponent } from '@components/fifth-circle/fifth-circle.component';
@@ -67,7 +68,6 @@ import { CreateFifthsExerciseComponent } from '@components/create-fifths-exercis
 import { ExerciceRythmComponent } from '@components/exercises/templates/rhythm/exercice-rythm.component';
 import { MetroPageComponent } from '@components/metro/metro-page/metro-page.component';
 import { NavbarComponent } from '@components/navbar/navbar.component';
-import { CookieModule } from 'ngx-cookie';
 
 import * as $ from 'jquery';
 import { YoutubeAudioComponent } from '@components/youtube-audio/youtube-audio.component';
@@ -95,7 +95,7 @@ import { PageArtistComponent } from './pages/page-artist/page-artist.component';
 import { PageAlbumComponent } from './pages/page-album/page-album.component';
 import { PageStyleComponent } from './pages/page-style/page-style.component';
 import { PageAuthorComponent } from './pages/page-author/page-author.component';
-import { PageKeyComponent } from './pages/page-key/page-key.component';
+// import { PageKeyComponent } from './pages/page-key/page-key.component';
 import { FretboardComponent } from './components/fretboard/fretboard.component';
 import { FretboardDiamondComponent } from './components/fretboard/fretboard.component';
 import { PianoDiamondComponent } from './components/piano/piano.component';
@@ -103,10 +103,12 @@ import { ScaleSelectorComponent } from './components/scale-selector/scale-select
 import { TonalityButtonComponent } from './components/tonality-button/tonality-button.component';
 import { BraidComponent } from './components/braid/braid.component';
 import { MidiControlSelectorComponent } from './components/midi-control-selector/midi-control-selector.component';
-import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
+// import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 import { StatsComponent } from './pages/stats/stats.component';
 import { DonateComponent } from './components/donate/donate.component';
 import { ChordstripComponent } from './components/chordstrip/chordstrip.component';
+import { CubesComponent } from './components/cubes/cubes.component';
+import { CubesDemoComponent } from './components/cubes-demo/cubes-demo.component';
 import { StoreComponent } from './pages/store/store.component';
 import { MidiChordDisplayComponent } from './components/midi-chord-display/midi-chord-display.component';
 import { PremiumAuthComponent } from './components/premium-auth/premium-auth.component';
@@ -160,7 +162,7 @@ import { TestSimpleComponent } from './test-simple/test-simple.component';
     PageAlbumComponent,
     PageStyleComponent,
     PageAuthorComponent,
-    PageKeyComponent,
+    // PageKeyComponent,
     FretboardComponent,
     FretboardDiamondComponent,
     PianoDiamondComponent,
@@ -168,10 +170,12 @@ import { TestSimpleComponent } from './test-simple/test-simple.component';
     TonalityButtonComponent,
     BraidComponent,
     MidiControlSelectorComponent,
-    ResetPasswordComponent,
+    // ResetPasswordComponent,
     StatsComponent,
     DonateComponent,
     ChordstripComponent,
+    CubesComponent,
+    CubesDemoComponent,
     StoreComponent,
     MidiChordDisplayComponent,
     PremiumAuthComponent,
