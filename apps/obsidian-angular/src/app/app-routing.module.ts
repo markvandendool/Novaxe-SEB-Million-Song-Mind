@@ -76,7 +76,7 @@ export class StatsResolver {
 }
 
 const routes: Routes = [
-  { path: '', redirectTo: '/auth', pathMatch: 'full' },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'auth', component: PremiumAuthComponent },
   { path: 'home', component: HomeComponent },
   { path: 'metronome', component: MetroPageComponent, pathMatch: 'prefix' },
@@ -104,7 +104,6 @@ const routes: Routes = [
   { path: 'author/:author', component: PageAuthorComponent, pathMatch: 'prefix' },
   // { path: 'key/:key', component: PageKeyComponent, pathMatch: 'prefix' },
   // { path: 'reset-password', component: ResetPasswordComponent, pathMatch: 'prefix' },
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: '**', redirectTo: '/home', pathMatch: 'full' },
   // { path: '**', component: TestpageComponent } , // always at the bottom !
 ];
