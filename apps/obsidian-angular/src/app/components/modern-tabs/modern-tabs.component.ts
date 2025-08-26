@@ -28,6 +28,12 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
     // PS5/Guitar Hero rhythm pulse state
     public rhythmPulse: boolean = false;
 
+    // Performance optimization: track last logged component to reduce console spam
+    private lastLoggedComponent: string | null = null;
+
+    // Reactive property for active component (Angular best practice - avoid method calls in templates)
+    public activeComponent: string | null = null;
+
     private subscriptions: Subscription[] = [];
 
     constructor(
@@ -38,19 +44,19 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         console.log('🎯 ModernTabsComponent: ngOnInit called');
         console.log('🎯 TabService exists:', !!this.tabService);
-        
+
         // Angular community best practice: Defensive service checking
         if (!this.tabService) {
             console.error('🎯 CRITICAL ERROR: TabService not injected!');
             return;
         }
-        
+
         if (typeof this.tabService.getAllTabs !== 'function') {
             console.error('🎯 CRITICAL ERROR: TabService.getAllTabs method missing!');
             console.log('🎯 Service methods available:', Object.getOwnPropertyNames(this.tabService));
             return;
         }
-        
+
         try {
             // Angular community best practice: Service health check
             const serviceHealthy = this.tabService.verifyServiceHealth();
@@ -58,22 +64,22 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
                 console.error('🎯 CRITICAL ERROR: Service health check failed!');
                 return;
             }
-            
+
             // Initialize tabs from service
             this.tabs = this.tabService.getAllTabs();
             console.log('🎯 Tabs retrieved successfully:', this.tabs.length, 'tabs');
-            
+
             if (!this.tabs || this.tabs.length === 0) {
                 console.error('🎯 CRITICAL ERROR: No tabs returned from service!');
                 return;
             }
-            
+
             this.tabState = this.tabService.getCurrentState();
-            
+
             console.log('🎯 Initial tabs loaded:', this.tabs.length);
             console.log('🎯 Tab details:', this.tabs.map(t => ({ id: t.id, name: t.name, component: t.component })));
             console.log('🎯 Initial tab state:', this.tabState);
-            
+
             // Subscribe to tab state changes with error handling
             this.subscriptions.push(
                 this.tabService.tabState$.subscribe({
@@ -82,12 +88,17 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
                         this.tabState = state;
                         // Re-fetch tabs when state changes
                         this.tabs = this.tabService.getAllTabs();
+                        // Update active component reactively
+                        this.updateActiveComponent();
                     },
                     error: (error) => {
                         console.error('🎯 Tab state subscription error:', error);
                     }
                 })
             );
+
+            // Initialize active component
+            this.updateActiveComponent();
         } catch (error) {
             console.error('🎯 CRITICAL ERROR in ngOnInit:', error);
             console.log('🎯 Stack trace:', error.stack);
@@ -120,9 +131,9 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
             currentActiveTab: this.tabState.activeTabId,
             allTabs: this.tabs.map(t => ({ id: t.id, name: t.name, component: t.component }))
         });
-        
+
         await this.tabService.openTab(tabId);
-        
+
         // Log result
         console.log('🎯 Tab opened, new state:', {
             activeTabId: this.tabState.activeTabId,
@@ -184,25 +195,34 @@ export class ModernTabsComponent implements OnInit, OnDestroy {
         return icon.startsWith('fa-') || icon === 'cubes-isometric';
     }
 
-    // Component access helpers with VERBOSE LOGGING
-    public getActiveComponent(): string | null {
+    // Component access helpers - OPTIMIZED FOR PERFORMANCE
+    private updateActiveComponent(): void {
         if (!this.tabState.activeTabId) {
-            console.log('🔍 getActiveComponent: No active tab ID');
-            return null;
+            this.activeComponent = null;
+            return;
         }
 
         const tab = this.tabService.getTab(this.tabState.activeTabId);
         const component = tab?.component || null;
-        
-        console.log('🔍 getActiveComponent:', {
-            activeTabId: this.tabState.activeTabId,
-            tabFound: !!tab,
-            tabName: tab?.name,
-            component: component,
-            fullTab: tab
-        });
-        
-        return component;
+
+        // Only log once when component actually changes
+        if (component !== this.lastLoggedComponent) {
+            console.log('🔍 updateActiveComponent: Active component changed to', {
+                activeTabId: this.tabState.activeTabId,
+                tabFound: !!tab,
+                tabName: tab?.name,
+                component: component,
+                fullTab: tab
+            });
+            this.lastLoggedComponent = component;
+        }
+
+        this.activeComponent = component;
+    }
+
+    // Legacy method kept for debugging
+    public getActiveComponent(): string | null {
+        return this.activeComponent;
     }
 
     // PS5/Guitar Hero hover events

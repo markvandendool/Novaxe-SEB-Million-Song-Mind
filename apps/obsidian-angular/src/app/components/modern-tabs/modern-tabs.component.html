@@ -63,45 +63,146 @@
         <!-- Dynamic Component Content -->
         <div class="panel-content">
             <!-- DEBUG INFO -->
-            <div style="background: #000; color: #0f0; padding: 10px; margin: 10px; font-family: monospace;" 
-                 *ngIf="tabState.activeTabId">
+            <div style="background: #000; color: #0f0; padding: 10px; margin: 10px; font-family: monospace;"
+                *ngIf="tabState.activeTabId">
                 <strong>🔍 DEBUG INFO:</strong><br>
                 Active Tab ID: {{ tabState.activeTabId }}<br>
-                Component: {{ getActiveComponent() }}<br>
+                Component: {{ activeComponent }}<br>
+                Component Method: {{ getActiveComponent() }}<br>
                 Tab State: {{ tabState | json }}
             </div>
 
-            <!-- Cubes Component -->
-            <app-cubes *ngIf="getActiveComponent() === 'cubes'" 
-                       [showControls]="true" 
-                       [enableInteraction]="true"
-                       class="cubes-fullscreen">
-            </app-cubes>
+            <!-- PS5/Xbox Mock Content - TESTING BASIC RENDERING -->
 
-            <!-- Braid Component -->
-            <app-braid *ngIf="getActiveComponent() === 'braid'">
-            </app-braid>
+            <!-- Cubes Component - Real Three.js Integration -->
+            <div *ngIf="activeComponent === 'CubesComponent'" class="cubes-integration-container">
+                <app-cubes [chord]="'C'" [key]="'C'" [showControls]="true" [enableInteraction]="true">
+                </app-cubes>
+            </div>
 
-            <!-- Fifth Circle Component -->
-            <app-fifth-circle *ngIf="getActiveComponent() === 'fifth-circle'">
-            </app-fifth-circle>
+            <!-- Braid Mock Component -->
+            <div *ngIf="activeComponent === 'BraidComponent'" class="ps5-mock-content braid-theme">
+                <div class="ps5-header">
+                    <h2>🌊 HARMONIC BRAID - WEAVING SOUND</h2>
+                    <div class="ps5-status-bar">
+                        <span class="status-item">THREADS: 12</span>
+                        <span class="status-item">HARMONY: PERFECT</span>
+                        <span class="status-item">WEAVE: ACTIVE</span>
+                    </div>
+                </div>
+                <div class="ps5-content-grid">
+                    <div class="game-panel">
+                        <h3>MUSICAL FABRIC NAVIGATOR</h3>
+                        <p>Navigate through the interconnected web of musical harmonies and progressions.</p>
+                        <div class="mock-braid-visualization">
+                            <div class="braid-strand strand-1"></div>
+                            <div class="braid-strand strand-2"></div>
+                            <div class="braid-strand strand-3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Editor Component -->
-            <app-editor *ngIf="getActiveComponent() === 'editor'">
-            </app-editor>
+            <!-- Fifth Circle Mock Component -->
+            <div *ngIf="activeComponent === 'FifthCircleComponent'" class="ps5-mock-content fifths-theme">
+                <div class="ps5-header">
+                    <h2>⭕ CIRCLE OF FIFTHS - THEORY MASTER</h2>
+                    <div class="ps5-status-bar">
+                        <span class="status-item">KEY: C MAJOR</span>
+                        <span class="status-item">MODE: LEARNING</span>
+                        <span class="status-item">PROGRESS: 75%</span>
+                    </div>
+                </div>
+                <div class="ps5-content-grid">
+                    <div class="game-panel">
+                        <h3>MUSICAL RELATIONSHIP MATRIX</h3>
+                        <p>Master the fundamental relationships between keys and build musical intuition.</p>
+                        <div class="mock-circle">
+                            <div class="circle-center">C</div>
+                            <div class="circle-notes">
+                                <span>G</span><span>D</span><span>A</span><span>E</span>
+                                <span>B</span><span>F#</span><span>Db</span><span>Ab</span>
+                                <span>Eb</span><span>Bb</span><span>F</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Metro Component -->
-            <app-metro *ngIf="getActiveComponent() === 'metro'" 
-                       [metro_volume]="0.6">
-            </app-metro>
+            <!-- Editor Mock Component -->
+            <div *ngIf="activeComponent === 'EditorComponent'" class="ps5-mock-content editor-theme">
+                <div class="ps5-header">
+                    <h2>📝 SCORE EDITOR - CREATE MODE</h2>
+                    <div class="ps5-status-bar">
+                        <span class="status-item">BPM: 120</span>
+                        <span class="status-item">4/4 TIME</span>
+                        <span class="status-item">AUTOSAVE: ON</span>
+                    </div>
+                </div>
+                <div class="ps5-content-grid">
+                    <div class="game-panel">
+                        <h3>MUSICAL COMPOSITION STUDIO</h3>
+                        <p>Create and edit musical masterpieces with professional-grade tools.</p>
+                        <div class="mock-staff">
+                            <div class="staff-line"></div>
+                            <div class="staff-line"></div>
+                            <div class="staff-line"></div>
+                            <div class="staff-line"></div>
+                            <div class="staff-line"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            <!-- Dictionary Component -->
-            <app-dico *ngIf="getActiveComponent() === 'dico'">
-            </app-dico>
+            <!-- Metro Mock Component -->
+            <div *ngIf="activeComponent === 'MetroComponent'" class="ps5-mock-content metro-theme">
+                <div class="ps5-header">
+                    <h2>🥁 RHYTHM ENGINE - PRECISION TIMING</h2>
+                    <div class="ps5-status-bar">
+                        <span class="status-item">BPM: 120</span>
+                        <span class="status-item">CLICK: ACTIVE</span>
+                        <span class="status-item">SYNC: LOCKED</span>
+                    </div>
+                </div>
+                <div class="ps5-content-grid">
+                    <div class="game-panel">
+                        <h3>METRONOME CONTROL CENTER</h3>
+                        <p>Lock into perfect time with advanced rhythm training tools.</p>
+                        <div class="mock-metronome">
+                            <div class="metronome-pendulum"></div>
+                            <div class="beat-indicator active">♩</div>
+                            <div class="tempo-slider"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dictionary Mock Component -->
+            <div *ngIf="activeComponent === 'DicoComponent'" class="ps5-mock-content dico-theme">
+                <div class="ps5-header">
+                    <h2>📚 CHORD LIBRARY - KNOWLEDGE BASE</h2>
+                    <div class="ps5-status-bar">
+                        <span class="status-item">CHORDS: 2847</span>
+                        <span class="status-item">SCALES: 156</span>
+                        <span class="status-item">UPDATED: TODAY</span>
+                    </div>
+                </div>
+                <div class="ps5-content-grid">
+                    <div class="game-panel">
+                        <h3>MUSICAL KNOWLEDGE EXPLORER</h3>
+                        <p>Discover and learn from an extensive library of musical knowledge.</p>
+                        <div class="mock-chord-list">
+                            <div class="chord-item">C Major</div>
+                            <div class="chord-item">G7</div>
+                            <div class="chord-item">Am</div>
+                            <div class="chord-item">F Major</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Fallback when no match -->
-            <div *ngIf="tabState.activeTabId && !getActiveComponent()" 
-                 style="padding: 20px; color: red; background: #333;">
+            <div *ngIf="tabState.activeTabId && !activeComponent" style="padding: 20px; color: red; background: #333;">
                 ❌ ERROR: No component found for "{{ tabState.activeTabId }}"
             </div>
         </div>

@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Million Song Mind - Musical Intelligence Platform</title>
-    <meta name="description" content="Choose between MusicViz (React) and Novaxe Obsidian (Angular 20) - Professional musical intelligence platforms">
+    <meta name="description"
+        content="Choose between MusicViz (React) and Novaxe Obsidian (Angular 20) - Professional musical intelligence platforms">
     <style>
         * {
             margin: 0;
@@ -207,20 +209,52 @@
             animation: float 8s linear infinite;
         }
 
-        .note:nth-child(1) { left: 10%; animation-delay: 0s; }
-        .note:nth-child(2) { left: 20%; animation-delay: 1s; }
-        .note:nth-child(3) { left: 30%; animation-delay: 2s; }
-        .note:nth-child(4) { left: 40%; animation-delay: 3s; }
-        .note:nth-child(5) { left: 50%; animation-delay: 4s; }
-        .note:nth-child(6) { left: 60%; animation-delay: 5s; }
-        .note:nth-child(7) { left: 70%; animation-delay: 6s; }
-        .note:nth-child(8) { left: 80%; animation-delay: 7s; }
+        .note:nth-child(1) {
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .note:nth-child(2) {
+            left: 20%;
+            animation-delay: 1s;
+        }
+
+        .note:nth-child(3) {
+            left: 30%;
+            animation-delay: 2s;
+        }
+
+        .note:nth-child(4) {
+            left: 40%;
+            animation-delay: 3s;
+        }
+
+        .note:nth-child(5) {
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        .note:nth-child(6) {
+            left: 60%;
+            animation-delay: 5s;
+        }
+
+        .note:nth-child(7) {
+            left: 70%;
+            animation-delay: 6s;
+        }
+
+        .note:nth-child(8) {
+            left: 80%;
+            animation-delay: 7s;
+        }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -232,12 +266,15 @@
                 transform: translateY(100vh) rotate(0deg);
                 opacity: 0;
             }
+
             10% {
                 opacity: 0.1;
             }
+
             90% {
                 opacity: 0.1;
             }
+
             100% {
                 transform: translateY(-100px) rotate(360deg);
                 opacity: 0;
@@ -245,8 +282,13 @@
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         @media (max-width: 768px) {
@@ -254,17 +296,18 @@
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
-            
+
             .logo {
                 font-size: 3rem;
             }
-            
+
             .platform-card {
                 padding: 30px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="musical-notes">
         <div class="note">♪</div>
@@ -294,7 +337,7 @@
                 <h2 class="platform-title">MusicViz</h2>
                 <p class="platform-subtitle">Modern React Experience</p>
                 <p class="platform-description">
-                    A sleek, modern musical interface built with React and cutting-edge web technologies. 
+                    A sleek, modern musical interface built with React and cutting-edge web technologies.
                     Perfect for quick composition, chord analysis, and musical exploration.
                 </p>
                 <div class="platform-features">
@@ -317,7 +360,7 @@
                 <h2 class="platform-title">ChordCubes 1.0</h2>
                 <p class="platform-subtitle">Interactive 3D Musical Cubes</p>
                 <p class="platform-description">
-                    Revolutionary 3D musical visualization system with interactive chord cubes, 
+                    Revolutionary 3D musical visualization system with interactive chord cubes,
                     advanced Three.js graphics, and immersive audio-visual experiences.
                 </p>
                 <div class="platform-features">
@@ -338,7 +381,8 @@
 
         <div style="text-align: center; margin-top: 40px; animation: fadeInUp 1s ease-out 0.9s both;">
             <p style="color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;">
-                🎯 <strong>Unity2.0 Live:</strong> Million Song Mind V1.0 ✅ | ChordCubes 1.0 ✅ | More Apps Coming Soon...
+                🎯 <strong>Unity2.0 Live:</strong> Million Song Mind V1.0 ✅ | ChordCubes 1.0 ✅ | More Apps Coming
+                Soon...
             </p>
             <p style="color: rgba(255, 255, 255, 0.7); margin-top: 10px;">
                 Built with ❤️ using React, Three.js, and Advanced Musical Intelligence
@@ -352,7 +396,7 @@
         }
 
         // Add some interactive musical elements
-        document.addEventListener('mousemove', function(e) {
+        document.addEventListener('mousemove', function (e) {
             if (Math.random() > 0.95) {
                 createMagicNote(e.clientX, e.clientY);
             }
@@ -370,9 +414,10 @@
             note.style.zIndex = '100';
             note.style.animation = 'fadeInUp 2s ease-out forwards';
             document.body.appendChild(note);
-            
+
             setTimeout(() => note.remove(), 2000);
         }
     </script>
 </body>
+
 </html>
