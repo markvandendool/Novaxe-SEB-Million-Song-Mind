@@ -8,40 +8,53 @@
     ],
     "routes": [
         {
-            "src": "/cubes/(.*)",
-            "dest": "/cubes/$1"
+            "src": "^/obsidiannvx$",
+            "status": 308,
+            "headers": {
+                "Location": "/obsidiannvx/"
+            }
         },
         {
-            "src": "/cubes",
+            "src": "^/obsidiannvx/?$",
+            "dest": "/obsidiannvx/index.html"
+        },
+        {
+            "src": "^/obsidiannvx/(.*)$",
+            "dest": "/obsidiannvx/$1"
+        },
+        {
+            "src": "^/cubes$",
+            "status": 308,
+            "headers": {
+                "Location": "/cubes/"
+            }
+        },
+        {
+            "src": "^/cubes/?$",
             "dest": "/cubes/index.html"
         },
         {
-            "src": "/obsidian/(.*)",
+            "src": "^/cubes/(.*)$",
+            "dest": "/cubes/$1"
+        },
+        {
+            "src": "^/analytics$",
             "status": 308,
             "headers": {
-                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/$1"
+                "Location": "/analytics/"
             }
         },
         {
-            "src": "/obsidian",
-            "status": 308,
-            "headers": {
-                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/"
-            }
+            "src": "^/analytics/?$",
+            "dest": "/analytics/index.html"
         },
         {
-            "src": "/dist-obsidian/(.*)",
-            "status": 308,
-            "headers": {
-                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/$1"
-            }
+            "src": "^/analytics/(.*)$",
+            "dest": "/analytics/$1"
         },
         {
-            "src": "/dist-obsidian",
-            "status": 308,
-            "headers": {
-                "Location": "https://dist-obsidian-qpcc2gbe9-markvandendools-projects.vercel.app/"
-            }
+            "src": "^/fonts/(.*)$",
+            "dest": "/fonts/$1"
         },
         {
             "src": "/api/(.*)",
@@ -50,6 +63,10 @@
         {
             "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot))",
             "dest": "/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/index.html"
         },
         {
             "src": "/(.*)",

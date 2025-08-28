@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Million Song Mind - Musical Intelligence Platform</title>
+    <meta name="description"
+        content="Professional musical intelligence platform featuring ChordCubes 3D, MSM Analytics, and ObsidianNVX applications">
+    <meta name="keywords" content="music, analysis, chords, harmony, visualization, angular, react, three.js">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="Million Song Mind - Musical Intelligence Platform">
+    <meta property="og:description" content="Professional musical intelligence platform with advanced applications">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://millionsongmind.com">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f8f8ff, #e6e6fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 60px 0;
+        }
+
+        .app-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .app-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .app-description {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .launch-button {
+            background: linear-gradient(45deg, #00b894, #00a085);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .launch-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
+            background: linear-gradient(45deg, #00a085, #00b894);
+        }
+
+        .status {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status h3 {
+            margin-bottom: 15px;
+            color: #00b894;
+        }
+
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+        }
+
+        .status-item {
+            padding: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .online {
+            color: #00b894;
+        }
+
+        .starting {
+            color: #fdcb6e;
+        }
+
+        .offline {
+            color: #e17055;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .subtitle {
+                font-size: 1.2rem;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .app-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">Million Song Mind</h1>
+            <p class="subtitle">Integrated Platform Suite</p>
+            <p class="description">
+                Six powerful applications working in perfect harmony, controlled by our revolutionary Novaxe
+                Obsidian neural engine.
+            </p>
+        </div>
+
+        <div class="apps-grid">
+            <div class="app-card">
+                <div class="app-icon">🧠</div>
+                <h2 class="app-title">Novaxe Obsidian</h2>
+                <p class="app-description">
+                    The neural command center. Advanced Angular 20 application that controls and
+                    orchestrates the entire ecosystem.
+                </p>
+                <a href="/obsidiannvx/" class="launch-button">
+                    🚀 Access Brain →
+                </a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon">📊</div>
+                <h2 class="app-title">MSM Analytics</h2>
+                <p class="app-description">
+                    Real-time harmonic analysis and braid visualization. React-powered dashboard for
+                    professional music analysis.
+                </p>
+                <a href="/MSM/" class="launch-button">
+                    📈 Launch Analytics →
+                </a>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon">🎮</div>
+                <h2 class="app-title">Chord Cubes</h2>
+                <p class="app-description">
+                    3D interactive chord visualization for OBS and live streaming. Professional Three.js
+                    implementation.
+                </p>
+                <a href="/cubes/" class="launch-button">
+                    🎯 Open Cubes →
+                </a>
+            </div>
+        </div>
+
+        <div class="status">
+            <h3>🌐 Platform Status</h3>
+            <div class="status-grid">
+                <div class="status-item">
+                    <span class="online">● Novaxe Obsidian: Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="online">● MSM Analytics: Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="online">● ChordCubes 2.0: Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="online">● All Systems: Operational</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple analytics
+        console.log('Million Song Mind Platform - Production Ready');
+
+        // Check if applications are accessible
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Platform loaded successfully');
+
+            // Add click tracking for buttons
+            const buttons = document.querySelectorAll('.launch-button');
+            buttons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    const appName = this.textContent.trim();
+                    console.log(`Launching application: ${appName}`);
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

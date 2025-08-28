@@ -1,0 +1,108 @@
+X:1
+T:Bill Bailey
+M:4/4
+L:1/4
+K:C
+Q:100
+"C"GA2c|e3/2^d/2eg|GA2c|e4|GA2c|e2g2|"G7"(gB3-|B4)|
+GB2d|fefg|GB2d|f4|GB2d|g2"G+"a2|"C"(ae3-|e4)|
+GA2c|e3/2^d/2eg|GA2c|e3G|GGce|g2_b2|"F"a2-a2-|a3c|
+cc2c|"F#dim7"d2c2|"C"gg2a|"A7"e3e|"D7"ed^cd|"G7"f2e2|"C"c4-|czz2|]
+
+X: 1
+Q:90
+T: The Bold Huzzar
+R: hornpipe
+M: 4/4
+L: 1/8
+K: Amaj
+|:cB|AGAc eAcA|BAGF E2d2|cdea fedc|BAGF EFGE|
+AGAc eAcA|BAGF E2d2|cecA fdBG|A2A2 A2:|
+|:cd|efec Acec|fdfd B2cd|efec AGAc|BAGF EFGE|
+ABAc eAcA|BAGF E2d2|cdea fdBG|A2A2 A2:|
+
+
+P: Hyttstenspolketten
+R: snoa, g\aangl\aat
+O: efter Bengt Jonsson
+Z: John Chambers <jc@trillian.mit.edu>
+M: C
+L: 1/8
+K: D
+FG \
+| "D"A2 A2 "G"B2 AG | "D"(FG) A2 A3 z | {A}F2 f2 f2 ed | "A7"(cd) e2 e3 z \
+| "A7"E3 F E2 (FG) | A3 B A2 (Bc) | "D"d2 cd "A7"e2 c2 | "D"d6 :|
+|: de \
+| "D"f2 fe f2 de | (fg) fe f2 gf | "A7"e2 (cd) e2 f2 | "G"g2 b2 "A7"a2 g2 \
+| "D"f2 fe f2 de | (fg) fe f2 gf | "A7"e2 fg a2 c2 | "D"d6 :|
+
+X: 2
+P: Bronwyn and Justin's Wedding Tune
+C: Peter "Puma" Hedlund
+R: sk\"ankl\aat, g\aangl\aat
+M: C
+L: 1/8
+K: Gm
+D2 |:\
+"Gm"G2d2 d2d2 | B2AB G3B | "Dm"A2f2 "A7"=e2^c2 |1 "D7"d3e dcBA :|2 "D7"d6 ||\
+d2 |\
+"Gm"g3g "F"f2e2 | "D7"d6 ga | "Gm"b3b "(A7)"a2g^f | "D7"a6 a2 |
+"Gm"g3g "F"f2e2 | "Bb"d2B2 "Eb"G3A | "Gm"B2cB "F"A2c2 | "D7"d6 d2 |\
+"Eb"g3g "F"f2e2 | "Gm"d2B2 "Eb"G3A | "Gm"B2cB "D7"A2D2 | "Gm"G6 |]
+%%text http://www.youtube.com/watch?v=jIta3BGCuqA
+
+X: 3
+P: \"Algjakten (The Elk Hunt)
+C: Olle Wallman
+R: g\aangl\aat
+Z: John Chambers <jc@trillian.mit.edu>
+M: C
+L: 1/8
+K: D
+|: "D"F4 FEFG | A2AF "D7"E2D2 | "G"G4 GFGA | "Em"B6 d2 | "A7"c4 cBcd | e2ec B2A2 | "D"d4 dcde | fgfd "(A7)"A2G2 ||
+|| "D"F4 FEFG | A2AF "D7"E2D2 | "G"G4 GFGA | "Em"B6 d2 | "A7"c4 cBcd | e2ec B2A2 | "D"d3e "A7"dcde | "D"d6 z2 :|
+fg \
+|: "D"a4- a2ba | f2gf e2d2 | "G"b4 g2f2 | "Em"e4 B4 | "A7"c4 cdcB | "A7"A2^GA B2c2 | "D"d3e f2g2 | a6 fg ||
+|| "D"a4- a2ba | f2gf e2d2 | "G"b4 g2f2 | "Em"e4 B4 | "A7"c4 cdcB | "A7"A2^GA B2c2 | "D"d3e "A7"dcde | "D"d6 z2 :|
+
+
+
+X: 4
+P: G\aangl\aat (snoa) fr\aan Pite\aa
+O: efter Andrea Hoag
+R: g\aangl\aat, snoa
+Z: John Chambers <jc@trillian.mit.edu>
+M: 2/4
+L: 1/16
+Q:90
+K: Am
+|: B2 \
+| "Am"c2BA "E7"^G2E2 \
+| "Am"A^GAB "E7"c2B2 \
+| "Am"{B}c2BA "E7"^GEGB \
+| "Am"A6 :|
+|: B2 \
+| "Am"c2Bc "Dm"d2cd \
+| "Am(C)"e2e2 "Dm(G)"d3B \
+| "Am"{B}c2BA "E7"^GABG \
+| "Am"A6 :|
+
+
+X: 5
+P: Morsiusmarssi
+C: Konsta Jylh\"a
+Z: John Chambers <jc@trillian.mit.edu>
+M: 2/4
+L: 1/16
+K: D
+Q:60
+|: "D"F3E DFFA | fgfe d2c2 | "G"dedc B2A2 | "Em"G3F E4 \
+| "A7"A2Ac e2f2 | g3f e4 | {efg}a2c2 cBA2 | "D"f2d2 dcd2 |
+| "D"F3E DFFA | fgfe d2c2 | "G"dedc B2AB | "Em"B3A G4 \
+| "A7"efgf e2e2 | "D"abag fedf | "A7"efed c2A2 | "D"d4-"fine"d4 :|
+K: Dm
+|: "Dm"d6 f2 | "A7"^c6 e2 | "Dm"d2A2 F2A2 | "A7"E2A2 "Dm"D2F2 \
+| "A7"A,6 ^C2 | E2G2 F2E2 | "Dm"FED2 "Gm"GFE2 | "A7"A8 |
+| "Dm"A6 (3ded | "A7"^c2d2 e2f2 | "Gm"g6 (3fgf | "A7"e2d2 ^c2_B2 \
+| A2^c2 e2g2 | a2g2 f2e2 | "Dm"d2f2 "A7"A2^c2 | "Dm"d4-"da Capo"d4 :|
+

@@ -1,0 +1,63 @@
+{
+    "version": 2,
+    "public": true,
+    "routes": [
+        {
+            "src": "^/obsidiannvx$",
+            "status": 308,
+            "headers": {
+                "Location": "/obsidiannvx/"
+            }
+        },
+        {
+            "src": "^/obsidiannvx/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json|map|txt|otf))$",
+            "dest": "/obsidiannvx/$1"
+        },
+        {
+            "src": "^/obsidiannvx/?$",
+            "dest": "/obsidiannvx/index.html"
+        },
+        {
+            "src": "^/obsidiannvx/(.*)$",
+            "dest": "/obsidiannvx/index.html"
+        },
+        {
+            "src": "^/cubes$",
+            "status": 308,
+            "headers": {
+                "Location": "/cubes/"
+            }
+        },
+        {
+            "src": "^/cubes/?$",
+            "dest": "/cubes/index.html"
+        },
+        {
+            "src": "^/cubes/(.*)$",
+            "dest": "/cubes/$1"
+        },
+        {
+            "src": "^/analytics$",
+            "status": 308,
+            "headers": {
+                "Location": "/analytics/"
+            }
+        },
+        {
+            "src": "^/analytics/?$",
+            "dest": "/analytics/index.html"
+        },
+        {
+            "src": "^/analytics/(.*)$",
+            "dest": "/analytics/$1"
+        },
+        {
+            "src": "^/fonts/(.*)$",
+            "dest": "/fonts/$1"
+        },
+        {
+            "src": "^/$",
+            "dest": "/index.html"
+        }
+    ]
+}

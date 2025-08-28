@@ -1,0 +1,202 @@
+
+<!-- metro -->
+
+<div 
+	draggable="true"
+  (dragstart)="onDragStart($event)"
+  (drag)="onDrag($event)" 
+  (dragover)="onDrag($event)" 
+  (drop)="onDragEnd($event)"
+  (dragend)="onDragEnd($event)"
+	style="position:absolute;width:100%;height: 100%;">
+
+
+<div class="flip-card">
+  <div id="flipCard" class="flip-card-inner">
+
+    <div class="flip-card-front">
+    	<a (click)="flip_card('flipCard')" role="button" class="metro-options">
+        <i class="fas fa-cog p-2" title="Metronome options"></i>
+      </a>
+
+			<svg (contextmenu)="flip_card('flipCard')" 
+					 [style.visibility]="display=='circle' ? 'visible' : 'hidden'"
+					 [style.height]="display=='circle' ? '100%' : '0%'" 
+					 [style.width]="display=='circle' ? '100%' : '0%'"
+					 viewBox="-25 -30 230 360" 
+					 version="2.0"
+					 xmlns="http://www.w3.org/TR/SVG2"
+					 xmlns:xlink="http://www.w3.org/1999/xlink">
+
+				<foreignObject *ngIf="count_display=='beat'" height="100px" width="100px" x="40" y="47" >
+					<xhtml:div [@openClose]="animation && beat" style="font-weight:bold;font-size: 50px;text-anchor:middle;"> {{beat+1}} </xhtml:div>
+				</foreignObject>
+
+				<text *ngIf="count_display=='subBeat'" x="90" y="98" style="font-size: 50px;text-anchor:middle;">{{beat+1}} : {{subBeat+1}}</text>
+				
+				<text *ngIf="count_display=='measure'" x="90" y="98" style="font-size: 20px;text-anchor:middle;">{{measure+1}} : {{beat+1}} : {{subBeat+1}}</text>
+
+				<text *ngIf="count_display=='measure_only'" x="90" y="98" style="font-size: 40px;text-anchor:middle;">{{measure+1}} </text>
+
+				<g *ngFor="let b of [].constructor(nb_beat_per_measure); let i = index;" >
+					<circle r="5" cx="90" cy="-15" 
+									attr.id_beat="{{i}}" 
+									id_subbeat="0"
+									(click)="toggleAccent($event)"
+									[ngClass]="{'active':i==beat && subBeat==0}"
+									attr.transform="rotate({{beat_angle*i}} 90 90)"
+									stroke="#343a40" 
+									stroke-width="1" 
+									fill="black"
+									class="metro-beat"/>
+
+					<circle r="3" cx="90" cy="-15" 
+									attr.id_beat="{{i}}" 
+									attr.id_subbeat="{{j+1}}" 
+									(click)="toggleAccent($event)"
+									*ngFor="let sb of [].constructor(nb_subbeat_per_beat-1); let j = index;" 
+									[ngClass]="{'active':j+1==subBeat && i==beat}" 
+									attr.transform="rotate({{(beat_angle*i)+(subBeat_angle*(j+1))}} 90 90)"
+									stroke="#343a40" 
+									stroke-width="1" 
+									fill="black"
+									class="metro-subbeat"/>
+				</g>
+			</svg>
+
+			<span (contextmenu)="flip_card('flipCard')" [hidden]="display=='circle'" class="line-display">
+				<span class="one-line" *ngFor="let b of [].constructor(nb_beat_per_measure); let i = index;" > 
+					<i  class="fa fa-circle metro-beat"  [ngClass]="{'active':i==beat && subBeat == 0}" (click)="toggleAccent($event)" attr.id_beat="{{i}}"></i> 
+					<i *ngFor="let sb of [].constructor(nb_subbeat_per_beat-1); let j = index;" 
+					[ngClass]="{'active':j==subBeat-1 && i==beat}" class="fa fa-circle metro-subbeat" (click)="toggleAccent($event)" attr.id_beat="{{i}}" attr.id_subbeat="{{j+1}}"></i> 
+				</span>
+
+				<p *ngIf="count_display=='subBeat'" x="90" y="98" style="font-size: 100px;text-align:center;">{{beat+1}} : {{subBeat+1}}</p>
+				
+				<p *ngIf="count_display=='measure'" x="90" y="98" style="font-size: 40px;text-align:center;">{{measure+1}} : {{beat+1}} : {{subBeat+1}}</p>
+
+				<p *ngIf="count_display=='measure_only'" x="90" y="98" style="font-size: 80px;text-align:center;">{{measure+1}} </p>
+			</span>
+    </div>
+
+
+
+    <div id="flipCardBack" class="flip-card-back" (contextmenu)="flip_card('flipCardBack')">
+
+    	<div class="flip-card-back-wrapper">
+
+    		<a (click)="flip_card('flipCardBack')" role="button" class="metro-options">
+	        <i class="fas fa-share p-2" title="Back to Metronome" style="transform: rotate(180deg);"></i>
+	      </a>
+
+				<div class="main"> 
+					<label for="nb_beats">Beats</label>
+					<input class="number" id="nb_beats" type="number" [(ngModel)]="nb_beat_per_measure" (change)="transport.setNb_beat_per_measure(nb_beat_per_measure);calcCircle()"/> 
+					
+					<label for="nb_subdiv">SubBeats</label>
+					<input class="number" type="number" min="1" id="nb_subdiv" [(ngModel)]="nb_subbeat_per_beat" (change)="changeNb_beat_per_measure(nb_subbeat_per_beat)"/> 
+				</div>
+
+
+				<!-- slider -->
+				<div class="range-sub">
+					<span class="col-2" >Bpm: {{bpm}}</span>
+					<div class="slidecontainer">
+						<input type="range" min="40" max="180"  id="myRange" [(ngModel)]="bpm" (change)="transport.set_bpm(bpm)">
+					</div>
+				</div>
+
+
+				<h6 style="text-align: left;">MIDI</h6>
+
+				<div class="d-flex apply-btns">
+					<div class="wrapper">
+						<span class="title">Device</span>
+						<select class="metro-selector" (change)="changeMidiInput()" [(ngModel)]="selectedMidiInput">
+							<option value="None">None</option>
+							<option *ngFor="let input of midiInputs" [ngValue]="input.id">{{input.name}}</option>
+						</select>
+					</div>
+
+					<div class="wrapper">
+						<span class="title">"Trigger note" number</span>
+						<input [(ngModel)]="midiNoteNumber" type="number" class="number" min="0" max="127"/>
+					</div>
+
+					<div class="wrapper">
+						<span class="title">Increment</span>
+						<select class="metro-selector" [(ngModel)]="midi_increment">
+							<option [ngValue]="4">Beat (4th)</option>
+							<option [ngValue]="2">8th</option>
+							<option [ngValue]="1">16th</option>
+						</select>
+					</div>
+
+					<h6>DISPLAY</h6>
+
+					<div class="wrapper">
+						<span class="title">Layout</span>							
+						<select class="metro-selector" [(ngModel)]="display">
+							<option [ngValue]="'line'">Line</option>
+							<option [ngValue]="'circle'">Circle</option>
+						</select>
+					</div>
+
+					<div class="wrapper">
+						<span class="title">Display count</span>
+						<select class="metro-selector" [(ngModel)]="count_display">
+							<option [ngValue]="'subBeat'">SubBeat</option>
+							<option [ngValue]="'beat'">Beat</option>
+							<option [ngValue]="'measure'">Measure</option>
+							<option [ngValue]="'measure_only'">Measure only</option>
+						</select>
+					</div>
+				
+					<div class="switch-titled wrapper">
+            <span class="title" >Metronome animation</span>
+            <label class="switch" title="On/Off" for="switch_metro_anim">
+              <input type="checkbox" [(ngModel)]="animation" class="custom-control-input" id="switch_metro_anim"/>
+              <span class="slider classic round">
+                <span class="number">I</span>
+                <span class="letter">O</span>
+              </span>
+            </label>
+          </div>
+	        
+					<h6>SOUND</h6>
+					
+					<div class="wrapper">
+						<span class="title">Tick sound</span>
+						<select class="metro-selector" [(ngModel)]="selected_tic_instrument">
+							<option [ngValue]="'1'">1</option>
+							<option [ngValue]="'2'">2</option>
+							<option [ngValue]="'3'">3</option>
+							<option [ngValue]="'4'">4</option>
+						</select>
+					</div>
+
+					<div class="wrapper">
+						<span class="title">Measure sound</span>
+						<select class="metro-selector" [(ngModel)]="selected_measure_instrument">
+							<option [ngValue]="'1'">1</option>
+							<option [ngValue]="'2'">2</option>
+							<option [ngValue]="'3'">3</option>
+							<option [ngValue]="'4'">4</option>
+						</select>
+					</div>
+				</div>
+
+
+				<!-- slider -->
+				<div class="range-sub">
+					<span class="col-2">Volume</span>
+					<div class="slidecontainer">
+						<input type="range" min="0.0001" max="0.8" step="0.01" id="myVolume_metro" [(ngModel)]="cm.metroVolume">
+					</div>
+				</div>
+
+			</div> <!-- flip card back wrapper -->
+    </div> <!-- flip card back -->
+  </div>
+</div>
+</div>

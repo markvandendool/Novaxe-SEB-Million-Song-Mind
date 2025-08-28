@@ -1,0 +1,80 @@
+{
+    "version": 2,
+    "outputDirectory": ".",
+    "public": true,
+    "alias": [
+        "millionsongmind.com",
+        "www.millionsongmind.com"
+    ],
+    "routes": [
+        {
+            "src": "^/cubes$",
+            "status": 308,
+            "headers": {
+                "Location": "/cubes/"
+            }
+        },
+        {
+            "src": "^/cubes/?$",
+            "dest": "/cubes/index.html"
+        },
+        {
+            "src": "^/cubes/(.*)$",
+            "dest": "/cubes/$1"
+        },
+        {
+            "src": "^/obsidian$",
+            "status": 308,
+            "headers": {
+                "Location": "/obsidian/"
+            }
+        },
+        {
+            "src": "^/obsidian/?$",
+            "dest": "/obsidian/index.html"
+        },
+        {
+            "src": "^/obsidian/(.*)$",
+            "dest": "/obsidian/$1"
+        },
+        {
+            "src": "^/analytics$",
+            "status": 308,
+            "headers": {
+                "Location": "/analytics/"
+            }
+        },
+        {
+            "src": "^/analytics/?$",
+            "dest": "/analytics/index.html"
+        },
+        {
+            "src": "^/analytics/(.*)$",
+            "dest": "/analytics/$1"
+        },
+        {
+            "src": "^/unity$",
+            "dest": "/unity-landing.html"
+        },
+        {
+            "src": "^/fonts/(.*)$",
+            "dest": "/fonts/$1"
+        },
+        {
+            "src": "/api/(.*)",
+            "dest": "/api/$1"
+        },
+        {
+            "src": "/(.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot|json))",
+            "dest": "/$1"
+        },
+        {
+            "src": "/",
+            "dest": "/index.html"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "/index.html"
+        }
+    ]
+}

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>OBS Cubes</title>
+	<link rel="stylesheet" href="./styles.css" />
+	<style>
+		@font-face {
+			font-family: 'NVXDiamond';
+			src:
+				url('../fonts/NVX Diamond Font.otf') format('opentype'),
+				url('../fonts/NVX%20Diamond%20Font.otf') format('opentype');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+	</style>
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+</head>
+
+<body>
+	<div id="ui">
+		<div class="row">
+			<label>Key</label>
+			<select id="key-select">
+				<option value="C" selected>C</option>
+				<option value="Db">Db</option>
+				<option value="D">D</option>
+				<option value="Eb">Eb</option>
+				<option value="E">E</option>
+				<option value="F">F</option>
+				<option value="F#">F#</option>
+				<option value="G">G</option>
+				<option value="Ab">Ab</option>
+				<option value="A">A</option>
+				<option value="Bb">Bb</option>
+				<option value="B">B</option>
+			</select>
+			<label>Set</label>
+			<select id="set-select">
+				<option value="all" selected>All</option>
+				<option value="major">Major</option>
+				<option value="applied">Applied</option>
+				<option value="minor">Minor</option>
+			</select>
+			<label>Label</label>
+			<select id="label-mode">
+				<option value="roman" selected>Roman</option>
+				<option value="letter">Letter</option>
+			</select>
+			<button id="arrange-btn">Arrange</button>
+			<button id="reset-btn">Reset</button>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="adjust-toggle" /> Adjust shelf
+			</label>
+			<button id="save-map-btn" title="Download shelf_map.json">Save Map</button>
+			<label class="file-btn">
+				Load Map
+				<input type="file" id="load-map-input" accept="application/json" hidden />
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="with-7th" /> With 7th
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="bass-enabled" checked /> Bass
+			</label>
+			<label style="margin-left:8px;">
+				<input type="checkbox" id="melody-enabled" /> Melody
+			</label>
+			<label style="margin-left:12px;">Chord Inst</label>
+			<select id="chord-inst">
+				<option value="string_ensemble_1" selected>Strings (Ensemble)</option>
+				<option value="acoustic_grand_piano">Piano</option>
+				<option value="choir_aahs">Choir</option>
+				<option value="string_ensemble_2">Strings 2</option>
+			</select>
+			<label style="margin-left:12px;">Bass Inst</label>
+			<select id="bass-inst">
+				<option value="contrabass" selected>Contrabass</option>
+				<option value="acoustic_bass">Acoustic Bass</option>
+				<option value="electric_bass_finger">Electric Bass</option>
+				<option value="cello">Cello</option>
+				<option value="synth_bass_1">Synth Bass</option>
+			</select>
+			<label style="margin-left:12px;">Melody Inst</label>
+			<select id="melody-inst">
+				<option value="violin" selected>Violin</option>
+				<option value="flute">Flute</option>
+				<option value="clarinet">Clarinet</option>
+				<option value="trumpet">Trumpet</option>
+				<option value="cello">Cello</option>
+			</select>
+			<label style="margin-left:12px;">Voice Leading</label>
+			<select id="voice-leading-mode">
+				<option value="vl1" selected>Voice leading 1</option>
+				<option value="vl2">Voice leading 2</option>
+			</select>
+			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
+		</div>
+		<div class="row small">
+			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
+		</div>
+		<div class="row small" id="color-cal">
+			<label style="margin-right:6px;">Colors</label>
+			<label>Tonic <input type="color" id="color-tonic" value="#62d1e6"></label>
+			<label style="margin-left:8px;">Subdom <input type="color" id="color-sub" value="#6b46c1"></label>
+			<label style="margin-left:8px;">Dominant <input type="color" id="color-dom" value="#ff7a45"></label>
+			<label style="margin-left:8px;">Neutral <input type="color" id="color-neu" value="#bfbfbf"></label>
+		</div>
+		<div class="row small" id="giant-toggles">
+			<label>Giant Melody <input type="checkbox" id="show-giant-melody" checked /></label>
+			<label style="margin-left:8px;">Giant Bass <input type="checkbox" id="show-giant-bass" checked /></label>
+			<button id="menu-lock-melody" style="margin-left:12px;">Lock Melody</button>
+			<button id="menu-unlock-melody">Unlock Melody</button>
+			<button id="menu-lock-bass" style="margin-left:12px;">Lock Bass</button>
+			<button id="menu-unlock-bass">Unlock Bass</button>
+		</div>
+	</div>
+	<canvas id="scene"></canvas>
+	<!-- legacy lane-controls removed; lock icons integrated into camera-ui -->
+	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
+
+	<div id="camera-ui">
+		<button id="view-down" title="Melody View">Melody View</button>
+		<button id="view-up" title="Bass View">Bass View</button>
+	</div>
+
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+			"troika-three-text": "https://unpkg.com/troika-three-text@0.49.0/dist/troika-three-text.esm.js",
+			"troika-three-utils": "https://unpkg.com/troika-three-utils@0.49.0/dist/troika-three-utils.esm.js",
+			"troika-worker-utils": "https://unpkg.com/troika-worker-utils@0.49.0/dist/troika-worker-utils.esm.js",
+			"webgl-sdf-generator": "https://cdn.skypack.dev/webgl-sdf-generator@1.1.1",
+			"bidi-js": "https://cdn.skypack.dev/bidi-js@1.0.2"
+		}
+	}
+	</script>
+	<!-- Tone.js for audio engine aligned with Novaxe stack -->
+	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+	<!-- Tonal for voice-leading utilities (mode 2) -->
+	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
+	<script type="module" src="./chords.js?v=1"></script>
+	<script type="module" src="./main.js?v=1"></script>
+</body>
+
+</html>

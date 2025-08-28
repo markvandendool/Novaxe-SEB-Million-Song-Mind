@@ -1,0 +1,150 @@
+@font-face {
+	// font-family: 'music-font';
+	// src: url("../../../assets/font/Chord_Grid_v2.otf") format("opentype");
+	font-family: "nvxChord";
+	src: url("../../../assets/font/nvxFont.otf");
+}
+
+section#thcircle .wrapper {
+	display: block;
+	position: relative;
+	height: auto;
+	width: 85%;
+	margin: auto;
+}
+
+section#thcircle .cObj {
+	position: absolute;
+}
+
+section#thcircle .centerText {
+	position: relative;
+	width: 30%;
+	left: 49%;
+	top: 37%;
+}
+
+section#thcircle .active {
+	fill: #b94041;
+	stroke: #b94041;
+}
+
+section#thcircle .back-circle {
+	fill: none;
+	opacity: .522;
+	stroke-width: .619;
+	stroke: #000;
+}
+
+section#thcircle .fifths {
+	font-family: nvxChord;
+	font-feature-settings: normal;
+	font-size: 29.3px;
+	font-variant-caps: normal;
+	font-variant-ligatures: normal;
+	font-variant-numeric: normal;
+	letter-spacing: 0px;
+	line-height: 0%;
+	stroke-width: 1px;
+	word-spacing: 0px;
+}
+
+section#thcircle .fifths_m {
+	font-family: nvxChord;
+	font-feature-settings: normal;
+	font-size: 23px;
+	font-variant-caps: normal;
+	font-variant-ligatures: normal;
+	font-variant-numeric: normal;
+	line-height: 1.25;
+	stroke-width: .772px;
+}
+
+section#thcircle .fifths_ext {
+	font-family: 'nvxChord';
+	font-feature-settings: normal;
+	font-size: 25px;
+	font-variant-caps: normal;
+	font-variant-ligatures: normal;
+	font-variant-numeric: normal;
+	letter-spacing: 0px;
+	line-height: 0%;
+	stroke-width: 1px;
+	word-spacing: 0px;
+	opacity: 0;
+
+	&.active {
+		opacity: 0;
+	}
+}
+
+section#thcircle .chord-font {
+	font-family: 'nvxChord';
+}
+
+section#thcircle .metro {
+	position: absolute;
+	top: 34.4vmin;
+	left: 28.6vmin;
+	height: 35vmin;
+	width: auto;
+}
+
+section#thcircle .selection_background {
+	opacity: 0;
+	fill: var(--blue_nvx);
+	paint-order: markers fill stroke;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: 2;
+	stroke: var(--blue_nvx);
+
+	&.active {
+		opacity: 0.5;
+	}
+}
+
+section#thcircle .path_points {
+	paint-order: markers fill stroke;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	stroke-width: .0317;
+	stroke: #b3b3b3;
+
+	&.active {}
+}
+
+section#thcircle .slices .cut {
+	fill: none;
+	stroke: #000000;
+	stroke-width: 0.36500001;
+	stroke-linecap: butt;
+	stroke-linejoin: miter;
+	stroke-miterlimit: 4;
+	stroke-dasharray: none;
+	stroke-opacity: 1;
+}
+
+section#thcircle #alter text {
+	font-family: Lato;
+	font-feature-settings: normal;
+	font-size: 10.2px;
+	font-variant-caps: normal;
+	font-variant-ligatures: normal;
+	font-variant-numeric: normal;
+	letter-spacing: 0px;
+	line-height: 0%;
+	stroke-width: .479px;
+	word-spacing: 0px;
+}
+
+section#thcircle #alter tspan {
+	font-family: Lato;
+	font-feature-settings: normal;
+	font-size: 10.2px;
+	font-variant-caps: normal;
+	font-variant-ligatures: normal;
+	font-variant-numeric: normal;
+	line-height: 1.25;
+	stroke-width: .479px;
+}

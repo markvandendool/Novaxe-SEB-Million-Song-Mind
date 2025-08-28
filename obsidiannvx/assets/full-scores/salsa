@@ -1,0 +1,23 @@
+X: 1
+T: from midi_export.mid
+M: 4/4
+L: 1/8
+Q:1/4=125
+% Last note suggests minor mode tune
+K:F % 1 flats
+% midi_export
+V:1
+x2 \
+[d3/2B3/2G3/2D3/2]x3/2[d/2B/2G/2D/2]x3/2[d/2-B/2-G/2D/2][d/2B/2]| \
+x2 [dBGD]x2[dBGD] x[d/2B/2G/2D/2-]D/2| \
+x2 [cA_GD]x2[c/2A/2_G/2D/2]x3/2[cA_GD]| \
+x2 [cA_GD]x2[cA_GD] x[c/2A/2_G/2D/2]x/2|
+x6 [dB=GD]x| \
+x[d/2B/2G/2D/2]
+V:2 clef=bass
+G,,3/2x3/2G,, D,,3/2x3/2D,,| \
+G,,2 xG,, D,,2 G,,D,,| \
+A,,2 xA,, D,,3/2x3/2D,,| \
+A,,2 xA,, D,,2 A,,D,,|
+G,,/2x/2D,,/2x/2 E,,/2x3/2 G,,2 xG,,| \
+D,,

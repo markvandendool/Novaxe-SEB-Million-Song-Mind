@@ -1,0 +1,335 @@
+<!-- Navigation -->
+<nav class="nav-container">
+    <div class="nav-content">
+        <div class="nav-brand">
+            <div class="brand-icon">
+                <div class="logo-animation">
+                    <span class="logo-circle"></span>
+                    <span class="logo-waves"></span>
+                </div>
+            </div>
+            <span class="brand-text">Million Song Mind</span>
+        </div>
+        
+        <div class="nav-links">
+            <a href="#platform" class="nav-link" (click)="scrollToSection('platform', $event)">Platform</a>
+            <a href="#features" class="nav-link" (click)="scrollToSection('features', $event)">Features</a>
+            <a href="#enterprise" class="nav-link" (click)="scrollToSection('enterprise', $event)">Enterprise</a>
+            <a href="#docs" class="nav-link">Documentation</a>
+        </div>
+        
+        <div class="nav-actions">
+            <button class="btn btn-ghost" (click)="openApp('demo', $event)">Live Demo</button>
+            <button class="btn btn-primary" (click)="openApp('sales', $event)">Get Started</button>
+        </div>
+        
+        <button class="mobile-menu-toggle" (click)="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-background">
+        <div class="hero-grid"></div>
+        <div class="hero-particles"></div>
+    </div>
+    
+    <div class="hero-content">
+        <div class="hero-badge">
+            <span class="badge-icon">🧠</span>
+            <span class="badge-text">Powered by Advanced AI</span>
+        </div>
+        
+        <h1 class="hero-title">
+            The Future of
+            <span class="title-gradient">Music Intelligence</span>
+        </h1>
+        
+        <p class="hero-subtitle">
+            Revolutionary platform combining harmonic analysis, real-time visualization, 
+            and AI-powered teaching tools. Built for musicians, producers, and educators 
+            who demand professional-grade music technology.
+        </p>
+        
+        <div class="hero-actions">
+            <button class="btn btn-primary btn-large" (click)="openApp('msm', $event)">
+                <span class="btn-icon">🚀</span>
+                Launch Platform
+            </button>
+            <button class="btn btn-ghost btn-large" (click)="openApp('unity', $event)" style="background: rgba(255,255,255,0.1); color: white; border-color: rgba(255,255,255,0.3);">
+                <span class="btn-icon">🎓</span>
+                Start Learning
+            </button>
+        </div>
+        
+        <div class="hero-stats">
+            <div class="stat-item">
+                <span class="stat-number">1M+</span>
+                <span class="stat-label">Songs Analyzed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">Musicians</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">99.9%</span>
+                <span class="stat-label">Accuracy</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Platform Overview -->
+<section class="platform-section" id="platform">
+    <div class="section-container">
+        <div class="section-header">
+            <h2 class="section-title">Integrated Platform Suite</h2>
+            <p class="section-subtitle">
+                Six powerful applications working in perfect harmony, 
+                controlled by our revolutionary Novaxe Obsidian neural engine.
+            </p>
+        </div>
+        
+        <div class="platform-grid">
+            <div class="platform-card primary-card" (click)="openApp('obsidian', $event)">
+                <div class="card-icon brain-icon">🧠</div>
+                <h3 class="card-title">Novaxe Obsidian</h3>
+                <p class="card-description">
+                    The neural command center. Advanced Angular 20 application 
+                    that controls and orchestrates the entire ecosystem.
+                </p>
+                <div class="card-tech">
+                    <span class="tech-badge">Angular 20</span>
+                    <span class="tech-badge">Neural Engine</span>
+                    <span class="tech-badge">Command Center</span>
+                </div>
+                <button class="card-action">
+                    <span>Access Brain</span>
+                    <span class="action-arrow">→</span>
+                </button>
+            </div>
+            
+            <div class="platform-card" (click)="openApp('msm', $event)">
+                <div class="card-icon">⚛️</div>
+                <h3 class="card-title">MSM Analytics</h3>
+                <p class="card-description">
+                    Real-time harmonic analysis and braid visualization. 
+                    React-powered dashboard for professional music analysis.
+                </p>
+                <div class="card-tech">
+                    <span class="tech-badge">Development</span>
+                    <span class="tech-badge">Real-time</span>
+                    <span class="tech-badge">Visualization</span>
+                </div>
+                <button class="card-action">
+                    <span>Launch Analytics</span>
+                    <span class="action-arrow">→</span>
+                </button>
+            </div>
+            
+            <div class="platform-card" (click)="openApp('chordcubes', $event)">
+                <div class="card-icon">🎲</div>
+                <h3 class="card-title">Chord Cubes</h3>
+                <p class="card-description">
+                    3D interactive chord visualization for OBS and live streaming. 
+                    Professional Three.js implementation.
+                </p>
+                <div class="card-tech">
+                    <span class="tech-badge">Three.js</span>
+                    <span class="tech-badge">3D Graphics</span>
+                    <span class="tech-badge">OBS Ready</span>
+                </div>
+                <button class="card-action">
+                    <span>Open Cubes</span>
+                    <span class="action-arrow">→</span>
+                </button>
+            </div>
+            
+            <div class="platform-card" (click)="openApp('unity', $event)">
+                <div class="card-icon">🎓</div>
+                <h3 class="card-title">Unity Learning</h3>
+                <p class="card-description">
+                    Comprehensive music education platform with AI-powered 
+                    lessons and adaptive learning paths.
+                </p>
+                <div class="card-tech">
+                    <span class="tech-badge">AI Tutor</span>
+                    <span class="tech-badge">Adaptive</span>
+                    <span class="tech-badge">Interactive</span>
+                </div>
+                <button class="card-action">
+                    <span>Start Learning</span>
+                    <span class="action-arrow">→</span>
+                </button>
+            </div>
+            
+            <div class="platform-card enterprise-card" (click)="openApp('sales', $event)">
+                <div class="card-icon">💼</div>
+                <h3 class="card-title">Enterprise Solutions</h3>
+                <p class="card-description">
+                    Custom implementations, API access, and white-label 
+                    solutions for organizations and institutions.
+                </p>
+                <div class="card-tech">
+                    <span class="tech-badge">Custom API</span>
+                    <span class="tech-badge">White Label</span>
+                    <span class="tech-badge">Enterprise</span>
+                </div>
+                <button class="card-action">
+                    <span>Contact Sales</span>
+                    <span class="action-arrow">→</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="features-section" id="features">
+    <div class="section-container">
+        <div class="section-header">
+            <h2 class="section-title">Revolutionary Features</h2>
+            <p class="section-subtitle">
+                Cutting-edge technology that transforms how you understand, 
+                create, and teach music.
+            </p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-item">
+                <div class="feature-icon">🎵</div>
+                <h3 class="feature-title">Advanced Harmonic Analysis</h3>
+                <p class="feature-description">
+                    Real-time chord recognition, key detection, and harmonic 
+                    progression analysis using state-of-the-art algorithms 
+                    and machine learning models.
+                </p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">📊</div>
+                <h3 class="feature-title">Million Song Dataset</h3>
+                <p class="feature-description">
+                    Process and analyze massive music datasets with 
+                    unprecedented speed and accuracy, uncovering patterns 
+                    and insights at scale.
+                </p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">🎮</div>
+                <h3 class="feature-title">Interactive 3D Environment</h3>
+                <p class="feature-description">
+                    Immersive 3D chord cubes and interactive elements make 
+                    learning music theory engaging and intuitive, perfect for 
+                    streaming and education.
+                </p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Professional Performance</h3>
+                <p class="feature-description">
+                    Built for professional use with low-latency processing, 
+                    real-time streaming capabilities, and enterprise-grade 
+                    reliability and security.
+                </p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">🔗</div>
+                <h3 class="feature-title">Unified Ecosystem</h3>
+                <p class="feature-description">
+                    All applications work seamlessly together, sharing data 
+                    and insights to provide a comprehensive music intelligence 
+                    experience.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="cta-background">
+        <div class="cta-waves"></div>
+    </div>
+    <div class="cta-content">
+        <h2 class="cta-title">Ready to Transform Your Music?</h2>
+        <p class="cta-subtitle">
+            Join thousands of musicians, producers, and educators who are already 
+            using Million Song Mind to unlock the secrets of music.
+        </p>
+        <div class="cta-actions">
+            <button class="btn btn-primary btn-large" (click)="openApp('msm', $event)">
+                <span class="btn-icon">🚀</span>
+                Start Free Trial
+            </button>
+            <button class="btn btn-secondary btn-large" (click)="openApp('sales', $event)">
+                <span class="btn-icon">💼</span>
+                Contact Sales
+            </button>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="footer">
+    <div class="footer-content">
+        <div class="footer-brand">
+            <div class="brand-icon">
+                <div class="logo-animation">
+                    <span class="logo-circle"></span>
+                    <span class="logo-waves"></span>
+                </div>
+            </div>
+            <span class="brand-text">Million Song Mind</span>
+            <p class="brand-tagline">Revolutionary Music Intelligence Platform</p>
+        </div>
+        
+        <div class="footer-links">
+            <div class="footer-column">
+                <h4 class="footer-heading">Platform</h4>
+                <a href="#" (click)="openApp('obsidian', $event)" class="footer-link">Novaxe Obsidian</a>
+                <a href="#" (click)="openApp('msm', $event)" class="footer-link">MSM Analytics</a>
+                <a href="#" (click)="openApp('chordcubes', $event)" class="footer-link">Chord Cubes</a>
+                <a href="#" (click)="openApp('unity', $event)" class="footer-link">Unity Learning</a>
+            </div>
+            
+            <div class="footer-column">
+                <h4 class="footer-heading">Company</h4>
+                <a href="#" class="footer-link">About Us</a>
+                <a href="#" class="footer-link">Careers</a>
+                <a href="#" class="footer-link">Press</a>
+                <a href="#" (click)="openApp('sales', $event)" class="footer-link">Contact</a>
+            </div>
+            
+            <div class="footer-column">
+                <h4 class="footer-heading">Resources</h4>
+                <a href="#" class="footer-link">Documentation</a>
+                <a href="#" class="footer-link">API Reference</a>
+                <a href="#" class="footer-link">Community</a>
+                <a href="#" class="footer-link">Support</a>
+            </div>
+            
+            <div class="footer-column">
+                <h4 class="footer-heading">Legal</h4>
+                <a href="#" class="footer-link">Privacy Policy</a>
+                <a href="#" class="footer-link">Terms of Service</a>
+                <a href="#" class="footer-link">Cookie Policy</a>
+                <a href="#" class="footer-link">GDPR</a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer-bottom">
+        <p class="footer-copyright">
+            © 2025 Million Song Mind. All rights reserved. 
+            Built with precision and passion for music.
+        </p>
+    </div>
+</footer>

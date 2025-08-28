@@ -4,22 +4,104 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>OBS Cubes</title>
+		<title>OBS Cubes - Interactive Musical Chord Visualization | Million Song Mind</title>
+	<meta name="description" content="Professional 3D chord visualization tool with interactive cubes, real-time audio, and advanced musical analysis. Powered by Three.js and Web Audio API.">
+	<meta name="keywords" content="music theory, chord visualization, three.js, interactive music, web audio, sound visualization">
+	
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://millionsonmind.com/cubes/">
+	<meta property="og:title" content="OBS Cubes - Interactive Musical Chord Visualization">
+	<meta property="og:description" content="Professional 3D chord visualization with interactive cubes and real-time audio">
+	<meta property="og:image" content="https://millionsonmind.com/cubes/favicon.ico">
+
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://millionsonmind.com/cubes/">
+	<meta property="twitter:title" content="OBS Cubes - Interactive Musical Chord Visualization">
+	<meta property="twitter:description" content="Professional 3D chord visualization with interactive cubes and real-time audio">
+	<meta property="twitter:image" content="https://millionsonmind.com/cubes/favicon.ico">
+	
+	<link rel="canonical" href="https://millionsonmind.com/cubes/">
+	<link rel="icon" href="./favicon.ico" type="image/x-icon">
 	<link rel="stylesheet" href="./styles.css" />
+	
+	<!-- Preload critical resources -->
+	<link rel="preload" href="https://unpkg.com/three@0.160.0/build/three.module.js" as="script" crossorigin>
+	<link rel="preload" href="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js" as="script">
+	
 	<style>
+		/* Critical CSS for font loading */
 		@font-face {
 			font-family: 'NVXDiamond';
-			src:
-				url('../fonts/NVX Diamond Font.otf') format('opentype');
+			src: url('../fonts/NVX Diamond Font.otf') format('opentype'),
+			     url('./assets/fonts/NVX-Diamond-Font.otf') format('opentype');
 			font-weight: 400;
 			font-style: normal;
 			font-display: swap;
 		}
+		
+		/* Loading spinner for better UX */
+		.loading-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #222222;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 10000;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			color: #ffffff;
+		}
+		
+		.loading-content {
+			text-align: center;
+		}
+		
+		.loading-spinner {
+			width: 40px;
+			height: 40px;
+			border: 4px solid #333;
+			border-top: 4px solid #0099ff;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin: 0 auto 20px;
+		}
+		
+		@keyframes spin {
+			0% { transform: rotate(0deg); }
+			100% { transform: rotate(360deg); }
+		}
+		
+		.loading-text {
+			font-size: 18px;
+			margin-bottom: 10px;
+		}
+		
+		.loading-subtext {
+			font-size: 14px;
+			opacity: 0.7;
+		}
 	</style>
-	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+	
+	<!-- SoundFont Player with fallback -->
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js" 
+		onerror="console.warn('SoundFont Player failed to load from CDN, using fallback audio')"></script>
 </head>
 
 <body>
+	<!-- Loading overlay -->
+	<div class="loading-overlay" id="loadingOverlay">
+		<div class="loading-content">
+			<div class="loading-spinner"></div>
+			<div class="loading-text">Loading OBS Cubes</div>
+			<div class="loading-subtext">Initializing 3D environment...</div>
+		</div>
+	</div>
+
 	<div id="ui">
 		<div class="row">
 			<label>Key</label>
@@ -118,7 +200,6 @@
 		</div>
 	</div>
 	<canvas id="scene"></canvas>
-	<!-- legacy lane-controls removed; lock icons integrated into camera-ui -->
 	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
 
 	<div id="camera-ui">
@@ -126,6 +207,7 @@
 		<button id="view-up" title="Bass View">Bass View</button>
 	</div>
 
+	<!-- Module imports with CDN fallbacks -->
 	<script type="importmap">
 	{
 		"imports": {
@@ -135,12 +217,47 @@
 		}
 	}
 	</script>
-	<!-- Tone.js for audio engine aligned with Novaxe stack -->
-	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
-	<!-- Tonal for voice-leading utilities (mode 2) -->
-	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
-	<script type="module" src="./chords.js?v=1"></script>
-	<script type="module" src="./main.js?v=1"></script>
+	
+	<!-- Audio libraries with CDN fallbacks -->
+	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js" 
+		onerror="console.warn('Tone.js failed to load from CDN')"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"
+		onerror="console.warn('Tonal.js failed to load from CDN')"></script>
+	
+	<!-- Core application modules -->
+	<script type="module" src="./chords.js?v=2.0"></script>
+	<script type="module" src="./main.js?v=2.0"></script>
+	
+	<!-- Production initialization script -->
+	<script>
+		// Hide loading overlay once everything is loaded
+		window.addEventListener('load', function() {
+			setTimeout(() => {
+				const overlay = document.getElementById('loadingOverlay');
+				if (overlay) {
+					overlay.style.transition = 'opacity 0.5s ease';
+					overlay.style.opacity = '0';
+					setTimeout(() => overlay.remove(), 500);
+				}
+			}, 1000); // Give modules time to initialize
+		});
+		
+		// Error handling for production
+		window.addEventListener('error', function(e) {
+			console.error('OBS Cubes Error:', e.error);
+			// Could add user-friendly error display here
+		});
+		
+		// Performance monitoring
+		window.addEventListener('DOMContentLoaded', function() {
+			console.log('OBS Cubes - Production Version 2.0');
+			console.log('Performance:', {
+				loadTime: performance.now(),
+				userAgent: navigator.userAgent,
+				webgl: !!window.WebGLRenderingContext
+			});
+		});
+	</script>
 </body>
 
 </html>
