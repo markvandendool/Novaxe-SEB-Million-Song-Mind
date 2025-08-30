@@ -9,6 +9,9 @@ import { BORDER_RATIO, SERIF_STACK, MUSIC_STACK } from './textureConfig.js'
 import { setupDiagnostics } from './diagnosticsOverlay.js'
 import { createBridge } from './integration/bridge.js'
 import { setState } from './stateStore.js'
+// Enterprise-level transport and style system
+import { chordCubesTransport } from './transport-bridge.js'
+import { createStyleSelector } from './style-selector.js'
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -113,6 +116,61 @@ function enterStageMode() {
         }
     });
 }
+function exitStageMode() {
+    if (!stageMode) return;
+    stageMode = false;
+    console.log('[STAGE] Exiting stage mode - restoring melody view and lighting');
+    console.log(`[STAGE] Current camera: ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}`);
+    console.log(`[STAGE] Target melody: ${melodyCamPos.x.toFixed(2)}, ${melodyCamPos.y.toFixed(2)}, ${melodyCamPos.z.toFixed(2)}`);
+
+    // Cancel ALL active tweens first to avoid conflicts
+    for (const tween of activeTweens) {
+        if (tween && tween.owner === camera) {
+            tween.cancelled = true;
+            console.log('[STAGE] Cancelled existing camera tween');
+        }
+    }
+    if (stageTween) {
+        stageTween.cancelled = true;
+        stageTween = null;
+        console.log('[STAGE] Cancelled existing stage tween');
+    }
+
+    // Animate back to melody camera position
+    const camFrom = camera.position.clone();
+    const camTo = melodyCamPos.clone();
+    const tgtFrom = controls.target.clone();
+    const tgtTo = melodyTarget.clone();
+
+    // Restore default lighting values
+    const ambFrom = ambient.intensity, ambTo = 0.7;
+    const dirFrom = dir.intensity, dirTo = 0.7;
+    const spotFrom = frontSpot.intensity, spotTo = 0.0;
+    const spotLFrom = frontSpotL.intensity, spotLTo = 0.0;
+    const spotRFrom = frontSpotR.intensity, spotRTo = 0.0;
+    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 0.0;
+
+    console.log(`[STAGE] Starting restoration tween from (${camFrom.x.toFixed(2)}, ${camFrom.y.toFixed(2)}, ${camFrom.z.toFixed(2)}) to (${camTo.x.toFixed(2)}, ${camTo.y.toFixed(2)}, ${camTo.z.toFixed(2)})`);
+
+    stageTween = tweenObject({
+        duration: 650, owner: camera, onUpdate: (v) => {
+            camera.position.lerpVectors(camFrom, camTo, v);
+            controls.target.lerpVectors(tgtFrom, tgtTo, v);
+            ambient.intensity = ambFrom + (ambTo - ambFrom) * v;
+            dir.intensity = dirFrom + (dirTo - dirFrom) * v;
+            frontSpot.intensity = spotFrom + (spotTo - spotFrom) * v;
+            frontSpotL.intensity = spotLFrom + (spotLTo - spotLFrom) * v;
+            frontSpotR.intensity = spotRFrom + (spotRTo - spotRFrom) * v;
+            stageSpot.intensity = stageSpotFrom + (stageSpotTo - stageSpotFrom) * v;
+            if (v % 0.2 < 0.1) console.log(`[STAGE] Restoration progress: ${(v * 100).toFixed(0)}%`);
+        }, onComplete: () => {
+            stageTween = null;
+            console.log('[STAGE] Exit complete - melody view restored');
+            console.log(`[STAGE] Final camera: ${camera.position.x.toFixed(2)}, ${camera.position.y.toFixed(2)}, ${camera.position.z.toFixed(2)}`);
+        }
+    });
+}
+
 function maybeEnterStageMode() {
     if (lineup.length && lockedMelody && lockedBass && lockedMelody.length === lineup.length && lockedBass.length === lineup.length) enterStageMode();
 }
@@ -628,7 +686,7 @@ function addEpicTitles() {
     if (!bgTitleMesh) {
         // MASSIVE all-caps, very tight leading
         const bgTex = makeTitleTexture(['MILLION', 'SONG', 'MIND'], { width: 4096, height: 4096, size: 520, lineGap: 0.52, weight: 1000 });
-        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0xcccccc });
+        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0xff69b4 });
         const scaleFactor = 15; // towering
         const bgGeo = new THREE.PlaneGeometry(18 * scaleFactor, 18 * scaleFactor);
         bgTitleMesh = new THREE.Mesh(bgGeo, bgMat);
@@ -1395,7 +1453,7 @@ function onPointerDown(e) {
     mouseDownTime = performance.now();
     fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
     try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
-    
+
     console.log(`[POINTER-DOWN] Starting click detection. Front-row cubes: ${cubes.length}, Shelf cubes: ${shelfCubes.length}`);
 
     // Temporary: check UI locks first; if hit, set guard and disable controls
@@ -2211,7 +2269,14 @@ bassLockIcon?.addEventListener('click', async () => {
     lockInBass(); bassLockIcon.textContent = '🔒'; await playLockSound();
 });
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
-playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
+playProgBtn?.addEventListener('click', () => {
+    // Use enterprise transport if available, fallback to original
+    if (enterpriseTransportEnabled) {
+        playFrontRowProgressionWithTiming();
+    } else {
+        playFrontRowProgression();
+    }
+});
 
 // Optional URL controls: ?bpm=120&bpc=4
 (function readPerfParams() {
@@ -2224,6 +2289,8 @@ playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
     } catch (_) { }
 })();
 resetBtn?.addEventListener('click', () => {
+    console.log('[RESET] Starting complete reset...');
+
     // Return all active cubes to their shelf origin and clear lineup
     for (const c of [...lineup]) {
         const r = c.userData.roman;
@@ -2235,12 +2302,65 @@ resetBtn?.addEventListener('click', () => {
             c.position.set((shelfSlots[r] || new THREE.Vector3()).x, (shelfSlots[r] || new THREE.Vector3()).y, shelfZ);
         }
         c.userData.isShelf = true;
+        c.userData.rotationIndex = 0; // Reset rotation
+        // Reset quaternion to identity
+        c.quaternion.set(0, 0, 0, 1);
         if (!shelfCubes.includes(c)) shelfCubes.push(c);
         const ci = cubes.indexOf(c); if (ci >= 0) cubes.splice(ci, 1);
+        // Set back to shelf layer
+        try { setCubeLayerRecursive(c, 2); } catch (_) { }
     }
     lineup = [];
-    // Also clear any locked lanes to avoid leftover markers
-    try { clearLockedLines(); setMelodyLockVisual('open'); setBassLockVisual('open'); } catch (_) { }
+
+    // Clear locked lanes and reset lock visuals
+    try {
+        lockedMelody = null;
+        lockedBass = null;
+        clearLockedLines();
+        setMelodyLockVisual('open');
+        setBassLockVisual('open');
+    } catch (_) { }
+
+    // Reset camera and lighting to default melody view
+    console.log('[RESET] ===== FORCING CAMERA/LIGHTING RESET =====');
+    try {
+        // Direct camera restoration without stage mode complexity
+        const camFrom = camera.position.clone();
+        const camTo = melodyCamPos.clone(); // (0, 5.8, 11.5)
+        const tgtFrom = controls.target.clone();
+        const tgtTo = melodyTarget.clone(); // (0, 1.4, 0)
+
+        console.log(`[RESET] Direct camera restore: ${camFrom.x.toFixed(2)}, ${camFrom.y.toFixed(2)}, ${camFrom.z.toFixed(2)} → ${camTo.x.toFixed(2)}, ${camTo.y.toFixed(2)}, ${camTo.z.toFixed(2)}`);
+
+        // Immediate restoration (no tween for reset - instant)
+        camera.position.copy(camTo);
+        controls.target.copy(tgtTo);
+
+        // Restore default lighting immediately
+        ambient.intensity = 0.7;
+        dir.intensity = 0.7;
+        frontSpot.intensity = 0.0;
+        frontSpotL.intensity = 0.0;
+        frontSpotR.intensity = 0.0;
+        stageSpot.intensity = 0.0;
+
+        stageMode = false; // Ensure stage mode is off
+        controls.enabled = true; // Ensure camera control is restored
+
+        console.log('[RESET] CAMERA AND LIGHTING RESET COMPLETE');
+    } catch (err) {
+        console.error('[RESET] Error during camera/lighting reset:', err);
+    }
+
+    // Cancel all active tweens
+    try {
+        for (const tween of activeTweens) {
+            if (tween) tween.cancelled = true;
+        }
+        activeTweens.length = 0;
+    } catch (_) { }
+
+    console.log('[RESET] Complete reset finished');
 });
 
 // Lock icon events handled above via melodyLockIcon/bassLockIcon
@@ -3352,30 +3472,33 @@ async function playLockSound() {
 }
 
 async function playFrontRowProgression() {
+    console.log('[PROGRESSION] ===== STARTING PROGRESSION =====');
+    console.log('[PROGRESSION] lineup.length:', lineup.length);
     if (lineup.length === 0) return;
+
+    // Remember if we were already in stage mode
+    const wasAlreadyInStageMode = stageMode;
+    console.log('[PROGRESSION] wasAlreadyInStageMode:', wasAlreadyInStageMode);
+
+    // Force enter stage mode for proper camera and lighting (even if already in stage mode)
+    console.log('[PROGRESSION] Entering stage mode for progression');
+    if (wasAlreadyInStageMode) {
+        // Already in stage mode, just ensure we're at the right position
+        console.log('[PROGRESSION] Already in stage mode, ensuring correct position');
+    } else {
+        // Enter stage mode fresh
+        enterStageMode();
+        // Wait for stage mode transition to complete
+        await new Promise(resolve => setTimeout(resolve, 950)); // enterStageMode duration is 900ms
+    }
+
     const msPerBeat = Math.round(60000 / progressionBpm);
     const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
-        // Ultra-flashy active chord highlight + camera dolly follow
+        // Ultra-flashy active chord highlight (no camera movement per chord)
         try {
             highlightChordEffect(c, 900); pulseGiantAt(i, 700);
-            // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
-            const tDur = 700;
-            const fromPos = camera.position.clone();
-            const fromTgt = controls.target.clone();
-            const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
-            const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
-            const tStart = performance.now();
-            const tween = {
-                owner: camera, tick: (now) => {
-                    const v = Math.min(1, (now - tStart) / tDur);
-                    camera.position.lerpVectors(fromPos, toPos, v);
-                    controls.target.lerpVectors(fromTgt, toTgt, v);
-                    return v >= 1;
-                }, cancelled: false
-            };
-            activeTweens.push(tween);
         } catch (_) { }
         if (lockedMelody || lockedBass) {
             // Use locked lines if present; fallback to face-derived where missing
@@ -3404,6 +3527,143 @@ async function playFrontRowProgression() {
         addProgressionPointFromCube(c);
         await new Promise(r => setTimeout(r, perChordMs));
     }
+
+    // After progression completes, FORCE return to melody view
+    console.log('[PROGRESSION] ===== FORCING MELODY VIEW RETURN =====');
+    try {
+        // Direct camera restoration without stage mode complexity
+        const camFrom = camera.position.clone();
+        const camTo = melodyCamPos.clone(); // (0, 5.8, 11.5)
+        const tgtFrom = controls.target.clone();
+        const tgtTo = melodyTarget.clone(); // (0, 1.4, 0)
+
+        console.log(`[PROGRESSION] Direct camera restore: ${camFrom.x.toFixed(2)}, ${camFrom.y.toFixed(2)}, ${camFrom.z.toFixed(2)} → ${camTo.x.toFixed(2)}, ${camTo.y.toFixed(2)}, ${camTo.z.toFixed(2)}`);
+
+        // Cancel any existing camera tweens
+        for (const tween of activeTweens) {
+            if (tween && tween.owner === camera) {
+                tween.cancelled = true;
+            }
+        }
+
+        // Direct tween to melody position
+        const restoreTween = tweenObject({
+            duration: 650, owner: camera, onUpdate: (v) => {
+                camera.position.lerpVectors(camFrom, camTo, v);
+                controls.target.lerpVectors(tgtFrom, tgtTo, v);
+                // Restore default lighting
+                ambient.intensity = 0.7;
+                dir.intensity = 0.7;
+                frontSpot.intensity = 0.0;
+                frontSpotL.intensity = 0.0;
+                frontSpotR.intensity = 0.0;
+                stageSpot.intensity = 0.0;
+            }, onComplete: () => {
+                console.log('[PROGRESSION] MELODY VIEW RESTORED SUCCESSFULLY');
+                stageMode = false; // Ensure stage mode is off
+            }
+        });
+
+    } catch (err) {
+        console.error('[PROGRESSION] Error during melody view restoration:', err);
+    }
+}
+
+// Enterprise Transport System Initialization
+let styleSelector = null;
+let enterpriseTransportEnabled = false;
+
+// Initialize enterprise systems after app load
+(async () => {
+    try {
+        console.log('[ENTERPRISE] Starting initialization...');
+
+        // Wait for app to be ready
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('[ENTERPRISE] App ready, initializing transport...');
+
+        // Initialize transport system
+        await chordCubesTransport.initAudioSystem();
+        console.log('[ENTERPRISE] Transport audio system ready');
+
+        // Create style selector UI
+        console.log('[ENTERPRISE] Creating style selector...');
+        styleSelector = createStyleSelector(chordCubesTransport);
+        console.log('[ENTERPRISE] Style selector created successfully');
+
+        // Add style selector toggle button to existing UI
+        console.log('[ENTERPRISE] Creating toggle button...');
+        const toggleBtn = document.createElement('button');
+        toggleBtn.textContent = '🎵 Styles';
+        toggleBtn.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4a90e2;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            z-index: 999;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        `;
+        toggleBtn.onclick = () => {
+            console.log('[ENTERPRISE] Style button clicked');
+            if (styleSelector) {
+                styleSelector.toggle();
+            } else {
+                console.error('[ENTERPRISE] Style selector not available');
+            }
+        };
+        document.body.appendChild(toggleBtn);
+        console.log('[ENTERPRISE] Toggle button added to DOM');
+
+        // Sync BPM with existing system
+        chordCubesTransport.setBpm(progressionBpm);
+        console.log('[ENTERPRISE] BPM synced:', progressionBpm);
+
+        // Expose functions for enterprise transport integration
+        window.playChordForObject = playChordForObject;
+        window.lineup = lineup;
+        window.progressionBpm = progressionBpm;
+        window.beatsPerChord = beatsPerChord;
+        console.log('[ENTERPRISE] Functions exposed to global scope');
+
+        enterpriseTransportEnabled = true;
+        console.log('[ENTERPRISE] ✅ TRANSPORT SYSTEM INITIALIZED SUCCESSFULLY');
+
+    } catch (error) {
+        console.error('[ENTERPRISE] ❌ FAILED TO INITIALIZE:', error);
+        console.error('[ENTERPRISE] Error stack:', error.stack);
+    }
+})();
+
+// Enhanced progression with enterprise transport integration
+async function playFrontRowProgressionWithTiming() {
+    if (lineup.length === 0) return;
+
+    if (enterpriseTransportEnabled) {
+        console.log('[ENTERPRISE] Using enterprise transport for progression');
+
+        // Use enterprise transport system
+        const success = await chordCubesTransport.playProgressionWithTiming(
+            lineup,
+            progressionBpm,
+            beatsPerChord
+        );
+
+        if (success) {
+            // Enterprise progression includes automatic camera management
+            console.log('[ENTERPRISE] Enterprise progression started successfully');
+            return;
+        }
+    }
+
+    // Fallback to original progression
+    console.log('[ENTERPRISE] Falling back to original progression');
+    return playFrontRowProgression();
 }
 
 // Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()

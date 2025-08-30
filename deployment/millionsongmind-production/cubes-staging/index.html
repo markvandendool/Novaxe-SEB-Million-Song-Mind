@@ -50,7 +50,7 @@
 			opacity: 0.9;
 		}
 	</style>
-	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+	<!-- Removed conflicting soundfont-player - using WebAudioFont for enterprise drums -->
 </head>
 
 <body>
@@ -174,8 +174,10 @@
 	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 	<!-- Tonal for voice-leading utilities (mode 2) -->
 	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
+	<!-- WebAudioFont for enterprise drum system (Novaxe-compatible) -->
+	<script src="https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js"></script>
 	<script type="module" src="./chords.js?v=1"></script>
-	<script type="module" src="./main.js?v=2"></script>
+	<script type="module" src="./main.js?v=8"></script>
 </body>
 
 </html>

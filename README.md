@@ -169,6 +169,7 @@ JWT_SECRET=your-super-secret-jwt-key
 - ✅ **User Authentication** - Secure login/registration
 - ✅ **Cloud Storage** - Save compositions to Supabase
 - ✅ **Responsive Design** - Mobile and desktop optimized
+- ✅ **Novaxe-Dev Integration** - Advanced Angular music components (`/novaxe-dev/`)
 
 ### **Technical Features**  
 - ✅ **Angular 20** - Latest framework version
