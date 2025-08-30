@@ -585,8 +585,70 @@ function candidatePngNamesForRoman(roman) {
 }
 
 function loadFaceTexture(label, romanLabel) {
+    // AUTOMATICALLY ADD 7TH NOTATION for diminished and I7 chords
+    let displayLabel = label;
+    const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
+    const isI7 = romanLabel === 'I7' || romanLabel === 'i7';
+
+    // Add 7th to display if not already present for special chords
+    if ((isDiminished || isI7) && !label.includes('7') && !label.includes('(7)')) {
+        if (isDiminished && romanLabel.includes('º') && !romanLabel.includes('º7')) {
+            // For diminished, show º7 instead of just º
+            displayLabel = label.replace('º', 'º7');
+        } else if (isI7) {
+            // For I7, add (7) superscript
+            displayLabel = label + '(7)';
+        }
+    }
+
+    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel})`);
+
     // Always use canvas-rendered texture; no PNGs
-    return makeFrontLabelTextureStyled(label, romanLabel);
+    return makeFrontLabelTextureStyled(displayLabel, romanLabel);
+}
+
+// SHIFT+CLICK: Temporarily update front face with 7th notation
+function updateChordFaceWith7th(targetObj) {
+    try {
+        const roman = targetObj.userData.roman;
+        const originalLabel = roman; // Use roman as base label
+        let displayWith7th = originalLabel;
+
+        // Add 7th notation if not already present
+        if (!originalLabel.includes('7') && !originalLabel.includes('(7)')) {
+            if (originalLabel.includes('º')) {
+                displayWith7th = originalLabel.replace('º', 'º7');
+            } else if (originalLabel.includes('ø')) {
+                displayWith7th = originalLabel.replace('ø', 'ø7');
+            } else {
+                displayWith7th = originalLabel + '(7)';
+            }
+        }
+
+        console.log(`[SHIFT-CLICK] Updating face: ${originalLabel} → ${displayWith7th}`);
+
+        // Generate new texture with 7th notation
+        const newTexture = makeFrontLabelTextureStyled(displayWith7th, roman);
+
+        // Update the front face material (index 0)
+        if (targetObj.material && targetObj.material[0]) {
+            targetObj.material[0].map = newTexture;
+            targetObj.material[0].needsUpdate = true;
+        }
+
+        // Reset back to original after 2 seconds
+        setTimeout(() => {
+            console.log(`[SHIFT-CLICK] Resetting face back to: ${originalLabel}`);
+            const originalTexture = loadFaceTexture(originalLabel, roman);
+            if (targetObj.material && targetObj.material[0]) {
+                targetObj.material[0].map = originalTexture;
+                targetObj.material[0].needsUpdate = true;
+            }
+        }, 2000);
+
+    } catch (error) {
+        console.error('[SHIFT-CLICK] Error updating chord face:', error);
+    }
 }
 
 function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false) {
@@ -1221,35 +1283,36 @@ async function loadSet(setName) {
     // Start with empty front row
     lineup = [];
     try {
-        ensureTempoUi();
+        // OLD DRUM UI COMMENTED OUT - USING PROFESSIONAL DRUM MACHINE NOW
+        // ensureTempoUi();
         // EMERGENCY: Force visible UI after 2 seconds
         setTimeout(() => {
-            console.log('[EMERGENCY] Forcing UI visibility...');
-            const widget = document.getElementById('unified-rhythm-widget');
-            if (!widget) {
-                console.error('[EMERGENCY] Widget not found! Creating emergency UI...');
-                createEmergencyUI();
-            } else {
-                console.log('[EMERGENCY] Widget found, forcing visibility...');
-                widget.style.cssText = `
-                    position: fixed !important;
-                    top: 50px !important;
-                    right: 50px !important;
-                    z-index: 2147483647 !important;
-                    background: rgba(255, 0, 0, 0.9) !important;
-                    color: white !important;
-                    padding: 20px !important;
-                    border-radius: 10px !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    pointer-events: auto !important;
-                    min-width: 300px !important;
-                    font-family: Arial, sans-serif !important;
-                    font-size: 14px !important;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
-                `;
-            }
+            console.log('[EMERGENCY] Old drum UI disabled - using professional drum machine');
+            // const widget = document.getElementById('unified-rhythm-widget');
+            // if (!widget) {
+            //     console.error('[EMERGENCY] Widget not found! Creating emergency UI...');
+            //     createEmergencyUI();
+            // } else {
+            //     console.log('[EMERGENCY] Widget found, forcing visibility...');
+            //     widget.style.cssText = `
+            //         position: fixed !important;
+            //         top: 50px !important;
+            //         right: 50px !important;
+            //         z-index: 2147483647 !important;
+            //         background: rgba(255, 0, 0, 0.9) !important;
+            //         color: white !important;
+            //         padding: 20px !important;
+            //         border-radius: 10px !important;
+            //         display: block !important;
+            //         visibility: visible !important;
+            //         opacity: 1 !important;
+            //         pointer-events: auto !important;
+            //         min-width: 300px !important;
+            //         font-family: Arial, sans-serif !important;
+            //         font-size: 14px !important;
+            //         box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
+            //     `;
+            // }
         }, 2000);
     } catch (_) { }
 }
@@ -1902,7 +1965,23 @@ function onPointerUp(e) {
             const centerHit = pickCenterPlay(hits, targetObj);
             if (centerHit) {
                 console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
-                playChordForObject(targetObj); pendingObj = null; return;
+
+                // SHIFT+CLICK: Temporarily force 7th for this chord
+                const isShiftClick = e.shiftKey;
+                if (isShiftClick) {
+                    console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman}`);
+                    const originalWithSeventh = withSeventh;
+                    withSeventh = true;
+                    playChordForObject(targetObj);
+                    withSeventh = originalWithSeventh; // Restore original setting
+
+                    // Update front face texture to show 7th notation temporarily
+                    updateChordFaceWith7th(targetObj);
+                } else {
+                    playChordForObject(targetObj);
+                }
+
+                pendingObj = null; return;
             }
             // Find a hit belonging to the pressed cube (overlay or face)
             let hit = null;
@@ -1930,8 +2009,21 @@ function onPointerUp(e) {
 
                     console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
 
-                    // Play audio immediately with the clicked tone (future state)
-                    playChordForObject(targetObj);
+                    // SHIFT+CLICK: Temporarily force 7th for this chord
+                    const isShiftClick = e.shiftKey;
+                    if (isShiftClick) {
+                        console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman} (quadrant)`);
+                        const originalWithSeventh = withSeventh;
+                        withSeventh = true;
+                        playChordForObject(targetObj);
+                        withSeventh = originalWithSeventh; // Restore original setting
+
+                        // Update front face texture to show 7th notation temporarily
+                        updateChordFaceWith7th(targetObj);
+                    } else {
+                        // Play audio immediately with the clicked tone (future state)
+                        playChordForObject(targetObj);
+                    }
 
                     if (angle !== 0) {
                         const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
@@ -2744,7 +2836,13 @@ function voiceLeadMidi(targetMidi, referenceMidi) {
 function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const use = includeSeventh ? names.slice(0, 4) : names.slice(0, 3);
+
+    // ALWAYS include 7th for diminished chords and I7 chords
+    const isDiminished = roman.includes('º') || roman.includes('ø');
+    const isI7 = roman === 'I7' || roman === 'i7';
+    const forceSeventhForSpecialChords = isDiminished || isI7;
+
+    const use = (includeSeventh || forceSeventhForSpecialChords) ? names.slice(0, 4) : names.slice(0, 3);
     const baseC4 = 60; // MIDI C4
     const midis = use.map(n => baseC4 + pcOf(n));
     midis.sort((a, b) => a - b);
@@ -3733,8 +3831,22 @@ async function playLockSound() {
 
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
-    const msPerBeat = Math.round(60000 / progressionBpm);
+
+    // INTEGRATE WITH PROFESSIONAL DRUM MACHINE TRANSPORT
+    console.log('[PLAY PROGRESSION] Starting with drum machine integration');
+
+    // Start drum machine if available
+    if (window.drumMachine && !window.drumMachine.isPlaying) {
+        console.log('[PLAY PROGRESSION] Starting drum machine transport');
+        await window.drumMachine.toggleDrums();
+    }
+
+    // Use drum machine BPM if available, otherwise fallback
+    const drumBpm = window.drumMachine?.bpm || progressionBpm;
+    const msPerBeat = Math.round(60000 / drumBpm);
     const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
+
+    console.log(`[PLAY PROGRESSION] Using BPM: ${drumBpm}, ms per chord: ${perChordMs}`);
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         // Ultra-flashy active chord highlight + camera dolly follow
@@ -3783,6 +3895,13 @@ async function playFrontRowProgression() {
         }
         addProgressionPointFromCube(c);
         await new Promise(r => setTimeout(r, perChordMs));
+    }
+
+    // STOP DRUM MACHINE WHEN PROGRESSION COMPLETES
+    console.log('[PLAY PROGRESSION] Progression complete - stopping drum machine');
+    if (window.drumMachine && window.drumMachine.isPlaying) {
+        await window.drumMachine.toggleDrums(); // Stop drums
+        console.log('[PLAY PROGRESSION] Drum machine stopped');
     }
 }
 
