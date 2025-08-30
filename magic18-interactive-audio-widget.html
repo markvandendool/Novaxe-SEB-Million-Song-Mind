@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>🎵 Magic 18 - Interactive Audio Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #1a1a2e;
+            font-family: 'Arial', sans-serif;
+            color: white;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff88;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 0 0 10px rgba(0, 255, 136, 0.3);
+        }
+
+        .spread {
+            display: flex;
+            gap: 20px;
+            max-width: 100%;
+            justify-content: center;
+        }
+
+        .page {
+            flex: 1;
+            max-width: 500px;
+            border: 2px solid #00ff88;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 255, 136, 0.2);
+            position: relative;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            font-weight: bold;
+            text-align: center;
+            font-size: 16px;
+        }
+
+        .svg-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* Interactive Button Overlays */
+        .interactive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .chord-button {
+            position: absolute;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+            z-index: 100;
+        }
+
+        .chord-button:hover {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.1);
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.5);
+        }
+
+        .chord-button.active {
+            border-color: #ffff00;
+            background: rgba(255, 255, 0, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+        }
+
+        .scale-degree-button {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+            z-index: 200;
+        }
+
+        .scale-degree-button:hover {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.3);
+            box-shadow: 0 0 10px rgba(255, 107, 53, 0.6);
+        }
+
+        .scale-degree-button.active {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.5);
+            box-shadow: 0 0 15px rgba(255, 107, 53, 1);
+            transform: scale(1.3);
+        }
+
+        .chord-tone-button {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border: 2px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+            z-index: 150;
+        }
+
+        .chord-tone-button:hover {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.6);
+        }
+
+        .chord-tone-button.active {
+            border-color: #00ffff;
+            background: rgba(0, 255, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 255, 255, 1);
+            transform: scale(1.2);
+        }
+
+        .fretboard-button {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.15s ease;
+            z-index: 120;
+        }
+
+        .fretboard-button:hover {
+            border-color: #ff00ff;
+            background: rgba(255, 0, 255, 0.4);
+            transform: scale(1.5);
+        }
+
+        .fretboard-button.active {
+            border-color: #ff00ff;
+            background: rgba(255, 0, 255, 0.7);
+            box-shadow: 0 0 8px rgba(255, 0, 255, 0.8);
+            transform: scale(1.8);
+        }
+
+        /* Audio Controls */
+        .audio-controls {
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+        }
+
+        .volume-control {
+            margin: 10px;
+        }
+
+        .volume-control input[type="range"] {
+            width: 200px;
+            margin: 0 10px;
+        }
+
+        .feedback-display {
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 14px;
+            min-height: 100px;
+        }
+
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🎵 Magic 18 - Interactive Audio Widget</h1>
+
+    <div class="spread">
+        <div class="page">
+            <div class="page-header">🎸 Left Page • Major System</div>
+            <div class="svg-container">
+                <object id="leftSvg" data="Charts Magic18 SVG_C Left.svg" type="image/svg+xml"></object>
+                <div id="leftOverlay" class="interactive-overlay"></div>
+            </div>
+        </div>
+        <div class="page">
+            <div class="page-header">🎹 Right Page • Minor System</div>
+            <div class="svg-container">
+                <object id="rightSvg" data="Charts Magic18 SVG_C Right.svg" type="image/svg+xml"></object>
+                <div id="rightOverlay" class="interactive-overlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="audio-controls">
+        <div class="volume-control">
+            🔊 Master Volume: <input type="range" id="masterVolume" min="0" max="1" step="0.1" value="0.7">
+            <span id="volumeDisplay">70%</span>
+        </div>
+        <div class="volume-control">
+            🎸 Chord Volume: <input type="range" id="chordVolume" min="0" max="1" step="0.1" value="0.8">
+            🎵 Note Volume: <input type="range" id="noteVolume" min="0" max="1" step="0.1" value="0.6">
+        </div>
+    </div>
+
+    <div class="feedback-display" id="feedbackDisplay">
+        🎵 Interactive Magic 18 Audio System Ready<br>
+        Click any element to play audio and see visual feedback!<br>
+        ---------------------------------------------------<br>
+    </div>
+
+    <div class="legend">
+        <div class="legend-item">🎯 <span>Chord Cubes</span></div>
+        <div class="legend-item">🔸 <span>Scale Degrees</span></div>
+        <div class="legend-item">⭕ <span>Chord Tones</span></div>
+        <div class="legend-item">🎸 <span>Fretboard Notes</span></div>
+        <div class="legend-item">🎼 <span>Chord Forms</span></div>
+    </div>
+
+    <script>
+        class Magic18AudioSystem {
+            constructor() {
+                this.audioContext = null;
+                this.masterVolume = 0.7;
+                this.chordVolume = 0.8;
+                this.noteVolume = 0.6;
+                this.activeElements = new Set();
+                this.feedbackDisplay = document.getElementById('feedbackDisplay');
+
+                // Magic 18 Position Mapping (committed to memory)
+                this.positions = {
+                    left: {
+                        'I': { x: 51, y: 64, chord: 'C', notes: ['C', 'E', 'G'] },
+                        'vi': { x: 372, y: 68, chord: 'Am', notes: ['A', 'C', 'E'] },
+                        'IV': { x: 53, y: 169, chord: 'F', notes: ['F', 'A', 'C'] },
+                        'ii': { x: 373, y: 168, chord: 'Dm', notes: ['D', 'F', 'A'] },
+                        'V': { x: 52, y: 269, chord: 'G', notes: ['G', 'B', 'D'] },
+                        'iii': { x: 371, y: 268, chord: 'Em', notes: ['E', 'G', 'B'] },
+                        'II': { x: 86, y: 447, chord: 'D7', notes: ['D', 'F#', 'A', 'C'] },
+                        'VI': { x: 214, y: 448, chord: 'A7', notes: ['A', 'C#', 'E', 'G'] },
+                        'III': { x: 339, y: 447, chord: 'E7', notes: ['E', 'G#', 'B', 'D'] }
+                    },
+                    right: {
+                        'i': { x: 51, y: 66, chord: 'Cm', notes: ['C', 'Eb', 'G'] },
+                        '♭III': { x: 371, y: 64, chord: 'Eb', notes: ['Eb', 'G', 'Bb'] },
+                        'iv': { x: 51, y: 168, chord: 'Fm', notes: ['F', 'Ab', 'C'] },
+                        '♭VI': { x: 374, y: 164, chord: 'Ab', notes: ['Ab', 'C', 'Eb'] },
+                        'v': { x: 49, y: 270, chord: 'Gm', notes: ['G', 'Bb', 'D'] },
+                        '♭VII': { x: 372, y: 271, chord: 'Bb', notes: ['Bb', 'D', 'F'] },
+                        'VII': { x: 91, y: 451, chord: 'B7', notes: ['B', 'D#', 'F#', 'A'] },
+                        'I7': { x: 211, y: 449, chord: 'C7', notes: ['C', 'E', 'G', 'Bb'] },
+                        'vii°': { x: 341, y: 450, chord: 'B°', notes: ['B', 'D', 'F'] }
+                    }
+                };
+
+                // Note frequencies for audio generation
+                this.noteFrequencies = {
+                    'C': 261.63, 'C#': 277.18, 'Db': 277.18,
+                    'D': 293.66, 'D#': 311.13, 'Eb': 311.13,
+                    'E': 329.63, 'F': 349.23, 'F#': 369.99,
+                    'Gb': 369.99, 'G': 392.00, 'G#': 415.30,
+                    'Ab': 415.30, 'A': 440.00, 'A#': 466.16,
+                    'Bb': 466.16, 'B': 493.88
+                };
+
+                this.initializeAudio();
+                this.setupEventListeners();
+                this.createInteractiveOverlays();
+            }
+
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.log('🎵 Audio system initialized successfully');
+                } catch (error) {
+                    this.log('❌ Audio initialization failed: ' + error.message);
+                }
+            }
+
+            setupEventListeners() {
+                // Volume controls
+                document.getElementById('masterVolume').addEventListener('input', (e) => {
+                    this.masterVolume = parseFloat(e.target.value);
+                    document.getElementById('volumeDisplay').textContent = Math.round(this.masterVolume * 100) + '%';
+                });
+
+                document.getElementById('chordVolume').addEventListener('input', (e) => {
+                    this.chordVolume = parseFloat(e.target.value);
+                });
+
+                document.getElementById('noteVolume').addEventListener('input', (e) => {
+                    this.noteVolume = parseFloat(e.target.value);
+                });
+            }
+
+            createInteractiveOverlays() {
+                // Wait for SVGs to load
+                setTimeout(() => {
+                    this.createButtonOverlays('left');
+                    this.createButtonOverlays('right');
+                }, 1000);
+            }
+
+            createButtonOverlays(page) {
+                const overlay = document.getElementById(`${page}Overlay`);
+                const positions = this.positions[page];
+
+                // Create chord cube buttons
+                Object.entries(positions).forEach(([roman, data]) => {
+                    const button = document.createElement('div');
+                    button.className = 'chord-button';
+                    button.style.left = (data.x - 40) + 'px';
+                    button.style.top = (data.y - 40) + 'px';
+                    button.style.width = '80px';
+                    button.style.height = '80px';
+                    button.title = `${roman} - ${data.chord}`;
+
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.playChord(data.notes, roman, data.chord);
+                        this.activateElement(button, `🎯 ${roman} (${data.chord})`);
+                    });
+
+                    overlay.appendChild(button);
+                });
+
+                this.log(`✅ Created interactive overlays for ${page} page`);
+            }
+
+            async playChord(notes, roman, chordName) {
+                if (!this.audioContext) return;
+
+                try {
+                    // Resume audio context if needed
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                    }
+
+                    const now = this.audioContext.currentTime;
+                    const chordVolume = this.masterVolume * this.chordVolume;
+
+                    // Play each note in the chord
+                    notes.forEach((note, index) => {
+                        const frequency = this.noteFrequencies[note];
+                        if (!frequency) return;
+
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+
+                        oscillator.frequency.setValueAtTime(frequency, now);
+                        oscillator.type = 'sine';
+
+                        // Stagger chord notes slightly
+                        const startTime = now + (index * 0.02);
+                        gainNode.gain.setValueAtTime(0, startTime);
+                        gainNode.gain.linearRampToValueAtTime(chordVolume * 0.3, startTime + 0.05);
+                        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 1.5);
+
+                        oscillator.start(startTime);
+                        oscillator.stop(startTime + 1.5);
+                    });
+
+                    this.log(`🎵 Playing ${roman} chord (${chordName}): [${notes.join(', ')}]`);
+                } catch (error) {
+                    this.log('❌ Audio playback error: ' + error.message);
+                }
+            }
+
+            async playNote(note, elementType) {
+                if (!this.audioContext) return;
+
+                try {
+                    if (this.audioContext.state === 'suspended') {
+                        await this.audioContext.resume();
+                    }
+
+                    const frequency = this.noteFrequencies[note];
+                    if (!frequency) return;
+
+                    const oscillator = this.audioContext.createOscillator();
+                    const gainNode = this.audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(this.audioContext.destination);
+
+                    oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                    oscillator.type = 'sine';
+
+                    const volume = this.masterVolume * this.noteVolume;
+                    const now = this.audioContext.currentTime;
+
+                    gainNode.gain.setValueAtTime(0, now);
+                    gainNode.gain.linearRampToValueAtTime(volume * 0.5, now + 0.02);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+
+                    oscillator.start(now);
+                    oscillator.stop(now + 0.8);
+
+                    this.log(`🎵 Playing ${elementType}: ${note} (${frequency.toFixed(1)} Hz)`);
+                } catch (error) {
+                    this.log('❌ Note playback error: ' + error.message);
+                }
+            }
+
+            activateElement(element, description) {
+                // Clear previous active states
+                document.querySelectorAll('.active').forEach(el => {
+                    el.classList.remove('active');
+                });
+
+                // Activate current element
+                element.classList.add('active');
+
+                // Auto-deactivate after 2 seconds
+                setTimeout(() => {
+                    element.classList.remove('active');
+                }, 2000);
+
+                this.log(`⚡ Activated: ${description}`);
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logLine = `[${timestamp}] ${message}`;
+                this.feedbackDisplay.innerHTML += logLine + '<br>';
+                this.feedbackDisplay.scrollTop = this.feedbackDisplay.scrollHeight;
+                console.log(logLine);
+            }
+        }
+
+        // Initialize the audio system when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const audioSystem = new Magic18AudioSystem();
+            window.magic18Audio = audioSystem; // Make globally accessible
+        });
+
+        // Add click-to-enable audio context
+        document.addEventListener('click', async () => {
+            if (window.magic18Audio && window.magic18Audio.audioContext &&
+                window.magic18Audio.audioContext.state === 'suspended') {
+                await window.magic18Audio.audioContext.resume();
+                window.magic18Audio.log('🎵 Audio context resumed - ready for playback');
+            }
+        }, { once: true });
+    </script>
+</body>
+
+</html>

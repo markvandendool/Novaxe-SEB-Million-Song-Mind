@@ -6,6 +6,10 @@
             "destination": "/cubes/index.html"
         },
         {
+            "source": "/cubes-staging",
+            "destination": "/cubes-staging/index.html"
+        },
+        {
             "source": "/MSM",
             "destination": "/MSM/index.html"
         },

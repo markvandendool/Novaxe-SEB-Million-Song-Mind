@@ -3,6 +3,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { CookieModule } from 'ngx-cookie';
 
 import abcjs from 'abcjs';
@@ -107,8 +108,6 @@ import { MidiControlSelectorComponent } from './components/midi-control-selector
 import { StatsComponent } from './pages/stats/stats.component';
 import { DonateComponent } from './components/donate/donate.component';
 import { ChordstripComponent } from './components/chordstrip/chordstrip.component';
-import { CubesComponent } from './components/cubes/cubes.component';
-import { CubesDemoComponent } from './components/cubes-demo/cubes-demo.component';
 import { StoreComponent } from './pages/store/store.component';
 import { MidiChordDisplayComponent } from './components/midi-chord-display/midi-chord-display.component';
 import { PremiumAuthComponent } from './components/premium-auth/premium-auth.component';
@@ -123,7 +122,12 @@ import { TabIntegrationService } from './components/modern-tabs/tab-integration.
 
 // Simple Tab System Imports  
 import { SimpleTabService } from './services/simple-tab/simple-tab.service';
+
+// Chord Chart System Imports
+import { ChordChartMagic18Component } from './components/chord-chart-magic18/chord-chart-magic18.component';
+import { ChordDemoComponent } from './components/chord-demo/chord-demo.component';
 import { SimpleWorkingTabsComponent } from './components/simple-working-tabs/simple-working-tabs.component';
+import { InstrumentModelService } from './services/instrument-model/instrument-model.service';
 
 
 
@@ -184,19 +188,20 @@ import { SimpleWorkingTabsComponent } from './components/simple-working-tabs/sim
     StatsComponent,
     DonateComponent,
     ChordstripComponent,
-    CubesComponent,
-    CubesDemoComponent,
     StoreComponent,
     MidiChordDisplayComponent,
     PremiumAuthComponent,
     TestSimpleComponent,
     ModernTabsComponent,
     SimpleWorkingTabsComponent,
+    ChordChartMagic18Component,
+    ChordDemoComponent,
   ],
   bootstrap: [AppComponent], imports: [BrowserModule,
     CommonModule,
     BrowserAnimationsModule,
     AppRoutingModule,
+    RouterModule,
     FormsModule,
     CookieModule.forRoot()], providers: [
       Songmodel,
@@ -227,6 +232,7 @@ import { SimpleWorkingTabsComponent } from './components/simple-working-tabs/sim
       AudioManagerService,
       TabIntegrationService,
       SimpleTabService,
+      InstrumentModelService,
       provideHttpClient(withInterceptorsFromDi())
     ]
 })

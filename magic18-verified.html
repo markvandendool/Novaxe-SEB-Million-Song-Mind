@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Magic 18 - Step 1: Two SVG Spread</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .spread {
+            display: flex;
+            gap: 20px;
+            max-width: 100%;
+            justify-content: center;
+        }
+
+        .page {
+            flex: 1;
+            max-width: 45%;
+            border: 2px solid #333;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .page h2 {
+            text-align: center;
+            margin: 0 0 10px 0;
+            padding: 10px;
+            background: #333;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .left h2 {
+            background: #2196F3;
+        }
+
+        .right h2 {
+            background: #FF5722;
+        }
+
+        .svg-container {
+            border: 1px solid #ddd;
+            background: white;
+        }
+
+        object,
+        embed,
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🎸 Magic 18 - Step 1: Two Page Spread</h1>
+        <p>Your actual SVG files side by side</p>
+    </div>
+
+    <div class="spread">
+        <div class="page left">
+            <h2>Left Page - C Major</h2>
+            <div class="svg-container">
+                <object data="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml">
+                    <embed src="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml">
+                    <img src="Charts%20Magic18%20SVG_C%20Left.svg" alt="Magic 18 C Left">
+                    </embed>
+                </object>
+            </div>
+        </div>
+
+        <div class="page right">
+            <h2>Right Page - C Minor</h2>
+            <div class="svg-container">
+                <object data="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml">
+                    <embed src="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml">
+                    <img src="Charts%20Magic18%20SVG_C%20Right.svg" alt="Magic 18 C Right">
+                    </embed>
+                </object>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Log to console for debugging
+        console.log('Magic 18 Step 1 loaded');
+
+        // Check if SVG files are loading
+        setTimeout(() => {
+            const objects = document.querySelectorAll('object');
+            objects.forEach((obj, i) => {
+                console.log(`Object ${i + 1} loaded:`, obj.data);
+            });
+        }, 2000);
+    </script>
+</body>
+
+</html>

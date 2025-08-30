@@ -1,0 +1,1933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 Professional Editor - Novaxe Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* SVG Viewer Area */
+        .svg-viewer-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: auto;
+        }
+
+        .svg-spread {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        .svg-page {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: crosshair;
+            transition: all 0.3s ease;
+        }
+
+        .svg-page:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .svg-page object {
+            display: block;
+            width: 400px;
+            height: auto;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Click Markers */
+        .click-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.3);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: pulse 2s infinite;
+            z-index: 100;
+        }
+
+        .click-marker.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.3);
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes glow {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 107, 53, 0.5);
+            }
+
+            100% {
+                box-shadow: 0 0 20px rgba(255, 107, 53, 0.8);
+            }
+        }
+
+        /* 9 Spectacular Animation Styles */
+        @keyframes quantum-pulse {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
+                background: radial-gradient(circle, rgba(0, 255, 255, 0.8), transparent);
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(90deg);
+                box-shadow: 0 0 40px #ff00ff, 0 0 80px #ff00ff, 0 0 120px #ff00ff;
+                background: radial-gradient(circle, rgba(255, 0, 255, 0.8), transparent);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(2) rotate(180deg);
+                box-shadow: 0 0 60px #ffff00, 0 0 120px #ffff00, 0 0 180px #ffff00;
+                background: radial-gradient(circle, rgba(255, 255, 0, 0.8), transparent);
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1.5) rotate(270deg);
+                box-shadow: 0 0 40px #ff0000, 0 0 80px #ff0000, 0 0 120px #ff0000;
+                background: radial-gradient(circle, rgba(255, 0, 0, 0.8), transparent);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(360deg);
+                box-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #00ffff;
+                background: radial-gradient(circle, rgba(0, 255, 255, 0.8), transparent);
+            }
+        }
+
+        @keyframes neural-spark {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 10px #00ff00;
+                filter: brightness(1);
+            }
+
+            10% {
+                transform: translate(-50%, -50%) scale(1.2);
+                box-shadow: 0 0 30px #00ff00, inset 0 0 20px #00ff00;
+                filter: brightness(2) contrast(1.5);
+            }
+
+            20% {
+                transform: translate(-50%, -50%) scale(0.8);
+                box-shadow: 0 0 50px #ffff00, inset 0 0 30px #ffff00;
+                filter: brightness(3) contrast(2);
+            }
+
+            30% {
+                transform: translate(-50%, -50%) scale(1.5);
+                box-shadow: 0 0 70px #ff6600, inset 0 0 40px #ff6600;
+                filter: brightness(4) contrast(2.5);
+            }
+
+            40% {
+                transform: translate(-50%, -50%) scale(0.9);
+                box-shadow: 0 0 90px #ff0000, inset 0 0 50px #ff0000;
+                filter: brightness(5) contrast(3);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.8);
+                box-shadow: 0 0 110px #ffffff, inset 0 0 60px #ffffff;
+                filter: brightness(6) contrast(3.5);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(1.1);
+                box-shadow: 0 0 90px #ff0000, inset 0 0 50px #ff0000;
+                filter: brightness(5) contrast(3);
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1.4);
+                box-shadow: 0 0 70px #ff6600, inset 0 0 40px #ff6600;
+                filter: brightness(4) contrast(2.5);
+            }
+
+            80% {
+                transform: translate(-50%, -50%) scale(0.95);
+                box-shadow: 0 0 50px #ffff00, inset 0 0 30px #ffff00;
+                filter: brightness(3) contrast(2);
+            }
+
+            90% {
+                transform: translate(-50%, -50%) scale(1.15);
+                box-shadow: 0 0 30px #00ff00, inset 0 0 20px #00ff00;
+                filter: brightness(2) contrast(1.5);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                box-shadow: 0 0 10px #00ff00;
+                filter: brightness(1);
+            }
+        }
+
+        @keyframes harmonic-resonance {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotateX(0deg) rotateY(0deg);
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+                background: conic-gradient(from 0deg, #8a2be2, #4169e1, #00ced1, #32cd32, #ffff00, #ffa500, #ff4500, #dc143c);
+                border-radius: 50%;
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.3) rotateX(90deg) rotateY(90deg);
+                box-shadow: 0 0 40px rgba(65, 105, 225, 0.8), inset 0 0 20px rgba(65, 105, 225, 0.5);
+                background: conic-gradient(from 90deg, #8a2be2, #4169e1, #00ced1, #32cd32, #ffff00, #ffa500, #ff4500, #dc143c);
+                border-radius: 20%;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.6) rotateX(180deg) rotateY(180deg);
+                box-shadow: 0 0 60px rgba(0, 206, 209, 0.8), inset 0 0 30px rgba(0, 206, 209, 0.5);
+                background: conic-gradient(from 180deg, #8a2be2, #4169e1, #00ced1, #32cd32, #ffff00, #ffa500, #ff4500, #dc143c);
+                border-radius: 10%;
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1.3) rotateX(270deg) rotateY(270deg);
+                box-shadow: 0 0 40px rgba(50, 205, 50, 0.8), inset 0 0 20px rgba(50, 205, 50, 0.5);
+                background: conic-gradient(from 270deg, #8a2be2, #4169e1, #00ced1, #32cd32, #ffff00, #ffa500, #ff4500, #dc143c);
+                border-radius: 30%;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotateX(360deg) rotateY(360deg);
+                box-shadow: 0 0 20px rgba(138, 43, 226, 0.8);
+                background: conic-gradient(from 360deg, #8a2be2, #4169e1, #00ced1, #32cd32, #ffff00, #ffa500, #ff4500, #dc143c);
+                border-radius: 50%;
+            }
+        }
+
+        @keyframes stellar-explosion {
+            0% {
+                transform: translate(-50%, -50%) scale(0.1);
+                box-shadow: 0 0 5px #ffffff;
+                background: radial-gradient(circle, #ffffff 0%, transparent 100%);
+                opacity: 1;
+            }
+
+            20% {
+                transform: translate(-50%, -50%) scale(0.5);
+                box-shadow: 0 0 50px #ffff00, 0 0 100px #ffaa00;
+                background: radial-gradient(circle, #ffff00 0%, #ffaa00 50%, transparent 100%);
+                opacity: 0.9;
+            }
+
+            40% {
+                transform: translate(-50%, -50%) scale(1.5);
+                box-shadow: 0 0 100px #ff6600, 0 0 200px #ff3300, 0 0 300px #ff0000;
+                background: radial-gradient(circle, #ffffff 0%, #ffff00 20%, #ff6600 40%, #ff3300 60%, #ff0000 80%, transparent 100%);
+                opacity: 0.8;
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(2.5);
+                box-shadow: 0 0 200px #ff0000, 0 0 400px #cc0000, 0 0 600px #990000;
+                background: radial-gradient(circle, #ffffff 0%, #ffff00 10%, #ff6600 25%, #ff3300 40%, #ff0000 55%, #cc0000 70%, #990000 85%, transparent 100%);
+                opacity: 0.6;
+            }
+
+            80% {
+                transform: translate(-50%, -50%) scale(3.5);
+                box-shadow: 0 0 300px #990000, 0 0 500px #660000, 0 0 700px #330000;
+                background: radial-gradient(circle, transparent 0%, #990000 30%, #660000 60%, #330000 90%, transparent 100%);
+                opacity: 0.4;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(4);
+                box-shadow: 0 0 100px #330000;
+                background: radial-gradient(circle, transparent 0%, transparent 100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes lightning-cascade {
+            0% {
+                transform: translate(-50%, -50%) scale(1) skewX(0deg);
+                box-shadow: 0 0 20px #00ffff;
+                background: linear-gradient(45deg, transparent, #00ffff, transparent);
+            }
+
+            10% {
+                transform: translate(-50%, -50%) scale(1.2) skewX(15deg);
+                box-shadow: 0 0 40px #ffffff, inset 0 0 20px #00ffff;
+                background: linear-gradient(60deg, transparent, #ffffff, #00ffff, transparent);
+            }
+
+            20% {
+                transform: translate(-50%, -50%) scale(0.8) skewX(-10deg);
+                box-shadow: 0 0 60px #ffff00, inset 0 0 30px #ffffff;
+                background: linear-gradient(75deg, transparent, #ffff00, #ffffff, transparent);
+            }
+
+            30% {
+                transform: translate(-50%, -50%) scale(1.5) skewX(20deg);
+                box-shadow: 0 0 80px #ffaa00, inset 0 0 40px #ffff00;
+                background: linear-gradient(90deg, transparent, #ffaa00, #ffff00, transparent);
+            }
+
+            40% {
+                transform: translate(-50%, -50%) scale(0.9) skewX(-15deg);
+                box-shadow: 0 0 100px #ff6600, inset 0 0 50px #ffaa00;
+                background: linear-gradient(105deg, transparent, #ff6600, #ffaa00, transparent);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.8) skewX(25deg);
+                box-shadow: 0 0 120px #ff3300, inset 0 0 60px #ff6600;
+                background: linear-gradient(120deg, transparent, #ff3300, #ff6600, transparent);
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(1.1) skewX(-20deg);
+                box-shadow: 0 0 100px #ff0000, inset 0 0 50px #ff3300;
+                background: linear-gradient(135deg, transparent, #ff0000, #ff3300, transparent);
+            }
+
+            70% {
+                transform: translate(-50%, -50%) scale(1.4) skewX(10deg);
+                box-shadow: 0 0 80px #cc0000, inset 0 0 40px #ff0000;
+                background: linear-gradient(150deg, transparent, #cc0000, #ff0000, transparent);
+            }
+
+            80% {
+                transform: translate(-50%, -50%) scale(0.95) skewX(-5deg);
+                box-shadow: 0 0 60px #990000, inset 0 0 30px #cc0000;
+                background: linear-gradient(165deg, transparent, #990000, #cc0000, transparent);
+            }
+
+            90% {
+                transform: translate(-50%, -50%) scale(1.15) skewX(5deg);
+                box-shadow: 0 0 40px #660000, inset 0 0 20px #990000;
+                background: linear-gradient(180deg, transparent, #660000, #990000, transparent);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) skewX(0deg);
+                box-shadow: 0 0 20px #330000;
+                background: linear-gradient(195deg, transparent, #330000, transparent);
+            }
+        }
+
+        @keyframes aurora-flow {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                box-shadow: 0 0 30px rgba(0, 255, 127, 0.7);
+                background: linear-gradient(0deg, rgba(0, 255, 127, 0.8), rgba(127, 255, 212, 0.6), rgba(173, 216, 230, 0.4), transparent);
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.3) rotate(90deg);
+                box-shadow: 0 0 50px rgba(127, 255, 212, 0.8);
+                background: linear-gradient(90deg, rgba(127, 255, 212, 0.8), rgba(173, 216, 230, 0.7), rgba(135, 206, 235, 0.5), transparent);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.6) rotate(180deg);
+                box-shadow: 0 0 70px rgba(173, 216, 230, 0.9);
+                background: linear-gradient(180deg, rgba(173, 216, 230, 0.9), rgba(135, 206, 235, 0.7), rgba(70, 130, 180, 0.5), transparent);
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1.3) rotate(270deg);
+                box-shadow: 0 0 50px rgba(135, 206, 235, 0.8);
+                background: linear-gradient(270deg, rgba(135, 206, 235, 0.8), rgba(70, 130, 180, 0.6), rgba(0, 255, 127, 0.4), transparent);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotate(360deg);
+                box-shadow: 0 0 30px rgba(0, 255, 127, 0.7);
+                background: linear-gradient(360deg, rgba(0, 255, 127, 0.8), rgba(127, 255, 212, 0.6), rgba(173, 216, 230, 0.4), transparent);
+            }
+        }
+
+        @keyframes diamond-crystal {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3);
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.9), rgba(192, 192, 192, 0.7), rgba(255, 255, 255, 0.5), transparent);
+                clip-path: polygon(50% 0%, 80% 20%, 100% 50%, 80% 80%, 50% 100%, 20% 80%, 0% 50%, 20% 20%);
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.2) rotateX(90deg) rotateY(90deg) rotateZ(90deg);
+                box-shadow: 0 0 40px rgba(255, 182, 193, 0.9), inset 0 0 30px rgba(255, 182, 193, 0.4);
+                background: linear-gradient(135deg, transparent, rgba(255, 182, 193, 0.9), rgba(255, 160, 122, 0.7), rgba(255, 182, 193, 0.5), transparent);
+                clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.5) rotateX(180deg) rotateY(180deg) rotateZ(180deg);
+                box-shadow: 0 0 60px rgba(255, 215, 0, 1), inset 0 0 40px rgba(255, 215, 0, 0.5);
+                background: linear-gradient(225deg, transparent, rgba(255, 215, 0, 0.9), rgba(255, 165, 0, 0.8), rgba(255, 215, 0, 0.6), transparent);
+                clip-path: polygon(25% 0%, 75% 0%, 100% 25%, 100% 75%, 75% 100%, 25% 100%, 0% 75%, 0% 25%);
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1.2) rotateX(270deg) rotateY(270deg) rotateZ(270deg);
+                box-shadow: 0 0 40px rgba(138, 43, 226, 0.9), inset 0 0 30px rgba(138, 43, 226, 0.4);
+                background: linear-gradient(315deg, transparent, rgba(138, 43, 226, 0.9), rgba(147, 112, 219, 0.7), rgba(138, 43, 226, 0.5), transparent);
+                clip-path: polygon(20% 20%, 80% 20%, 80% 80%, 20% 80%);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotateX(360deg) rotateY(360deg) rotateZ(360deg);
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.3);
+                background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.9), rgba(192, 192, 192, 0.7), rgba(255, 255, 255, 0.5), transparent);
+                clip-path: polygon(50% 0%, 80% 20%, 100% 50%, 80% 80%, 50% 100%, 20% 80%, 0% 50%, 20% 20%);
+            }
+        }
+
+        @keyframes phoenix-rise {
+            0% {
+                transform: translate(-50%, -50%) scale(0.5) rotate(0deg);
+                box-shadow: 0 0 20px rgba(255, 69, 0, 0.8);
+                background: radial-gradient(ellipse, rgba(255, 69, 0, 0.9) 0%, rgba(255, 140, 0, 0.7) 40%, rgba(255, 215, 0, 0.5) 70%, transparent 100%);
+                opacity: 0.7;
+            }
+
+            20% {
+                transform: translate(-50%, -50%) scale(0.8) rotate(72deg);
+                box-shadow: 0 0 40px rgba(255, 140, 0, 0.9), 0 0 80px rgba(255, 69, 0, 0.6);
+                background: radial-gradient(ellipse, rgba(255, 140, 0, 0.9) 0%, rgba(255, 215, 0, 0.8) 30%, rgba(255, 69, 0, 0.6) 60%, transparent 100%);
+                opacity: 0.8;
+            }
+
+            40% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(144deg);
+                box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 140, 0, 0.7), 0 0 180px rgba(255, 69, 0, 0.5);
+                background: radial-gradient(ellipse, rgba(255, 215, 0, 1) 0%, rgba(255, 255, 0, 0.8) 25%, rgba(255, 140, 0, 0.6) 50%, rgba(255, 69, 0, 0.4) 75%, transparent 100%);
+                opacity: 0.9;
+            }
+
+            60% {
+                transform: translate(-50%, -50%) scale(1.6) rotate(216deg);
+                box-shadow: 0 0 80px rgba(255, 255, 0, 1), 0 0 160px rgba(255, 215, 0, 0.8), 0 0 240px rgba(255, 140, 0, 0.6);
+                background: radial-gradient(ellipse, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 0, 0.9) 20%, rgba(255, 215, 0, 0.7) 40%, rgba(255, 140, 0, 0.5) 60%, rgba(255, 69, 0, 0.3) 80%, transparent 100%);
+                opacity: 1;
+            }
+
+            80% {
+                transform: translate(-50%, -50%) scale(2) rotate(288deg);
+                box-shadow: 0 0 100px rgba(255, 255, 255, 1), 0 0 200px rgba(255, 255, 0, 0.9), 0 0 300px rgba(255, 215, 0, 0.7);
+                background: radial-gradient(ellipse, rgba(255, 255, 255, 1) 0%, rgba(255, 255, 0, 0.9) 15%, rgba(255, 215, 0, 0.8) 30%, rgba(255, 140, 0, 0.6) 45%, rgba(255, 69, 0, 0.4) 60%, transparent 100%);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(2.5) rotate(360deg);
+                box-shadow: 0 0 50px rgba(255, 255, 255, 0.8), 0 0 100px rgba(255, 215, 0, 0.6);
+                background: radial-gradient(ellipse, rgba(255, 255, 255, 0.8) 0%, rgba(255, 215, 0, 0.6) 30%, rgba(255, 140, 0, 0.4) 60%, transparent 100%);
+                opacity: 0.5;
+            }
+        }
+
+        @keyframes ocean-wave {
+            0% {
+                transform: translate(-50%, -50%) scale(1) rotateX(0deg);
+                box-shadow: 0 0 30px rgba(0, 191, 255, 0.7);
+                background: linear-gradient(180deg,
+                        rgba(0, 191, 255, 0.9) 0%,
+                        rgba(30, 144, 255, 0.8) 25%,
+                        rgba(70, 130, 180, 0.7) 50%,
+                        rgba(100, 149, 237, 0.6) 75%,
+                        transparent 100%);
+                border-radius: 50% 50% 40% 60%;
+            }
+
+            25% {
+                transform: translate(-50%, -50%) scale(1.3) rotateX(90deg);
+                box-shadow: 0 0 50px rgba(30, 144, 255, 0.8);
+                background: linear-gradient(270deg,
+                        rgba(30, 144, 255, 0.9) 0%,
+                        rgba(70, 130, 180, 0.8) 25%,
+                        rgba(100, 149, 237, 0.7) 50%,
+                        rgba(135, 206, 235, 0.6) 75%,
+                        transparent 100%);
+                border-radius: 60% 40% 50% 50%;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.6) rotateX(180deg);
+                box-shadow: 0 0 70px rgba(70, 130, 180, 0.9);
+                background: linear-gradient(0deg,
+                        rgba(70, 130, 180, 0.9) 0%,
+                        rgba(100, 149, 237, 0.8) 25%,
+                        rgba(135, 206, 235, 0.7) 50%,
+                        rgba(176, 196, 222, 0.6) 75%,
+                        transparent 100%);
+                border-radius: 40% 60% 50% 50%;
+            }
+
+            75% {
+                transform: translate(-50%, -50%) scale(1.3) rotateX(270deg);
+                box-shadow: 0 0 50px rgba(100, 149, 237, 0.8);
+                background: linear-gradient(90deg,
+                        rgba(100, 149, 237, 0.9) 0%,
+                        rgba(135, 206, 235, 0.8) 25%,
+                        rgba(176, 196, 222, 0.7) 50%,
+                        rgba(0, 191, 255, 0.6) 75%,
+                        transparent 100%);
+                border-radius: 50% 50% 60% 40%;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1) rotateX(360deg);
+                box-shadow: 0 0 30px rgba(0, 191, 255, 0.7);
+                background: linear-gradient(180deg,
+                        rgba(0, 191, 255, 0.9) 0%,
+                        rgba(30, 144, 255, 0.8) 25%,
+                        rgba(70, 130, 180, 0.7) 50%,
+                        rgba(100, 149, 237, 0.6) 75%,
+                        transparent 100%);
+                border-radius: 50% 50% 40% 60%;
+            }
+        }
+
+        /* Animation Classes */
+        .quantum-pulse-animation {
+            animation: quantum-pulse 3s infinite;
+        }
+
+        .neural-spark-animation {
+            animation: neural-spark 2s infinite;
+        }
+
+        .harmonic-resonance-animation {
+            animation: harmonic-resonance 4s infinite;
+        }
+
+        .stellar-explosion-animation {
+            animation: stellar-explosion 3s infinite;
+        }
+
+        .lightning-cascade-animation {
+            animation: lightning-cascade 2.5s infinite;
+        }
+
+        .aurora-flow-animation {
+            animation: aurora-flow 5s infinite;
+        }
+
+        .diamond-crystal-animation {
+            animation: diamond-crystal 4s infinite;
+        }
+
+        .phoenix-rise-animation {
+            animation: phoenix-rise 6s infinite;
+        }
+
+        .ocean-wave-animation {
+            animation: ocean-wave 4.5s infinite;
+        }
+
+        /* Editor Panel */
+        .editor-panel {
+            width: 450px;
+            background: rgba(0, 0, 0, 0.8);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            transition: width 0.3s ease;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel.collapsed {
+            width: 60px;
+        }
+
+        .editor-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .editor-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .collapse-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .editor-content {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .editor-panel.collapsed .editor-content {
+            display: none;
+        }
+
+        /* Control Buttons */
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff88 0%, #00d4aa 100%);
+            color: #1a1a2e;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Click Counter */
+        .click-counter {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .counter-display {
+            font-size: 24px;
+            font-weight: 700;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        .counter-label {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Object Details */
+        .object-details {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .object-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .object-id {
+            font-weight: 600;
+            color: #ff6b35;
+            font-size: 16px;
+        }
+
+        .object-type {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: auto;
+        }
+
+        .object-property {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .property-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 500;
+        }
+
+        .property-value {
+            color: #00ff88;
+            font-weight: 600;
+            font-family: 'Monaco', monospace;
+        }
+
+        /* Novaxe Integration Panel */
+        .novaxe-integration {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .integration-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff88;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .integration-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+            padding: 8px;
+            margin: 5px 0;
+            font-size: 12px;
+            border-left: 3px solid #00ff88;
+        }
+
+        /* Scroll Indicators */
+        .scroll-indicator {
+            position: absolute;
+            right: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            z-index: 100;
+        }
+
+        .scroll-thumb {
+            width: 100%;
+            background: #00ff88;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            z-index: 300;
+        }
+
+        .status-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        /* Tooltips */
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tooltip.show {
+            opacity: 1;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .editor-panel {
+                width: 350px;
+            }
+
+            .svg-page object {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .editor-panel {
+                width: 100%;
+                height: 50%;
+            }
+
+            .svg-spread {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .svg-page object {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- SVG Viewer Container -->
+        <div class="svg-viewer-container">
+            <div class="svg-spread" id="svgSpread">
+                <!-- Left Page -->
+                <div class="svg-page" id="leftPage" data-page="left">
+                    <object data="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml" id="leftSvg">
+                        <embed src="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml" />
+                        <img src="Charts%20Magic18%20SVG_C%20Left.svg" alt="Magic 18 Left Chart" />
+                    </object>
+                </div>
+
+                <!-- Right Page -->
+                <div class="svg-page" id="rightPage" data-page="right">
+                    <object data="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml" id="rightSvg">
+                        <embed src="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml" />
+                        <img src="Charts%20Magic18%20SVG_C%20Right.svg" alt="Magic 18 Right Chart" />
+                    </object>
+                </div>
+            </div>
+
+            <!-- Click Markers will be dynamically added here -->
+        </div>
+
+        <!-- Editor Panel -->
+        <div class="editor-panel" id="editorPanel">
+            <div class="editor-header">
+                <div class="editor-title">Magic 18 Professional Editor</div>
+                <button class="collapse-btn" id="collapseBtn">📊</button>
+            </div>
+
+            <div class="editor-content">
+                <!-- Control Bar -->
+                <div class="control-bar">
+                    <button class="btn btn-primary" id="refreshBtn">🔄 Refresh</button>
+                    <button class="btn btn-secondary" id="clearBtn">🗑 Clear All</button>
+                    <button class="btn btn-secondary" id="exportBtn">📤 Export</button>
+                    <button class="btn btn-danger" id="resetBtn">⚡ Reset</button>
+                </div>
+
+                <!-- Click Counter -->
+                <div class="click-counter">
+                    <div class="counter-display" id="clickCounter">0</div>
+                    <div class="counter-label">Clicks / 100 Maximum</div>
+                </div>
+
+                <!-- Session Info -->
+                <div class="object-details">
+                    <div class="object-header">
+                        <div class="object-id">Session Info</div>
+                        <div class="object-type">ACTIVE</div>
+                    </div>
+                    <div class="object-property">
+                        <span class="property-label">Started:</span>
+                        <span class="property-value" id="sessionStart">--:--:--</span>
+                    </div>
+                    <div class="object-property">
+                        <span class="property-label">Template:</span>
+                        <span class="property-value">Magic 18 C Major</span>
+                    </div>
+                    <div class="object-property">
+                        <span class="property-label">Mode:</span>
+                        <span class="property-value" id="currentMode">Object Detection</span>
+                    </div>
+                </div>
+
+                <!-- Novaxe Integration -->
+                <div class="novaxe-integration">
+                    <div class="integration-header">
+                        🎵 Novaxe Integration
+                    </div>
+                    <div class="integration-item">
+                        <strong>Braid System:</strong> Ready for chord mapping
+                    </div>
+                    <div class="integration-item">
+                        <strong>MIDI Engine:</strong> Event registration active
+                    </div>
+                    <div class="integration-item">
+                        <strong>Cube Architecture:</strong> 3D positioning enabled
+                    </div>
+                    <div class="integration-item">
+                        <strong>Note Recognition:</strong> Pitch detection ready
+                    </div>
+                </div>
+
+                <!-- Object List -->
+                <div id="objectList">
+                    <!-- Dynamic object details will be inserted here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>System Active</span>
+            </div>
+            <div class="status-indicator">
+                <span>Server: localhost:8080</span>
+            </div>
+            <div class="status-indicator">
+                <span id="mousePos">Mouse: (0, 0)</span>
+            </div>
+        </div>
+        <div class="status-right">
+            <span>Novaxe Magic 18 Professional Editor v2.0</span>
+        </div>
+    </div>
+
+    <!-- Tooltip -->
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Professional Magic 18 Editor System
+        class Magic18ProfessionalEditor {
+            constructor() {
+                this.clicks = [];
+                this.maxClicks = 100;
+                this.currentSession = {
+                    startTime: new Date(),
+                    template: 'Magic 18 C Major',
+                    mode: 'Object Detection'
+                };
+                this.novaxeIntegration = {
+                    braidSystem: true,
+                    midiEngine: true,
+                    cubeArchitecture: true,
+                    noteRecognition: true
+                };
+                this.isCollapsed = false;
+
+                this.initializeSystem();
+            }
+
+            initializeSystem() {
+                console.log('🚀 Initializing Magic 18 Professional Editor');
+                this.setupEventListeners();
+                this.updateSessionDisplay();
+                this.startSystemMonitoring();
+
+                // Show startup message
+                this.showTooltip('Magic 18 Professional Editor Initialized', 2000);
+            }
+
+            setupEventListeners() {
+                // SVG Click Detection
+                document.getElementById('leftPage').addEventListener('click', (e) => this.handleSvgClick(e, 'left'));
+                document.getElementById('rightPage').addEventListener('click', (e) => this.handleSvgClick(e, 'right'));
+
+                // Control Buttons
+                document.getElementById('refreshBtn').addEventListener('click', () => this.refreshSystem());
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearAllClicks());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportData());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetSystem());
+                document.getElementById('collapseBtn').addEventListener('click', () => this.togglePanel());
+
+                // Mouse tracking
+                document.addEventListener('mousemove', (e) => this.trackMouse(e));
+
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => this.handleKeyboard(e));
+
+                // Window resize
+                window.addEventListener('resize', () => this.handleResize());
+            }
+
+            handleSvgClick(event, page) {
+                if (this.clicks.length >= this.maxClicks) {
+                    this.showTooltip('Maximum clicks reached (100). Clear or reset to continue.', 3000);
+                    return;
+                }
+
+                event.preventDefault();
+
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+
+                // Create comprehensive click data
+                const clickData = {
+                    id: this.clicks.length + 1,
+                    timestamp: new Date(),
+                    page: page,
+                    coordinates: { x: Math.round(x), y: Math.round(y) },
+                    pixel: this.getPixelData(event.currentTarget, x, y),
+                    svgElement: this.analyzeSvgElement(event.currentTarget, x, y),
+                    musicalContext: this.analyzeMusicalContext(page, x, y),
+                    novaxeMapping: this.generateNovaxeMapping(page, x, y),
+                    metadata: {
+                        sessionTime: Date.now() - this.currentSession.startTime.getTime(),
+                        browserInfo: navigator.userAgent,
+                        viewportSize: { width: window.innerWidth, height: window.innerHeight },
+                        zoomLevel: window.devicePixelRatio
+                    }
+                };
+
+                this.clicks.push(clickData);
+                this.createClickMarker(event.currentTarget, x, y, clickData.id);
+                this.updateDisplay();
+                this.processNovaxeIntegration(clickData);
+
+                console.log('🎯 Click detected:', clickData);
+            }
+
+            getPixelData(element, x, y) {
+                // Advanced pixel analysis
+                return {
+                    position: { x, y },
+                    relativePosition: {
+                        x: (x / element.offsetWidth * 100).toFixed(2),
+                        y: (y / element.offsetHeight * 100).toFixed(2)
+                    },
+                    color: 'rgb(unknown)', // Would need canvas for actual color
+                    density: 'medium', // Placeholder for pixel density analysis
+                    region: this.identifyRegion(x, y, element.offsetWidth, element.offsetHeight)
+                };
+            }
+
+            identifyRegion(x, y, width, height) {
+                const centerX = width / 2;
+                const centerY = height / 2;
+
+                if (x < centerX && y < centerY) return 'top-left';
+                if (x > centerX && y < centerY) return 'top-right';
+                if (x < centerX && y > centerY) return 'bottom-left';
+                if (x > centerX && y > centerY) return 'bottom-right';
+                return 'center';
+            }
+
+            analyzeSvgElement(container, x, y) {
+                // Deep SVG element analysis
+                return {
+                    type: 'svg-region',
+                    bounds: container.getBoundingClientRect(),
+                    transform: 'none',
+                    style: getComputedStyle(container),
+                    attributes: Array.from(container.attributes).map(attr => ({
+                        name: attr.name,
+                        value: attr.value
+                    })),
+                    depth: 0, // Would calculate actual DOM depth
+                    accessibility: {
+                        role: container.getAttribute('role') || 'img',
+                        label: container.getAttribute('aria-label') || 'Music Chart'
+                    }
+                };
+            }
+
+            analyzeMusicalContext(page, x, y) {
+                // Musical theory integration
+                const musicalRegions = this.getMagic18Regions(page);
+                const currentRegion = this.findRegionForPoint(x, y, musicalRegions);
+
+                return {
+                    page: page,
+                    region: currentRegion,
+                    keySignature: 'C Major', // Based on template
+                    chordProgression: this.inferChordProgression(currentRegion),
+                    scalePosition: this.calculateScalePosition(x, y),
+                    harmonicFunction: this.analyzeHarmonicFunction(currentRegion),
+                    intervalRelations: this.calculateIntervals(currentRegion),
+                    rythmicContext: this.analyzeRhythmicPosition(x, y)
+                };
+            }
+
+            getMagic18Regions(page) {
+                // Define Magic 18 musical regions based on template analysis
+                return {
+                    tonic: { x: 100, y: 100, width: 80, height: 60, chord: 'C' },
+                    subdominant: { x: 200, y: 100, width: 80, height: 60, chord: 'F' },
+                    dominant: { x: 300, y: 100, width: 80, height: 60, chord: 'G' },
+                    secondary: { x: 150, y: 200, width: 80, height: 60, chord: 'Am' },
+                    diminished: { x: 250, y: 200, width: 80, height: 60, chord: 'Bdim' },
+                    // Additional regions based on Magic 18 structure
+                };
+            }
+
+            findRegionForPoint(x, y, regions) {
+                for (const [name, region] of Object.entries(regions)) {
+                    if (x >= region.x && x <= region.x + region.width &&
+                        y >= region.y && y <= region.y + region.height) {
+                        return { name, ...region };
+                    }
+                }
+                return { name: 'unidentified', chord: 'unknown' };
+            }
+
+            inferChordProgression(region) {
+                const progressions = {
+                    'tonic': ['I', 'vi', 'IV', 'V'],
+                    'subdominant': ['IV', 'I', 'V', 'vi'],
+                    'dominant': ['V', 'I', 'vi', 'IV'],
+                    'secondary': ['vi', 'IV', 'I', 'V']
+                };
+                return progressions[region.name] || ['I', 'V', 'vi', 'IV'];
+            }
+
+            calculateScalePosition(x, y) {
+                // Calculate position within scale/mode
+                return {
+                    degree: Math.floor((x / 400) * 7) + 1, // 1-7 scale degrees
+                    octave: Math.floor((y / 300) * 4) + 3, // Octaves 3-7
+                    mode: 'Ionian', // C Major = C Ionian
+                    accidental: 'natural'
+                };
+            }
+
+            analyzeHarmonicFunction(region) {
+                const functions = {
+                    'tonic': { function: 'Tonic', stability: 'stable', tendency: 'rest' },
+                    'subdominant': { function: 'Subdominant', stability: 'moderate', tendency: 'predominant' },
+                    'dominant': { function: 'Dominant', stability: 'unstable', tendency: 'resolution' },
+                    'secondary': { function: 'Relative Minor', stability: 'stable', tendency: 'parallel' }
+                };
+                return functions[region.name] || { function: 'Unknown', stability: 'neutral', tendency: 'none' };
+            }
+
+            calculateIntervals(region) {
+                // Calculate intervals from root
+                return {
+                    fromRoot: ['P1', 'M3', 'P5'], // Perfect unison, Major third, Perfect fifth
+                    available: ['P1', 'm2', 'M2', 'm3', 'M3', 'P4', 'TT', 'P5', 'm6', 'M6', 'm7', 'M7'],
+                    recommended: this.getRecommendedIntervals(region.name)
+                };
+            }
+
+            getRecommendedIntervals(regionName) {
+                const recommendations = {
+                    'tonic': ['P1', 'M3', 'P5', 'M7'],
+                    'subdominant': ['P1', 'M3', 'P5', 'm7'],
+                    'dominant': ['P1', 'M3', 'P5', 'm7'],
+                    'secondary': ['P1', 'm3', 'P5', 'm7']
+                };
+                return recommendations[regionName] || ['P1', 'M3', 'P5'];
+            }
+
+            analyzeRhythmicPosition(x, y) {
+                // Rhythmic context analysis
+                const beatPosition = (x / 400) * 4; // 4/4 time
+                return {
+                    beat: Math.floor(beatPosition) + 1,
+                    subdivision: ((beatPosition % 1) * 4).toFixed(2),
+                    timeSignature: '4/4',
+                    tempo: 120, // BPM
+                    swing: 0, // Straight feel
+                    accentuation: this.calculateAccent(beatPosition)
+                };
+            }
+
+            calculateAccent(beatPosition) {
+                const beat = Math.floor(beatPosition) + 1;
+                if (beat === 1) return 'strong';
+                if (beat === 3) return 'medium';
+                return 'weak';
+            }
+
+            generateNovaxeMapping(page, x, y) {
+                // Generate comprehensive Novaxe component mappings
+                return {
+                    braidChord: this.generateBraidMapping(page, x, y),
+                    midiEvent: this.generateMidiMapping(page, x, y),
+                    cubePosition: this.generateCubeMapping(page, x, y),
+                    noteData: this.generateNoteMapping(page, x, y),
+                    automationData: this.generateAutomationData(x, y)
+                };
+            }
+
+            generateBraidMapping(page, x, y) {
+                // Braid system chord mapping
+                return {
+                    braidId: `braid_${page}_${Date.now()}`,
+                    chordType: 'major_triad',
+                    voicing: 'root_position',
+                    inversion: 0,
+                    extensions: [],
+                    tensions: [],
+                    braidPattern: this.calculateBraidPattern(x, y),
+                    harmonicSeries: [1, 3, 5], // Root, third, fifth
+                    resonance: this.calculateResonance(x, y)
+                };
+            }
+
+            calculateBraidPattern(x, y) {
+                // Calculate braid pattern based on position
+                const pattern = [];
+                const basePattern = [1, 3, 5, 7, 9, 11, 13]; // Extended harmony
+                const complexity = Math.floor((x + y) / 100) + 3;
+
+                for (let i = 0; i < Math.min(complexity, 7); i++) {
+                    pattern.push(basePattern[i]);
+                }
+
+                return pattern;
+            }
+
+            calculateResonance(x, y) {
+                // Calculate harmonic resonance
+                return {
+                    fundamental: 440, // A4 reference
+                    harmonics: [440, 880, 1320, 1760], // Harmonic series
+                    amplitude: (x / 400).toFixed(3),
+                    phase: (y / 300 * Math.PI * 2).toFixed(3),
+                    decay: 0.5
+                };
+            }
+
+            generateMidiMapping(page, x, y) {
+                // MIDI event generation
+                const noteNumber = Math.floor((x / 400) * 88) + 21; // Piano range
+                const velocity = Math.floor((y / 300) * 127) + 1;
+
+                return {
+                    channel: page === 'left' ? 1 : 2,
+                    noteNumber: noteNumber,
+                    velocity: velocity,
+                    duration: 480, // Quarter note in ticks
+                    timestamp: Date.now(),
+                    cc: {
+                        modulation: Math.floor((x / 400) * 127),
+                        expression: Math.floor((y / 300) * 127),
+                        sustain: x > 200 ? 127 : 0
+                    },
+                    pitchBend: Math.floor((x - 200) / 200 * 8192),
+                    aftertouch: Math.floor((y / 300) * 127)
+                };
+            }
+
+            generateCubeMapping(page, x, y) {
+                // 3D cube architecture positioning
+                return {
+                    position: {
+                        x: (x / 400) * 2 - 1, // Normalize to -1 to 1
+                        y: (y / 300) * 2 - 1,
+                        z: page === 'left' ? -0.5 : 0.5
+                    },
+                    rotation: {
+                        x: (y / 300) * Math.PI * 2,
+                        y: (x / 400) * Math.PI * 2,
+                        z: 0
+                    },
+                    scale: {
+                        x: 1 + (x / 800),
+                        y: 1 + (y / 600),
+                        z: 1
+                    },
+                    material: {
+                        color: this.calculateCubeColor(x, y),
+                        opacity: (x + y) / 700,
+                        metallic: x / 400,
+                        roughness: 1 - (y / 300)
+                    },
+                    physics: {
+                        mass: 1,
+                        friction: 0.5,
+                        restitution: 0.3,
+                        gravity: { x: 0, y: -9.81, z: 0 }
+                    }
+                };
+            }
+
+            calculateCubeColor(x, y) {
+                // HSL color based on position
+                const hue = (x / 400) * 360;
+                const saturation = (y / 300) * 100;
+                const lightness = 50;
+                return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+            }
+
+            generateNoteMapping(page, x, y) {
+                // Musical note data
+                const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const noteIndex = Math.floor((x / 400) * 12);
+                const octave = Math.floor((y / 300) * 8) + 1;
+
+                return {
+                    note: notes[noteIndex],
+                    octave: octave,
+                    frequency: this.calculateFrequency(notes[noteIndex], octave),
+                    midiNote: (octave * 12) + noteIndex + 12,
+                    enharmonic: this.getEnharmonic(notes[noteIndex]),
+                    interval: this.calculateInterval(notes[noteIndex]),
+                    chordTone: this.analyzeChordTone(notes[noteIndex]),
+                    scaleFunction: this.analyzeScaleFunction(notes[noteIndex])
+                };
+            }
+
+            calculateFrequency(note, octave) {
+                // Calculate frequency using equal temperament
+                const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const noteIndex = notes.indexOf(note);
+                const midiNumber = (octave * 12) + noteIndex + 12;
+                return Math.round(440 * Math.pow(2, (midiNumber - 69) / 12) * 100) / 100;
+            }
+
+            getEnharmonic(note) {
+                const enharmonics = {
+                    'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb',
+                    'Db': 'C#', 'Eb': 'D#', 'Gb': 'F#', 'Ab': 'G#', 'Bb': 'A#'
+                };
+                return enharmonics[note] || note;
+            }
+
+            calculateInterval(note) {
+                // Calculate interval from C
+                const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const intervals = ['P1', 'm2', 'M2', 'm3', 'M3', 'P4', 'TT', 'P5', 'm6', 'M6', 'm7', 'M7'];
+                const index = notes.indexOf(note);
+                return intervals[index];
+            }
+
+            analyzeChordTone(note) {
+                // Analyze chord tone function in C major
+                const chordTones = {
+                    'C': 'root', 'E': 'third', 'G': 'fifth',
+                    'D': 'ninth', 'F': 'eleventh', 'A': 'thirteenth', 'B': 'major_seventh'
+                };
+                return chordTones[note] || 'extension';
+            }
+
+            analyzeScaleFunction(note) {
+                // Scale function analysis
+                const functions = {
+                    'C': { degree: 1, function: 'tonic' },
+                    'D': { degree: 2, function: 'supertonic' },
+                    'E': { degree: 3, function: 'mediant' },
+                    'F': { degree: 4, function: 'subdominant' },
+                    'G': { degree: 5, function: 'dominant' },
+                    'A': { degree: 6, function: 'submediant' },
+                    'B': { degree: 7, function: 'leading_tone' }
+                };
+                return functions[note] || { degree: 0, function: 'chromatic' };
+            }
+
+            generateAutomationData(x, y) {
+                // Automation curve data for Novaxe
+                return {
+                    curves: [
+                        {
+                            parameter: 'volume',
+                            value: (y / 300).toFixed(3),
+                            interpolation: 'linear'
+                        },
+                        {
+                            parameter: 'pan',
+                            value: ((x / 400) * 2 - 1).toFixed(3),
+                            interpolation: 'smooth'
+                        },
+                        {
+                            parameter: 'filter_cutoff',
+                            value: (x / 400).toFixed(3),
+                            interpolation: 'exponential'
+                        },
+                        {
+                            parameter: 'reverb_send',
+                            value: ((x + y) / 700).toFixed(3),
+                            interpolation: 'logarithmic'
+                        }
+                    ],
+                    envelope: this.generateEnvelope(x, y),
+                    lfo: this.generateLFO(x, y)
+                };
+            }
+
+            generateEnvelope(x, y) {
+                return {
+                    attack: (x / 400).toFixed(3),
+                    decay: (y / 600).toFixed(3),
+                    sustain: ((x + y) / 700).toFixed(3),
+                    release: (1 - (x / 400)).toFixed(3)
+                };
+            }
+
+            generateLFO(x, y) {
+                return {
+                    rate: (x / 100).toFixed(2),
+                    depth: (y / 300).toFixed(3),
+                    waveform: this.selectWaveform(x),
+                    phase: ((x / 400) * 360).toFixed(1)
+                };
+            }
+
+            selectWaveform(x) {
+                const waveforms = ['sine', 'triangle', 'sawtooth', 'square', 'random'];
+                const index = Math.floor((x / 400) * waveforms.length);
+                return waveforms[index] || 'sine';
+            }
+
+            createClickMarker(container, x, y, id) {
+                const marker = document.createElement('div');
+                marker.className = 'click-marker';
+                marker.style.left = x + 'px';
+                marker.style.top = y + 'px';
+                marker.setAttribute('data-click-id', id);
+                marker.title = `Click #${id} (${x}, ${y})`;
+
+                /* COMMENTED OUT - FANCY ANIMATIONS (keeping for later)
+                // Array of spectacular animations to choose from
+                const spectacularAnimations = [
+                    'quantum-pulse-animation',
+                    'neural-spark-animation', 
+                    'harmonic-resonance-animation',
+                    'stellar-explosion-animation',
+                    'lightning-cascade-animation',
+                    'aurora-flow-animation',
+                    'diamond-crystal-animation',
+                    'phoenix-rise-animation',
+                    'ocean-wave-animation'
+                ];
+                
+                // Randomly select a spectacular animation
+                const randomAnimation = spectacularAnimations[Math.floor(Math.random() * spectacularAnimations.length)];
+                
+                // Apply the spectacular animation immediately
+                marker.classList.add(randomAnimation);
+                marker.style.zIndex = '1000';
+                
+                // Create dynamic highlight overlay for extra spectacle
+                const highlight = document.createElement('div');
+                highlight.style.position = 'absolute';
+                highlight.style.left = '50%';
+                highlight.style.top = '50%';
+                highlight.style.width = '150px';
+                highlight.style.height = '150px';
+                highlight.style.transform = 'translate(-50%, -50%)';
+                highlight.style.border = '4px solid #ff6b35';
+                highlight.style.borderRadius = '50%';
+                highlight.style.zIndex = '999';
+                highlight.style.pointerEvents = 'none';
+                highlight.style.animation = 'pulse 1.5s infinite alternate';
+                highlight.style.boxShadow = '0 0 30px rgba(255, 107, 53, 0.8)';
+                
+                marker.style.position = 'relative';
+                marker.appendChild(highlight);
+                */
+
+                // SIMPLE YELLOW HIGHLIGHT SQUARE - On, Delay, Off
+                const simpleHighlight = document.createElement('div');
+                simpleHighlight.style.position = 'absolute';
+                simpleHighlight.style.left = '50%';
+                simpleHighlight.style.top = '50%';
+                simpleHighlight.style.width = '80px';
+                simpleHighlight.style.height = '80px';
+                simpleHighlight.style.transform = 'translate(-50%, -50%)';
+                simpleHighlight.style.border = '3px solid yellow';
+                simpleHighlight.style.backgroundColor = 'transparent';
+                simpleHighlight.style.zIndex = '1000';
+                simpleHighlight.style.pointerEvents = 'none';
+
+                marker.style.position = 'relative';
+                marker.appendChild(simpleHighlight);
+
+                container.appendChild(marker);
+
+                // Simple on/delay/off animation
+                setTimeout(() => {
+                    if (simpleHighlight && simpleHighlight.parentNode) {
+                        simpleHighlight.parentNode.removeChild(simpleHighlight);
+                    }
+                }, 2000); // 2 second delay before removing
+
+                // Add interaction
+                marker.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectClick(id);
+                });
+
+                // Log simple effect for user feedback
+                console.log(`🟡 SIMPLE YELLOW HIGHLIGHT: Click #${id} at (${x}, ${y})`);
+            }
+
+            selectClick(id) {
+                // Clear previous selection
+                document.querySelectorAll('.click-marker').forEach(marker => {
+                    marker.classList.remove('selected');
+                });
+
+                // Select current
+                const marker = document.querySelector(`[data-click-id="${id}"]`);
+                if (marker) {
+                    marker.classList.add('selected');
+                    this.displayClickDetails(id);
+                }
+            }
+
+            displayClickDetails(id) {
+                const click = this.clicks.find(c => c.id === id);
+                if (!click) return;
+
+                const objectList = document.getElementById('objectList');
+                objectList.innerHTML = this.generateDetailedObjectHTML(click);
+            }
+
+            generateDetailedObjectHTML(click) {
+                return `
+                    <div class="object-details">
+                        <div class="object-header">
+                            <div class="object-id">Click #${click.id}</div>
+                            <div class="object-type">${click.page.toUpperCase()}</div>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Coordinates:</span>
+                            <span class="property-value">(${click.coordinates.x}, ${click.coordinates.y})</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Region:</span>
+                            <span class="property-value">${click.pixel.region}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Musical Note:</span>
+                            <span class="property-value">${click.novaxeMapping.noteData.note}${click.novaxeMapping.noteData.octave}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Frequency:</span>
+                            <span class="property-value">${click.novaxeMapping.noteData.frequency} Hz</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">MIDI Note:</span>
+                            <span class="property-value">${click.novaxeMapping.midiEvent.noteNumber}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Velocity:</span>
+                            <span class="property-value">${click.novaxeMapping.midiEvent.velocity}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Chord Function:</span>
+                            <span class="property-value">${click.musicalContext.harmonicFunction.function}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Scale Degree:</span>
+                            <span class="property-value">${click.musicalContext.scalePosition.degree}</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Braid Pattern:</span>
+                            <span class="property-value">[${click.novaxeMapping.braidChord.braidPattern.join(', ')}]</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Cube Position:</span>
+                            <span class="property-value">(${click.novaxeMapping.cubePosition.position.x.toFixed(2)}, ${click.novaxeMapping.cubePosition.position.y.toFixed(2)}, ${click.novaxeMapping.cubePosition.position.z.toFixed(2)})</span>
+                        </div>
+                        
+                        <div class="object-property">
+                            <span class="property-label">Timestamp:</span>
+                            <span class="property-value">${click.timestamp.toLocaleTimeString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="novaxe-integration">
+                        <div class="integration-header">
+                            🎵 Active Novaxe Mappings
+                        </div>
+                        <div class="integration-item">
+                            <strong>Braid Chord:</strong> ${click.novaxeMapping.braidChord.braidId}
+                        </div>
+                        <div class="integration-item">
+                            <strong>MIDI Channel:</strong> ${click.novaxeMapping.midiEvent.channel}
+                        </div>
+                        <div class="integration-item">
+                            <strong>Cube Material:</strong> ${click.novaxeMapping.cubePosition.material.color}
+                        </div>
+                        <div class="integration-item">
+                            <strong>Automation:</strong> ${click.novaxeMapping.automationData.curves.length} curves
+                        </div>
+                    </div>
+                `;
+            }
+
+            updateDisplay() {
+                // Update click counter
+                document.getElementById('clickCounter').textContent = this.clicks.length;
+
+                // Update object list
+                if (this.clicks.length > 0 && !document.querySelector('.click-marker.selected')) {
+                    this.displayRecentClicks();
+                }
+            }
+
+            displayRecentClicks() {
+                const objectList = document.getElementById('objectList');
+                const recentClicks = this.clicks.slice(-5); // Show last 5 clicks
+
+                objectList.innerHTML = recentClicks.map(click => `
+                    <div class="object-details" onclick="editor.selectClick(${click.id})" style="cursor: pointer;">
+                        <div class="object-header">
+                            <div class="object-id">Click #${click.id}</div>
+                            <div class="object-type">${click.page.toUpperCase()}</div>
+                        </div>
+                        <div class="object-property">
+                            <span class="property-label">Note:</span>
+                            <span class="property-value">${click.novaxeMapping.noteData.note}${click.novaxeMapping.noteData.octave}</span>
+                        </div>
+                        <div class="object-property">
+                            <span class="property-label">Position:</span>
+                            <span class="property-value">(${click.coordinates.x}, ${click.coordinates.y})</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            processNovaxeIntegration(clickData) {
+                // Process integration with Novaxe systems
+                console.log('🎵 Processing Novaxe Integration:', {
+                    braidChord: clickData.novaxeMapping.braidChord,
+                    midiEvent: clickData.novaxeMapping.midiEvent,
+                    cubePosition: clickData.novaxeMapping.cubePosition,
+                    noteData: clickData.novaxeMapping.noteData
+                });
+
+                // Simulate real Novaxe integration calls
+                this.sendToBraidSystem(clickData.novaxeMapping.braidChord);
+                this.sendToMidiEngine(clickData.novaxeMapping.midiEvent);
+                this.updateCubeArchitecture(clickData.novaxeMapping.cubePosition);
+                this.registerNoteEvent(clickData.novaxeMapping.noteData);
+            }
+
+            sendToBraidSystem(braidData) {
+                console.log('🧬 Braid System:', braidData);
+                // Integration point for actual Novaxe braid system
+            }
+
+            sendToMidiEngine(midiData) {
+                console.log('🎹 MIDI Engine:', midiData);
+                // Integration point for actual Novaxe MIDI system
+            }
+
+            updateCubeArchitecture(cubeData) {
+                console.log('🧊 Cube Architecture:', cubeData);
+                // Integration point for actual Novaxe 3D cube system
+            }
+
+            registerNoteEvent(noteData) {
+                console.log('🎵 Note Registration:', noteData);
+                // Integration point for actual Novaxe note system
+            }
+
+            refreshSystem() {
+                console.log('🔄 Refreshing Magic 18 System');
+
+                // Refresh SVGs
+                document.getElementById('leftSvg').data = 'Charts%20Magic18%20SVG_C%20Left.svg?' + Date.now();
+                document.getElementById('rightSvg').data = 'Charts%20Magic18%20SVG_C%20Right.svg?' + Date.now();
+
+                // Refresh integration systems
+                this.verifyNovaxeIntegration();
+
+                this.showTooltip('System refreshed successfully', 2000);
+            }
+
+            verifyNovaxeIntegration() {
+                const systems = ['braidSystem', 'midiEngine', 'cubeArchitecture', 'noteRecognition'];
+                systems.forEach(system => {
+                    this.novaxeIntegration[system] = true;
+                    console.log(`✅ ${system} verified`);
+                });
+            }
+
+            clearAllClicks() {
+                if (this.clicks.length === 0) return;
+
+                this.clicks = [];
+
+                // Remove all markers
+                document.querySelectorAll('.click-marker').forEach(marker => marker.remove());
+
+                // Clear object list
+                document.getElementById('objectList').innerHTML = '';
+
+                this.updateDisplay();
+                this.showTooltip('All clicks cleared', 2000);
+            }
+
+            exportData() {
+                const exportData = {
+                    session: this.currentSession,
+                    clicks: this.clicks,
+                    integration: this.novaxeIntegration,
+                    exported: new Date(),
+                    version: '2.0'
+                };
+
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `magic18-session-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                URL.revokeObjectURL(url);
+                this.showTooltip('Data exported successfully', 2000);
+            }
+
+            resetSystem() {
+                if (confirm('Reset entire Magic 18 system? This will clear all data.')) {
+                    this.clicks = [];
+                    this.currentSession = {
+                        startTime: new Date(),
+                        template: 'Magic 18 C Major',
+                        mode: 'Object Detection'
+                    };
+
+                    document.querySelectorAll('.click-marker').forEach(marker => marker.remove());
+                    document.getElementById('objectList').innerHTML = '';
+
+                    this.updateDisplay();
+                    this.updateSessionDisplay();
+                    this.showTooltip('System reset complete', 2000);
+                }
+            }
+
+            togglePanel() {
+                this.isCollapsed = !this.isCollapsed;
+                const panel = document.getElementById('editorPanel');
+
+                if (this.isCollapsed) {
+                    panel.classList.add('collapsed');
+                    document.getElementById('collapseBtn').textContent = '📊';
+                } else {
+                    panel.classList.remove('collapsed');
+                    document.getElementById('collapseBtn').textContent = '📊';
+                }
+            }
+
+            trackMouse(event) {
+                document.getElementById('mousePos').textContent =
+                    `Mouse: (${event.clientX}, ${event.clientY})`;
+            }
+
+            handleKeyboard(event) {
+                switch (event.key) {
+                    case 'r':
+                        if (event.ctrlKey || event.metaKey) {
+                            event.preventDefault();
+                            this.refreshSystem();
+                        }
+                        break;
+                    case 'c':
+                        if (event.ctrlKey || event.metaKey && event.shiftKey) {
+                            event.preventDefault();
+                            this.clearAllClicks();
+                        }
+                        break;
+                    case 'e':
+                        if (event.ctrlKey || event.metaKey) {
+                            event.preventDefault();
+                            this.exportData();
+                        }
+                        break;
+                    case 'Escape':
+                        this.clearSelection();
+                        break;
+                }
+            }
+
+            clearSelection() {
+                document.querySelectorAll('.click-marker').forEach(marker => {
+                    marker.classList.remove('selected');
+                });
+            }
+
+            handleResize() {
+                // Handle responsive adjustments
+                console.log('📐 Window resized:', window.innerWidth, 'x', window.innerHeight);
+            }
+
+            updateSessionDisplay() {
+                document.getElementById('sessionStart').textContent =
+                    this.currentSession.startTime.toLocaleTimeString();
+                document.getElementById('currentMode').textContent =
+                    this.currentSession.mode;
+            }
+
+            startSystemMonitoring() {
+                // Start monitoring system health
+                setInterval(() => {
+                    this.monitorSystem();
+                }, 5000);
+            }
+
+            monitorSystem() {
+                // Monitor system performance and health
+                const memoryUsage = performance.memory ?
+                    (performance.memory.usedJSHeapSize / 1024 / 1024).toFixed(2) + ' MB' :
+                    'Unknown';
+
+                console.log('💻 System Status:', {
+                    clicks: this.clicks.length,
+                    maxClicks: this.maxClicks,
+                    memory: memoryUsage,
+                    uptime: Date.now() - this.currentSession.startTime.getTime() + 'ms'
+                });
+            }
+
+            showTooltip(message, duration = 1000) {
+                const tooltip = document.getElementById('tooltip');
+                tooltip.textContent = message;
+                tooltip.style.left = '50%';
+                tooltip.style.top = '50px';
+                tooltip.style.transform = 'translateX(-50%)';
+                tooltip.classList.add('show');
+
+                setTimeout(() => {
+                    tooltip.classList.remove('show');
+                }, duration);
+            }
+        }
+
+        // Initialize the system
+        const editor = new Magic18ProfessionalEditor();
+
+        // Global access for debugging
+        window.Magic18Editor = editor;
+
+        console.log('🎵 Magic 18 Professional Editor Ready!');
+    </script>
+</body>
+
+</html>

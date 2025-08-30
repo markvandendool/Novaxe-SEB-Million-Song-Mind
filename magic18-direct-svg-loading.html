@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 - Direct SVG Loading</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .page {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            flex: 1;
+            min-width: 600px;
+            max-width: 800px;
+        }
+
+        .page h2 {
+            color: #333;
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .svg-container {
+            position: relative;
+            display: block;
+            border: 2px solid #ddd;
+            background: #f9f9f9;
+            width: 100%;
+            height: 75vh;
+            min-height: 600px;
+            overflow: hidden;
+        }
+
+        .svg-container svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        /* Interactive overlay - must match SVG container exactly */
+        .interactive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .loading {
+            padding: 20px;
+            text-align: center;
+            color: #666;
+        }
+
+        .error {
+            padding: 20px;
+            text-align: center;
+            color: #d32f2f;
+            background: #ffebee;
+            border-radius: 5px;
+        }
+
+        /* Interactive overlay buttons - using responsive positioning */
+        .interactive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .chord-button,
+        .form-button,
+        .ingredient-button,
+        .fret-button {
+            position: absolute;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+        }
+
+        .chord-button,
+        .form-button {
+            background: rgba(255, 255, 0, 0);
+            border-radius: 4px;
+            z-index: 10;
+        }
+
+        .chord-button:hover,
+        .form-button:hover {
+            background: rgba(255, 255, 0, 0.3);
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .chord-button.active {
+            background: rgba(255, 255, 0, 0.5);
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .ingredient-button {
+            background: rgba(255, 0, 255, 0);
+            border-radius: 50%;
+            z-index: 15;
+        }
+
+        .ingredient-button:hover {
+            background: rgba(255, 0, 255, 0.4);
+            border-color: #FF00FF;
+            box-shadow: 0 0 12px rgba(255, 0, 255, 0.7);
+        }
+
+        .fret-button {
+            background: rgba(0, 255, 0, 0);
+            border-radius: 50%;
+            z-index: 12;
+        }
+
+        .fret-button:hover {
+            background: rgba(0, 255, 0, 0.4);
+            border-color: #00FF00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.7);
+        }
+
+        /* Control Panel */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .volume-control label {
+            min-width: 80px;
+            font-size: 0.9em;
+        }
+
+        .volume-control input {
+            width: 100px;
+        }
+
+        .log-display {
+            max-height: 100px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .flash {
+            animation: flash 0.3s ease-out;
+        }
+
+        @keyframes flash {
+            0% {
+                transform: scale(1.0);
+                box-shadow: 0 0 0px rgba(255, 255, 255, 0.8);
+            }
+
+            50% {
+                transform: scale(1.4);
+                box-shadow: 0 0 20px rgba(255, 255, 0, 0.8);
+            }
+
+            100% {
+                transform: scale(1.0);
+                box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🎵 Magic 18 Pedagogical System 🎵</h1>
+        <p>Direct SVG Loading - Interactive Audio Widget</p>
+    </div>
+
+    <div class="container">
+        <div class="page">
+            <h2>𝛿Ÿ𝛬, Left Page • Major System</h2>
+            <div class="svg-container" id="leftSvgContainer">
+                <div class="loading">Loading Left SVG...</div>
+                <div class="interactive-overlay" id="leftOverlay"></div>
+            </div>
+        </div>
+
+        <div class="page">
+            <h2>𝛿Ÿ𝛬, Right Page • Minor System</h2>
+            <div class="svg-container" id="rightSvgContainer">
+                <div class="loading">Loading Right SVG...</div>
+                <div class="interactive-overlay" id="rightOverlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="volume-control">
+            <label>Master Volume:</label>
+            <input type="range" id="masterVolume" min="0" max="100" value="30">
+            <span id="masterVolumeValue">30%</span>
+        </div>
+        <div class="volume-control">
+            <label>Chord Volume:</label>
+            <input type="range" id="chordVolume" min="0" max="100" value="25">
+            <span id="chordVolumeValue">25%</span>
+        </div>
+        <div class="log-display" id="logDisplay"></div>
+    </div>
+
+    <script>
+        /**
+         * Professional-grade Magic 18 Interactive System
+         * Production-ready responsive coordinate transformation system
+         * Industry-standard architecture for cross-platform deployment
+         */
+        class Magic18DirectSVGSystem {
+            constructor() {
+                this.audioContext = null;
+                this.masterGain = null;
+                this.chordGain = null;
+                this.activeChord = null;
+                this.logElement = document.getElementById('logDisplay');
+                this.transformationMatrix = new Map();
+                this.resizeObserver = null;
+                this.devicePixelRatio = window.devicePixelRatio || 1;
+
+                // Professional coordinate system constants
+                this.SVG_VIEWBOX = {
+                    width: 612,
+                    height: 792,
+                    aspectRatio: 612 / 792
+                };
+
+                // Initialize element data
+                this.initializeElementData();
+
+                this.initializeSystem();
+            }
+
+            /**
+             * Professional element data - exact coordinates from SVG analysis
+             */
+            initializeElementData() {
+                this.leftPageElements = {
+                    chordBlocks: [
+                        { id: 'I_Chord', x: 30.56, y: 50.94, width: 64.08, height: 64.08, chord: 'C', roman: 'I', notes: ['C', 'E', 'G'] },
+                        { id: 'vi_Chord', x: 518.66, y: 50.89, width: 64.32, height: 64.08, chord: 'Am', roman: 'vi', notes: ['A', 'C', 'E'] },
+                        { id: 'IV_chord', x: 30.56, y: 205.84, width: 64.08, height: 64.08, chord: 'F', roman: 'IV', notes: ['F', 'A', 'C'] },
+                        { id: 'ii', x: 518.74, y: 205.85, width: 64.08, height: 64.08, chord: 'Dm', roman: 'ii', notes: ['D', 'F', 'A'] },
+                        { id: 'V', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'G', roman: 'V', notes: ['G', 'B', 'D'] },
+                        { id: 'iii', x: 518.5, y: 360.1, width: 64.32, height: 64.32, chord: 'Em', roman: 'iii', notes: ['E', 'G', 'B'] },
+                        { id: 'II', x: 80.66, y: 638.82, width: 64.08, height: 64.08, chord: 'D7', roman: 'II7', notes: ['D', 'F#', 'A', 'C'] },
+                        { id: 'VI', x: 274.15, y: 638.82, width: 64.08, height: 64.08, chord: 'A7', roman: 'VI7', notes: ['A', 'C#', 'E', 'G'] },
+                        { id: 'III', x: 467.03, y: 638.82, width: 64.32, height: 64.08, chord: 'E7', roman: 'III7', notes: ['E', 'G#', 'B', 'D'] }
+                    ],
+                    ingredients: [
+                        // Root notes (circles/diamonds)
+                        { x: 274.65, y: 708.15, size: 14.96, type: 'root', chord: 'VI', note: 'A', color: '#FF4444' },
+                        { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'vi', note: 'A', color: '#FF4444' },
+                        { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'I', note: 'C', color: '#FF4444' },
+                        { x: 468.22, y: 708.15, size: 14.96, type: 'root', chord: 'III', note: 'E', color: '#FF4444' },
+                        { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'iii', note: 'E', color: '#FF4444' },
+                        { x: 31.05, y: 275.18, size: 14.96, type: 'root', chord: 'IV', note: 'F', color: '#FF4444' },
+                        { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'V', note: 'G', color: '#FF4444' },
+                        { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'ii', note: 'D', color: '#FF4444' },
+                        { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'II', note: 'D', color: '#FF4444' }
+                    ],
+                    fretboardNotes: this.generateFretboardCoordinates()
+                };
+
+                this.rightPageElements = {
+                    chordBlocks: [
+                        { id: 'i', x: 29.76, y: 50.95, width: 64.32, height: 64.08, chord: 'Cm', roman: 'i', notes: ['C', 'Eb', 'G'] },
+                        { id: 'bIII', x: 518.74, y: 50.95, width: 64.08, height: 64.08, chord: 'Eb', roman: 'bIII', notes: ['Eb', 'G', 'Bb'] },
+                        { id: 'iv', x: 30.55, y: 205.84, width: 64.08, height: 64.08, chord: 'Fm', roman: 'iv', notes: ['F', 'Ab', 'C'] },
+                        { id: 'bVI', x: 518.74, y: 205.81, width: 64.08, height: 64.08, chord: 'Ab', roman: 'bVI', notes: ['Ab', 'C', 'Eb'] },
+                        { id: 'v', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'Gm', roman: 'v', notes: ['G', 'Bb', 'D'] },
+                        { id: 'bVII', x: 518.74, y: 360.2, width: 64.08, height: 64.08, chord: 'Bb', roman: 'bVII', notes: ['Bb', 'D', 'F'] },
+                        { id: 'VII', x: 80.56, y: 638.82, width: 64.32, height: 64.08, chord: 'B7', roman: 'VII7', notes: ['B', 'D#', 'F#', 'A'] },
+                        { id: 'I7', x: 274.22, y: 638.82, width: 64.32, height: 64.08, chord: 'C7', roman: 'I7', notes: ['C', 'E', 'G', 'Bb'] },
+                        { id: 'vii_dim', x: 470.72, y: 638.82, width: 64.08, height: 64.08, chord: 'B°', roman: 'vii°', notes: ['B', 'D', 'F'] }
+                    ],
+                    ingredients: [
+                        { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'bVII', note: 'Bb', color: '#FF4444' },
+                        { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'bVI', note: 'Ab', color: '#FF4444' },
+                        { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'v', note: 'G', color: '#FF4444' },
+                        { x: 31.05, y: 275.18, size: 14.96, type: 'root', chord: 'iv', note: 'F', color: '#FF4444' },
+                        { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'bIII', note: 'Eb', color: '#FF4444' },
+                        { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'i', note: 'C', color: '#FF4444' },
+                        { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'VII', note: 'B', color: '#FF4444' },
+                        { x: 274.85, y: 708.15, size: 14.96, type: 'root', chord: 'I7', note: 'C', color: '#FF4444' },
+                        { x: 471.22, y: 708.15, size: 14.96, type: 'root', chord: 'vii°', note: 'B', color: '#FF4444' }
+                    ],
+                    fretboardNotes: this.generateFretboardCoordinates()
+                };
+            }
+
+            /**
+             * Generate professional fretboard coordinate system
+             */
+            generateFretboardCoordinates() {
+                const strings = [
+                    { name: 'E', x: 8.13, baseNote: 'E', baseOctave: 2 },
+                    { name: 'A', x: 25.28, baseNote: 'A', baseOctave: 2 },
+                    { name: 'D', x: 42.43, baseNote: 'D', baseOctave: 3 },
+                    { name: 'G', x: 59.54, baseNote: 'G', baseOctave: 3 },
+                    { name: 'B', x: 76.76, baseNote: 'B', baseOctave: 3 },
+                    { name: 'e', x: 94.01, baseNote: 'E', baseOctave: 4 }
+                ];
+
+                const fretPositions = [
+                    376.68, 346.68, 316.68, 286.68, 256.68, 226.68, 196.68,
+                    166.68, 136.68, 106.68, 76.68, 46.68, 15.92
+                ];
+
+                const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const fretboardNotes = [];
+
+                strings.forEach(string => {
+                    const baseIndex = chromaticScale.indexOf(string.baseNote);
+                    fretPositions.forEach((y, fretIndex) => {
+                        const noteIndex = (baseIndex + fretIndex) % 12;
+                        const note = chromaticScale[noteIndex];
+                        const octave = string.baseOctave + Math.floor((baseIndex + fretIndex) / 12);
+
+                        fretboardNotes.push({
+                            string: string.name,
+                            fret: fretIndex,
+                            x: string.x,
+                            y: y,
+                            note: note,
+                            octave: octave
+                        });
+                    });
+                });
+
+                return fretboardNotes;
+            }
+
+            /**
+             * Initialize the complete system with professional error handling
+             */
+            async initializeSystem() {
+                try {
+                    await this.initializeAudio();
+                    await this.loadSVGContent();
+                    this.setupResponsiveSystem();
+                    this.bindEventListeners();
+                    this.log('✅ Magic 18 System initialized successfully');
+                } catch (error) {
+                    this.handleError('System initialization failed', error);
+                }
+            }
+
+            /**
+             * Professional responsive system using ResizeObserver
+             */
+            setupResponsiveSystem() {
+                // Modern ResizeObserver for professional responsive behavior
+                this.resizeObserver = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        if (entry.target.classList.contains('svg-container')) {
+                            this.recalculateTransformations(entry.target);
+                        }
+                    }
+                });
+
+                // Observe all SVG containers
+                const containers = document.querySelectorAll('.svg-container');
+                containers.forEach(container => {
+                    this.resizeObserver.observe(container);
+                });
+
+                // Initial calculation
+                this.calculateAllTransformations();
+            }
+
+            /**
+             * Calculate precise transformation matrices for each SVG container
+             */
+            calculateAllTransformations() {
+                const leftContainer = document.getElementById('leftSvgContainer');
+                const rightContainer = document.getElementById('rightSvgContainer');
+
+                if (leftContainer) this.calculateTransformationMatrix('left', leftContainer);
+                if (rightContainer) this.calculateTransformationMatrix('right', rightContainer);
+            }
+
+            /**
+             * Industry-standard coordinate transformation calculation
+             */
+            calculateTransformationMatrix(pageId, container) {
+                const svgElement = container.querySelector('svg');
+                if (!svgElement) return;
+
+                const containerRect = container.getBoundingClientRect();
+                const svgRect = svgElement.getBoundingClientRect();
+
+                // Calculate the actual rendered SVG dimensions accounting for object-fit: contain
+                const containerAspect = containerRect.width / containerRect.height;
+                const svgAspect = this.SVG_VIEWBOX.aspectRatio;
+
+                let renderedWidth, renderedHeight, offsetX, offsetY;
+
+                if (containerAspect > svgAspect) {
+                    // Container is wider than SVG aspect ratio
+                    renderedHeight = containerRect.height;
+                    renderedWidth = renderedHeight * svgAspect;
+                    offsetX = (containerRect.width - renderedWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // Container is taller than SVG aspect ratio  
+                    renderedWidth = containerRect.width;
+                    renderedHeight = renderedWidth / svgAspect;
+                    offsetX = 0;
+                    offsetY = (containerRect.height - renderedHeight) / 2;
+                }
+
+                // Create transformation matrix
+                const transform = {
+                    scaleX: renderedWidth / this.SVG_VIEWBOX.width,
+                    scaleY: renderedHeight / this.SVG_VIEWBOX.height,
+                    translateX: offsetX,
+                    translateY: offsetY,
+                    renderedWidth,
+                    renderedHeight,
+                    containerRect,
+                    svgRect
+                };
+
+                this.transformationMatrix.set(pageId, transform);
+
+                this.log(`📐 ${pageId.toUpperCase()}: Scale(${transform.scaleX.toFixed(4)}, ${transform.scaleY.toFixed(4)}) Offset(${offsetX.toFixed(2)}, ${offsetY.toFixed(2)})`);
+
+                // Recreate interactive elements with new transformation
+                this.createInteractiveElements(pageId);
+            }
+
+            /**
+             * Recalculate transformations on resize (professional responsive handling)
+             */
+            recalculateTransformations(container) {
+                const pageId = container.id === 'leftSvgContainer' ? 'left' : 'right';
+                this.calculateTransformationMatrix(pageId, container);
+            }
+
+            /**
+             * Transform SVG coordinates to screen coordinates using transformation matrix
+             */
+            transformCoordinate(pageId, svgX, svgY) {
+                const transform = this.transformationMatrix.get(pageId);
+                if (!transform) {
+                    this.log(`❌ No transformation matrix for ${pageId}`);
+                    return { x: 0, y: 0 };
+                }
+
+                return {
+                    x: (svgX * transform.scaleX) + transform.translateX,
+                    y: (svgY * transform.scaleY) + transform.translateY
+                };
+            }
+
+            /**
+             * Transform size from SVG units to screen pixels
+             */
+            transformSize(pageId, svgSize) {
+                const transform = this.transformationMatrix.get(pageId);
+                if (!transform) return svgSize;
+
+                return svgSize * Math.min(transform.scaleX, transform.scaleY);
+            }
+            /**
+             * Initialize professional-grade Web Audio API
+             */
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterGain = this.audioContext.createGain();
+                    this.chordGain = this.audioContext.createGain();
+
+                    this.masterGain.connect(this.audioContext.destination);
+                    this.chordGain.connect(this.masterGain);
+
+                    // Professional volume initialization
+                    this.masterGain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                    this.chordGain.gain.setValueAtTime(0.25, this.audioContext.currentTime);
+
+                    this.setupVolumeControls();
+                    this.log('🎵 Professional audio system initialized');
+                } catch (error) {
+                    throw new Error(`Audio initialization failed: ${error.message}`);
+                }
+            }
+
+            /**
+             * Professional volume control system
+             */
+            setupVolumeControls() {
+                const masterSlider = document.getElementById('masterVolume');
+                const chordSlider = document.getElementById('chordVolume');
+                const masterValue = document.getElementById('masterVolumeValue');
+                const chordValue = document.getElementById('chordVolumeValue');
+
+                if (masterSlider && masterValue) {
+                    masterSlider.addEventListener('input', (e) => {
+                        const value = e.target.value / 100;
+                        this.masterGain.gain.setValueAtTime(value, this.audioContext.currentTime);
+                        masterValue.textContent = e.target.value + '%';
+                    });
+                }
+
+                if (chordSlider && chordValue) {
+                    chordSlider.addEventListener('input', (e) => {
+                        const value = e.target.value / 100;
+                        this.chordGain.gain.setValueAtTime(value, this.audioContext.currentTime);
+                        chordValue.textContent = e.target.value + '%';
+                    });
+                }
+            }
+
+            /**
+             * Professional SVG content loading with error handling
+             */
+            async loadSVGContent() {
+                try {
+                    this.log('🔄 Loading SVG content...');
+
+                    const [leftResponse, rightResponse] = await Promise.all([
+                        fetch('Charts Magic18 SVG_C Left.svg'),
+                        fetch('Charts Magic18 SVG_C Right.svg')
+                    ]);
+
+                    if (!leftResponse.ok) throw new Error(`Left SVG load failed: ${leftResponse.status}`);
+                    if (!rightResponse.ok) throw new Error(`Right SVG load failed: ${rightResponse.status}`);
+
+                    const [leftSvgText, rightSvgText] = await Promise.all([
+                        leftResponse.text(),
+                        rightResponse.text()
+                    ]);
+
+                    // Professional DOM manipulation
+                    this.insertSVGContent('leftSvgContainer', leftSvgText, 'leftOverlay');
+                    this.insertSVGContent('rightSvgContainer', rightSvgText, 'rightOverlay');
+
+                    this.log('✅ SVG content loaded successfully');
+
+                    // Allow DOM to stabilize before calculations
+                    await this.waitForDOMStabilization();
+
+                } catch (error) {
+                    throw new Error(`SVG loading failed: ${error.message}`);
+                }
+            }
+
+            /**
+             * Professional DOM content insertion
+             */
+            insertSVGContent(containerId, svgContent, overlayId) {
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    throw new Error(`Container ${containerId} not found`);
+                }
+
+                container.innerHTML = svgContent + `<div class="interactive-overlay" id="${overlayId}"></div>`;
+            }
+
+            /**
+             * Wait for DOM stabilization (professional async handling)
+             */
+            waitForDOMStabilization() {
+                return new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(resolve);
+                    });
+                });
+            }
+
+            /**
+             * Bind professional event listeners
+             */
+            bindEventListeners() {
+                // Professional window resize handling
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        this.calculateAllTransformations();
+                    }, 100);
+                });
+
+                // Professional orientation change handling
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.calculateAllTransformations();
+                    }, 300);
+                });
+            }
+
+            /**
+             * Professional error handling system
+             */
+            handleError(message, error) {
+                const errorMsg = `❌ ${message}: ${error.message}`;
+                this.log(errorMsg);
+                console.error(message, error);
+
+                // Professional error recovery
+                const containers = document.querySelectorAll('.svg-container');
+                containers.forEach(container => {
+                    if (!container.querySelector('svg')) {
+                        container.innerHTML = '<div class="error">Failed to load SVG content. Please refresh.</div>';
+                    }
+                });
+            }
+
+            // Exact chord coordinates from SVG analysis
+            chordBlocks: [
+                { id: 'I_Chord', x: 30.56, y: 50.94, width: 64.08, height: 64.08, chord: 'C', roman: 'I', notes: ['C', 'E', 'G'] },
+                { id: 'vi_Chord', x: 518.66, y: 50.89, width: 64.32, height: 64.08, chord: 'Am', roman: 'vi', notes: ['A', 'C', 'E'] },
+                { id: 'IV_chord', x: 30.56, y: 205.84, width: 64.08, height: 64.08, chord: 'F', roman: 'IV', notes: ['F', 'A', 'C'] },
+                { id: 'ii', x: 518.74, y: 205.85, width: 64.08, height: 64.08, chord: 'Dm', roman: 'ii', notes: ['D', 'F', 'A'] },
+                { id: 'V', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'G', roman: 'V', notes: ['G', 'B', 'D'] },
+                { id: 'iii', x: 518.5, y: 360.1, width: 64.32, height: 64.32, chord: 'Em', roman: 'iii', notes: ['E', 'G', 'B'] },
+                { id: 'II', x: 80.66, y: 638.82, width: 64.08, height: 64.08, chord: 'D7', roman: 'II7', notes: ['D', 'F#', 'A', 'C'] },
+                { id: 'VI', x: 274.15, y: 638.82, width: 64.08, height: 64.08, chord: 'A7', roman: 'VI7', notes: ['A', 'C#', 'E', 'G'] },
+                { id: 'III', x: 467.03, y: 638.82, width: 64.32, height: 64.08, chord: 'E7', roman: 'III7', notes: ['E', 'G#', 'B', 'D'] }
+            ],
+            ingredients: [
+                // Root notes (circles/diamonds)
+                { x: 274.65, y: 708.15, size: 14.96, type: 'root', chord: 'VI', note: 'A', color: '#FF4444' },
+                { x: 467.76, y: 708.15, size: 14.96, type: 'root', chord: 'III', note: 'E', color: '#FF4444' },
+                { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'II', note: 'D', color: '#FF4444' },
+                { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'vi', note: 'A', color: '#FF4444' },
+                { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'V', note: 'G', color: '#FF4444' },
+                { x: 31.05, y: 275.17, size: 14.96, type: 'root', chord: 'IV', note: 'F', color: '#FF4444' },
+                { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'iii', note: 'E', color: '#FF4444' },
+                { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'ii', note: 'D', color: '#FF4444' },
+                { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'I', note: 'C', color: '#FF4444' },
+
+                // Minor 3rds (m3rd)
+                { x: 535.24, y: 120.28, size: 14.96, type: 'm3rd', chord: 'vi', note: 'C', color: '#4444FF' },
+                { x: 535.24, y: 429.53, size: 14.96, type: 'm3rd', chord: 'iii', note: 'G', color: '#4444FF' },
+                { x: 535.24, y: 275.18, size: 14.96, type: 'm3rd', chord: 'ii', note: 'F', color: '#4444FF' },
+
+                // Minor 7ths
+                { x: 322.65, y: 708.15, size: 14.96, type: 'min7th', chord: 'VI', note: 'G', color: '#44FF44' },
+                { x: 515.76, y: 708.15, size: 14.96, type: 'min7th', chord: 'III', note: 'D', color: '#44FF44' },
+                { x: 129.16, y: 708.15, size: 14.96, type: 'min7th', chord: 'II', note: 'C', color: '#44FF44' },
+                { x: 567.24, y: 120.28, size: 14.96, type: 'min7th', chord: 'vi', note: 'G', color: '#44FF44' },
+                { x: 79.05, y: 429.53, size: 14.96, type: 'min7th', chord: 'V', note: 'F', color: '#44FF44' },
+                { x: 567.24, y: 429.53, size: 14.96, type: 'min7th', chord: 'iii', note: 'D', color: '#44FF44' },
+                { x: 567.24, y: 275.18, size: 14.96, type: 'min7th', chord: 'ii', note: 'C', color: '#44FF44' },
+
+                // Major 3rds
+                { x: 290.65, y: 708.15, size: 14.96, type: '3rd', chord: 'VI', note: 'C#', color: '#FFFF44' },
+                { x: 483.76, y: 708.15, size: 14.96, type: '3rd', chord: 'III', note: 'G#', color: '#FFFF44' },
+                { x: 97.16, y: 708.15, size: 14.96, type: '3rd', chord: 'II', note: 'F#', color: '#FFFF44' },
+                { x: 47.05, y: 429.54, size: 14.96, type: '3rd', chord: 'V', note: 'B', color: '#FFFF44' },
+                { x: 47.05, y: 275.18, size: 14.96, type: '3rd', chord: 'IV', note: 'A', color: '#FFFF44' },
+                { x: 46.5, y: 120.28, size: 14.96, type: '3rd', chord: 'I', note: 'E', color: '#FFFF44' }
+            ],
+            fretboardNotes: [
+                // Fretboard positions (6 strings × ~12 frets visible)
+                // E String (Low E) - x: 8.13
+                { string: 'E', fret: 0, x: 8.13, y: 376.68, note: 'E', octave: 2 },
+                { string: 'E', fret: 1, x: 8.13, y: 346.68, note: 'F', octave: 2 },
+                { string: 'E', fret: 2, x: 8.13, y: 316.68, note: 'F#', octave: 2 },
+                { string: 'E', fret: 3, x: 8.13, y: 286.68, note: 'G', octave: 2 },
+                { string: 'E', fret: 4, x: 8.13, y: 256.68, note: 'G#', octave: 2 },
+                { string: 'E', fret: 5, x: 8.13, y: 226.68, note: 'A', octave: 2 },
+                { string: 'E', fret: 6, x: 8.13, y: 196.68, note: 'A#', octave: 2 },
+                { string: 'E', fret: 7, x: 8.13, y: 166.68, note: 'B', octave: 2 },
+                { string: 'E', fret: 8, x: 8.13, y: 136.68, note: 'C', octave: 3 },
+                { string: 'E', fret: 9, x: 8.13, y: 106.68, note: 'C#', octave: 3 },
+                { string: 'E', fret: 10, x: 8.13, y: 76.68, note: 'D', octave: 3 },
+                { string: 'E', fret: 11, x: 8.13, y: 46.68, note: 'D#', octave: 3 },
+                { string: 'E', fret: 12, x: 8.13, y: 15.92, note: 'E', octave: 3 },
+
+                // A String - x: 25.28
+                { string: 'A', fret: 0, x: 25.28, y: 376.68, note: 'A', octave: 2 },
+                { string: 'A', fret: 1, x: 25.28, y: 346.68, note: 'A#', octave: 2 },
+                { string: 'A', fret: 2, x: 25.28, y: 316.68, note: 'B', octave: 2 },
+                { string: 'A', fret: 3, x: 25.28, y: 286.68, note: 'C', octave: 3 },
+                { string: 'A', fret: 4, x: 25.28, y: 256.68, note: 'C#', octave: 3 },
+                { string: 'A', fret: 5, x: 25.28, y: 226.68, note: 'D', octave: 3 },
+                { string: 'A', fret: 6, x: 25.28, y: 196.68, note: 'D#', octave: 3 },
+                { string: 'A', fret: 7, x: 25.28, y: 166.68, note: 'E', octave: 3 },
+                { string: 'A', fret: 8, x: 25.28, y: 136.68, note: 'F', octave: 3 },
+                { string: 'A', fret: 9, x: 25.28, y: 106.68, note: 'F#', octave: 3 },
+                { string: 'A', fret: 10, x: 25.28, y: 76.68, note: 'G', octave: 3 },
+                { string: 'A', fret: 11, x: 25.28, y: 46.68, note: 'G#', octave: 3 },
+                { string: 'A', fret: 12, x: 25.28, y: 15.92, note: 'A', octave: 3 },
+
+                // D String - x: 42.43
+                { string: 'D', fret: 0, x: 42.43, y: 376.68, note: 'D', octave: 3 },
+                { string: 'D', fret: 1, x: 42.43, y: 346.68, note: 'D#', octave: 3 },
+                { string: 'D', fret: 2, x: 42.43, y: 316.68, note: 'E', octave: 3 },
+                { string: 'D', fret: 3, x: 42.43, y: 286.68, note: 'F', octave: 3 },
+                { string: 'D', fret: 4, x: 42.43, y: 256.68, note: 'F#', octave: 3 },
+                { string: 'D', fret: 5, x: 42.43, y: 226.68, note: 'G', octave: 3 },
+                { string: 'D', fret: 6, x: 42.43, y: 196.68, note: 'G#', octave: 3 },
+                { string: 'D', fret: 7, x: 42.43, y: 166.68, note: 'A', octave: 3 },
+                { string: 'D', fret: 8, x: 42.43, y: 136.68, note: 'A#', octave: 3 },
+                { string: 'D', fret: 9, x: 42.43, y: 106.68, note: 'B', octave: 3 },
+                { string: 'D', fret: 10, x: 42.43, y: 76.68, note: 'C', octave: 4 },
+                { string: 'D', fret: 11, x: 42.43, y: 46.68, note: 'C#', octave: 4 },
+                { string: 'D', fret: 12, x: 42.43, y: 15.92, note: 'D', octave: 4 },
+
+                // G String - x: 59.54
+                { string: 'G', fret: 0, x: 59.54, y: 376.68, note: 'G', octave: 3 },
+                { string: 'G', fret: 1, x: 59.54, y: 346.68, note: 'G#', octave: 3 },
+                { string: 'G', fret: 2, x: 59.54, y: 316.68, note: 'A', octave: 3 },
+                { string: 'G', fret: 3, x: 59.54, y: 286.68, note: 'A#', octave: 3 },
+                { string: 'G', fret: 4, x: 59.54, y: 256.68, note: 'B', octave: 3 },
+                { string: 'G', fret: 5, x: 59.54, y: 226.68, note: 'C', octave: 4 },
+                { string: 'G', fret: 6, x: 59.54, y: 196.68, note: 'C#', octave: 4 },
+                { string: 'G', fret: 7, x: 59.54, y: 166.68, note: 'D', octave: 4 },
+                { string: 'G', fret: 8, x: 59.54, y: 136.68, note: 'D#', octave: 4 },
+                { string: 'G', fret: 9, x: 59.54, y: 106.68, note: 'E', octave: 4 },
+                { string: 'G', fret: 10, x: 59.54, y: 76.68, note: 'F', octave: 4 },
+                { string: 'G', fret: 11, x: 59.54, y: 46.68, note: 'F#', octave: 4 },
+                { string: 'G', fret: 12, x: 59.54, y: 15.92, note: 'G', octave: 4 },
+
+                // B String - x: 76.76
+                { string: 'B', fret: 0, x: 76.76, y: 376.68, note: 'B', octave: 3 },
+                { string: 'B', fret: 1, x: 76.76, y: 346.68, note: 'C', octave: 4 },
+                { string: 'B', fret: 2, x: 76.76, y: 316.68, note: 'C#', octave: 4 },
+                { string: 'B', fret: 3, x: 76.76, y: 286.68, note: 'D', octave: 4 },
+                { string: 'B', fret: 4, x: 76.76, y: 256.68, note: 'D#', octave: 4 },
+                { string: 'B', fret: 5, x: 76.76, y: 226.68, note: 'E', octave: 4 },
+                { string: 'B', fret: 6, x: 76.76, y: 196.68, note: 'F', octave: 4 },
+                { string: 'B', fret: 7, x: 76.76, y: 166.68, note: 'F#', octave: 4 },
+                { string: 'B', fret: 8, x: 76.76, y: 136.68, note: 'G', octave: 4 },
+                { string: 'B', fret: 9, x: 76.76, y: 106.68, note: 'G#', octave: 4 },
+                { string: 'B', fret: 10, x: 76.76, y: 76.68, note: 'A', octave: 4 },
+                { string: 'B', fret: 11, x: 76.76, y: 46.68, note: 'A#', octave: 4 },
+                { string: 'B', fret: 12, x: 76.76, y: 15.92, note: 'B', octave: 4 },
+
+                // High E String - x: 94.01 (approximate)
+                { string: 'e', fret: 0, x: 94.01, y: 376.68, note: 'E', octave: 4 },
+                { string: 'e', fret: 1, x: 94.01, y: 346.68, note: 'F', octave: 4 },
+                { string: 'e', fret: 2, x: 94.01, y: 316.68, note: 'F#', octave: 4 },
+                { string: 'e', fret: 3, x: 94.01, y: 286.68, note: 'G', octave: 4 },
+                { string: 'e', fret: 4, x: 94.01, y: 256.68, note: 'G#', octave: 4 },
+                { string: 'e', fret: 5, x: 94.01, y: 226.68, note: 'A', octave: 4 },
+                { string: 'e', fret: 6, x: 94.01, y: 196.68, note: 'A#', octave: 4 },
+                { string: 'e', fret: 7, x: 94.01, y: 166.68, note: 'B', octave: 4 },
+                { string: 'e', fret: 8, x: 94.01, y: 136.68, note: 'C', octave: 5 },
+                { string: 'e', fret: 9, x: 94.01, y: 106.68, note: 'C#', octave: 5 },
+                { string: 'e', fret: 10, x: 94.01, y: 76.68, note: 'D', octave: 5 },
+                { string: 'e', fret: 11, x: 94.01, y: 46.68, note: 'D#', octave: 5 },
+                { string: 'e', fret: 12, x: 94.01, y: 15.92, note: 'E', octave: 5 }
+            ]
+        };
+
+        this.rightPageElements = {
+            chordBlocks: [
+                { id: 'i', x: 29.76, y: 50.95, width: 64.32, height: 64.08, chord: 'Cm', roman: 'i', notes: ['C', 'Eb', 'G'] },
+                { id: 'bIII', x: 518.74, y: 50.95, width: 64.08, height: 64.08, chord: 'Eb', roman: 'bIII', notes: ['Eb', 'G', 'Bb'] },
+                { id: 'iv', x: 30.55, y: 205.84, width: 64.08, height: 64.08, chord: 'Fm', roman: 'iv', notes: ['F', 'Ab', 'C'] },
+                { id: 'bVI', x: 518.74, y: 205.81, width: 64.08, height: 64.08, chord: 'Ab', roman: 'bVI', notes: ['Ab', 'C', 'Eb'] },
+                { id: 'v', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'Gm', roman: 'v', notes: ['G', 'Bb', 'D'] },
+                { id: 'bVII', x: 518.74, y: 360.2, width: 64.08, height: 64.08, chord: 'Bb', roman: 'bVII', notes: ['Bb', 'D', 'F'] },
+                { id: 'VII', x: 80.56, y: 638.82, width: 64.32, height: 64.08, chord: 'B7', roman: 'VII7', notes: ['B', 'D#', 'F#', 'A'] },
+                { id: 'I7', x: 274.22, y: 638.82, width: 64.32, height: 64.08, chord: 'C7', roman: 'I7', notes: ['C', 'E', 'G', 'Bb'] },
+                { id: 'vii_dim', x: 470.72, y: 638.82, width: 64.08, height: 64.08, chord: 'B°', roman: 'vii°', notes: ['B', 'D', 'F'] }
+            ],
+            ingredients: [
+                // Root notes
+                { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'bVII', note: 'Bb', color: '#FF4444' },
+                { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'bVI', note: 'Ab', color: '#FF4444' },
+                { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'v', note: 'G', color: '#FF4444' },
+                { x: 31.05, y: 275.18, size: 14.96, type: 'root', chord: 'iv', note: 'F', color: '#FF4444' },
+                { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'bIII', note: 'Eb', color: '#FF4444' },
+                { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'i', note: 'C', color: '#FF4444' },
+                { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'VII', note: 'B', color: '#FF4444' },
+                { x: 274.85, y: 708.15, size: 14.96, type: 'root', chord: 'I7', note: 'C', color: '#FF4444' },
+                { x: 471.22, y: 708.15, size: 14.96, type: 'root', chord: 'vii°', note: 'B', color: '#FF4444' },
+
+                // Minor 3rds
+                { x: 47.05, y: 429.53, size: 14.96, type: 'm3rd', chord: 'v', note: 'Bb', color: '#4444FF' },
+                { x: 47.05, y: 275.18, size: 14.96, type: 'm3rd', chord: 'iv', note: 'Ab', color: '#4444FF' },
+                { x: 46.5, y: 120.28, size: 14.96, type: 'm3rd', chord: 'i', note: 'Eb', color: '#4444FF' },
+
+                // Major 3rd (for diminished chord)
+                { x: 487.22, y: 708.15, size: 14.96, type: '3rd', chord: 'vii°', note: 'D', color: '#FFFF44' },
+
+                // Minor 7ths
+                { x: 567.24, y: 429.53, size: 14.96, type: 'min7th', chord: 'bVII', note: 'Ab', color: '#44FF44' },
+                { x: 79.05, y: 429.53, size: 14.96, type: 'min7th', chord: 'v', note: 'F', color: '#44FF44' },
+                { x: 79.05, y: 275.18, size: 14.96, type: 'min7th', chord: 'iv', note: 'Eb', color: '#44FF44' },
+                { x: 78.5, y: 120.28, size: 14.96, type: 'min7th', chord: 'i', note: 'Bb', color: '#44FF44' }
+            ],
+            fretboardNotes: [
+                // Same fretboard structure as left page
+                // E String (Low E) - x: 8.13
+                { string: 'E', fret: 0, x: 8.13, y: 376.68, note: 'E', octave: 2 },
+                { string: 'E', fret: 1, x: 8.13, y: 346.68, note: 'F', octave: 2 },
+                { string: 'E', fret: 2, x: 8.13, y: 316.68, note: 'F#', octave: 2 },
+                { string: 'E', fret: 3, x: 8.13, y: 286.68, note: 'G', octave: 2 },
+                { string: 'E', fret: 4, x: 8.13, y: 256.68, note: 'G#', octave: 2 },
+                { string: 'E', fret: 5, x: 8.13, y: 226.68, note: 'A', octave: 2 },
+                { string: 'E', fret: 6, x: 8.13, y: 196.68, note: 'A#', octave: 2 },
+                { string: 'E', fret: 7, x: 8.13, y: 166.68, note: 'B', octave: 2 },
+                { string: 'E', fret: 8, x: 8.13, y: 136.68, note: 'C', octave: 3 },
+                { string: 'E', fret: 9, x: 8.13, y: 106.68, note: 'C#', octave: 3 },
+                { string: 'E', fret: 10, x: 8.13, y: 76.68, note: 'D', octave: 3 },
+                { string: 'E', fret: 11, x: 8.13, y: 46.68, note: 'D#', octave: 3 },
+                { string: 'E', fret: 12, x: 8.13, y: 15.92, note: 'E', octave: 3 },
+
+                // A String - x: 25.28
+                { string: 'A', fret: 0, x: 25.28, y: 376.68, note: 'A', octave: 2 },
+                { string: 'A', fret: 1, x: 25.28, y: 346.68, note: 'A#', octave: 2 },
+                { string: 'A', fret: 2, x: 25.28, y: 316.68, note: 'B', octave: 2 },
+                { string: 'A', fret: 3, x: 25.28, y: 286.68, note: 'C', octave: 3 },
+                { string: 'A', fret: 4, x: 25.28, y: 256.68, note: 'C#', octave: 3 },
+                { string: 'A', fret: 5, x: 25.28, y: 226.68, note: 'D', octave: 3 },
+                { string: 'A', fret: 6, x: 25.28, y: 196.68, note: 'D#', octave: 3 },
+                { string: 'A', fret: 7, x: 25.28, y: 166.68, note: 'E', octave: 3 },
+                { string: 'A', fret: 8, x: 25.28, y: 136.68, note: 'F', octave: 3 },
+                { string: 'A', fret: 9, x: 25.28, y: 106.68, note: 'F#', octave: 3 },
+                { string: 'A', fret: 10, x: 25.28, y: 76.68, note: 'G', octave: 3 },
+                { string: 'A', fret: 11, x: 25.28, y: 46.68, note: 'G#', octave: 3 },
+                { string: 'A', fret: 12, x: 25.28, y: 15.92, note: 'A', octave: 3 },
+
+                // D String - x: 42.43
+                { string: 'D', fret: 0, x: 42.43, y: 376.68, note: 'D', octave: 3 },
+                { string: 'D', fret: 1, x: 42.43, y: 346.68, note: 'D#', octave: 3 },
+                { string: 'D', fret: 2, x: 42.43, y: 316.68, note: 'E', octave: 3 },
+                { string: 'D', fret: 3, x: 42.43, y: 286.68, note: 'F', octave: 3 },
+                { string: 'D', fret: 4, x: 42.43, y: 256.68, note: 'F#', octave: 3 },
+                { string: 'D', fret: 5, x: 42.43, y: 226.68, note: 'G', octave: 3 },
+                { string: 'D', fret: 6, x: 42.43, y: 196.68, note: 'G#', octave: 3 },
+                { string: 'D', fret: 7, x: 42.43, y: 166.68, note: 'A', octave: 3 },
+                { string: 'D', fret: 8, x: 42.43, y: 136.68, note: 'A#', octave: 3 },
+                { string: 'D', fret: 9, x: 42.43, y: 106.68, note: 'B', octave: 3 },
+                { string: 'D', fret: 10, x: 42.43, y: 76.68, note: 'C', octave: 4 },
+                { string: 'D', fret: 11, x: 42.43, y: 46.68, note: 'C#', octave: 4 },
+                { string: 'D', fret: 12, x: 42.43, y: 15.92, note: 'D', octave: 4 },
+
+                // G String - x: 59.54
+                { string: 'G', fret: 0, x: 59.54, y: 376.68, note: 'G', octave: 3 },
+                { string: 'G', fret: 1, x: 59.54, y: 346.68, note: 'G#', octave: 3 },
+                { string: 'G', fret: 2, x: 59.54, y: 316.68, note: 'A', octave: 3 },
+                { string: 'G', fret: 3, x: 59.54, y: 286.68, note: 'A#', octave: 3 },
+                { string: 'G', fret: 4, x: 59.54, y: 256.68, note: 'B', octave: 3 },
+                { string: 'G', fret: 5, x: 59.54, y: 226.68, note: 'C', octave: 4 },
+                { string: 'G', fret: 6, x: 59.54, y: 196.68, note: 'C#', octave: 4 },
+                { string: 'G', fret: 7, x: 59.54, y: 166.68, note: 'D', octave: 4 },
+                { string: 'G', fret: 8, x: 59.54, y: 136.68, note: 'D#', octave: 4 },
+                { string: 'G', fret: 9, x: 59.54, y: 106.68, note: 'E', octave: 4 },
+                { string: 'G', fret: 10, x: 59.54, y: 76.68, note: 'F', octave: 4 },
+                { string: 'G', fret: 11, x: 59.54, y: 46.68, note: 'F#', octave: 4 },
+                { string: 'G', fret: 12, x: 59.54, y: 15.92, note: 'G', octave: 4 },
+
+                // B String - x: 76.76
+                { string: 'B', fret: 0, x: 76.76, y: 376.68, note: 'B', octave: 3 },
+                { string: 'B', fret: 1, x: 76.76, y: 346.68, note: 'C', octave: 4 },
+                { string: 'B', fret: 2, x: 76.76, y: 316.68, note: 'C#', octave: 4 },
+                { string: 'B', fret: 3, x: 76.76, y: 286.68, note: 'D', octave: 4 },
+                { string: 'B', fret: 4, x: 76.76, y: 256.68, note: 'D#', octave: 4 },
+                { string: 'B', fret: 5, x: 76.76, y: 226.68, note: 'E', octave: 4 },
+                { string: 'B', fret: 6, x: 76.76, y: 196.68, note: 'F', octave: 4 },
+                { string: 'B', fret: 7, x: 76.76, y: 166.68, note: 'F#', octave: 4 },
+                { string: 'B', fret: 8, x: 76.76, y: 136.68, note: 'G', octave: 4 },
+                { string: 'B', fret: 9, x: 76.76, y: 106.68, note: 'G#', octave: 4 },
+                { string: 'B', fret: 10, x: 76.76, y: 76.68, note: 'A', octave: 4 },
+                { string: 'B', fret: 11, x: 76.76, y: 46.68, note: 'A#', octave: 4 },
+                { string: 'B', fret: 12, x: 76.76, y: 15.92, note: 'B', octave: 4 },
+
+                // High E String - x: 94.01
+                { string: 'e', fret: 0, x: 94.01, y: 376.68, note: 'E', octave: 4 },
+                { string: 'e', fret: 1, x: 94.01, y: 346.68, note: 'F', octave: 4 },
+                { string: 'e', fret: 2, x: 94.01, y: 316.68, note: 'F#', octave: 4 },
+                { string: 'e', fret: 3, x: 94.01, y: 286.68, note: 'G', octave: 4 },
+                { string: 'e', fret: 4, x: 94.01, y: 256.68, note: 'G#', octave: 4 },
+                { string: 'e', fret: 5, x: 94.01, y: 226.68, note: 'A', octave: 4 },
+                { string: 'e', fret: 6, x: 94.01, y: 196.68, note: 'A#', octave: 4 },
+                { string: 'e', fret: 7, x: 94.01, y: 166.68, note: 'B', octave: 4 },
+                { string: 'e', fret: 8, x: 94.01, y: 136.68, note: 'C', octave: 5 },
+                { string: 'e', fret: 9, x: 94.01, y: 106.68, note: 'C#', octave: 5 },
+                { string: 'e', fret: 10, x: 94.01, y: 76.68, note: 'D', octave: 5 },
+                { string: 'e', fret: 11, x: 94.01, y: 46.68, note: 'D#', octave: 5 },
+                { string: 'e', fret: 12, x: 94.01, y: 15.92, note: 'E', octave: 5 }
+            ]
+        };
+
+        this.initializeAudio();
+        this.setupVolumeControls();
+        this.loadSVGs();
+            }
+
+        initializeAudio() {
+            try {
+                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                this.masterGain = this.audioContext.createGain();
+                this.chordGain = this.audioContext.createGain();
+
+                this.masterGain.connect(this.audioContext.destination);
+                this.chordGain.connect(this.masterGain);
+
+                this.masterGain.gain.value = 0.3;
+                this.chordGain.gain.value = 0.25;
+
+                this.log('🎵 Audio System: Ready');
+            } catch (error) {
+                this.log(`❌ Audio initialization failed: ${error.message}`);
+            }
+        }
+
+        setupVolumeControls() {
+            const masterVolume = document.getElementById('masterVolume');
+            const chordVolume = document.getElementById('chordVolume');
+
+            masterVolume.addEventListener('input', (e) => {
+                const value = e.target.value / 100;
+                this.masterGain.gain.value = value;
+                document.getElementById('masterVolumeValue').textContent = `${e.target.value}%`;
+            });
+
+            chordVolume.addEventListener('input', (e) => {
+                const value = e.target.value / 100;
+                this.chordGain.gain.value = value;
+                document.getElementById('chordVolumeValue').textContent = `${e.target.value}%`;
+            });
+        }
+
+            async loadSVGs() {
+            try {
+                this.log('🔄 Loading SVG files...');
+
+                // Load left SVG
+                const leftResponse = await fetch('Charts Magic18 SVG_C Left.svg');
+                if (!leftResponse.ok) {
+                    throw new Error(`Failed to load left SVG: ${leftResponse.status}`);
+                }
+                const leftSvgText = await leftResponse.text();
+
+                // Load right SVG
+                const rightResponse = await fetch('Charts Magic18 SVG_C Right.svg');
+                if (!rightResponse.ok) {
+                    throw new Error(`Failed to load right SVG: ${rightResponse.status}`);
+                }
+                const rightSvgText = await rightResponse.text();
+
+                // Insert SVGs into containers
+                const leftContainer = document.getElementById('leftSvgContainer');
+                const rightContainer = document.getElementById('rightSvgContainer');
+
+                leftContainer.innerHTML = leftSvgText + '<div class="interactive-overlay" id="leftOverlay"></div>';
+                rightContainer.innerHTML = rightSvgText + '<div class="interactive-overlay" id="rightOverlay"></div>';
+
+                this.log('✅ SVG files loaded successfully');
+
+                // Create interactive elements
+                setTimeout(() => {
+                    this.createInteractiveElements('left');
+                    this.createInteractiveElements('right');
+                }, 100);
+
+            } catch (error) {
+                this.log(`❌ Failed to load SVGs: ${error.message}`);
+                console.error('SVG loading error:', error);
+
+                // Show error message
+                document.getElementById('leftSvgContainer').innerHTML =
+                    `<div class="error">Failed to load left SVG: ${error.message}</div>`;
+                document.getElementById('rightSvgContainer').innerHTML =
+                    `<div class="error">Failed to load right SVG: ${error.message}</div>`;
+            }
+        }
+
+        createInteractiveElements(page) {
+            const overlayId = page + 'Overlay';
+            const overlay = document.getElementById(overlayId);
+
+            if (!overlay) {
+                this.log(`❌ Could not find overlay for ${page} page`);
+                return;
+            }
+
+            const elements = page === 'left' ? this.leftPageElements : this.rightPageElements;
+
+            // SVG dimensions from viewBox (612 x 792)
+            const svgWidth = 612;
+            const svgHeight = 792;
+
+            this.log(`📐 Creating responsive buttons for ${page.toUpperCase()} page`);
+
+            // Create chord block buttons with percentage positioning
+            elements.chordBlocks.forEach(chord => {
+                const button = document.createElement('div');
+                button.className = 'chord-button';
+
+                // Convert SVG coordinates to percentages
+                const leftPercent = (chord.x / svgWidth) * 100;
+                const topPercent = (chord.y / svgHeight) * 100;
+                const widthPercent = (chord.width / svgWidth) * 100;
+                const heightPercent = (chord.height / svgHeight) * 100;
+
+                button.style.left = leftPercent + '%';
+                button.style.top = topPercent + '%';
+                button.style.width = widthPercent + '%';
+                button.style.height = heightPercent + '%';
+
+                button.title = `${chord.chord} (${chord.roman}) - ${chord.notes.join(', ')}`;
+                button.dataset.chord = chord.chord;
+                button.dataset.roman = chord.roman;
+                button.dataset.notes = chord.notes.join(',');
+                button.dataset.page = page;
+
+                button.addEventListener('click', (e) => {
+                    this.playChord(chord, button, page);
+                });
+
+                overlay.appendChild(button);
+            });
+
+            // Create ingredient buttons with percentage positioning
+            elements.ingredients.forEach(ingredient => {
+                const button = document.createElement('div');
+                button.className = 'ingredient-button';
+
+                // Convert SVG coordinates to percentages (centered positioning)
+                const leftPercent = ((ingredient.x - ingredient.size / 2) / svgWidth) * 100;
+                const topPercent = ((ingredient.y - ingredient.size / 2) / svgHeight) * 100;
+                const sizePercent = (ingredient.size / svgWidth) * 100;
+
+                button.style.left = leftPercent + '%';
+                button.style.top = topPercent + '%';
+                button.style.width = sizePercent + '%';
+                button.style.height = sizePercent + '%';
+
+                button.title = `${ingredient.chord} ${ingredient.type}: ${ingredient.note}`;
+                button.dataset.note = ingredient.note;
+                button.dataset.type = ingredient.type;
+                button.dataset.chord = ingredient.chord;
+                button.dataset.page = page;
+
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.log(`🔸 Clicked ingredient: ${ingredient.chord} ${ingredient.type} (${ingredient.note})`);
+                    this.playNote(ingredient.note, 4);
+                    this.flashElement(button);
+                });
+
+                overlay.appendChild(button);
+            });
+
+            // Create fretboard note buttons with percentage positioning
+            elements.fretboardNotes.forEach(fretNote => {
+                const button = document.createElement('div');
+                button.className = 'fret-button';
+
+                // Use a standard fret button size (relative to SVG)
+                const buttonSize = 12; // pixels in original SVG
+                const leftPercent = ((fretNote.x - buttonSize / 2) / svgWidth) * 100;
+                const topPercent = ((fretNote.y - buttonSize / 2) / svgHeight) * 100;
+                const sizePercent = (buttonSize / svgWidth) * 100;
+
+                button.style.left = leftPercent + '%';
+                button.style.top = topPercent + '%';
+                button.style.width = sizePercent + '%';
+                button.style.height = sizePercent + '%';
+
+                button.title = `${fretNote.string} string, fret ${fretNote.fret}: ${fretNote.note}${fretNote.octave}`;
+                button.dataset.note = fretNote.note;
+                button.dataset.octave = fretNote.octave;
+                button.dataset.string = fretNote.string;
+                button.dataset.fret = fretNote.fret;
+                button.dataset.page = page;
+
+                button.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.log(`🎸 Clicked fret: ${fretNote.string} string, fret ${fretNote.fret} (${fretNote.note}${fretNote.octave})`);
+                    this.playNote(fretNote.note, fretNote.octave);
+                    this.flashElement(button);
+                });
+
+                overlay.appendChild(button);
+            });
+
+            this.log(`✅ Created ${elements.chordBlocks.length} chord buttons, ${elements.ingredients.length} ingredient buttons, and ${elements.fretboardNotes.length} fret buttons for ${page} page`);
+        }
+
+        playChord(chord, buttonElement, page) {
+            if (this.activeChord) {
+                this.activeChord.classList.remove('active');
+            }
+
+            buttonElement.classList.add('active');
+            this.activeChord = buttonElement;
+
+            this.log(`🎵 Playing: ${chord.chord} (${chord.roman}) [${chord.notes.join(', ')}] - ${page.toUpperCase()} page`);
+
+            // Play the chord notes simultaneously
+            chord.notes.forEach((note, index) => {
+                setTimeout(() => {
+                    this.playNote(note, 4, 0.8, this.chordGain);
+                }, index * 50); // Slight staggering for richness
+            });
+
+            // Remove active state after animation
+            setTimeout(() => {
+                buttonElement.classList.remove('active');
+                if (this.activeChord === buttonElement) {
+                    this.activeChord = null;
+                }
+            }, 1500);
+        }
+
+        playNote(note, octave = 4, duration = 0.5, gainNode = null) {
+            if (!this.audioContext) return;
+
+            const oscillator = this.audioContext.createOscillator();
+            const envelope = this.audioContext.createGain();
+
+            oscillator.connect(envelope);
+            envelope.connect(gainNode || this.chordGain);
+
+            oscillator.frequency.value = this.getFrequency(note, octave);
+            oscillator.type = 'sawtooth';
+
+            const now = this.audioContext.currentTime;
+            envelope.gain.setValueAtTime(0, now);
+            envelope.gain.linearRampToValueAtTime(0.3, now + 0.01);
+            envelope.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+            oscillator.start(now);
+            oscillator.stop(now + duration);
+        }
+
+        getFrequency(note, octave = 4) {
+            const noteFrequencies = {
+                'C': 261.63, 'C#': 277.18, 'Db': 277.18,
+                'D': 293.66, 'D#': 311.13, 'Eb': 311.13,
+                'E': 329.63, 'F': 349.23, 'F#': 369.99, 'Gb': 369.99,
+                'G': 392.00, 'G#': 415.30, 'Ab': 415.30,
+                'A': 440.00, 'A#': 466.16, 'Bb': 466.16,
+                'B': 493.88
+            };
+            const baseFreq = noteFrequencies[note] || 440;
+            // Calculate frequency for different octaves (4 is the base octave)
+            return baseFreq * Math.pow(2, octave - 4);
+        }
+
+        flashElement(element) {
+            element.classList.add('flash');
+            setTimeout(() => {
+                element.classList.remove('flash');
+            }, 300);
+        }
+
+        log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}`;
+            console.log(logEntry);
+
+            if (this.logElement) {
+                const div = document.createElement('div');
+                div.textContent = logEntry;
+                this.logElement.appendChild(div);
+                this.logElement.scrollTop = this.logElement.scrollHeight;
+
+                // Keep only last 20 entries
+                while (this.logElement.children.length > 20) {
+                    this.logElement.removeChild(this.logElement.firstChild);
+                }
+            }
+        }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const magic18System = new Magic18DirectSVGSystem();
+
+            // Enable audio on first user interaction
+            document.addEventListener('click', () => {
+                if (magic18System.audioContext && magic18System.audioContext.state === 'suspended') {
+                    magic18System.audioContext.resume().then(() => {
+                        magic18System.log('🔊 Audio context resumed');
+                    });
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+
+</html>

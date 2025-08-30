@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 Click Data Analyzer</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .upload-area {
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+        }
+        .upload-area.dragover {
+            background: #3a3a3a;
+            border-color: #66BB6A;
+        }
+        #fileInput {
+            margin: 20px 0;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 5px;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        .click-item {
+            background: #333;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #4CAF50;
+        }
+        .chord-analysis {
+            background: #1e4a28;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .progression-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #66BB6A;
+            margin: 15px 0;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magic 18 Click Data Analyzer</h1>
+    <p>Upload your magic18-session JSON file to analyze the chord progression you clicked!</p>
+
+    <div class="upload-area" id="uploadArea">
+        <p>📁 Drag and drop your JSON file here, or click to select</p>
+        <input type="file" id="fileInput" accept=".json" />
+        <button class="button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+        <h2>Click Analysis Results</h2>
+        <div id="analysisContent"></div>
+    </div>
+
+    <script>
+        // Magic 18 Chord Mapping - More flexible coordinate ranges
+        const chordMapping = {
+            // Based on typical SVG layouts - we'll use percentage-based detection
+            chords: {
+                // Row 1 - Top section
+                'C': { minX: 0, maxX: 200, minY: 0, maxY: 150 },
+                'F': { minX: 200, maxX: 400, minY: 0, maxY: 150 },
+                'Bb': { minX: 400, maxX: 600, minY: 0, maxY: 150 },
+                'Eb': { minX: 600, maxX: 800, minY: 0, maxY: 150 },
+                
+                // Row 2 - Second section  
+                'Dm': { minX: 0, maxX: 200, minY: 150, maxY: 300 },
+                'Gm': { minX: 200, maxX: 400, minY: 150, maxY: 300 },
+                'Cm': { minX: 400, maxX: 600, minY: 150, maxY: 300 },
+                'Fm': { minX: 600, maxX: 800, minY: 150, maxY: 300 },
+                
+                // Row 3 - Third section
+                'Em': { minX: 0, maxX: 200, minY: 300, maxY: 450 },
+                'Am': { minX: 200, maxX: 400, minY: 300, maxY: 450 },
+                'D7': { minX: 400, maxX: 600, minY: 300, maxY: 450 },
+                'G7': { minX: 600, maxX: 800, minY: 300, maxY: 450 },
+                
+                // Row 4 - Fourth section
+                'G': { minX: 0, maxX: 200, minY: 450, maxY: 600 },
+                'C7': { minX: 200, maxX: 400, minY: 450, maxY: 600 },
+                'F7': { minX: 400, maxX: 600, minY: 450, maxY: 600 },
+                'Bb7': { minX: 600, maxX: 800, minY: 450, maxY: 600 },
+                
+                // Additional chords - flexible positioning
+                'A7': { minX: 100, maxX: 300, minY: 200, maxY: 400 },
+                'E7': { minX: 300, maxX: 500, minY: 200, maxY: 400 },
+                'B7': { minX: 500, maxX: 700, minY: 200, maxY: 400 },
+                'B°': { minX: 50, maxX: 250, minY: 100, maxY: 300 },
+                'D°': { minX: 250, maxX: 450, minY: 100, maxY: 300 },
+                'Ab': { minX: 450, maxX: 650, minY: 100, maxY: 300 }
+            }
+        };
+
+        function identifyChord(x, y) {
+            // Handle undefined coordinates
+            if (x === undefined || y === undefined || x === null || y === null) {
+                return `Unknown (${x}, ${y})`;
+            }
+            
+            // Convert to numbers if they're strings
+            x = parseFloat(x);
+            y = parseFloat(y);
+            
+            if (isNaN(x) || isNaN(y)) {
+                return `Invalid Coordinates (${x}, ${y})`;
+            }
+            
+            // Check all chords
+            for (let [chordName, coords] of Object.entries(chordMapping.chords)) {
+                if (x >= coords.minX && x <= coords.maxX && 
+                    y >= coords.minY && y <= coords.maxY) {
+                    return chordName;
+                }
+            }
+            
+            // If no match found, try a more flexible approach based on general areas
+            if (x < 200) {
+                if (y < 150) return 'C (Left-Top)';
+                else if (y < 300) return 'Dm (Left-Mid)';
+                else if (y < 450) return 'Em (Left-Low)';
+                else return 'G (Left-Bottom)';
+            } else if (x < 400) {
+                if (y < 150) return 'F (Center-Top)';
+                else if (y < 300) return 'Gm (Center-Mid)';
+                else if (y < 450) return 'Am (Center-Low)';
+                else return 'C7 (Center-Bottom)';
+            } else if (x < 600) {
+                if (y < 150) return 'Bb (Right-Top)';
+                else if (y < 300) return 'Cm (Right-Mid)';
+                else if (y < 450) return 'D7 (Right-Low)';
+                else return 'F7 (Right-Bottom)';
+            } else {
+                if (y < 150) return 'Eb (Far-Right-Top)';
+                else if (y < 300) return 'Fm (Far-Right-Mid)';
+                else if (y < 450) return 'G7 (Far-Right-Low)';
+                else return 'Bb7 (Far-Right-Bottom)';
+            }
+        }
+
+        function analyzeHarmonicProgression(chords) {
+            const progressionAnalysis = [];
+            
+            // Common progression patterns
+            const patterns = {
+                'I-vi-IV-V': ['C', 'Am', 'F', 'G'],
+                'vi-IV-I-V': ['Am', 'F', 'C', 'G'],
+                'I-V-vi-IV': ['C', 'G', 'Am', 'F'],
+                'ii-V-I': ['Dm', 'G', 'C']
+            };
+
+            // Analyze for patterns
+            const chordNames = chords.map(c => c.chord);
+            
+            for (let [patternName, pattern] of Object.entries(patterns)) {
+                for (let i = 0; i <= chordNames.length - pattern.length; i++) {
+                    const slice = chordNames.slice(i, i + pattern.length);
+                    if (JSON.stringify(slice) === JSON.stringify(pattern)) {
+                        progressionAnalysis.push({
+                            pattern: patternName,
+                            position: i,
+                            chords: slice
+                        });
+                    }
+                }
+            }
+
+            return progressionAnalysis;
+        }
+
+        function processJsonData(jsonData) {
+            const analysisContent = document.getElementById('analysisContent');
+            
+            // Debug: Show the JSON structure
+            console.log('JSON Data Structure:', jsonData);
+            
+            // Try different possible data structures
+            let clicks = [];
+            
+            if (jsonData.clicks) {
+                clicks = jsonData.clicks;
+            } else if (jsonData.clickData) {
+                clicks = jsonData.clickData;
+            } else if (jsonData.events) {
+                clicks = jsonData.events;
+            } else if (Array.isArray(jsonData)) {
+                clicks = jsonData;
+            } else {
+                // Try to find any array in the JSON
+                for (let key in jsonData) {
+                    if (Array.isArray(jsonData[key])) {
+                        clicks = jsonData[key];
+                        break;
+                    }
+                }
+            }
+            
+            if (clicks.length === 0) {
+                let debugInfo = `<div class="chord-analysis">
+                    <h3>🔍 Debug Information:</h3>
+                    <p><strong>JSON Keys Found:</strong> ${Object.keys(jsonData).join(', ')}</p>
+                    <p><strong>JSON Structure:</strong></p>
+                    <pre style="background: #333; padding: 10px; border-radius: 5px; max-height: 200px; overflow-y: auto;">${JSON.stringify(jsonData, null, 2)}</pre>
+                </div>`;
+                analysisContent.innerHTML = debugInfo + '<p>No click data found. Please check the JSON structure above.</p>';
+                return;
+            }
+
+            // Sort clicks by timestamp if available
+            if (clicks[0] && clicks[0].timestamp) {
+                clicks.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+            }
+
+            // Identify chords for each click
+            const chordClicks = clicks.map((click, index) => {
+                // Handle different coordinate formats
+                let x = click.x || click.clientX || click.pageX || click.offsetX;
+                let y = click.y || click.clientY || click.pageY || click.offsetY;
+                
+                // Handle nested coordinate objects
+                if (click.coordinates) {
+                    x = click.coordinates.x;
+                    y = click.coordinates.y;
+                } else if (click.position) {
+                    x = click.position.x;
+                    y = click.position.y;
+                }
+                
+                return {
+                    order: index + 1,
+                    timestamp: click.timestamp || Date.now() - (clicks.length - index) * 1000,
+                    coordinates: { x: x, y: y },
+                    chord: identifyChord(x, y),
+                    time: click.timestamp ? new Date(click.timestamp).toLocaleTimeString() : 'Unknown',
+                    raw: click // Keep raw data for debugging
+                };
+            });
+
+            // Generate HTML
+            let html = '<div class="chord-analysis">';
+            html += '<h3>🎵 Your Chord Progression:</h3>';
+            html += '<div class="progression-display">';
+            html += chordClicks.map(c => c.chord).join(' → ');
+            html += '</div>';
+            html += `<p><strong>Total clicks:</strong> ${chordClicks.length}</p>`;
+            html += '</div>';
+
+            // Harmonic analysis
+            const patterns = analyzeHarmonicProgression(chordClicks);
+            if (patterns.length > 0) {
+                html += '<div class="chord-analysis">';
+                html += '<h3>🎼 Detected Patterns:</h3>';
+                patterns.forEach(pattern => {
+                    html += `<p><strong>${pattern.pattern}:</strong> ${pattern.chords.join(' → ')}</p>`;
+                });
+                html += '</div>';
+            }
+
+            // Individual click details
+            html += '<h3>📍 Click Details:</h3>';
+            chordClicks.forEach(click => {
+                html += `<div class="click-item">`;
+                html += `<strong>Click #${click.order}: ${click.chord}</strong><br>`;
+                html += `Time: ${click.time}<br>`;
+                html += `Coordinates: (${click.coordinates.x}, ${click.coordinates.y})<br>`;
+                
+                // Show raw data for debugging if coordinates are undefined
+                if (click.coordinates.x === undefined || click.coordinates.y === undefined) {
+                    html += `<details style="margin-top: 10px;">`;
+                    html += `<summary style="cursor: pointer; color: #ff6b6b;">🐛 Debug Raw Data</summary>`;
+                    html += `<pre style="background: #333; padding: 5px; margin-top: 5px; font-size: 12px;">${JSON.stringify(click.raw, null, 2)}</pre>`;
+                    html += `</details>`;
+                }
+                html += `</div>`;
+            });
+
+            analysisContent.innerHTML = html;
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const results = document.getElementById('results');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                alert('Please select a JSON file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    processJsonData(jsonData);
+                    results.style.display = 'block';
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Test data button for development
+        function loadTestData() {
+            const testData = {
+                clicks: [
+                    { x: 150, y: 100, timestamp: Date.now() - 5000 },
+                    { x: 250, y: 200, timestamp: Date.now() - 4000 },
+                    { x: 350, y: 150, timestamp: Date.now() - 3000 },
+                    { x: 450, y: 100, timestamp: Date.now() - 2000 },
+                    { x: 250, y: 300, timestamp: Date.now() - 1000 }
+                ]
+            };
+            processJsonData(testData);
+            results.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

@@ -37,7 +37,7 @@ import { PageAuthorComponent } from '@pages/page-author/page-author.component';
 import { StatsComponent } from '@pages/stats/stats.component';
 import { StoreComponent } from '@pages/store/store.component';
 import { PremiumAuthComponent } from '@components/premium-auth/premium-auth.component';
-import { CubesDemoComponent } from '@components/cubes-demo/cubes-demo.component';
+import { ChordDemoComponent } from '@components/chord-demo/chord-demo.component';
 
 @Injectable()
 export class SongResolver {
@@ -82,7 +82,7 @@ const routes: Routes = [
   { path: 'metronome', component: MetroPageComponent, pathMatch: 'prefix' },
   { path: 'fifths', component: PageFifthCircleComponent, pathMatch: 'prefix' },
   { path: 'chord-detect', component: MidiChordDetectSimpleComponent, pathMatch: 'prefix' },
-  { path: 'cubes', component: CubesDemoComponent, pathMatch: 'prefix' },
+  { path: 'chord-charts', component: ChordDemoComponent, pathMatch: 'prefix' },
   { path: 'learn-fifths', component: LearnFifthsComponent, pathMatch: 'prefix' },
   { path: 'learn-rythm', component: AbcCheckerComponent, pathMatch: 'prefix' },
   { path: 'full-score', component: AbcCheckerFullScoreComponent, pathMatch: 'prefix' },

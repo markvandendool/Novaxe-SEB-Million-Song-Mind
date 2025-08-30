@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 Precise Chord Mapper</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+
+        .section {
+            background: #2a2a2a;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .chord-mapping {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .chord-item {
+            background: #333;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .major-section {
+            border-left-color: #4CAF50;
+        }
+
+        .applied-section {
+            border-left-color: #2196F3;
+        }
+
+        .minor-section {
+            border-left-color: #FF9800;
+        }
+
+        .coordinates {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+        }
+
+        .progression-display {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #66BB6A;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #1e4a28;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Magic 18 Precise Chord Mapping</h1>
+    <p>Based on your ascending order clicks, here's the definitive coordinate mapping:</p>
+
+    <div class="progression-display">
+        <div>MAJOR: I - ii - iii - IV - V - vi - vii°</div>
+        <div>APPLIED: I7 - II7 - III7 - VI7 - VII7</div>
+        <div>MINOR: i - ♭III - iv - v - ♭VI - ♭VII</div>
+    </div>
+
+    <div class="section">
+        <h2>🎵 MAJOR SECTION (Roman: I ii iii IV V vi vii°)</h2>
+        <div class="chord-mapping">
+            <div class="chord-item major-section">
+                <strong>1. C Major (I)</strong><br>
+                <span class="coordinates">Left Page: (51, 64)</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>2. D minor (ii)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>3. E minor (iii)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>4. F Major (IV)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>5. G Major (V)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>6. A minor (vi)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+            <div class="chord-item major-section">
+                <strong>7. B diminished (vii°)</strong><br>
+                <span class="coordinates">Left Page: TBD</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎶 APPLIED DOMINANTS SECTION (Roman: I7 II7 III7 VI7 VII7)</h2>
+        <div class="chord-mapping">
+            <div class="chord-item applied-section">
+                <strong>8. C7 (I7)</strong><br>
+                <span class="coordinates">Page: TBD</span>
+            </div>
+            <div class="chord-item applied-section">
+                <strong>9. D7 (II7)</strong><br>
+                <span class="coordinates">Page: TBD</span>
+            </div>
+            <div class="chord-item applied-section">
+                <strong>10. E7 (III7)</strong><br>
+                <span class="coordinates">Page: TBD</span>
+            </div>
+            <div class="chord-item applied-section">
+                <strong>11. A7 (VI7)</strong><br>
+                <span class="coordinates">Page: TBD</span>
+            </div>
+            <div class="chord-item applied-section">
+                <strong>12. B7 (VII7)</strong><br>
+                <span class="coordinates">Page: TBD</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🎵 MINOR SECTION (Roman: i ♭III iv v ♭VI ♭VII)</h2>
+        <div class="chord-mapping">
+            <div class="chord-item minor-section">
+                <strong>13. C minor (i)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+            <div class="chord-item minor-section">
+                <strong>14. E♭ Major (♭III)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+            <div class="chord-item minor-section">
+                <strong>15. F minor (iv)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+            <div class="chord-item minor-section">
+                <strong>16. G minor (v)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+            <div class="chord-item minor-section">
+                <strong>17. A♭ Major (♭VI)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+            <div class="chord-item minor-section">
+                <strong>18. B♭ Major (♭VII)</strong><br>
+                <span class="coordinates">Right Page: TBD</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🔍 Next Steps</h2>
+        <p>Now I'll extract all 18 coordinates from your JSON file and create the perfect mapping system!</p>
+        <button onclick="loadAscendingData()"
+            style="background: #4CAF50; color: white; padding: 15px 30px; border: none; border-radius: 5px; font-size: 16px; cursor: pointer;">
+            Load Ascending Data & Create Perfect Mapping
+        </button>
+    </div>
+
+    <script>
+        function loadAscendingData() {
+            // This will be updated with the actual coordinate extraction
+            alert('Ready to extract coordinates from magic18-ascending.json!');
+        }
+    </script>
+</body>
+
+</html>

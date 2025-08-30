@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 Chord Progression Player - Novaxe Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .main-container {
+            display: flex;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* SVG Viewer Area */
+        .svg-viewer-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: auto;
+        }
+
+        .svg-spread {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        .svg-page {
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: crosshair;
+            transition: all 0.3s ease;
+        }
+
+        .svg-page:hover {
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .svg-page object {
+            display: block;
+            width: 400px;
+            height: auto;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        /* Click Markers */
+        .click-marker {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+            background: rgba(0, 255, 136, 0.3);
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            animation: pulse 2s infinite;
+            z-index: 100;
+        }
+
+        .click-marker.selected {
+            border-color: #ff6b35;
+            background: rgba(255, 107, 53, 0.3);
+            animation: glow 1s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px rgba(255, 107, 53, 0.5); }
+            100% { box-shadow: 0 0 20px rgba(255, 107, 53, 0.8); }
+        }
+
+        /* Chord Progression Player */
+        .chord-player-container {
+            width: 500px;
+            background: rgba(0, 0, 0, 0.8);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            position: relative;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .player-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 200;
+        }
+
+        .player-title {
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .collapse-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background 0.2s ease;
+        }
+
+        .collapse-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .player-content {
+            padding: 20px;
+            flex: 1;
+        }
+
+        /* Control Bar */
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #00ff88 0%, #00d4aa 100%);
+            color: #1a1a2e;
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff4757 0%, #ff3742 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* Chord Sections */
+        .chord-section {
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #00ff88;
+        }
+
+        .section-count {
+            background: rgba(0, 255, 136, 0.2);
+            color: #00ff88;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .chord-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .chord-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chord-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #00ff88;
+            transform: translateY(-2px);
+        }
+
+        .chord-card.playing {
+            background: linear-gradient(135deg, #00ff88 0%, #00d4aa 100%);
+            color: #1a1a2e;
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .chord-symbol {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .chord-roman {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .chord-notes {
+            font-size: 10px;
+            font-family: 'Monaco', monospace;
+            opacity: 0.6;
+            line-height: 1.2;
+        }
+
+        /* Novaxe Integration Display */
+        .novaxe-display {
+            background: rgba(0, 255, 136, 0.05);
+            border: 1px solid rgba(0, 255, 136, 0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .integration-header {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00ff88;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .integration-data {
+            font-size: 12px;
+            font-family: 'Monaco', monospace;
+            line-height: 1.4;
+        }
+
+        .data-line {
+            margin: 3px 0;
+            padding: 2px 0;
+            border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+        }
+
+        .data-label {
+            color: rgba(255, 255, 255, 0.7);
+            width: 120px;
+            display: inline-block;
+        }
+
+        .data-value {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            background: rgba(255, 255, 255, 0.1);
+            height: 4px;
+            border-radius: 2px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #00ff88, #00d4aa);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Status Bar */
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(20px);
+            padding: 10px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            z-index: 300;
+        }
+
+        .status-left {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #00ff88;
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .chord-player-container {
+                width: 400px;
+            }
+            
+            .svg-page object {
+                width: 300px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .chord-player-container {
+                width: 100%;
+                height: 60%;
+            }
+            
+            .svg-spread {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .svg-page object {
+                width: 250px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <!-- SVG Viewer Container -->
+        <div class="svg-viewer-container">
+            <div class="svg-spread" id="svgSpread">
+                <!-- Left Page -->
+                <div class="svg-page" id="leftPage" data-page="left">
+                    <object data="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml" id="leftSvg">
+                        <embed src="Charts%20Magic18%20SVG_C%20Left.svg" type="image/svg+xml" />
+                        <img src="Charts%20Magic18%20SVG_C%20Left.svg" alt="Magic 18 Left Chart" />
+                    </object>
+                </div>
+                
+                <!-- Right Page -->
+                <div class="svg-page" id="rightPage" data-page="right">
+                    <object data="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml" id="rightSvg">
+                        <embed src="Charts%20Magic18%20SVG_C%20Right.svg" type="image/svg+xml" />
+                        <img src="Charts%20Magic18%20SVG_C%20Right.svg" alt="Magic 18 Right Chart" />
+                    </object>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chord Progression Player -->
+        <div class="chord-player-container" id="chordPlayer">
+            <div class="player-header">
+                <div class="player-title">Chord Progression Player</div>
+                <button class="collapse-btn" id="collapseBtn">🎵</button>
+            </div>
+            
+            <div class="player-content">
+                <!-- Control Bar -->
+                <div class="control-bar">
+                    <button class="btn btn-play" id="playBtn">▶️ Play</button>
+                    <button class="btn btn-stop" id="stopBtn">⏹ Stop</button>
+                    <button class="btn btn-secondary" id="exportBtn">📤 Export</button>
+                    <button class="btn btn-secondary" id="analyzeBtn">📊 Analyze</button>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+
+                <!-- Current Novaxe Integration -->
+                <div class="novaxe-display" id="currentNovaxe">
+                    <div class="integration-header">
+                        🎵 Current Chord - Novaxe Integration
+                    </div>
+                    <div class="integration-data" id="integrationData">
+                        <div class="data-line">
+                            <span class="data-label">Chord:</span>
+                            <span class="data-value" id="currentChord">Ready to play...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Major Key Section -->
+                <div class="chord-section">
+                    <div class="section-header">
+                        <div class="section-title">Major Key (C Major)</div>
+                        <div class="section-count">7 chords</div>
+                    </div>
+                    <div class="chord-grid" id="majorChords">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Applied Dominants Section -->
+                <div class="chord-section">
+                    <div class="section-header">
+                        <div class="section-title">Applied Dominants</div>
+                        <div class="section-count">5 chords</div>
+                    </div>
+                    <div class="chord-grid" id="appliedChords">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Minor Key Section -->
+                <div class="chord-section">
+                    <div class="section-header">
+                        <div class="section-title">Minor Key (C Natural Minor)</div>
+                        <div class="section-count">7 chords</div>
+                    </div>
+                    <div class="chord-grid" id="minorChords">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>Player Active</span>
+            </div>
+            <div class="status-indicator">
+                <span>Total Chords: <span id="totalChords">19</span></span>
+            </div>
+            <div class="status-indicator">
+                <span id="playbackStatus">Ready</span>
+            </div>
+        </div>
+        <div class="status-right">
+            <span>Magic 18 Chord Progression Player v1.0</span>
+        </div>
+    </div>
+
+    <script>
+        // Magic 18 Chord Progression Player
+        class ChordProgressionPlayer {
+            constructor() {
+                this.chordSequence = [
+                    // Major Key Chords
+                    { symbol: 'C', roman: 'I', notes: ['C', 'E', 'G'], type: 'major', function: 'tonic' },
+                    { symbol: 'Dm', roman: 'ii', notes: ['D', 'F', 'A'], type: 'minor', function: 'supertonic' },
+                    { symbol: 'Em', roman: 'iii', notes: ['E', 'G', 'B'], type: 'minor', function: 'mediant' },
+                    { symbol: 'F', roman: 'IV', notes: ['F', 'A', 'C'], type: 'major', function: 'subdominant' },
+                    { symbol: 'G', roman: 'V', notes: ['G', 'B', 'D'], type: 'major', function: 'dominant' },
+                    { symbol: 'Am', roman: 'vi', notes: ['A', 'C', 'E'], type: 'minor', function: 'submediant' },
+                    { symbol: 'Bø', roman: 'viiø', notes: ['B', 'D', 'F'], type: 'diminished', function: 'leading_tone' },
+                    
+                    // Applied Dominants
+                    { symbol: 'C7', roman: 'I7', notes: ['C', 'E', 'G', 'Bb'], type: 'dominant7', function: 'applied_to_IV' },
+                    { symbol: 'D7', roman: 'II7', notes: ['D', 'F#', 'A', 'C'], type: 'dominant7', function: 'applied_to_V' },
+                    { symbol: 'E7', roman: 'III7', notes: ['E', 'G#', 'B', 'D'], type: 'dominant7', function: 'applied_to_vi' },
+                    { symbol: 'A7', roman: 'VI7', notes: ['A', 'C#', 'E', 'G'], type: 'dominant7', function: 'applied_to_ii' },
+                    { symbol: 'B7', roman: 'VII7', notes: ['B', 'D#', 'F#', 'A'], type: 'dominant7', function: 'applied_to_iii' },
+                    
+                    // Minor Key Chords
+                    { symbol: 'Cm', roman: 'i', notes: ['C', 'Eb', 'G'], type: 'minor', function: 'tonic_minor' },
+                    { symbol: 'Dø', roman: 'iiø', notes: ['D', 'F', 'Ab'], type: 'diminished', function: 'supertonic_minor' },
+                    { symbol: 'Eb', roman: 'bIII', notes: ['Eb', 'G', 'Bb'], type: 'major', function: 'mediant_minor' },
+                    { symbol: 'Fm', roman: 'iv', notes: ['F', 'Ab', 'C'], type: 'minor', function: 'subdominant_minor' },
+                    { symbol: 'Gm', roman: 'v', notes: ['G', 'Bb', 'D'], type: 'minor', function: 'dominant_minor' },
+                    { symbol: 'Ab', roman: 'bVI', notes: ['Ab', 'C', 'Eb'], type: 'major', function: 'submediant_minor' },
+                    { symbol: 'Bb', roman: 'bVII', notes: ['Bb', 'D', 'F'], type: 'major', function: 'subtonic_minor' }
+                ];
+                
+                this.currentChordIndex = -1;
+                this.isPlaying = false;
+                this.playInterval = null;
+                this.tempo = 120; // BPM
+                
+                this.initializePlayer();
+            }
+
+            initializePlayer() {
+                console.log('🎵 Initializing Magic 18 Chord Progression Player');
+                this.setupEventListeners();
+                this.populateChordSections();
+                this.setupSVGClickDetection();
+                
+                console.log('📊 Loaded chord sequence:', this.chordSequence);
+            }
+
+            setupEventListeners() {
+                document.getElementById('playBtn').addEventListener('click', () => this.startPlayback());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopPlayback());
+                document.getElementById('exportBtn').addEventListener('click', () => this.exportProgression());
+                document.getElementById('analyzeBtn').addEventListener('click', () => this.analyzeProgression());
+                document.getElementById('collapseBtn').addEventListener('click', () => this.togglePlayer());
+            }
+
+            populateChordSections() {
+                // Major chords (0-6)
+                const majorContainer = document.getElementById('majorChords');
+                const majorChords = this.chordSequence.slice(0, 7);
+                majorContainer.innerHTML = majorChords.map((chord, index) => this.createChordCard(chord, index)).join('');
+
+                // Applied dominants (7-11)
+                const appliedContainer = document.getElementById('appliedChords');
+                const appliedChords = this.chordSequence.slice(7, 12);
+                appliedContainer.innerHTML = appliedChords.map((chord, index) => this.createChordCard(chord, index + 7)).join('');
+
+                // Minor chords (12-18)
+                const minorContainer = document.getElementById('minorChords');
+                const minorChords = this.chordSequence.slice(12);
+                minorContainer.innerHTML = minorChords.map((chord, index) => this.createChordCard(chord, index + 12)).join('');
+            }
+
+            createChordCard(chord, index) {
+                return `
+                    <div class="chord-card" data-chord-index="${index}" onclick="player.playChord(${index})">
+                        <div class="chord-symbol">${chord.symbol}</div>
+                        <div class="chord-roman">${chord.roman}</div>
+                        <div class="chord-notes">${chord.notes.join(' ')}</div>
+                    </div>
+                `;
+            }
+
+            setupSVGClickDetection() {
+                document.getElementById('leftPage').addEventListener('click', (e) => this.handleSVGClick(e, 'left'));
+                document.getElementById('rightPage').addEventListener('click', (e) => this.handleSVGClick(e, 'right'));
+            }
+
+            handleSVGClick(event, page) {
+                const rect = event.currentTarget.getBoundingClientRect();
+                const x = event.clientX - rect.left;
+                const y = event.clientY - rect.top;
+                
+                // Detect chord based on click position
+                const detectedChord = this.detectChordFromPosition(x, y, page);
+                if (detectedChord !== -1) {
+                    this.playChord(detectedChord);
+                    this.highlightChordInSequence(detectedChord);
+                }
+                
+                console.log('🎯 SVG Click:', { x, y, page, detectedChord });
+            }
+
+            detectChordFromPosition(x, y, page) {
+                // Simple chord detection based on click regions
+                // This would be enhanced with actual SVG analysis
+                const regions = [
+                    { x: 50, y: 50, width: 60, height: 40, chord: 0 },   // C
+                    { x: 120, y: 50, width: 60, height: 40, chord: 1 },  // Dm
+                    { x: 190, y: 50, width: 60, height: 40, chord: 2 },  // Em
+                    { x: 260, y: 50, width: 60, height: 40, chord: 3 },  // F
+                    { x: 330, y: 50, width: 60, height: 40, chord: 4 },  // G
+                    { x: 50, y: 100, width: 60, height: 40, chord: 5 },  // Am
+                    { x: 120, y: 100, width: 60, height: 40, chord: 6 }, // Bø
+                    // Add more regions for applied dominants and minor chords
+                ];
+
+                for (const region of regions) {
+                    if (x >= region.x && x <= region.x + region.width &&
+                        y >= region.y && y <= region.y + region.height) {
+                        return region.chord;
+                    }
+                }
+                
+                return -1; // No chord detected
+            }
+
+            playChord(index) {
+                if (index < 0 || index >= this.chordSequence.length) return;
+
+                this.currentChordIndex = index;
+                const chord = this.chordSequence[index];
+                
+                // Clear previous highlights
+                document.querySelectorAll('.chord-card').forEach(card => card.classList.remove('playing'));
+                
+                // Highlight current chord
+                const chordCard = document.querySelector(`[data-chord-index="${index}"]`);
+                if (chordCard) {
+                    chordCard.classList.add('playing');
+                }
+
+                // Update Novaxe integration display
+                this.updateNovaxeDisplay(chord);
+                
+                // Generate and process Novaxe mappings
+                this.processNovaxeIntegration(chord, index);
+                
+                console.log('🎵 Playing chord:', chord);
+            }
+
+            updateNovaxeDisplay(chord) {
+                const integrationData = document.getElementById('integrationData');
+                const novaxeMapping = this.generateNovaxeMapping(chord);
+                
+                integrationData.innerHTML = `
+                    <div class="data-line">
+                        <span class="data-label">Chord:</span>
+                        <span class="data-value">${chord.symbol} (${chord.roman})</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">Notes:</span>
+                        <span class="data-value">${chord.notes.join(' ')}</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">Function:</span>
+                        <span class="data-value">${chord.function}</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">Braid ID:</span>
+                        <span class="data-value">${novaxeMapping.braidChord.braidId}</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">MIDI Channel:</span>
+                        <span class="data-value">${novaxeMapping.midiEvents[0].channel}</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">Cube Position:</span>
+                        <span class="data-value">(${novaxeMapping.cubePosition.x.toFixed(2)}, ${novaxeMapping.cubePosition.y.toFixed(2)}, ${novaxeMapping.cubePosition.z.toFixed(2)})</span>
+                    </div>
+                    <div class="data-line">
+                        <span class="data-label">Frequencies:</span>
+                        <span class="data-value">${novaxeMapping.frequencies.join('Hz, ')}Hz</span>
+                    </div>
+                `;
+            }
+
+            generateNovaxeMapping(chord) {
+                return {
+                    braidChord: {
+                        braidId: `braid_${chord.symbol.replace('#', 'sharp').replace('b', 'flat')}_${Date.now()}`,
+                        chordType: chord.type,
+                        voicing: 'root_position',
+                        braidPattern: this.calculateBraidPattern(chord),
+                        harmonicSeries: this.calculateHarmonicSeries(chord)
+                    },
+                    midiEvents: chord.notes.map((note, index) => ({
+                        channel: 1,
+                        noteNumber: this.noteToMIDI(note),
+                        velocity: 100 - (index * 5),
+                        duration: 480,
+                        timestamp: Date.now() + (index * 50)
+                    })),
+                    cubePosition: {
+                        x: (this.currentChordIndex % 7) / 3.5 - 1,
+                        y: Math.floor(this.currentChordIndex / 7) / 3 - 1,
+                        z: chord.type === 'major' ? 0.5 : chord.type === 'minor' ? 0 : -0.5
+                    },
+                    frequencies: chord.notes.map(note => this.noteToFrequency(note)),
+                    automationData: this.generateAutomationData(chord)
+                };
+            }
+
+            calculateBraidPattern(chord) {
+                const basePattern = [1, 3, 5];
+                if (chord.notes.length > 3) basePattern.push(7);
+                if (chord.type === 'diminished') basePattern[2] = 4.5; // b5
+                return basePattern;
+            }
+
+            calculateHarmonicSeries(chord) {
+                const root = this.noteToFrequency(chord.notes[0]);
+                return [root, root * 2, root * 3, root * 4, root * 5];
+            }
+
+            noteToMIDI(note) {
+                const noteMap = {
+                    'C': 60, 'C#': 61, 'Db': 61, 'D': 62, 'D#': 63, 'Eb': 63,
+                    'E': 64, 'F': 65, 'F#': 66, 'Gb': 66, 'G': 67, 'G#': 68,
+                    'Ab': 68, 'A': 69, 'A#': 70, 'Bb': 70, 'B': 71
+                };
+                return noteMap[note] || 60;
+            }
+
+            noteToFrequency(note) {
+                const noteMap = {
+                    'C': 261.63, 'C#': 277.18, 'Db': 277.18, 'D': 293.66, 'D#': 311.13, 'Eb': 311.13,
+                    'E': 329.63, 'F': 349.23, 'F#': 369.99, 'Gb': 369.99, 'G': 392.00, 'G#': 415.30,
+                    'Ab': 415.30, 'A': 440.00, 'A#': 466.16, 'Bb': 466.16, 'B': 493.88
+                };
+                return noteMap[note] || 440.00;
+            }
+
+            generateAutomationData(chord) {
+                return {
+                    volume: chord.function.includes('dominant') ? 0.8 : 0.6,
+                    pan: (this.currentChordIndex - 9) / 9,
+                    reverb: chord.type === 'diminished' ? 0.7 : 0.4,
+                    filter: chord.function.includes('minor') ? 0.3 : 0.6
+                };
+            }
+
+            processNovaxeIntegration(chord, index) {
+                const mapping = this.generateNovaxeMapping(chord);
+                
+                // Send to Novaxe systems
+                this.sendToBraidSystem(mapping.braidChord);
+                this.sendToMidiEngine(mapping.midiEvents);
+                this.updateCubeArchitecture(mapping.cubePosition);
+                this.processAutomation(mapping.automationData);
+                
+                console.log('🧬 Novaxe Integration:', mapping);
+            }
+
+            sendToBraidSystem(braidData) {
+                console.log('🧬 Braid System:', braidData);
+                // Integration point for actual Novaxe braid system
+            }
+
+            sendToMidiEngine(midiEvents) {
+                console.log('🎹 MIDI Engine:', midiEvents);
+                // Integration point for actual Novaxe MIDI system
+            }
+
+            updateCubeArchitecture(cubeData) {
+                console.log('🧊 Cube Architecture:', cubeData);
+                // Integration point for actual Novaxe 3D cube system
+            }
+
+            processAutomation(automationData) {
+                console.log('⚡ Automation:', automationData);
+                // Integration point for actual Novaxe automation system
+            }
+
+            startPlayback() {
+                if (this.isPlaying) return;
+                
+                this.isPlaying = true;
+                this.currentChordIndex = -1;
+                document.getElementById('playbackStatus').textContent = 'Playing';
+                
+                const chordDuration = (60 / this.tempo) * 1000; // Duration per chord in ms
+                
+                this.playInterval = setInterval(() => {
+                    this.currentChordIndex++;
+                    
+                    if (this.currentChordIndex >= this.chordSequence.length) {
+                        this.stopPlayback();
+                        return;
+                    }
+                    
+                    this.playChord(this.currentChordIndex);
+                    this.updateProgress();
+                }, chordDuration);
+            }
+
+            stopPlayback() {
+                if (!this.isPlaying) return;
+                
+                this.isPlaying = false;
+                clearInterval(this.playInterval);
+                
+                // Clear highlights
+                document.querySelectorAll('.chord-card').forEach(card => card.classList.remove('playing'));
+                
+                document.getElementById('playbackStatus').textContent = 'Stopped';
+                document.getElementById('progressFill').style.width = '0%';
+                
+                this.currentChordIndex = -1;
+            }
+
+            updateProgress() {
+                const progress = ((this.currentChordIndex + 1) / this.chordSequence.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+            }
+
+            highlightChordInSequence(chordIndex) {
+                const chordCard = document.querySelector(`[data-chord-index="${chordIndex}"]`);
+                if (chordCard) {
+                    chordCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            exportProgression() {
+                const exportData = {
+                    title: 'Magic 18 Chord Progression',
+                    key: 'C Major / C Minor',
+                    chords: this.chordSequence,
+                    novaxeMappings: this.chordSequence.map(chord => this.generateNovaxeMapping(chord)),
+                    exported: new Date().toISOString(),
+                    version: '1.0'
+                };
+                
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `magic18-chord-progression-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                console.log('📤 Exported chord progression data');
+            }
+
+            analyzeProgression() {
+                const analysis = {
+                    totalChords: this.chordSequence.length,
+                    majorChords: this.chordSequence.filter(c => c.type === 'major').length,
+                    minorChords: this.chordSequence.filter(c => c.type === 'minor').length,
+                    diminishedChords: this.chordSequence.filter(c => c.type === 'diminished').length,
+                    dominantSevenths: this.chordSequence.filter(c => c.type === 'dominant7').length,
+                    keyAreas: ['C Major', 'C Natural Minor'],
+                    harmonicFunctions: [...new Set(this.chordSequence.map(c => c.function))],
+                    complexity: this.calculateComplexity()
+                };
+                
+                console.log('📊 Progression Analysis:', analysis);
+                alert(`Chord Progression Analysis:
+                
+Total Chords: ${analysis.totalChords}
+Major: ${analysis.majorChords} | Minor: ${analysis.minorChords} | Diminished: ${analysis.diminishedChords}
+Dominant 7ths: ${analysis.dominantSevenths}
+Key Areas: ${analysis.keyAreas.join(', ')}
+Complexity Score: ${analysis.complexity}/10`);
+            }
+
+            calculateComplexity() {
+                let score = 0;
+                score += this.chordSequence.filter(c => c.type === 'dominant7').length * 2;
+                score += this.chordSequence.filter(c => c.type === 'diminished').length * 1.5;
+                score += [...new Set(this.chordSequence.map(c => c.function))].length * 0.5;
+                return Math.min(Math.round(score), 10);
+            }
+
+            togglePlayer() {
+                const player = document.getElementById('chordPlayer');
+                player.style.display = player.style.display === 'none' ? 'flex' : 'none';
+            }
+        }
+
+        // Initialize the player
+        const player = new ChordProgressionPlayer();
+        
+        // Global access
+        window.ChordPlayer = player;
+        
+        console.log('🎵 Magic 18 Chord Progression Player Ready!');
+    </script>
+</body>
+</html>

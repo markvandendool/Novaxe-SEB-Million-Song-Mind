@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 - Pixel Perfect Interactive Widget</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin: 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .page {
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .page h2 {
+            color: #333;
+            margin: 0 0 20px 0;
+            text-align: center;
+            font-size: 1.5em;
+        }
+
+        .svg-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .svg-container svg,
+        .svg-container embed {
+            display: block;
+            max-width: 612px;
+            height: auto;
+            border: 2px solid #ddd;
+        }
+
+        /* Interactive overlay buttons - positioned exactly over SVG elements */
+        .interactive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .chord-button,
+        .scale-degree-button,
+        .chord-tone-button,
+        .fret-note-button,
+        .form-button {
+            position: absolute;
+            background: rgba(255, 255, 0, 0);
+            border: 2px solid transparent;
+            border-radius: 4px;
+            cursor: pointer;
+            pointer-events: all;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .chord-button:hover {
+            background: rgba(255, 255, 0, 0.3);
+            border-color: #FFD700;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+        }
+
+        .chord-button.active {
+            background: rgba(255, 255, 0, 0.5);
+            border-color: #FFD700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.8);
+        }
+
+        .scale-degree-button:hover {
+            background: rgba(0, 255, 255, 0.3);
+            border-color: #00FFFF;
+        }
+
+        .chord-tone-button:hover {
+            background: rgba(255, 0, 255, 0.3);
+            border-color: #FF00FF;
+        }
+
+        .fret-note-button:hover {
+            background: rgba(0, 255, 0, 0.3);
+            border-color: #00FF00;
+        }
+
+        .form-button:hover {
+            background: rgba(255, 165, 0, 0.3);
+            border-color: #FFA500;
+        }
+
+        /* Control Panel */
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #444;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .volume-control label {
+            min-width: 80px;
+            font-size: 0.9em;
+        }
+
+        .volume-control input {
+            width: 100px;
+        }
+
+        .log-display {
+            max-height: 100px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            margin-top: 10px;
+        }
+
+        .debug-info {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.8em;
+            display: none;
+        }
+
+        .debug-info.show {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>🎵 Magic 18 Pedagogical System 🎵</h1>
+        <p>Pixel-Perfect Interactive Audio Widget - Every Element is a Button</p>
+    </div>
+
+    <div class="container">
+        <div class="page">
+            <h2>𝛿Ÿ𝛬, Left Page â€¢ Major System</h2>
+            <div class="svg-container" id="leftSvgContainer">
+                <embed src="Charts Magic18 SVG_C Left.svg" type="image/svg+xml" id="leftSvg">
+                <div class="interactive-overlay" id="leftOverlay"></div>
+            </div>
+        </div>
+
+        <div class="page">
+            <h2>𝛿Ÿ𝛬, Right Page â€¢ Minor System</h2>
+            <div class="svg-container" id="rightSvgContainer">
+                <embed src="Charts Magic18 SVG_C Right.svg" type="image/svg+xml" id="rightSvg">
+                <div class="interactive-overlay" id="rightOverlay"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <div class="volume-control">
+            <label>Master Volume:</label>
+            <input type="range" id="masterVolume" min="0" max="100" value="30">
+            <span id="masterVolumeValue">30%</span>
+        </div>
+        <div class="volume-control">
+            <label>Chord Volume:</label>
+            <input type="range" id="chordVolume" min="0" max="100" value="25">
+            <span id="chordVolumeValue">25%</span>
+        </div>
+        <div class="volume-control">
+            <label>Note Volume:</label>
+            <input type="range" id="noteVolume" min="0" max="100" value="20">
+            <span id="noteVolumeValue">20%</span>
+        </div>
+        <div class="log-display" id="logDisplay"></div>
+    </div>
+
+    <div class="debug-info" id="debugInfo">
+        <div>Mouse Position: <span id="mousePos">0, 0</span></div>
+        <div>SVG Coords: <span id="svgCoords">0, 0</span></div>
+        <div>Element: <span id="currentElement">none</span></div>
+    </div>
+
+    <script>
+        class Magic18PixelPerfectSystem {
+            constructor() {
+                this.audioContext = null;
+                this.masterGain = null;
+                this.chordGain = null;
+                this.noteGain = null;
+                this.activeChord = null;
+                this.logElement = document.getElementById('logDisplay');
+
+                // Exact SVG element coordinates from the actual SVG files
+                this.leftPageElements = {
+                    chordBlocks: [
+                        { id: 'I_Chord', x: 30.56, y: 50.94, width: 64.08, height: 64.08, chord: 'C', roman: 'I', notes: ['C', 'E', 'G'] },
+                        { id: 'vi_Chord', x: 518.66, y: 50.89, width: 64.32, height: 64.08, chord: 'Am', roman: 'vi', notes: ['A', 'C', 'E'] },
+                        { id: 'IV_chord', x: 30.56, y: 205.84, width: 64.08, height: 64.08, chord: 'F', roman: 'IV', notes: ['F', 'A', 'C'] },
+                        { id: 'ii', x: 518.74, y: 205.85, width: 64.08, height: 64.08, chord: 'Dm', roman: 'ii', notes: ['D', 'F', 'A'] },
+                        { id: 'V', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'G', roman: 'V', notes: ['G', 'B', 'D'] },
+                        { id: 'iii', x: 518.5, y: 360.1, width: 64.32, height: 64.32, chord: 'Em', roman: 'iii', notes: ['E', 'G', 'B'] },
+                        { id: 'II', x: 80.66, y: 638.82, width: 64.08, height: 64.08, chord: 'D7', roman: 'II7', notes: ['D', 'F#', 'A', 'C'] },
+                        { id: 'VI', x: 274.15, y: 638.82, width: 64.08, height: 64.08, chord: 'A7', roman: 'VI7', notes: ['A', 'C#', 'E', 'G'] },
+                        { id: 'III', x: 467.03, y: 638.82, width: 64.32, height: 64.08, chord: 'E7', roman: 'III7', notes: ['E', 'G#', 'B', 'D'] }
+                    ],
+                    forms: [
+                        { id: 'form_C', x: 84.22, y: 103.5, width: 10.23, height: 10.23, form: 'C' },
+                        { id: 'form_a', x: 572.41, y: 103.76, width: 10.23, height: 10.23, form: 'a' },
+                        { id: 'form_E1', x: 84.22, y: 258.26, width: 10.23, height: 10.23, form: 'E' },
+                        { id: 'form_d', x: 572.41, y: 258.42, width: 10.23, height: 10.23, form: 'd' },
+                        { id: 'form_G', x: 84.22, y: 412.79, width: 10.23, height: 10.23, form: 'G' },
+                        { id: 'form_e', x: 572.41, y: 412.65, width: 10.23, height: 10.23, form: 'e' },
+                        { id: 'form_D', x: 134.33, y: 691.41, width: 10.23, height: 10.23, form: 'D' },
+                        { id: 'form_A', x: 327.82, y: 691.65, width: 10.23, height: 10.23, form: 'A' },
+                        { id: 'form_E2', x: 520.93, y: 691.24, width: 10.23, height: 10.23, form: 'E' }
+                    ],
+                    // Scale degrees would be extracted from the scale diagram coordinates
+                    scaleDegrees: [
+                        { x: 233.87, y: 32.41, width: 143.63, height: 381.48 }
+                    ]
+                };
+
+                this.rightPageElements = {
+                    chordBlocks: [
+                        { id: 'i', x: 29.76, y: 50.95, width: 64.32, height: 64.08, chord: 'Cm', roman: 'i', notes: ['C', 'Eb', 'G'] },
+                        { id: 'bIII', x: 518.74, y: 50.95, width: 64.08, height: 64.08, chord: 'Eb', roman: 'bIII', notes: ['Eb', 'G', 'Bb'] },
+                        { id: 'iv', x: 30.55, y: 205.84, width: 64.08, height: 64.08, chord: 'Fm', roman: 'iv', notes: ['F', 'Ab', 'C'] },
+                        { id: 'bVI', x: 518.74, y: 205.81, width: 64.08, height: 64.08, chord: 'Ab', roman: 'bVI', notes: ['Ab', 'C', 'Eb'] },
+                        { id: 'v', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'Gm', roman: 'v', notes: ['G', 'Bb', 'D'] },
+                        { id: 'bVII', x: 518.74, y: 360.2, width: 64.08, height: 64.08, chord: 'Bb', roman: 'bVII', notes: ['Bb', 'D', 'F'] },
+                        { id: 'VII', x: 80.56, y: 638.82, width: 64.32, height: 64.08, chord: 'B7', roman: 'VII7', notes: ['B', 'D#', 'F#', 'A'] },
+                        { id: 'I7', x: 274.22, y: 638.82, width: 64.32, height: 64.08, chord: 'C7', roman: 'I7', notes: ['C', 'E', 'G', 'Bb'] },
+                        { id: 'vii_dim', x: 470.72, y: 638.82, width: 64.08, height: 64.08, chord: 'B°', roman: 'vii°', notes: ['B', 'D', 'F'] }
+                    ],
+                    forms: [
+                        { id: 'form_c', x: 84.22, y: 103.5, width: 10.23, height: 10.23, form: 'c' },
+                        { id: 'form_D1', x: 572.4, y: 103.51, width: 10.25, height: 10.26, form: 'D' },
+                        { id: 'form_e1', x: 84.21, y: 258.24, width: 10.25, height: 10.26, form: 'e' },
+                        { id: 'form_G1', x: 572.4, y: 258.78, width: 10.25, height: 10.26, form: 'G' },
+                        { id: 'form_g', x: 84.22, y: 412.79, width: 10.23, height: 10.23, form: 'g' },
+                        { id: 'form_A1', x: 572.41, y: 413.05, width: 10.23, height: 10.23, form: 'A' },
+                        { id: 'form_CA1', x: 134.61, y: 691.14, width: 16.59, height: 10.26, form: 'CA' },
+                        { id: 'form_C1', x: 327.82, y: 691.39, width: 10.23, height: 10.23, form: 'C' },
+                        { id: 'form_ca', x: 521.09, y: 691.39, width: 16.59, height: 10.26, form: 'ca' }
+                    ],
+                    scaleDegrees: [
+                        { x: 234.19, y: 34.38, width: 144.49, height: 379.33 }
+                    ]
+                };
+
+                this.initializeAudio();
+                this.setupVolumeControls();
+                this.setupSVGLoading();
+                this.setupDebugMode();
+            }
+
+            initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    this.masterGain = this.audioContext.createGain();
+                    this.chordGain = this.audioContext.createGain();
+                    this.noteGain = this.audioContext.createGain();
+
+                    this.masterGain.connect(this.audioContext.destination);
+                    this.chordGain.connect(this.masterGain);
+                    this.noteGain.connect(this.masterGain);
+
+                    this.masterGain.gain.value = 0.3;
+                    this.chordGain.gain.value = 0.25;
+                    this.noteGain.gain.value = 0.2;
+
+                    this.log('🎵 Audio System: Ready');
+                } catch (error) {
+                    this.log(`❌ Audio initialization failed: ${error.message}`);
+                }
+            }
+
+            setupVolumeControls() {
+                const masterVolume = document.getElementById('masterVolume');
+                const chordVolume = document.getElementById('chordVolume');
+                const noteVolume = document.getElementById('noteVolume');
+
+                masterVolume.addEventListener('input', (e) => {
+                    const value = e.target.value / 100;
+                    this.masterGain.gain.value = value;
+                    document.getElementById('masterVolumeValue').textContent = `${e.target.value}%`;
+                });
+
+                chordVolume.addEventListener('input', (e) => {
+                    const value = e.target.value / 100;
+                    this.chordGain.gain.value = value;
+                    document.getElementById('chordVolumeValue').textContent = `${e.target.value}%`;
+                });
+
+                noteVolume.addEventListener('input', (e) => {
+                    const value = e.target.value / 100;
+                    this.noteGain.gain.value = value;
+                    document.getElementById('noteVolumeValue').textContent = `${e.target.value}%`;
+                });
+            }
+
+            setupSVGLoading() {
+                const leftSvg = document.getElementById('leftSvg');
+                const rightSvg = document.getElementById('rightSvg');
+
+                // Add error handling
+                leftSvg.addEventListener('error', (e) => {
+                    this.log('❌ Left SVG failed to load: ' + e.message);
+                    console.error('Left SVG error:', e);
+                });
+
+                rightSvg.addEventListener('error', (e) => {
+                    this.log('❌ Right SVG failed to load: ' + e.message);
+                    console.error('Right SVG error:', e);
+                });
+
+                leftSvg.addEventListener('load', () => {
+                    this.log('📄 Left SVG loaded successfully');
+                    this.createInteractiveElements('left');
+                });
+
+                rightSvg.addEventListener('load', () => {
+                    this.log('📄 Right SVG loaded successfully');
+                    this.createInteractiveElements('right');
+                });
+
+                // Also handle if SVGs are already loaded
+                setTimeout(() => {
+                    this.log('🔍 Checking SVG load status...');
+
+                    if (leftSvg.getSVGDocument && leftSvg.getSVGDocument()) {
+                        this.log('📄 Left SVG already loaded (getSVGDocument)');
+                        this.createInteractiveElements('left');
+                    } else if (leftSvg.contentDocument) {
+                        this.log('📄 Left SVG already loaded (contentDocument)');
+                        this.createInteractiveElements('left');
+                    } else {
+                        this.log('⏳ Left SVG still loading...');
+                    }
+
+                    if (rightSvg.getSVGDocument && rightSvg.getSVGDocument()) {
+                        this.log('📄 Right SVG already loaded (getSVGDocument)');
+                        this.createInteractiveElements('right');
+                    } else if (rightSvg.contentDocument) {
+                        this.log('📄 Right SVG already loaded (contentDocument)');
+                        this.createInteractiveElements('right');
+                    } else {
+                        this.log('⏳ Right SVG still loading...');
+                    }
+                }, 500);
+            }
+
+            createInteractiveElements(page) {
+                const overlayId = page + 'Overlay';
+                const overlay = document.getElementById(overlayId);
+                const svgElement = document.getElementById(page + 'Svg');
+
+                if (!overlay || !svgElement) {
+                    this.log(`❌ Could not find overlay or SVG for ${page} page`);
+                    return;
+                }
+
+                const elements = page === 'left' ? this.leftPageElements : this.rightPageElements;
+                const svgRect = svgElement.getBoundingClientRect();
+
+                this.log(`📐 ${page.toUpperCase()} SVG rect: ${svgRect.width}x${svgRect.height} at (${svgRect.left}, ${svgRect.top})`);
+
+                // Get SVG viewBox to calculate scaling
+                let svgDoc = null;
+                if (svgElement.getSVGDocument) {
+                    svgDoc = svgElement.getSVGDocument();
+                } else if (svgElement.contentDocument) {
+                    svgDoc = svgElement.contentDocument;
+                }
+
+                if (!svgDoc) {
+                    this.log(`❌ Could not access SVG document for ${page} page`);
+                    return;
+                }
+
+                const svg = svgDoc.querySelector('svg');
+                if (!svg) {
+                    this.log(`❌ Could not find SVG element in document for ${page} page`);
+                    return;
+                }
+
+                const viewBox = svg.getAttribute('viewBox');
+                if (!viewBox) {
+                    this.log(`❌ No viewBox found for ${page} page SVG`);
+                    return;
+                }
+
+                const viewBoxValues = viewBox.split(' ');
+                const svgWidth = parseFloat(viewBoxValues[2]);
+                const svgHeight = parseFloat(viewBoxValues[3]);
+
+                // Calculate scaling factors
+                const scaleX = svgRect.width / svgWidth;
+                const scaleY = svgRect.height / svgHeight;
+
+                this.log(`📐 ${page.toUpperCase()} SVG: ${svgWidth}x${svgHeight}, Scale: ${scaleX.toFixed(3)}x${scaleY.toFixed(3)}`);
+
+                // Create chord block buttons
+                elements.chordBlocks.forEach(chord => {
+                    const button = document.createElement('div');
+                    button.className = 'chord-button';
+                    button.style.left = (chord.x * scaleX) + 'px';
+                    button.style.top = (chord.y * scaleY) + 'px';
+                    button.style.width = (chord.width * scaleX) + 'px';
+                    button.style.height = (chord.height * scaleY) + 'px';
+                    button.title = `${chord.chord} (${chord.roman}) - ${chord.notes.join(', ')}`;
+                    button.dataset.chord = chord.chord;
+                    button.dataset.roman = chord.roman;
+                    button.dataset.notes = chord.notes.join(',');
+                    button.dataset.page = page;
+
+                    button.addEventListener('click', (e) => {
+                        this.playChord(chord, button, page);
+                    });
+
+                    overlay.appendChild(button);
+                });
+
+                // Create form buttons
+                elements.forms.forEach(form => {
+                    const button = document.createElement('div');
+                    button.className = 'form-button';
+                    button.style.left = (form.x * scaleX) + 'px';
+                    button.style.top = (form.y * scaleY) + 'px';
+                    button.style.width = (form.width * scaleX) + 'px';
+                    button.style.height = (form.height * scaleY) + 'px';
+                    button.title = `Form: ${form.form}`;
+                    button.dataset.form = form.form;
+                    button.dataset.page = page;
+
+                    button.addEventListener('click', (e) => {
+                        this.playForm(form, button, page);
+                    });
+
+                    overlay.appendChild(button);
+                });
+
+                this.log(`✅ Created ${elements.chordBlocks.length} chord buttons and ${elements.forms.length} form buttons for ${page} page`);
+            }
+
+            playChord(chord, buttonElement, page) {
+                if (this.activeChord) {
+                    this.activeChord.classList.remove('active');
+                }
+
+                buttonElement.classList.add('active');
+                this.activeChord = buttonElement;
+
+                this.log(`🎵 Playing: ${chord.chord} (${chord.roman}) [${chord.notes.join(', ')}] - ${page.toUpperCase()} page`);
+
+                // Play the chord notes simultaneously
+                chord.notes.forEach((note, index) => {
+                    setTimeout(() => {
+                        this.playNote(note, 0.8, this.chordGain);
+                    }, index * 50); // Slight staggering for richness
+                });
+
+                // Remove active state after animation
+                setTimeout(() => {
+                    buttonElement.classList.remove('active');
+                    if (this.activeChord === buttonElement) {
+                        this.activeChord = null;
+                    }
+                }, 1500);
+            }
+
+            playForm(form, buttonElement, page) {
+                this.log(`🎸 Form: ${form.form} - ${page.toUpperCase()} page`);
+
+                // Visual feedback
+                buttonElement.style.background = 'rgba(255, 165, 0, 0.6)';
+                setTimeout(() => {
+                    buttonElement.style.background = 'rgba(255, 165, 0, 0)';
+                }, 300);
+
+                // Play a form-specific sound (guitar strum simulation)
+                this.playNote('G', 0.4, this.noteGain);
+                setTimeout(() => this.playNote('B', 0.3, this.noteGain), 50);
+                setTimeout(() => this.playNote('D', 0.3, this.noteGain), 100);
+            }
+
+            playNote(note, duration = 0.5, gainNode = null) {
+                if (!this.audioContext) return;
+
+                const oscillator = this.audioContext.createOscillator();
+                const envelope = this.audioContext.createGain();
+
+                oscillator.connect(envelope);
+                envelope.connect(gainNode || this.noteGain);
+
+                oscillator.frequency.value = this.getFrequency(note);
+                oscillator.type = 'sawtooth';
+
+                const now = this.audioContext.currentTime;
+                envelope.gain.setValueAtTime(0, now);
+                envelope.gain.linearRampToValueAtTime(0.3, now + 0.01);
+                envelope.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                oscillator.start(now);
+                oscillator.stop(now + duration);
+            }
+
+            getFrequency(note) {
+                const noteFrequencies = {
+                    'C': 261.63, 'C#': 277.18, 'Db': 277.18,
+                    'D': 293.66, 'D#': 311.13, 'Eb': 311.13,
+                    'E': 329.63, 'F': 349.23, 'F#': 369.99, 'Gb': 369.99,
+                    'G': 392.00, 'G#': 415.30, 'Ab': 415.30,
+                    'A': 440.00, 'A#': 466.16, 'Bb': 466.16,
+                    'B': 493.88
+                };
+                return noteFrequencies[note] || 440;
+            }
+
+            setupDebugMode() {
+                const debugInfo = document.getElementById('debugInfo');
+                let debugMode = false;
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === '`') {
+                        debugMode = !debugMode;
+                        debugInfo.classList.toggle('show', debugMode);
+                        this.log(`🔧 Debug mode: ${debugMode ? 'ON' : 'OFF'}`);
+                    }
+                });
+
+                document.addEventListener('mousemove', (e) => {
+                    if (!debugMode) return;
+
+                    document.getElementById('mousePos').textContent = `${e.clientX}, ${e.clientY}`;
+
+                    // Calculate SVG coordinates
+                    const leftSvg = document.getElementById('leftSvg');
+                    const rightSvg = document.getElementById('rightSvg');
+
+                    const checkSvgCoords = (svg, label) => {
+                        const rect = svg.getBoundingClientRect();
+                        if (e.clientX >= rect.left && e.clientX <= rect.right &&
+                            e.clientY >= rect.top && e.clientY <= rect.bottom) {
+
+                            const relX = e.clientX - rect.left;
+                            const relY = e.clientY - rect.top;
+
+                            // Convert to SVG coordinates
+                            const svgX = (relX / rect.width) * 612;
+                            const svgY = (relY / rect.height) * 792;
+
+                            document.getElementById('svgCoords').textContent = `${svgX.toFixed(1)}, ${svgY.toFixed(1)} (${label})`;
+                        }
+                    };
+
+                    checkSvgCoords(leftSvg, 'LEFT');
+                    checkSvgCoords(rightSvg, 'RIGHT');
+                });
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+                console.log(logEntry);
+
+                if (this.logElement) {
+                    const div = document.createElement('div');
+                    div.textContent = logEntry;
+                    this.logElement.appendChild(div);
+                    this.logElement.scrollTop = this.logElement.scrollHeight;
+
+                    // Keep only last 20 entries
+                    while (this.logElement.children.length > 20) {
+                        this.logElement.removeChild(this.logElement.firstChild);
+                    }
+                }
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const magic18System = new Magic18PixelPerfectSystem();
+
+            // Enable audio on first user interaction
+            document.addEventListener('click', () => {
+                if (magic18System.audioContext && magic18System.audioContext.state === 'suspended') {
+                    magic18System.audioContext.resume().then(() => {
+                        magic18System.log('🔊 Audio context resumed');
+                    });
+                }
+            }, { once: true });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 DEFINITIVE Chord Analyzer</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 1600px; 
+            margin: 0 auto; 
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .upload-area {
+            border: 2px dashed #4CAF50;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: #2a2a2a;
+        }
+        .upload-area.dragover {
+            background: #3a3a3a;
+            border-color: #66BB6A;
+        }
+        #fileInput {
+            margin: 20px 0;
+            padding: 10px;
+            background: #333;
+            border: 1px solid #555;
+            color: #fff;
+            border-radius: 5px;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+        }
+        .click-item {
+            background: #333;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .major-chord { border-left: 4px solid #4CAF50; }
+        .applied-chord { border-left: 4px solid #2196F3; }
+        .minor-chord { border-left: 4px solid #FF9800; }
+        .chord-analysis {
+            background: #1e4a28;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .progression-display {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #66BB6A;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .button {
+            background: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        .button:hover {
+            background: #45a049;
+        }
+        .coordinate-table {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .coord-entry {
+            padding: 5px 0;
+            border-bottom: 1px solid #444;
+        }
+    </style>
+</head>
+<body>
+    <h1>Magic 18 DEFINITIVE Chord Analyzer</h1>
+    <p><strong>✅ CALIBRATED:</strong> Based on your exact ascending order clicks!</p>
+
+    <div class="coordinate-table">
+        <h3>🎯 DEFINITIVE COORDINATE MAPPING</h3>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="color: #4CAF50;">MAJOR (I-vii°)</h4>
+                <div class="coord-entry">1. C     (left): (51, 64)</div>
+                <div class="coord-entry">2. Dm    (left): (373, 168)</div>
+                <div class="coord-entry">3. Em    (left): (371, 268)</div>
+                <div class="coord-entry">4. F     (left): (53, 169)</div>
+                <div class="coord-entry">5. G     (left): (52, 269)</div>
+                <div class="coord-entry">6. Am    (left): (372, 68)</div>
+                <div class="coord-entry">7. B°    (right): (341, 450)</div>
+            </div>
+            <div>
+                <h4 style="color: #2196F3;">APPLIED (I7-VII7)</h4>
+                <div class="coord-entry">8. C7    (right): (211, 449)</div>
+                <div class="coord-entry">9. D7    (left): (86, 447)</div>
+                <div class="coord-entry">10. E7   (left): (339, 447)</div>
+                <div class="coord-entry">11. A7   (left): (214, 448)</div>
+                <div class="coord-entry">12. B7   (right): (91, 451)</div>
+            </div>
+            <div>
+                <h4 style="color: #FF9800;">MINOR (i-♭VII)</h4>
+                <div class="coord-entry">13. Cm   (right): (51, 66)</div>
+                <div class="coord-entry">14. Eb   (right): (371, 64)</div>
+                <div class="coord-entry">15. Fm   (right): (51, 168)</div>
+                <div class="coord-entry">16. Gm   (right): (49, 270)</div>
+                <div class="coord-entry">17. Ab   (right): (374, 164)</div>
+                <div class="coord-entry">18. Bb   (right): (372, 271)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="upload-area" id="uploadArea">
+        <p>📁 Drag and drop your Magic 18 session JSON file here</p>
+        <input type="file" id="fileInput" accept=".json" />
+        <button class="button" onclick="document.getElementById('fileInput').click()">Choose File</button>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+        <h2>🎵 Chord Progression Analysis</h2>
+        <div id="analysisContent"></div>
+    </div>
+
+    <script>
+        // DEFINITIVE Magic 18 Coordinate Mapping - Based on your exact ascending clicks!
+        const DEFINITIVE_MAPPING = [
+            { chord: 'C',    page: 'left',  x: 51,  y: 64,  type: 'major',   roman: 'I' },
+            { chord: 'Dm',   page: 'left',  x: 373, y: 168, type: 'major',   roman: 'ii' },
+            { chord: 'Em',   page: 'left',  x: 371, y: 268, type: 'major',   roman: 'iii' },
+            { chord: 'F',    page: 'left',  x: 53,  y: 169, type: 'major',   roman: 'IV' },
+            { chord: 'G',    page: 'left',  x: 52,  y: 269, type: 'major',   roman: 'V' },
+            { chord: 'Am',   page: 'left',  x: 372, y: 68,  type: 'major',   roman: 'vi' },
+            { chord: 'B°',   page: 'right', x: 341, y: 450, type: 'major',   roman: 'vii°' },
+            { chord: 'C7',   page: 'right', x: 211, y: 449, type: 'applied', roman: 'I7' },
+            { chord: 'D7',   page: 'left',  x: 86,  y: 447, type: 'applied', roman: 'II7' },
+            { chord: 'E7',   page: 'left',  x: 339, y: 447, type: 'applied', roman: 'III7' },
+            { chord: 'A7',   page: 'left',  x: 214, y: 448, type: 'applied', roman: 'VI7' },
+            { chord: 'B7',   page: 'right', x: 91,  y: 451, type: 'applied', roman: 'VII7' },
+            { chord: 'Cm',   page: 'right', x: 51,  y: 66,  type: 'minor',   roman: 'i' },
+            { chord: 'Eb',   page: 'right', x: 371, y: 64,  type: 'minor',   roman: '♭III' },
+            { chord: 'Fm',   page: 'right', x: 51,  y: 168, type: 'minor',   roman: 'iv' },
+            { chord: 'Gm',   page: 'right', x: 49,  y: 270, type: 'minor',   roman: 'v' },
+            { chord: 'Ab',   page: 'right', x: 374, y: 164, type: 'minor',   roman: '♭VI' },
+            { chord: 'Bb',   page: 'right', x: 372, y: 271, type: 'minor',   roman: '♭VII' }
+        ];
+
+        function identifyChordPrecise(x, y, page) {
+            if (x === undefined || y === undefined || !page) {
+                return { chord: 'Unknown', confidence: 0, reason: 'Missing data' };
+            }
+
+            x = parseFloat(x);
+            y = parseFloat(y);
+
+            let bestMatch = null;
+            let smallestDistance = Infinity;
+
+            // Check each definitive coordinate with tolerance
+            for (let mapping of DEFINITIVE_MAPPING) {
+                if (mapping.page !== page) continue;
+                
+                const distance = Math.sqrt(Math.pow(x - mapping.x, 2) + Math.pow(y - mapping.y, 2));
+                
+                if (distance < smallestDistance) {
+                    smallestDistance = distance;
+                    bestMatch = mapping;
+                }
+            }
+
+            // Determine confidence based on distance
+            let confidence = 'Perfect';
+            let reason = `Exact match (distance: ${smallestDistance.toFixed(1)})`;
+            
+            if (smallestDistance > 50) {
+                confidence = 'Low';
+                reason = `Distant match (distance: ${smallestDistance.toFixed(1)})`;
+            } else if (smallestDistance > 20) {
+                confidence = 'Medium';
+                reason = `Close match (distance: ${smallestDistance.toFixed(1)})`;
+            }
+
+            return {
+                chord: bestMatch ? bestMatch.chord : 'Unknown',
+                roman: bestMatch ? bestMatch.roman : '?',
+                type: bestMatch ? bestMatch.type : 'unknown',
+                confidence: confidence,
+                distance: smallestDistance.toFixed(1),
+                reason: reason,
+                expected: bestMatch ? `(${bestMatch.x}, ${bestMatch.y})` : 'N/A'
+            };
+        }
+
+        function processJsonData(jsonData) {
+            const analysisContent = document.getElementById('analysisContent');
+            
+            let clicks = [];
+            if (jsonData.clicks) {
+                clicks = jsonData.clicks;
+            } else {
+                analysisContent.innerHTML = '<p>❌ No clicks array found in JSON file.</p>';
+                return;
+            }
+
+            if (clicks.length === 0) {
+                analysisContent.innerHTML = '<p>❌ No click data found.</p>';
+                return;
+            }
+
+            // Sort clicks by timestamp if available
+            if (clicks[0] && clicks[0].timestamp) {
+                clicks.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            }
+
+            // Analyze each click
+            const chordClicks = clicks.map((click, index) => {
+                let x = click.coordinates?.x;
+                let y = click.coordinates?.y;
+                let page = click.page;
+                
+                const analysis = identifyChordPrecise(x, y, page);
+                
+                return {
+                    order: index + 1,
+                    timestamp: click.timestamp ? new Date(click.timestamp).toLocaleTimeString() : 'Unknown',
+                    coordinates: { x, y },
+                    page: page,
+                    analysis: analysis,
+                    raw: click
+                };
+            });
+
+            // Generate results HTML
+            let html = '<div class="chord-analysis">';
+            html += '<h3>🎵 Your Chord Progression:</h3>';
+            html += '<div class="progression-display">';
+            html += chordClicks.map(c => c.analysis.chord).join(' → ');
+            html += '</div>';
+            html += '<div class="progression-display" style="font-size: 0.9em; color: #ccc;">';
+            html += chordClicks.map(c => c.analysis.roman).join(' → ');
+            html += '</div>';
+            html += `<p><strong>Total clicks:</strong> ${chordClicks.length}</p>`;
+            html += '</div>';
+
+            // Individual click details
+            html += '<h3>📍 Detailed Analysis:</h3>';
+            chordClicks.forEach(click => {
+                const analysis = click.analysis;
+                let cssClass = 'click-item';
+                if (analysis.type === 'major') cssClass += ' major-chord';
+                else if (analysis.type === 'applied') cssClass += ' applied-chord';
+                else if (analysis.type === 'minor') cssClass += ' minor-chord';
+
+                html += `<div class="${cssClass}">`;
+                html += `<strong>Click #${click.order}: ${analysis.chord} (${analysis.roman})</strong>`;
+                html += ` - ${analysis.confidence} Match<br>`;
+                html += `Page: ${click.page} | Coordinates: (${click.coordinates.x}, ${click.coordinates.y})<br>`;
+                html += `Expected: ${analysis.expected} | Distance: ${analysis.distance}<br>`;
+                html += `<small style="color: #aaa;">${analysis.reason}</small>`;
+                html += `</div>`;
+            });
+
+            analysisContent.innerHTML = html;
+        }
+
+        // File upload handling
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const results = document.getElementById('results');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile(files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFile(e.target.files[0]);
+            }
+        });
+
+        function handleFile(file) {
+            if (file.type !== 'application/json' && !file.name.endsWith('.json')) {
+                alert('Please select a JSON file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const jsonData = JSON.parse(e.target.result);
+                    processJsonData(jsonData);
+                    results.style.display = 'block';
+                } catch (error) {
+                    alert('Error parsing JSON file: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>

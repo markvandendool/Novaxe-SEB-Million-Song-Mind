@@ -1,0 +1,35 @@
+<div class="chord-demo-container">
+    <h1>🎸 Magic 18 Chord Chart Demo</h1>
+    <p>Interactive guitar chord learning system - Starting with chord I (C major)</p>
+
+    <div class="demo-controls">
+        <button (click)="toggleChart()">
+            {{ showMagic18Chart ? 'Hide' : 'Show' }} Magic 18 Chart
+        </button>
+    </div>
+
+    <div class="chart-container" *ngIf="showMagic18Chart">
+        <app-chord-chart-magic18></app-chord-chart-magic18>
+    </div>
+
+    <div class="instructions">
+        <h3>🎯 How to Use:</h3>
+        <ol>
+            <li><strong>Select a Roman Numeral:</strong> Click on any Roman numeral (I, ii, iii, IV, V, vi, vii°) to see
+                the chord</li>
+            <li><strong>View the Fretboard:</strong> See the chord positions highlighted on the guitar fretboard</li>
+            <li><strong>Change Keys:</strong> Use the key selector to transpose the entire chart</li>
+            <li><strong>Play Chords:</strong> Click the play button to hear the chord (audio integration coming)</li>
+            <li><strong>Learn Colors:</strong> Green=Root, Red=Third, Blue=Fifth, Grey=Seventh</li>
+        </ol>
+
+        <h3>🚀 Next Steps:</h3>
+        <ul>
+            <li>Multi-instrument support (Ukulele, Bass, Mandolin, Banjo)</li>
+            <li>Real audio playback with strumming simulation</li>
+            <li>3D rotating chord cubes</li>
+            <li>Advanced fingering patterns</li>
+            <li>Minor key charts</li>
+        </ul>
+    </div>
+</div>

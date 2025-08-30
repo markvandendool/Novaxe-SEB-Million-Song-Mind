@@ -1,0 +1,87 @@
+<div class="chord-chart-magic18">
+    <!-- Header -->
+    <div class="chart-header">
+        <h2>Magic 18 Chord Chart</h2>
+        <div class="key-controls">
+            <label>Key:</label>
+            <select [(ngModel)]="currentKey" (change)="changeKey(currentKey)">
+                <option value="C">C Major</option>
+                <option value="G">G Major</option>
+                <option value="D">D Major</option>
+                <option value="A">A Major</option>
+                <option value="E">E Major</option>
+                <option value="F">F Major</option>
+                <option value="Bb">Bb Major</option>
+                <option value="Eb">Eb Major</option>
+            </select>
+            <span class="position-indicator">{{ chordPosition | titlecase }} Position</span>
+        </div>
+    </div>
+
+    <!-- Roman Numeral Chord Grid -->
+    <div class="roman-chord-grid">
+        <div class="roman-chord-button" *ngFor="let chord of majorKeyChords"
+            [class.active]="activeRoman === chord.roman" [attr.data-roman]="chord.roman"
+            [attr.data-quality]="chord.quality" (click)="selectChord(chord.roman)">
+            <div class="roman-numeral">{{ chord.roman }}</div>
+            <div class="chord-symbol">{{ getChordSymbolForKey(chord, currentKey) }}</div>
+            <div class="chord-quality">{{ chord.quality }}</div>
+        </div>
+    </div>
+
+    <!-- Current Chord Display -->
+    <div class="current-chord-display" *ngIf="activeChord">
+        <div class="chord-info">
+            <h3>{{ activeRoman }} - {{ activeChord.chords[0] }}</h3>
+            <p>{{ currentKey }} {{ currentMode }} - {{ chordPosition }} position</p>
+        </div>
+    </div>
+
+    <!-- Fretboard Integration Container -->
+    <div class="fretboard-container">
+        <div class="fretboard-controls">
+            <button (click)="showFingerings = !showFingerings">
+                {{ showFingerings ? 'Hide' : 'Show' }} Fingerings
+            </button>
+            <button (click)="showIntervals = !showIntervals">
+                {{ showIntervals ? 'Hide' : 'Show' }} Intervals
+            </button>
+        </div>
+
+        <!-- This will reference your existing fretboard component -->
+        <div class="novaxe-fretboard-reference">
+            <app-fretboard #novaxeFretboard [display]="true">
+            </app-fretboard>
+        </div>
+    </div>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+        <button class="play-chord-btn" (click)="playChordAudio(activeChord)" *ngIf="activeChord">
+            🔊 Play {{ activeChord.chords[0] }}
+        </button>
+        <button class="strum-btn" *ngIf="activeChord">
+            🎸 Strum Chord
+        </button>
+    </div>
+
+    <!-- Legend -->
+    <div class="chart-legend">
+        <div class="legend-item">
+            <div class="color-box root"></div>
+            <span>Root (Green)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box third"></div>
+            <span>Third (Red)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box fifth"></div>
+            <span>Fifth (Blue)</span>
+        </div>
+        <div class="legend-item">
+            <div class="color-box seventh"></div>
+            <span>Seventh (Grey)</span>
+        </div>
+    </div>
+</div>

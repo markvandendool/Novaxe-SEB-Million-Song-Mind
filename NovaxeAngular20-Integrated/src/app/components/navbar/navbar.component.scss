@@ -1,0 +1,294 @@
+section#nvx-nav .navbar {
+  // max-height: 75px;
+  user-select: none;
+  background-color: var(--dark_prim);
+  padding: 0rem 2rem;
+}
+
+section#nvx-nav .navbar-brand {
+  width: 5%;
+  padding: 0;
+  margin: 0;
+  max-height: 75px;
+}
+
+section#nvx-nav .logo img {
+  width: auto;
+  max-height: 65px;
+  margin: 5px 0;
+}
+
+section#nvx-nav .logo span {
+  color: var(--light_prim);
+  font-weight: bold;
+  position: absolute;
+}
+
+section#nvx-nav .navbar-collapse ul {
+  margin-left: 3.5rem;
+}
+
+section#nvx-nav .navbar-collapse ul li .nav-link {
+  color: var(--light_prim);
+}
+
+section#nvx-nav .navbar-collapse ul li .nav-link.disabled {
+  color: var(--gray_sec);
+}
+
+section#nvx-nav .global-search input.form-control {
+  max-width: 290px;
+}
+
+section#nvx-nav .global-search input:focus {
+  border-color: transparent;
+  outline: 0;
+  box-shadow: none;
+}
+
+section#nvx-nav .global-search a.btn {
+  color: var(--light_prim);
+  border: 2px solid var(--green_nvx);
+}
+
+section#nvx-nav .global-search a.btn:hover {
+  background-color: #28a74570;
+  color: #fff;
+}
+
+section#nvx-nav .search-results {
+  background: white;
+  position: absolute;
+  padding: 0 10px;
+  border: 1px solid #dcdcdc;
+  border-radius: 5px;
+  min-width: 233px;
+  overflow-y: scroll;
+  max-height: 400px;
+}
+
+section#nvx-nav .search-results dt {
+  text-transform: uppercase;
+  font-size: 12px;
+  background: #8e9cff66;
+  border-radius: 5px;
+  padding: 0 5px;
+}
+
+section#nvx-nav .search-results dd {
+  font-size: 12px;
+  padding-left: 0.5rem;
+}
+
+section#nvx-nav .modal input {
+  margin: 5px 0;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-width: 0.5px;
+}
+
+section#nvx-nav .modal input:focus-visible {
+  outline: var(--blue_nvx) auto 1px;
+}
+
+section#nvx-nav .chkpass {
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+}
+
+section#nvx-nav .chkpass span {
+  padding: 5px;
+}
+
+section#nvx-nav .chkpass input[type="checkbox"] {
+  color: var(--light_prim);
+}
+
+section#nvx-nav .chkpass input[type='checkbox']:after {
+  width: 15px;
+  height: 15px;
+  top: -1px;
+  left: -1px;
+  bottom: 0px;
+  right: 0px;
+  position: relative;
+  content: "";
+  display: block;
+  visibility: visible;
+  padding: 0;
+  border-radius: 4px;
+}
+
+section#nvx-nav .chkpass input[type='checkbox']:checked:after {
+  width: 15px;
+  height: 15px;
+  top: -1px;
+  left: -1px;
+  bottom: 0px;
+  right: 0px;
+  position: relative;
+  background-color: var(--green_nvx);
+  content: '';
+  display: block;
+  visibility: visible;
+  border: 2px solid var(--light_prim);
+  border: 2px solid var(--light_prim);
+  border-radius: 4px;
+}
+
+section#nvx-nav .modal {
+  position: fixed;
+  left: 0;
+  z-index: 1050;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  outline: 0;
+  justify-content: center;
+  align-items: center;
+  background: #0000005c;
+}
+
+section#nvx-nav .modal .modal-dialog {
+  width: 100%;
+  height: auto;
+}
+
+section#nvx-nav .modal .modal-header {
+  background: #28a74569;
+}
+
+section#nvx-nav #sign-up-modal .modal-footer {
+  display: flex;
+  justify-content: flex-start;
+}
+
+section#nvx-nav #sign-up-modal .modal-footer button {
+  margin-left: auto;
+}
+
+.fake-link:hover {
+  text-decoration: underline;
+}
+
+.fake-link {
+  color: #007bff;
+  cursor: pointer;
+}
+
+/* NovA20 Score Button Styling */
+.nova20-score-btn {
+  background: linear-gradient(45deg, #28a745, #20c997) !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  margin: 0 10px !important;
+  color: white !important;
+  font-weight: bold !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.nova20-score-btn:hover {
+  background: linear-gradient(45deg, #218838, #1eaa89) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  color: white !important;
+  text-decoration: none !important;
+}
+
+/* Cubes Button Styling */
+.cubes-trigger {
+  color: #17a2b8 !important;
+  font-weight: bold !important;
+}
+
+.cubes-trigger:hover {
+  background-color: #17a2b8 !important;
+  color: white !important;
+}
+
+/* Score Area Cubes Integration */
+.score-cubes-overlay {
+  position: fixed;
+  top: 80px;
+  /* Below navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70vw;
+  height: 60vh;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(2px);
+  border-radius: 12px;
+  border: 2px solid #17a2b8;
+  box-shadow: 0 10px 30px rgba(23, 162, 184, 0.2);
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.score-cubes-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: all;
+}
+
+.cubes-controls {
+  background: linear-gradient(45deg, #17a2b8, #28a745);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 10px 10px 0 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 35px;
+}
+
+.close-cubes-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.close-cubes-btn:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.score-cubes-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0 0 10px 10px;
+  flex: 1;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .score-cubes-overlay {
+    width: 80vw;
+    height: 55vh;
+  }
+}
+
+@media (max-width: 768px) {
+  .score-cubes-overlay {
+    width: 90vw;
+    height: 50vh;
+    top: 70px;
+  }
+}

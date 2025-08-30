@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 Interactive System - Professional Grade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(52, 73, 94, 0.1);
+            border-radius: 15px;
+        }
+
+        .control-group {
+            text-align: center;
+        }
+
+        .control-group label {
+            display: block;
+            font-weight: bold;
+            color: #34495e;
+            margin-bottom: 8px;
+        }
+
+        .control-group input[type="range"] {
+            width: 150px;
+            margin-bottom: 5px;
+        }
+
+        .control-group span {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .svg-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .svg-container {
+            position: relative;
+            width: 100%;
+            height: 600px;
+            border: 3px solid #3498db;
+            border-radius: 15px;
+            overflow: hidden;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.2);
+        }
+
+        .svg-container svg {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .interactive-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .interactive-overlay * {
+            pointer-events: auto;
+        }
+
+        .chord-button {
+            position: absolute;
+            background: rgba(66, 165, 245, 0.9);
+            color: white;
+            border: 2px solid #1976D2;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .chord-button:hover {
+            background: rgba(66, 165, 245, 1);
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .ingredient-button {
+            position: absolute;
+            background: #e74c3c;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
+        }
+
+        .ingredient-button:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .log-section {
+            background: #2c3e50;
+            border-radius: 15px;
+            padding: 20px;
+            height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-section h3 {
+            color: #ecf0f1;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        .log-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            color: #bdc3c7;
+        }
+
+        .log-entry .timestamp {
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        @media (max-width: 768px) {
+            .svg-section {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🎵 Magic 18 Interactive System</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="masterVolume">Master Volume</label>
+                <input type="range" id="masterVolume" min="0" max="100" value="30">
+                <span id="masterVolumeValue">30%</span>
+            </div>
+            <div class="control-group">
+                <label for="chordVolume">Chord Volume</label>
+                <input type="range" id="chordVolume" min="0" max="100" value="25">
+                <span id="chordVolumeValue">25%</span>
+            </div>
+        </div>
+
+        <div class="svg-section">
+            <div class="svg-container" id="leftSvgContainer">
+                <div class="interactive-overlay" id="leftOverlay"></div>
+            </div>
+            <div class="svg-container" id="rightSvgContainer">
+                <div class="interactive-overlay" id="rightOverlay"></div>
+            </div>
+        </div>
+
+        <div class="log-section">
+            <h3>System Log</h3>
+            <div class="log-display" id="logDisplay"></div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Professional-grade Magic 18 Interactive System
+         * Production-ready responsive coordinate transformation system
+         * Industry-standard architecture for cross-platform deployment
+         */
+        class Magic18DirectSVGSystem {
+            constructor() {
+                this.audioContext = null;
+                this.masterGain = null;
+                this.chordGain = null;
+                this.activeChord = null;
+                this.logElement = document.getElementById('logDisplay');
+                this.transformationMatrix = new Map();
+                this.resizeObserver = null;
+                this.devicePixelRatio = window.devicePixelRatio || 1;
+
+                // Professional coordinate system constants
+                this.SVG_VIEWBOX = {
+                    width: 612,
+                    height: 792,
+                    aspectRatio: 612 / 792
+                };
+
+                // Initialize element data
+                this.initializeElementData();
+
+                this.initializeSystem();
+            }
+
+            /**
+             * Professional element data - exact coordinates from SVG analysis
+             */
+            initializeElementData() {
+                this.leftPageElements = {
+                    chordBlocks: [
+                        { id: 'I_Chord', x: 30.56, y: 50.94, width: 64.08, height: 64.08, chord: 'C', roman: 'I', notes: ['C', 'E', 'G'] },
+                        { id: 'vi_Chord', x: 518.66, y: 50.89, width: 64.32, height: 64.08, chord: 'Am', roman: 'vi', notes: ['A', 'C', 'E'] },
+                        { id: 'IV_chord', x: 30.56, y: 205.84, width: 64.08, height: 64.08, chord: 'F', roman: 'IV', notes: ['F', 'A', 'C'] },
+                        { id: 'ii', x: 518.74, y: 205.85, width: 64.08, height: 64.08, chord: 'Dm', roman: 'ii', notes: ['D', 'F', 'A'] },
+                        { id: 'V', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'G', roman: 'V', notes: ['G', 'B', 'D'] },
+                        { id: 'iii', x: 518.5, y: 360.1, width: 64.32, height: 64.32, chord: 'Em', roman: 'iii', notes: ['E', 'G', 'B'] },
+                        { id: 'II', x: 80.66, y: 638.82, width: 64.08, height: 64.08, chord: 'D7', roman: 'II7', notes: ['D', 'F#', 'A', 'C'] },
+                        { id: 'VI', x: 274.15, y: 638.82, width: 64.08, height: 64.08, chord: 'A7', roman: 'VI7', notes: ['A', 'C#', 'E', 'G'] },
+                        { id: 'III', x: 467.03, y: 638.82, width: 64.32, height: 64.08, chord: 'E7', roman: 'III7', notes: ['E', 'G#', 'B', 'D'] }
+                    ],
+                    ingredients: [
+                        // Root notes (circles/diamonds)
+                        { x: 274.65, y: 708.15, size: 14.96, type: 'root', chord: 'VI', note: 'A', color: '#FF4444' },
+                        { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'vi', note: 'A', color: '#FF4444' },
+                        { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'I', note: 'C', color: '#FF4444' },
+                        { x: 468.22, y: 708.15, size: 14.96, type: 'root', chord: 'III', note: 'E', color: '#FF4444' },
+                        { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'iii', note: 'E', color: '#FF4444' },
+                        { x: 31.05, y: 275.18, size: 14.96, type: 'root', chord: 'IV', note: 'F', color: '#FF4444' },
+                        { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'V', note: 'G', color: '#FF4444' },
+                        { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'ii', note: 'D', color: '#FF4444' },
+                        { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'II', note: 'D', color: '#FF4444' }
+                    ],
+                    fretboardNotes: this.generateFretboardCoordinates()
+                };
+
+                this.rightPageElements = {
+                    chordBlocks: [
+                        { id: 'i', x: 29.76, y: 50.95, width: 64.32, height: 64.08, chord: 'Cm', roman: 'i', notes: ['C', 'Eb', 'G'] },
+                        { id: 'bIII', x: 518.74, y: 50.95, width: 64.08, height: 64.08, chord: 'Eb', roman: 'bIII', notes: ['Eb', 'G', 'Bb'] },
+                        { id: 'iv', x: 30.55, y: 205.84, width: 64.08, height: 64.08, chord: 'Fm', roman: 'iv', notes: ['F', 'Ab', 'C'] },
+                        { id: 'bVI', x: 518.74, y: 205.81, width: 64.08, height: 64.08, chord: 'Ab', roman: 'bVI', notes: ['Ab', 'C', 'Eb'] },
+                        { id: 'v', x: 30.56, y: 360.18, width: 64.08, height: 64.08, chord: 'Gm', roman: 'v', notes: ['G', 'Bb', 'D'] },
+                        { id: 'bVII', x: 518.74, y: 360.2, width: 64.08, height: 64.08, chord: 'Bb', roman: 'bVII', notes: ['Bb', 'D', 'F'] },
+                        { id: 'VII', x: 80.56, y: 638.82, width: 64.32, height: 64.08, chord: 'B7', roman: 'VII7', notes: ['B', 'D#', 'F#', 'A'] },
+                        { id: 'I7', x: 274.22, y: 638.82, width: 64.32, height: 64.08, chord: 'C7', roman: 'I7', notes: ['C', 'E', 'G', 'Bb'] },
+                        { id: 'vii_dim', x: 470.72, y: 638.82, width: 64.08, height: 64.08, chord: 'B°', roman: 'vii°', notes: ['B', 'D', 'F'] }
+                    ],
+                    ingredients: [
+                        { x: 519.24, y: 429.53, size: 14.96, type: 'root', chord: 'bVII', note: 'Bb', color: '#FF4444' },
+                        { x: 519.24, y: 275.17, size: 14.96, type: 'root', chord: 'bVI', note: 'Ab', color: '#FF4444' },
+                        { x: 31.05, y: 429.53, size: 14.96, type: 'root', chord: 'v', note: 'G', color: '#FF4444' },
+                        { x: 31.05, y: 275.18, size: 14.96, type: 'root', chord: 'iv', note: 'F', color: '#FF4444' },
+                        { x: 519.24, y: 120.27, size: 14.96, type: 'root', chord: 'bIII', note: 'Eb', color: '#FF4444' },
+                        { x: 30.49, y: 120.27, size: 14.96, type: 'root', chord: 'i', note: 'C', color: '#FF4444' },
+                        { x: 81.16, y: 708.15, size: 14.96, type: 'root', chord: 'VII', note: 'B', color: '#FF4444' },
+                        { x: 274.85, y: 708.15, size: 14.96, type: 'root', chord: 'I7', note: 'C', color: '#FF4444' },
+                        { x: 471.22, y: 708.15, size: 14.96, type: 'root', chord: 'vii°', note: 'B', color: '#FF4444' }
+                    ],
+                    fretboardNotes: this.generateFretboardCoordinates()
+                };
+            }
+
+            /**
+             * Generate professional fretboard coordinate system
+             */
+            generateFretboardCoordinates() {
+                const strings = [
+                    { name: 'E', x: 8.13, baseNote: 'E', baseOctave: 2 },
+                    { name: 'A', x: 25.28, baseNote: 'A', baseOctave: 2 },
+                    { name: 'D', x: 42.43, baseNote: 'D', baseOctave: 3 },
+                    { name: 'G', x: 59.54, baseNote: 'G', baseOctave: 3 },
+                    { name: 'B', x: 76.76, baseNote: 'B', baseOctave: 3 },
+                    { name: 'e', x: 94.01, baseNote: 'E', baseOctave: 4 }
+                ];
+
+                const fretPositions = [
+                    376.68, 346.68, 316.68, 286.68, 256.68, 226.68, 196.68,
+                    166.68, 136.68, 106.68, 76.68, 46.68, 15.92
+                ];
+
+                const chromaticScale = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                const fretboardNotes = [];
+
+                strings.forEach(string => {
+                    const baseIndex = chromaticScale.indexOf(string.baseNote);
+                    fretPositions.forEach((y, fretIndex) => {
+                        const noteIndex = (baseIndex + fretIndex) % 12;
+                        const note = chromaticScale[noteIndex];
+                        const octave = string.baseOctave + Math.floor((baseIndex + fretIndex) / 12);
+
+                        fretboardNotes.push({
+                            string: string.name,
+                            fret: fretIndex,
+                            x: string.x,
+                            y: y,
+                            note: note,
+                            octave: octave
+                        });
+                    });
+                });
+
+                return fretboardNotes;
+            }
+
+            /**
+             * Initialize the complete system with professional error handling
+             */
+            async initializeSystem() {
+                try {
+                    await this.initializeAudio();
+                    await this.loadSVGContent();
+                    this.setupResponsiveSystem();
+                    this.bindEventListeners();
+                    this.log('✅ Magic 18 System initialized successfully');
+                } catch (error) {
+                    this.handleError('System initialization failed', error);
+                }
+            }
+
+            /**
+             * Professional responsive system using ResizeObserver
+             */
+            setupResponsiveSystem() {
+                // Modern ResizeObserver for professional responsive behavior
+                this.resizeObserver = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        if (entry.target.classList.contains('svg-container')) {
+                            this.recalculateTransformations(entry.target);
+                        }
+                    }
+                });
+
+                // Observe all SVG containers
+                const containers = document.querySelectorAll('.svg-container');
+                containers.forEach(container => {
+                    this.resizeObserver.observe(container);
+                });
+
+                // Initial calculation
+                this.calculateAllTransformations();
+            }
+
+            /**
+             * Calculate precise transformation matrices for each SVG container
+             */
+            calculateAllTransformations() {
+                const leftContainer = document.getElementById('leftSvgContainer');
+                const rightContainer = document.getElementById('rightSvgContainer');
+
+                if (leftContainer) this.calculateTransformationMatrix('left', leftContainer);
+                if (rightContainer) this.calculateTransformationMatrix('right', rightContainer);
+            }
+
+            /**
+             * Industry-standard coordinate transformation calculation
+             */
+            calculateTransformationMatrix(pageId, container) {
+                const svgElement = container.querySelector('svg');
+                if (!svgElement) return;
+
+                const containerRect = container.getBoundingClientRect();
+                const svgRect = svgElement.getBoundingClientRect();
+
+                // Calculate the actual rendered SVG dimensions accounting for object-fit: contain
+                const containerAspect = containerRect.width / containerRect.height;
+                const svgAspect = this.SVG_VIEWBOX.aspectRatio;
+
+                let renderedWidth, renderedHeight, offsetX, offsetY;
+
+                if (containerAspect > svgAspect) {
+                    // Container is wider than SVG aspect ratio
+                    renderedHeight = containerRect.height;
+                    renderedWidth = renderedHeight * svgAspect;
+                    offsetX = (containerRect.width - renderedWidth) / 2;
+                    offsetY = 0;
+                } else {
+                    // Container is taller than SVG aspect ratio  
+                    renderedWidth = containerRect.width;
+                    renderedHeight = renderedWidth / svgAspect;
+                    offsetX = 0;
+                    offsetY = (containerRect.height - renderedHeight) / 2;
+                }
+
+                // Create transformation matrix
+                const transform = {
+                    scaleX: renderedWidth / this.SVG_VIEWBOX.width,
+                    scaleY: renderedHeight / this.SVG_VIEWBOX.height,
+                    translateX: offsetX,
+                    translateY: offsetY,
+                    renderedWidth,
+                    renderedHeight,
+                    containerRect,
+                    svgRect
+                };
+
+                this.transformationMatrix.set(pageId, transform);
+
+                this.log(`📐 ${pageId.toUpperCase()}: Scale(${transform.scaleX.toFixed(4)}, ${transform.scaleY.toFixed(4)}) Offset(${offsetX.toFixed(2)}, ${offsetY.toFixed(2)})`);
+
+                // Recreate interactive elements with new transformation
+                this.createInteractiveElements(pageId);
+            }
+
+            /**
+             * Recalculate transformations on resize (professional responsive handling)
+             */
+            recalculateTransformations(container) {
+                const pageId = container.id === 'leftSvgContainer' ? 'left' : 'right';
+                this.calculateTransformationMatrix(pageId, container);
+            }
+
+            /**
+             * Transform SVG coordinates to screen coordinates using transformation matrix
+             */
+            transformCoordinate(pageId, svgX, svgY) {
+                const transform = this.transformationMatrix.get(pageId);
+                if (!transform) {
+                    this.log(`❌ No transformation matrix for ${pageId}`);
+                    return null;
+                }
+
+                return {
+                    x: transform.translateX + (svgX * transform.scaleX),
+                    y: transform.translateY + (svgY * transform.scaleY)
+                };
+            }
+
+            /**
+             * Professional audio initialization with Web Audio API
+             */
+            async initializeAudio() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+                    // Professional gain staging
+                    this.masterGain = this.audioContext.createGain();
+                    this.chordGain = this.audioContext.createGain();
+
+                    // Connect audio graph
+                    this.masterGain.connect(this.audioContext.destination);
+                    this.chordGain.connect(this.masterGain);
+
+                    // Set professional levels
+                    this.masterGain.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                    this.chordGain.gain.setValueAtTime(0.25, this.audioContext.currentTime);
+
+                    this.setupVolumeControls();
+                    this.log('🎵 Audio context initialized successfully');
+                } catch (error) {
+                    throw new Error(`Audio initialization failed: ${error.message}`);
+                }
+            }
+
+            /**
+             * Professional volume control setup with proper gain staging
+             */
+            setupVolumeControls() {
+                const masterSlider = document.getElementById('masterVolume');
+                const chordSlider = document.getElementById('chordVolume');
+                const masterValue = document.getElementById('masterVolumeValue');
+                const chordValue = document.getElementById('chordVolumeValue');
+
+                if (masterSlider && masterValue) {
+                    masterSlider.addEventListener('input', (e) => {
+                        const value = e.target.value / 100;
+                        this.masterGain.gain.setValueAtTime(value, this.audioContext.currentTime);
+                        masterValue.textContent = e.target.value + '%';
+                    });
+                }
+
+                if (chordSlider && chordValue) {
+                    chordSlider.addEventListener('input', (e) => {
+                        const value = e.target.value / 100;
+                        this.chordGain.gain.setValueAtTime(value, this.audioContext.currentTime);
+                        chordValue.textContent = e.target.value + '%';
+                    });
+                }
+            }
+
+            /**
+             * Professional SVG content loading with error handling
+             */
+            async loadSVGContent() {
+                try {
+                    this.log('🔄 Loading SVG content...');
+
+                    const [leftResponse, rightResponse] = await Promise.all([
+                        fetch('Charts Magic18 SVG_C Left.svg'),
+                        fetch('Charts Magic18 SVG_C Right.svg')
+                    ]);
+
+                    if (!leftResponse.ok) throw new Error(`Left SVG load failed: ${leftResponse.status}`);
+                    if (!rightResponse.ok) throw new Error(`Right SVG load failed: ${rightResponse.status}`);
+
+                    const [leftSvgText, rightSvgText] = await Promise.all([
+                        leftResponse.text(),
+                        rightResponse.text()
+                    ]);
+
+                    // Professional DOM manipulation
+                    this.insertSVGContent('leftSvgContainer', leftSvgText, 'leftOverlay');
+                    this.insertSVGContent('rightSvgContainer', rightSvgText, 'rightOverlay');
+
+                    this.log('✅ SVG content loaded successfully');
+
+                    // Allow DOM to stabilize before calculations
+                    await this.waitForDOMStabilization();
+
+                } catch (error) {
+                    throw new Error(`SVG loading failed: ${error.message}`);
+                }
+            }
+
+            /**
+             * Professional DOM content insertion
+             */
+            insertSVGContent(containerId, svgContent, overlayId) {
+                const container = document.getElementById(containerId);
+                if (!container) {
+                    throw new Error(`Container ${containerId} not found`);
+                }
+
+                container.innerHTML = svgContent + `<div class="interactive-overlay" id="${overlayId}"></div>`;
+            }
+
+            /**
+             * Wait for DOM stabilization (professional async handling)
+             */
+            waitForDOMStabilization() {
+                return new Promise(resolve => {
+                    requestAnimationFrame(() => {
+                        requestAnimationFrame(resolve);
+                    });
+                });
+            }
+
+            /**
+             * Bind professional event listeners
+             */
+            bindEventListeners() {
+                // Professional window resize handling
+                let resizeTimeout;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimeout);
+                    resizeTimeout = setTimeout(() => {
+                        this.calculateAllTransformations();
+                    }, 100);
+                });
+
+                // Professional orientation change handling
+                window.addEventListener('orientationchange', () => {
+                    setTimeout(() => {
+                        this.calculateAllTransformations();
+                    }, 300);
+                });
+            }
+
+            /**
+             * Create professional interactive elements using transformation matrices
+             */
+            createInteractiveElements(page) {
+                const elements = page === 'left' ? this.leftPageElements : this.rightPageElements;
+                const overlay = document.getElementById(`${page}Overlay`);
+                const transform = this.transformationMatrix.get(page);
+
+                if (!overlay || !elements || !transform) {
+                    this.log(`❌ Missing requirements for ${page} interactive elements`);
+                    return;
+                }
+
+                // Clear existing elements
+                overlay.innerHTML = '';
+
+                // Create chord block buttons with precise positioning
+                elements.chordBlocks.forEach(block => {
+                    const coords = this.transformCoordinate(page, block.x, block.y);
+                    if (!coords) return;
+
+                    const button = document.createElement('button');
+                    button.className = 'chord-button';
+                    button.textContent = block.chord;
+                    button.dataset.chord = block.chord;
+                    button.dataset.notes = JSON.stringify(block.notes);
+
+                    // Apply precise positioning using transformation matrix
+                    Object.assign(button.style, {
+                        position: 'absolute',
+                        left: `${coords.x}px`,
+                        top: `${coords.y}px`,
+                        width: `${block.width * transform.scaleX}px`,
+                        height: `${block.height * transform.scaleY}px`,
+                        fontSize: `${Math.min(block.width * transform.scaleX * 0.25, 16)}px`,
+                        backgroundColor: 'rgba(66, 165, 245, 0.8)',
+                        color: 'white',
+                        border: '2px solid #1976D2',
+                        borderRadius: '6px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                        zIndex: 1000
+                    });
+
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.playChord(block.chord, button, page);
+                        this.flashElement(button);
+                    });
+
+                    button.addEventListener('mouseenter', () => {
+                        button.style.backgroundColor = 'rgba(66, 165, 245, 0.95)';
+                        button.style.transform = 'scale(1.05)';
+                    });
+
+                    button.addEventListener('mouseleave', () => {
+                        button.style.backgroundColor = 'rgba(66, 165, 245, 0.8)';
+                        button.style.transform = 'scale(1)';
+                    });
+
+                    overlay.appendChild(button);
+                });
+
+                // Create ingredient buttons (root notes, etc.)
+                elements.ingredients.forEach(ingredient => {
+                    const coords = this.transformCoordinate(page, ingredient.x, ingredient.y);
+                    if (!coords) return;
+
+                    const button = document.createElement('button');
+                    button.className = 'ingredient-button';
+                    button.textContent = ingredient.note;
+                    button.dataset.note = ingredient.note;
+
+                    const size = ingredient.size * Math.min(transform.scaleX, transform.scaleY);
+
+                    Object.assign(button.style, {
+                        position: 'absolute',
+                        left: `${coords.x - size / 2}px`,
+                        top: `${coords.y - size / 2}px`,
+                        width: `${size}px`,
+                        height: `${size}px`,
+                        fontSize: `${size * 0.4}px`,
+                        backgroundColor: ingredient.color || '#FF4444',
+                        color: 'white',
+                        border: '2px solid rgba(255,255,255,0.8)',
+                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        transition: 'all 0.2s ease',
+                        zIndex: 1001
+                    });
+
+                    button.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        this.playNote(ingredient.note, 4, 0.8);
+                        this.flashElement(button);
+                    });
+
+                    overlay.appendChild(button);
+                });
+
+                this.log(`✅ Created ${elements.chordBlocks.length + elements.ingredients.length} interactive elements for ${page.toUpperCase()}`);
+            }
+
+            /**
+             * Professional chord playback with proper Web Audio API implementation
+             */
+            playChord(chord, buttonElement, page) {
+                if (!this.audioContext) {
+                    this.log('❌ Audio context not initialized');
+                    return;
+                }
+
+                // Find chord data
+                const pageElements = page === 'left' ? this.leftPageElements : this.rightPageElements;
+                const chordData = pageElements.chordBlocks.find(c => c.chord === chord);
+
+                if (!chordData) {
+                    this.log(`❌ Chord data not found for ${chord}`);
+                    return;
+                }
+
+                this.log(`🎵 Playing chord: ${chord} (${chordData.notes.join(', ')})`);
+
+                // Play each note in the chord
+                chordData.notes.forEach((note, index) => {
+                    setTimeout(() => {
+                        this.playNote(note, 4, 2.0, this.chordGain);
+                    }, index * 50); // Slight stagger for richness
+                });
+
+                this.activeChord = chord;
+
+                // Visual feedback
+                if (buttonElement) {
+                    this.flashElement(buttonElement);
+                }
+            }
+
+            /**
+             * Professional note synthesis with Web Audio API
+             */
+            playNote(note, octave = 4, duration = 0.5, gainNode = null) {
+                if (!this.audioContext) return;
+
+                const frequency = this.getFrequency(note, octave);
+                const oscillator = this.audioContext.createOscillator();
+                const noteGain = this.audioContext.createGain();
+
+                oscillator.connect(noteGain);
+                noteGain.connect(gainNode || this.masterGain);
+
+                oscillator.frequency.setValueAtTime(frequency, this.audioContext.currentTime);
+                oscillator.type = 'triangle';
+
+                // Professional envelope
+                const now = this.audioContext.currentTime;
+                noteGain.gain.setValueAtTime(0, now);
+                noteGain.gain.linearRampToValueAtTime(0.3, now + 0.05);
+                noteGain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+
+                oscillator.start(now);
+                oscillator.stop(now + duration);
+
+                this.log(`🎵 Playing ${note}${octave} (${frequency.toFixed(2)}Hz)`);
+            }
+
+            /**
+             * Professional frequency calculation
+             */
+            getFrequency(note, octave = 4) {
+                const noteFreqs = {
+                    'C': 261.63, 'C#': 277.18, 'Db': 277.18,
+                    'D': 293.66, 'D#': 311.13, 'Eb': 311.13,
+                    'E': 329.63, 'F': 349.23, 'F#': 369.99, 'Gb': 369.99,
+                    'G': 392.00, 'G#': 415.30, 'Ab': 415.30,
+                    'A': 440.00, 'A#': 466.16, 'Bb': 466.16, 'B': 493.88
+                };
+
+                const baseFreq = noteFreqs[note] || 440;
+                return baseFreq * Math.pow(2, octave - 4);
+            }
+
+            /**
+             * Professional visual feedback
+             */
+            flashElement(element) {
+                const originalBg = element.style.backgroundColor;
+                element.style.backgroundColor = '#FFC107';
+                setTimeout(() => {
+                    element.style.backgroundColor = originalBg;
+                }, 200);
+            }
+
+            /**
+             * Professional logging system
+             */
+            log(message) {
+                if (this.logElement) {
+                    const timestamp = new Date().toLocaleTimeString();
+                    const logEntry = document.createElement('div');
+                    logEntry.className = 'log-entry';
+                    logEntry.innerHTML = `<span class="timestamp">[${timestamp}]</span> ${message}`;
+                    this.logElement.appendChild(logEntry);
+                    this.logElement.scrollTop = this.logElement.scrollHeight;
+
+                    // Limit log entries
+                    while (this.logElement.children.length > 20) {
+                        this.logElement.removeChild(this.logElement.firstChild);
+                    }
+                }
+                console.log(message);
+            }
+
+            /**
+             * Professional error handling
+             */
+            handleError(message, error) {
+                const errorMsg = `❌ ${message}: ${error.message}`;
+                this.log(errorMsg);
+                console.error(errorMsg, error);
+            }
+        }
+
+        // Initialize the professional system
+        document.addEventListener('DOMContentLoaded', () => {
+            const magic18System = new Magic18DirectSVGSystem();
+        });
+    </script>
+</body>
+
+</html>

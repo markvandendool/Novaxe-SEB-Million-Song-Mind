@@ -1,0 +1,149 @@
+.chord-demo-container {
+    padding: 40px 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+
+    h1 {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 3rem;
+        margin-bottom: 10px;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    p {
+        text-align: center;
+        color: #7f8c8d;
+        font-size: 1.2rem;
+        margin-bottom: 40px;
+    }
+}
+
+.demo-controls {
+    text-align: center;
+    margin-bottom: 30px;
+
+    button {
+        padding: 12px 24px;
+        background: linear-gradient(135deg, #3498db, #2980b9);
+        color: white;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+        &:hover {
+            background: linear-gradient(135deg, #2980b9, #1f639a);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+    }
+}
+
+.chart-container {
+    margin: 40px 0;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.instructions {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    padding: 30px;
+    margin-top: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    h3 {
+        color: #2c3e50;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        font-weight: 700;
+    }
+
+    ol,
+    ul {
+        color: #495057;
+        font-size: 1rem;
+        line-height: 1.6;
+
+        li {
+            margin-bottom: 10px;
+
+            strong {
+                color: #2c3e50;
+                font-weight: 600;
+            }
+        }
+    }
+
+    ol {
+        counter-reset: instruction-counter;
+
+        li {
+            counter-increment: instruction-counter;
+            position: relative;
+            padding-left: 10px;
+
+            &::marker {
+                color: #3498db;
+                font-weight: bold;
+            }
+        }
+    }
+
+    ul li {
+        position: relative;
+        padding-left: 20px;
+
+        &::before {
+            content: '🚀';
+            position: absolute;
+            left: 0;
+        }
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chord-demo-container {
+        padding: 20px 15px;
+
+        h1 {
+            font-size: 2.2rem;
+        }
+
+        p {
+            font-size: 1rem;
+        }
+    }
+
+    .instructions {
+        padding: 20px;
+        margin-top: 30px;
+
+        h3 {
+            font-size: 1.3rem;
+        }
+
+        ol,
+        ul {
+            font-size: 0.95rem;
+        }
+    }
+}

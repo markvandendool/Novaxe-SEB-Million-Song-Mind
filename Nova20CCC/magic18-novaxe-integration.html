@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 18 → Novaxe Ecosystem Integration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: #ffffff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .integration-container {
+            display: flex;
+            height: 100vh;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        /* Magic 18 Editor Panel */
+        .magic18-panel {
+            flex: 2;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .magic18-header {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 15px 20px;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .magic18-content {
+            height: calc(100vh - 120px);
+        }
+
+        .magic18-content iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Novaxe Connection Panel */
+        .novaxe-panel {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .novaxe-header {
+            background: linear-gradient(45deg, #2b3990, #28a745);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        .status-active {
+            background: #28a745;
+        }
+
+        .status-connecting {
+            background: #ffc107;
+        }
+
+        .status-error {
+            background: #dc3545;
+        }
+
+        @keyframes pulse {
+            0% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .integration-stats {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+        }
+
+        .stat-value {
+            font-weight: 600;
+            color: #4ecdc4;
+        }
+
+        /* Control Panel */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #a0a0a0;
+            font-size: 14px;
+        }
+
+        .control-select,
+        .control-button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 14px;
+        }
+
+        .control-button {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Activity Log */
+        .activity-log {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'SF Mono', monospace;
+            font-size: 12px;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid #4ecdc4;
+            padding-left: 10px;
+        }
+
+        .log-timestamp {
+            color: #a0a0a0;
+            margin-right: 10px;
+        }
+
+        .log-chord {
+            color: #ff6b6b;
+            font-weight: 600;
+        }
+
+        .log-action {
+            color: #4ecdc4;
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left: 4px solid #4ecdc4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .integration-container {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .magic18-panel,
+            .novaxe-panel {
+                flex: none;
+            }
+
+            .magic18-content {
+                height: 60vh;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="integration-container">
+        <!-- Magic 18 Editor Panel -->
+        <div class="magic18-panel">
+            <div class="magic18-header">
+                ⚡ Magic 18 Chord Cubes - Professional Editor
+            </div>
+            <div class="magic18-content">
+                <iframe src="magic18/magic18-professional-editor.html" id="magic18-frame"></iframe>
+            </div>
+        </div>
+
+        <!-- Novaxe Integration Panel -->
+        <div class="novaxe-panel">
+            <div class="novaxe-header">
+                🎵 Novaxe Ecosystem Integration
+            </div>
+
+            <!-- Connection Status -->
+            <div class="status-indicator">
+                <div class="status-dot status-connecting" id="status-dot"></div>
+                <span id="status-text">Connecting to Novaxe...</span>
+            </div>
+
+            <!-- Integration Statistics -->
+            <div class="integration-stats">
+                <h3 style="margin-bottom: 15px; color: #4ecdc4;">📊 Integration Stats</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Novaxe System:</span>
+                    <span class="stat-value" id="novaxe-status">127K Lines</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Port:</span>
+                    <span class="stat-value">localhost:9000</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Magic 18 Chords:</span>
+                    <span class="stat-value">18 Mapped</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Animations:</span>
+                    <span class="stat-value">9 Spectacular</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Activations:</span>
+                    <span class="stat-value" id="activation-count">0</span>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="control-panel">
+                <h3 style="margin-bottom: 15px; color: #4ecdc4;">🎛️ Controls</h3>
+
+                <div class="control-group">
+                    <label class="control-label">Animation Style:</label>
+                    <select class="control-select" id="animation-select">
+                        <option value="quantum-pulse">Quantum Pulse</option>
+                        <option value="neural-spark">Neural Spark</option>
+                        <option value="harmonic-resonance">Harmonic Resonance</option>
+                        <option value="stellar-explosion">Stellar Explosion</option>
+                        <option value="lightning-cascade">Lightning Cascade</option>
+                        <option value="aurora-flow">Aurora Flow</option>
+                        <option value="diamond-crystal">Diamond Crystal</option>
+                        <option value="phoenix-rise">Phoenix Rise</option>
+                        <option value="ocean-wave">Ocean Wave</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Test Chord:</label>
+                    <select class="control-select" id="chord-select">
+                        <option value="">Select a chord...</option>
+                        <option value="C">C Major (I)</option>
+                        <option value="Dm">D minor (ii)</option>
+                        <option value="Em">E minor (iii)</option>
+                        <option value="F">F Major (IV)</option>
+                        <option value="G">G Major (V)</option>
+                        <option value="Am">A minor (vi)</option>
+                        <option value="B°">B diminished (vii°)</option>
+                        <option value="C7">C7 (I7)</option>
+                        <option value="D7">D7 (V7/V)</option>
+                        <option value="E7">E7 (V7/vi)</option>
+                        <option value="A7">A7 (V7/ii)</option>
+                        <option value="B7">B7 (V7/iii)</option>
+                        <option value="Cm">C minor (i)</option>
+                        <option value="Eb">E♭ Major (♭III)</option>
+                        <option value="Fm">F minor (iv)</option>
+                        <option value="Gm">G minor (v)</option>
+                        <option value="Ab">A♭ Major (♭VI)</option>
+                        <option value="Bb">B♭ Major (♭VII)</option>
+                    </select>
+                </div>
+
+                <button class="control-button" onclick="testChordActivation()">
+                    🎯 Test Chord Activation
+                </button>
+
+                <button class="control-button" onclick="openNovaxeSystem()" style="margin-top: 10px;">
+                    🚀 Open Novaxe System
+                </button>
+            </div>
+
+            <!-- Activity Log -->
+            <div style="margin-bottom: 10px;">
+                <h3 style="color: #4ecdc4;">📝 Activity Log</h3>
+            </div>
+            <div class="activity-log" id="activity-log">
+                <div class="log-entry">
+                    <span class="log-timestamp">Loading...</span>
+                    <span class="log-action">Initializing Magic 18 → Novaxe Integration...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="novaxe-integration/magic18-novaxe-bridge.js"></script>
+    <script>
+        let activationCount = 0;
+        let integrationActive = false;
+
+        // Initialize integration on load
+        window.addEventListener('load', async () => {
+            await initializeIntegration();
+        });
+
+        async function initializeIntegration() {
+            updateLog('System', 'Magic 18 Integration starting...');
+
+            try {
+                // Check Novaxe connection
+                const response = await fetch('http://localhost:9000');
+                if (response.ok) {
+                    updateConnectionStatus(true);
+                    updateLog('Novaxe', 'Connected to 127K line ecosystem ✅');
+                    integrationActive = true;
+
+                    // Initialize Magic 18 bridge
+                    if (window.Magic18NovaxeBridge) {
+                        updateLog('Magic18', 'Bridge initialized successfully ✅');
+                    }
+                } else {
+                    updateConnectionStatus(false);
+                    updateLog('Error', 'Failed to connect to Novaxe system ❌');
+                }
+            } catch (error) {
+                updateConnectionStatus(false);
+                updateLog('Error', `Connection failed: ${error.message} ❌`);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+
+            if (connected) {
+                statusDot.className = 'status-dot status-active';
+                statusText.textContent = 'Connected to Novaxe Ecosystem';
+            } else {
+                statusDot.className = 'status-dot status-error';
+                statusText.textContent = 'Connection Failed';
+            }
+        }
+
+        function updateLog(source, message) {
+            const log = document.getElementById('activity-log');
+            const timestamp = new Date().toLocaleTimeString();
+
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-chord">${source}:</span>
+                <span class="log-action">${message}</span>
+            `;
+
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function testChordActivation() {
+            const chordSelect = document.getElementById('chord-select');
+            const animationSelect = document.getElementById('animation-select');
+
+            const chord = chordSelect.value;
+            const animation = animationSelect.value;
+
+            if (!chord) {
+                updateLog('Warning', 'Please select a chord to test');
+                return;
+            }
+
+            if (window.Magic18NovaxeBridge) {
+                try {
+                    window.Magic18NovaxeBridge.activateChord(chord, animation);
+                    activationCount++;
+                    document.getElementById('activation-count').textContent = activationCount;
+                    updateLog('Test', `Activated ${chord} with ${animation} animation 🎵`);
+                } catch (error) {
+                    updateLog('Error', `Test failed: ${error.message} ❌`);
+                }
+            } else {
+                updateLog('Error', 'Magic 18 Bridge not available ❌');
+            }
+        }
+
+        function openNovaxeSystem() {
+            window.open('http://localhost:9000', '_blank');
+            updateLog('Navigation', 'Opened Novaxe system in new tab 🚀');
+        }
+
+        // Listen for Magic 18 chord events from iframe
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'magic18-chord-activated') {
+                const { chord, animation } = event.data;
+                activationCount++;
+                document.getElementById('activation-count').textContent = activationCount;
+                updateLog('Magic18', `Chord ${chord} activated with ${animation} 🎯`);
+            }
+        });
+
+        // Auto-refresh connection every 30 seconds
+        setInterval(async () => {
+            if (!integrationActive) {
+                await initializeIntegration();
+            }
+        }, 30000);
+    </script>
+</body>
+
+</html>

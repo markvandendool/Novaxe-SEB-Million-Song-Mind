@@ -1,0 +1,322 @@
+.chord-chart-magic18 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    padding: 20px;
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    border-radius: 12px;
+    color: white;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header Styles */
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+
+    h2 {
+        margin: 0;
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+}
+
+.key-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+
+    label {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    select {
+        padding: 8px 12px;
+        border-radius: 6px;
+        border: none;
+        background: white;
+        color: #333;
+        font-size: 1rem;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .position-indicator {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 6px 12px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+}
+
+/* Roman Numeral Grid */
+.roman-chord-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.roman-chord-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    &.active {
+        background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        border-color: #ff6b6b;
+        color: white;
+        box-shadow: 0 6px 12px rgba(255, 107, 107, 0.3);
+        transform: scale(1.05);
+    }
+
+    .roman-numeral {
+        font-size: 1.8rem;
+        font-weight: 900;
+        margin-bottom: 8px;
+        font-family: 'Times New Roman', serif;
+    }
+
+    .chord-symbol {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: #ffeb3b;
+    }
+
+    .chord-quality {
+        font-size: 0.85rem;
+        opacity: 0.8;
+        text-transform: capitalize;
+    }
+}
+
+/* Current Chord Display */
+.current-chord-display {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+
+    .chord-info h3 {
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+        color: #ffeb3b;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    }
+
+    .chord-info p {
+        margin: 0;
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+}
+
+/* Fretboard Container */
+.fretboard-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.fretboard-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+
+    button {
+        padding: 8px 16px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    }
+}
+
+.novaxe-fretboard-reference {
+    /* Container for your existing fretboard component */
+    /* This will inherit the existing fretboard styles */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Audio Controls */
+.audio-controls {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 30px;
+
+    button {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 25px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+        &.play-chord-btn {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: white;
+
+            &:hover {
+                background: linear-gradient(135deg, #45a049, #5cb85c);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(76, 175, 80, 0.3);
+            }
+        }
+
+        &.strum-btn {
+            background: linear-gradient(135deg, #ff9800, #ffb74d);
+            color: white;
+
+            &:hover {
+                background: linear-gradient(135deg, #f57c00, #ff9800);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(255, 152, 0, 0.3);
+            }
+        }
+    }
+}
+
+/* Legend */
+.chart-legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+
+    .color-box {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+
+        &.root {
+            background: #4caf50;
+        }
+
+        /* Green */
+        &.third {
+            background: #f44336;
+        }
+
+        /* Red */
+        &.fifth {
+            background: #2196f3;
+        }
+
+        /* Blue */
+        &.seventh {
+            background: #9e9e9e;
+        }
+
+        /* Grey */
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .chord-chart-magic18 {
+        padding: 15px;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+
+        h2 {
+            font-size: 1.8rem;
+        }
+    }
+
+    .roman-chord-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .roman-chord-button {
+        padding: 15px;
+
+        .roman-numeral {
+            font-size: 1.5rem;
+        }
+
+        .chord-symbol {
+            font-size: 1rem;
+        }
+    }
+
+    .audio-controls {
+        flex-direction: column;
+        gap: 10px;
+
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+        }
+    }
+
+    .chart-legend {
+        gap: 15px;
+    }
+}
+
+/* iPad/Tablet Touch Enhancements */
+@media (hover: none) and (pointer: coarse) {
+    .roman-chord-button {
+        /* Larger touch targets */
+        min-height: 100px;
+
+        &:active {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(0.95);
+        }
+    }
+
+    .audio-controls button {
+        min-height: 50px;
+
+        &:active {
+            transform: scale(0.95);
+        }
+    }
+}
