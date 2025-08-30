@@ -1,129 +1,3 @@
-// ============================================
-// CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
-// ============================================
-(function () {
-    'use strict';
-
-    // Suppress AudioContext warnings BEFORE anything else loads
-    const originalWarn = console.warn;
-    const originalLog = console.log;
-
-    console.warn = function (...args) {
-        const msg = String(args[0] || '');
-        if (msg.includes('AudioContext') ||
-            msg.includes('not allowed to start') ||
-            msg.includes('user gesture') ||
-            msg.includes('Tone.js') ||
-            msg.includes('resumed') ||
-            msg.includes('created')) {
-            // COMPLETELY SUPPRESS - don't even log once
-            return;
-        }
-        return originalWarn.apply(console, args);
-    };
-
-    console.log = function (...args) {
-        const msg = String(args[0] || '');
-        if (msg.includes('* Tone.js v') && msg.includes('*')) {
-            console.log('[AUDIO] Tone.js loaded (warnings suppressed)');
-            return; // Suppress the repeated Tone.js version messages
-        }
-        return originalLog.apply(console, args);
-    };
-})();
-
-// (Duplicate removed - suppression already applied above)
-
-// ============================================
-// CLAUDE'S PART 3: PROPER IMPORT ORDER
-// ============================================
-
-// Import transport bridge FIRST (it will expose globally)
-import { chordCubesTransport } from './transport-bridge.js';
-
-// IMMEDIATE DEBUG: Check if import worked
-console.log('[MAIN] Transport import result:', chordCubesTransport);
-console.log('[MAIN] Window transport (should be set by transport-bridge.js):', window.chordCubesTransport);
-
-// EMERGENCY: Ensure global exposure even if transport-bridge.js didn't set it
-if (chordCubesTransport && !window.chordCubesTransport) {
-    window.chordCubesTransport = chordCubesTransport;
-    console.log('[MAIN] ✅ Manually exposed transport to global scope');
-}
-
-// DEBUG: Check what methods are actually available
-console.log('[DEBUG] Available transport methods:', Object.getOwnPropertyNames(window.chordCubesTransport || {}));
-console.log('[DEBUG] Transport prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.chordCubesTransport || {})));
-console.log('[DEBUG] Has ensureAudioContext?', typeof window.chordCubesTransport?.ensureAudioContext);
-console.log('[DEBUG] Has toggleDrums?', typeof window.chordCubesTransport?.toggleDrums);
-console.log('[DEBUG] Has setStyle?', typeof window.chordCubesTransport?.setStyle);
-
-// EMERGENCY: Add missing methods if they don't exist
-if (window.chordCubesTransport) {
-    const transport = window.chordCubesTransport;
-
-    if (!transport.ensureAudioContext) {
-        console.log('[FIX] Adding missing ensureAudioContext method');
-        transport.ensureAudioContext = async function () {
-            try {
-                if (window.Tone && window.Tone.context.state !== 'running') {
-                    await window.Tone.start();
-                    console.log('[FIX] Tone.js context started');
-                }
-                return true;
-            } catch (error) {
-                console.error('[FIX] Audio context failed:', error);
-                return false;
-            }
-        };
-    }
-
-    if (!transport.toggleDrums) {
-        console.log('[FIX] Adding missing toggleDrums method');
-        transport.toggleDrums = function () {
-            this.drumsOn = !this.drumsOn;
-            console.log('[FIX] Drums toggled:', this.drumsOn);
-            return this.drumsOn;
-        };
-    }
-
-    if (!transport.setStyle) {
-        console.log('[FIX] Adding missing setStyle method');
-        transport.setStyle = function (style) {
-            this.currentStyle = style;
-            console.log('[FIX] Style set to:', style);
-        };
-    }
-
-    if (!transport.setBPM) {
-        console.log('[FIX] Adding missing setBPM method');
-        transport.setBPM = function (bpm) {
-            this.bpm = bpm;
-            if (window.Tone && window.Tone.Transport) {
-                window.Tone.Transport.bpm.value = bpm;
-            }
-            console.log('[FIX] BPM set to:', bpm);
-        };
-    }
-
-    console.log('[FIX] ✅ All missing methods added');
-}
-
-// EMERGENCY: Create fallback if import completely failed
-if (!chordCubesTransport && !window.chordCubesTransport) {
-    console.error('[MAIN] ❌ Transport import completely failed - creating fallback');
-    window.chordCubesTransport = {
-        drumsOn: false,
-        isPlaying: false,
-        toggleDrums: () => { console.log('[FALLBACK] Drums toggle'); return false; },
-        setBPM: (bpm) => { console.log('[FALLBACK] BPM set to', bpm); },
-        ensureAudioContext: async () => { console.log('[FALLBACK] Audio context'); return false; },
-        start: async () => { console.log('[FALLBACK] Start'); return false; },
-        stop: () => { console.log('[FALLBACK] Stop'); }
-    };
-}
-
-// Your other imports come AFTER
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
@@ -1220,38 +1094,7 @@ async function loadSet(setName) {
     for (const s of shelfCubes) { s.visible = true; }
     // Start with empty front row
     lineup = [];
-    try {
-        ensureTempoUi();
-        // EMERGENCY: Force visible UI after 2 seconds
-        setTimeout(() => {
-            console.log('[EMERGENCY] Forcing UI visibility...');
-            const widget = document.getElementById('unified-rhythm-widget');
-            if (!widget) {
-                console.error('[EMERGENCY] Widget not found! Creating emergency UI...');
-                createEmergencyUI();
-            } else {
-                console.log('[EMERGENCY] Widget found, forcing visibility...');
-                widget.style.cssText = `
-                    position: fixed !important;
-                    top: 50px !important;
-                    right: 50px !important;
-                    z-index: 2147483647 !important;
-                    background: rgba(255, 0, 0, 0.9) !important;
-                    color: white !important;
-                    padding: 20px !important;
-                    border-radius: 10px !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    pointer-events: auto !important;
-                    min-width: 300px !important;
-                    font-family: Arial, sans-serif !important;
-                    font-size: 14px !important;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
-                `;
-            }
-        }, 2000);
-    } catch (_) { }
+    try { ensureTempoUi(); } catch (_) { }
 }
 
 async function updateLabels() {
@@ -1552,7 +1395,7 @@ function onPointerDown(e) {
     mouseDownTime = performance.now();
     fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
     try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
-
+    
     console.log(`[POINTER-DOWN] Starting click detection. Front-row cubes: ${cubes.length}, Shelf cubes: ${shelfCubes.length}`);
 
     // Temporary: check UI locks first; if hit, set guard and disable controls
@@ -3015,256 +2858,33 @@ function readFlagsFromUrl() {
     } catch (_) { /* ignore */ }
 }
 
-// CLAUDE'S PART 5: FIXED UI CREATION FUNCTION
+// Tempo/Metronome UI
 function ensureTempoUi() {
-    console.log('[UNIFIED-WIDGET] Creating drum/metronome control...');
-
-    // Check if transport is available
-    if (!window.chordCubesTransport) {
-        console.error('[UNIFIED-WIDGET] Transport not available - cannot create UI');
-        return;
-    }
-
-    // Remove any existing UI
-    const existingUi = document.getElementById('unified-rhythm-widget');
-    if (existingUi) {
-        existingUi.remove();
-    }
-
-    // Create the widget
-    const widget = document.createElement('div');
-    widget.id = 'unified-rhythm-widget';
-    widget.innerHTML = `
-        <div class="rhythm-controls">
-            <div class="control-row">
-                <label>BPM: <span id="bpm-value">120</span></label>
-                <input type="range" id="bpm-slider" min="60" max="180" value="120">
-            </div>
-            <div class="control-row">
-                <button id="drum-toggle" class="control-btn">Drums: Off</button>
-                <button id="metronome-toggle" class="control-btn">Metronome: Off</button>
-            </div>
-            <div class="control-row">
-                <label>Style:</label>
-                <select id="style-selector">
-                    <option value="rock">Rock</option>
-                    <option value="jazz">Jazz</option>
-                    <option value="electronic">Electronic</option>
-                    <option value="funk">Funk</option>
-                    <option value="latin">Latin</option>
-                    <option value="hiphop">Hip-Hop</option>
-                </select>
-            </div>
-        </div>
-    `;
-
-    // CRITICAL: Force visibility with inline styles
-    widget.style.cssText = `
-        position: fixed !important;
-        top: 10px !important;
-        right: 10px !important;
-        z-index: 2147483647 !important;
-        background: rgba(0, 0, 0, 0.9) !important;
-        color: white !important;
-        padding: 15px !important;
-        border-radius: 10px !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        min-width: 250px !important;
-        font-family: Arial, sans-serif !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
-    `;
-
-    // Add to body (not to a container that might be hidden)
-    document.body.appendChild(widget);
-
-    // Setup event listeners
-    setupRhythmControls();
-
-    console.log('[UNIFIED-WIDGET] ✅ Widget created and attached to body');
-
-    // Verify visibility
-    setTimeout(() => {
-        const rect = widget.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-            console.error('[UNIFIED-WIDGET] Widget has zero dimensions!');
-            console.log('Widget computed style:', window.getComputedStyle(widget));
-        } else {
-            console.log('[UNIFIED-WIDGET] Widget visible at:', rect);
+    if (tempoUi) return;
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
+    const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
+    const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
+    const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
+    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
+    const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
+    btn.onclick = async () => {
+        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
+        if (!metroLoop && window.Tone) {
+            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
         }
-    }, 100);
-
-    // Store references for compatibility
-    tempoUi = widget;
-}
-
-function setupRhythmControls() {
-    const transport = window.chordCubesTransport;
-    if (!transport) {
-        console.error('[CONTROLS] Transport not available');
-        return;
-    }
-
-    // BPM Slider
-    const bpmSlider = document.getElementById('bpm-slider');
-    const bpmValue = document.getElementById('bpm-value');
-
-    if (bpmSlider) {
-        bpmSlider.addEventListener('input', (e) => {
-            const bpm = parseInt(e.target.value);
-            transport.setBPM(bpm);
-            bpmValue.textContent = bpm;
-        });
-    }
-
-    // Drum Toggle
-    const drumToggle = document.getElementById('drum-toggle');
-    if (drumToggle) {
-        drumToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Drum button clicked');
-
-            // Ensure audio context is started
-            await transport.ensureAudioContext();
-
-            // Toggle drums
-            const drumsOn = transport.toggleDrums();
-            drumToggle.textContent = `Drums: ${drumsOn ? 'On' : 'Off'}`;
-            drumToggle.style.backgroundColor = drumsOn ? '#4CAF50' : '#333';
-
-            // Start/stop transport if needed
-            if (drumsOn && !transport.isPlaying) {
-                await transport.start();
-            } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) {
-                transport.stop();
-            }
-        });
-    }
-
-    // Metronome Toggle
-    const metronomeToggle = document.getElementById('metronome-toggle');
-    if (metronomeToggle) {
-        metronomeToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Metronome button clicked');
-
-            // Ensure audio context is started
-            await transport.ensureAudioContext();
-
-            // Toggle metronome
-            const metronomOn = transport.toggleMetronome();
-            metronomeToggle.textContent = `Metronome: ${metronomOn ? 'On' : 'Off'}`;
-            metronomeToggle.style.backgroundColor = metronomOn ? '#4CAF50' : '#333';
-
-            // Start/stop transport if needed
-            if (metronomOn && !transport.isPlaying) {
-                await transport.start();
-            } else if (!metronomOn && !transport.drumsOn && transport.isPlaying) {
-                transport.stop();
-            }
-        });
-    }
-
-    // Style Selector
-    const styleSelector = document.getElementById('style-selector');
-    if (styleSelector) {
-        styleSelector.addEventListener('change', (e) => {
-            transport.setStyle(e.target.value);
-            console.log(`[CONTROLS] Style changed to ${e.target.value}`);
-        });
-    }
-
-    console.log('[CONTROLS] ✅ Event listeners attached');
-}
-
-function createEmergencyUI() {
-    console.log('[EMERGENCY] Creating emergency UI...');
-
-    // Remove any existing emergency UI
-    const existing = document.getElementById('emergency-ui');
-    if (existing) existing.remove();
-
-    // Create emergency UI
-    const emergencyDiv = document.createElement('div');
-    emergencyDiv.id = 'emergency-ui';
-    emergencyDiv.innerHTML = `
-        <h3>🚨 EMERGENCY DRUM CONTROLS 🚨</h3>
-        <p>Transport: ${window.chordCubesTransport ? '✅ Available' : '❌ Missing'}</p>
-        <button id="emergency-drums">DRUMS: OFF</button>
-        <button id="emergency-test">TEST SOUND</button>
-        <div>BPM: <input type="range" id="emergency-bpm" min="60" max="180" value="120"> <span id="emergency-bpm-val">120</span></div>
-    `;
-
-    emergencyDiv.style.cssText = `
-        position: fixed !important;
-        top: 100px !important;
-        left: 50px !important;
-        z-index: 2147483647 !important;
-        background: rgba(255, 0, 0, 0.95) !important;
-        color: white !important;
-        padding: 20px !important;
-        border-radius: 10px !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        min-width: 300px !important;
-        font-family: Arial, sans-serif !important;
-        font-size: 16px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
-        border: 3px solid yellow !important;
-    `;
-
-    document.body.appendChild(emergencyDiv);
-
-    // Add emergency event listeners
-    const drumBtn = document.getElementById('emergency-drums');
-    const testBtn = document.getElementById('emergency-test');
-    const bpmSlider = document.getElementById('emergency-bpm');
-    const bpmVal = document.getElementById('emergency-bpm-val');
-
-    if (drumBtn && window.chordCubesTransport) {
-        drumBtn.onclick = async () => {
-            try {
-                await window.chordCubesTransport.ensureAudioContext();
-                const drumsOn = window.chordCubesTransport.toggleDrums();
-                drumBtn.textContent = `DRUMS: ${drumsOn ? 'ON' : 'OFF'}`;
-                drumBtn.style.backgroundColor = drumsOn ? 'green' : 'red';
-
-                if (drumsOn && !window.chordCubesTransport.isPlaying) {
-                    await window.chordCubesTransport.start();
-                } else if (!drumsOn && window.chordCubesTransport.isPlaying) {
-                    window.chordCubesTransport.stop();
-                }
-
-                console.log('[EMERGENCY] Drums toggled:', drumsOn);
-            } catch (error) {
-                console.error('[EMERGENCY] Drum toggle failed:', error);
-            }
-        };
-    }
-
-    if (testBtn && window.chordCubesTransport) {
-        testBtn.onclick = async () => {
-            try {
-                await window.chordCubesTransport.ensureAudioContext();
-                window.chordCubesTransport.playDrumSound('kick');
-                console.log('[EMERGENCY] Test sound played');
-            } catch (error) {
-                console.error('[EMERGENCY] Test sound failed:', error);
-            }
-        };
-    }
-
-    if (bpmSlider && bpmVal && window.chordCubesTransport) {
-        bpmSlider.oninput = () => {
-            const bpm = parseInt(bpmSlider.value);
-            window.chordCubesTransport.setBPM(bpm);
-            bpmVal.textContent = bpm;
-        };
-    }
-
-    console.log('[EMERGENCY] ✅ Emergency UI created and functional');
+        if (!metroOn) {
+            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
+            btn.textContent = 'Metronome: On'; metroOn = true;
+        } else {
+            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
+            btn.textContent = 'Metronome: Off'; metroOn = false;
+        }
+    };
+    box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+    document.body.appendChild(box);
+    tempoUi = box; tempoSlider = slider; metroBtn = btn;
 }
 
 function createPlayButton() {
@@ -3787,56 +3407,5 @@ async function playFrontRowProgression() {
 }
 
 // Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()
-
-// ============================================
-// CLAUDE'S PART 7: DEBUGGING HELPERS
-// ============================================
-
-// Add these to help debug UI visibility issues
-window.debugUI = function () {
-    const widget = document.getElementById('unified-rhythm-widget');
-    if (!widget) {
-        console.error('Widget not found in DOM');
-        return;
-    }
-
-    const rect = widget.getBoundingClientRect();
-    const computed = window.getComputedStyle(widget);
-
-    console.log('Widget Debug Info:');
-    console.log('- Position:', rect);
-    console.log('- Display:', computed.display);
-    console.log('- Visibility:', computed.visibility);
-    console.log('- Z-Index:', computed.zIndex);
-    console.log('- Opacity:', computed.opacity);
-    console.log('- Parent:', widget.parentElement);
-
-    // Check if something is covering it
-    const elementAtPoint = document.elementFromPoint(rect.left + 10, rect.top + 10);
-    console.log('- Element at widget position:', elementAtPoint);
-
-    // Force to front
-    widget.style.zIndex = '2147483647';
-    console.log('Forced z-index to maximum');
-};
-
-window.forceShowUI = function () {
-    const widget = document.getElementById('unified-rhythm-widget');
-    if (widget) {
-        widget.style.cssText = `
-            position: fixed !important;
-            top: 10px !important;
-            right: 10px !important;
-            z-index: 2147483647 !important;
-            background: red !important;
-            width: 300px !important;
-            height: 200px !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        `;
-        console.log('Forced widget to red box for visibility');
-    }
-};
 
 

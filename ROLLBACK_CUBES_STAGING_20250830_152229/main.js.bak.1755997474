@@ -1,129 +1,3 @@
-// ============================================
-// CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
-// ============================================
-(function () {
-    'use strict';
-
-    // Suppress AudioContext warnings BEFORE anything else loads
-    const originalWarn = console.warn;
-    const originalLog = console.log;
-
-    console.warn = function (...args) {
-        const msg = String(args[0] || '');
-        if (msg.includes('AudioContext') ||
-            msg.includes('not allowed to start') ||
-            msg.includes('user gesture') ||
-            msg.includes('Tone.js') ||
-            msg.includes('resumed') ||
-            msg.includes('created')) {
-            // COMPLETELY SUPPRESS - don't even log once
-            return;
-        }
-        return originalWarn.apply(console, args);
-    };
-
-    console.log = function (...args) {
-        const msg = String(args[0] || '');
-        if (msg.includes('* Tone.js v') && msg.includes('*')) {
-            console.log('[AUDIO] Tone.js loaded (warnings suppressed)');
-            return; // Suppress the repeated Tone.js version messages
-        }
-        return originalLog.apply(console, args);
-    };
-})();
-
-// (Duplicate removed - suppression already applied above)
-
-// ============================================
-// CLAUDE'S PART 3: PROPER IMPORT ORDER
-// ============================================
-
-// Import transport bridge FIRST (it will expose globally)
-import { chordCubesTransport } from './transport-bridge.js';
-
-// IMMEDIATE DEBUG: Check if import worked
-console.log('[MAIN] Transport import result:', chordCubesTransport);
-console.log('[MAIN] Window transport (should be set by transport-bridge.js):', window.chordCubesTransport);
-
-// EMERGENCY: Ensure global exposure even if transport-bridge.js didn't set it
-if (chordCubesTransport && !window.chordCubesTransport) {
-    window.chordCubesTransport = chordCubesTransport;
-    console.log('[MAIN] ✅ Manually exposed transport to global scope');
-}
-
-// DEBUG: Check what methods are actually available
-console.log('[DEBUG] Available transport methods:', Object.getOwnPropertyNames(window.chordCubesTransport || {}));
-console.log('[DEBUG] Transport prototype methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(window.chordCubesTransport || {})));
-console.log('[DEBUG] Has ensureAudioContext?', typeof window.chordCubesTransport?.ensureAudioContext);
-console.log('[DEBUG] Has toggleDrums?', typeof window.chordCubesTransport?.toggleDrums);
-console.log('[DEBUG] Has setStyle?', typeof window.chordCubesTransport?.setStyle);
-
-// EMERGENCY: Add missing methods if they don't exist
-if (window.chordCubesTransport) {
-    const transport = window.chordCubesTransport;
-
-    if (!transport.ensureAudioContext) {
-        console.log('[FIX] Adding missing ensureAudioContext method');
-        transport.ensureAudioContext = async function () {
-            try {
-                if (window.Tone && window.Tone.context.state !== 'running') {
-                    await window.Tone.start();
-                    console.log('[FIX] Tone.js context started');
-                }
-                return true;
-            } catch (error) {
-                console.error('[FIX] Audio context failed:', error);
-                return false;
-            }
-        };
-    }
-
-    if (!transport.toggleDrums) {
-        console.log('[FIX] Adding missing toggleDrums method');
-        transport.toggleDrums = function () {
-            this.drumsOn = !this.drumsOn;
-            console.log('[FIX] Drums toggled:', this.drumsOn);
-            return this.drumsOn;
-        };
-    }
-
-    if (!transport.setStyle) {
-        console.log('[FIX] Adding missing setStyle method');
-        transport.setStyle = function (style) {
-            this.currentStyle = style;
-            console.log('[FIX] Style set to:', style);
-        };
-    }
-
-    if (!transport.setBPM) {
-        console.log('[FIX] Adding missing setBPM method');
-        transport.setBPM = function (bpm) {
-            this.bpm = bpm;
-            if (window.Tone && window.Tone.Transport) {
-                window.Tone.Transport.bpm.value = bpm;
-            }
-            console.log('[FIX] BPM set to:', bpm);
-        };
-    }
-
-    console.log('[FIX] ✅ All missing methods added');
-}
-
-// EMERGENCY: Create fallback if import completely failed
-if (!chordCubesTransport && !window.chordCubesTransport) {
-    console.error('[MAIN] ❌ Transport import completely failed - creating fallback');
-    window.chordCubesTransport = {
-        drumsOn: false,
-        isPlaying: false,
-        toggleDrums: () => { console.log('[FALLBACK] Drums toggle'); return false; },
-        setBPM: (bpm) => { console.log('[FALLBACK] BPM set to', bpm); },
-        ensureAudioContext: async () => { console.log('[FALLBACK] Audio context'); return false; },
-        start: async () => { console.log('[FALLBACK] Start'); return false; },
-        stop: () => { console.log('[FALLBACK] Stop'); }
-    };
-}
-
-// Your other imports come AFTER
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { chordSetsC, inversionByQuarterTurn, noteSetsC, notesToDegreesInC, transposeNotes, degreeSets } from './chords.js';
@@ -166,15 +40,6 @@ scene.add(ambient);
 const dir = new THREE.DirectionalLight(0xffffff, 0.7);
 dir.position.set(3, 5, 4);
 scene.add(dir);
-// Double front-row spotlight (soft key + fill)
-const frontKey = new THREE.SpotLight(0xffffff, 0.85, 12.0, Math.PI / 6, 0.35, 1.2);
-frontKey.position.set(0, 4.8, 5.6);
-frontKey.target.position.set(0, 0, 0);
-scene.add(frontKey); scene.add(frontKey.target);
-const frontFill = new THREE.SpotLight(0xffffff, 0.45, 10.0, Math.PI / 4, 0.5, 1.0);
-frontFill.position.set(-3.5, 3.8, 6.2);
-frontFill.target.position.set(0, 0, 0);
-scene.add(frontFill); scene.add(frontFill.target);
 // Front-row spotlights (off by default)
 const frontSpot = new THREE.PointLight(0xffffff, 0.0, 4.5, 1.6);
 frontSpot.position.set(0, 1.3, 1.6);
@@ -303,38 +168,6 @@ function animateQuaternion(obj, toQuat, duration = 900) {
             obj.quaternion.slerpQuaternions(fromQuat, to, v);
         }
     });
-}
-
-// Derive rotationIndex from the cube's current quaternion (snap to nearest quadrant)
-function syncRotationIndexFromQuaternion(obj) {
-    try {
-        // Determine which of the four tone faces is currently pointing DOWN (toward world -Y)
-        // Base mapping indices: 0=bottom(-Y)=root, 1=right(+X)=3rd, 2=top(+Y)=5th, 3=left(-X)=7th
-        const worldDown = new THREE.Vector3(0, -1, 0);
-        const baseNormals = [
-            new THREE.Vector3(0, -1, 0), // bottom
-            new THREE.Vector3(1, 0, 0),  // right
-            new THREE.Vector3(0, 1, 0),  // top
-            new THREE.Vector3(-1, 0, 0), // left
-        ];
-        let bestIdx = 0; let bestDot = -Infinity;
-        for (let i = 0; i < 4; i++) {
-            const w = baseNormals[i].clone().applyQuaternion(obj.quaternion);
-            const d = w.dot(worldDown);
-            if (d > bestDot) { bestDot = d; bestIdx = i; }
-        }
-        obj.userData.rotationIndex = ((bestIdx % 4) + 4) % 4;
-        // Optional: if very close to exact alignment, snap quaternion to the nearest quarter to stabilize visuals
-        const angle = Math.atan2(
-            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).y,
-            new THREE.Vector3(1, 0, 0).applyQuaternion(obj.quaternion).x
-        );
-        const snapped = Math.round(angle / (Math.PI / 2)) * (Math.PI / 2);
-        if (Math.abs(snapped - angle) < 0.05) {
-            const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snapped);
-            obj.quaternion.copy(q);
-        }
-    } catch (_) { /* no-op */ }
 }
 function animateScale(obj, toScalar, duration = 500) {
     const from = obj.scale.clone();
@@ -754,7 +587,7 @@ function addEpicTitles() {
     if (!bgTitleMesh) {
         // MASSIVE all-caps, very tight leading
         const bgTex = makeTitleTexture(['MILLION', 'SONG', 'MIND'], { width: 4096, height: 4096, size: 520, lineGap: 0.52, weight: 1000 });
-        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0xcccccc });
+        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0xffffff });
         const scaleFactor = 15; // towering
         const bgGeo = new THREE.PlaneGeometry(18 * scaleFactor, 18 * scaleFactor);
         bgTitleMesh = new THREE.Mesh(bgGeo, bgMat);
@@ -1220,72 +1053,18 @@ async function loadSet(setName) {
     for (const s of shelfCubes) { s.visible = true; }
     // Start with empty front row
     lineup = [];
-    try {
-        ensureTempoUi();
-        // EMERGENCY: Force visible UI after 2 seconds
-        setTimeout(() => {
-            console.log('[EMERGENCY] Forcing UI visibility...');
-            const widget = document.getElementById('unified-rhythm-widget');
-            if (!widget) {
-                console.error('[EMERGENCY] Widget not found! Creating emergency UI...');
-                createEmergencyUI();
-            } else {
-                console.log('[EMERGENCY] Widget found, forcing visibility...');
-                widget.style.cssText = `
-                    position: fixed !important;
-                    top: 50px !important;
-                    right: 50px !important;
-                    z-index: 2147483647 !important;
-                    background: rgba(255, 0, 0, 0.9) !important;
-                    color: white !important;
-                    padding: 20px !important;
-                    border-radius: 10px !important;
-                    display: block !important;
-                    visibility: visible !important;
-                    opacity: 1 !important;
-                    pointer-events: auto !important;
-                    min-width: 300px !important;
-                    font-family: Arial, sans-serif !important;
-                    font-size: 14px !important;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
-                `;
-            }
-        }, 2000);
-    } catch (_) { }
+    try { ensureTempoUi(); } catch (_) { }
 }
 
 async function updateLabels() {
-    const makeFrontLabel = (cube) => {
-        if (labelMode === 'roman') return cube.userData.roman;
-        // Derive letter label by transposing original C-root to current key while preserving suffix from original letter
-        try {
-            const roman = cube.userData.roman;
-            const orig = cube.userData.letter || '';
-            // Prefer computed root from noteSetsC
-            const rootC = (noteSetsC[roman] || ['C'])[0];
-            const transposedRoot = transposeNotes([rootC], currentKey)[0];
-            // Extract suffix from original letter (drop leading root note token)
-            const m = String(orig).match(/^[A-G](?:#|b)?(.*)$/);
-            const suffix = m ? m[1] : '';
-            return `${transposedRoot}${suffix}`;
-        } catch (_) { return cube.userData.letter; }
-    };
     for (const c of cubes) {
-        const label = makeFrontLabel(c);
+        const label = c.userData[labelMode];
         const materials = await makeMaterials(label, c.userData.roman);
         c.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         c.material = materials;
     }
     for (const s of shelfCubes) {
-        const label = (labelMode === 'roman') ? s.userData.roman : (() => {
-            try {
-                const rootC = (noteSetsC[s.userData.roman] || ['C'])[0];
-                const transposedRoot = transposeNotes([rootC], currentKey)[0];
-                const m = String(s.userData.letter || '').match(/^[A-G](?:#|b)?(.*)$/);
-                const suffix = m ? m[1] : '';
-                return `${transposedRoot}${suffix}`;
-            } catch (_) { return s.userData.letter; }
-        })();
+        const label = s.userData[labelMode];
         const materials = await makeMaterials(label, s.userData.roman);
         if (Array.isArray(s.material)) s.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         s.material = materials;
@@ -1395,26 +1174,42 @@ function resolveCubeFromObject(obj) {
 }
 
 // Debug overlay for shelf picking
-let debugEnabled = true; // Always enabled for forensic analysis
+let debugEnabled = new URLSearchParams(window.location.search).has('debug');
 let debugOverlay = null;
 function createDebugOverlay() {
     if (!debugEnabled || debugOverlay) return;
     debugOverlay = document.createElement('div');
-    debugOverlay.style.cssText = 'position:fixed;bottom:10px;right:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:420px;pointer-events:none;text-align:right;';
+    debugOverlay.style.cssText = 'position:fixed;top:10px;left:10px;background:rgba(0,0,0,0.8);color:#0f0;padding:10px;font-family:monospace;font-size:12px;z-index:10000;max-width:600px;pointer-events:none;white-space:pre;';
     document.body.appendChild(debugOverlay);
 }
 function updateDebugOverlay(info) { if (debugOverlay) debugOverlay.innerHTML = info; }
 
-function ensureDebugOverlayPosition() {
-    if (!debugOverlay) return;
+// 3D HUD inside the scene (near the ground "D") showing per-frame bottom/top notes
+let hudText = null;
+let hudLast = '';
+function ensure3DHud() {
     try {
-        debugOverlay.style.position = 'fixed';
-        debugOverlay.style.bottom = '10px';
-        debugOverlay.style.top = '';
-        debugOverlay.style.right = '10px';
-        debugOverlay.style.left = '';
-        debugOverlay.style.textAlign = 'right';
-        debugOverlay.style.whiteSpace = 'pre';
+        if (hudText) return;
+        const text = new TroikaText();
+        text.text = '';
+        text.font = NVX_FONT_URL;
+        text.color = 0x00ff88;
+        text.fontSize = 0.32 * cubeSize;
+        text.anchorX = 'left'; text.anchorY = 'top';
+        text.renderOrder = 6;
+        // Position roughly inside the big ground "D"
+        text.position.set(-7.6, 1.0, 0.6);
+        text.rotation.x = -Math.PI / 2; // lay flat slightly above ground
+        try { if (text.material) { text.material.depthWrite = false; text.material.depthTest = true; } } catch (_) { }
+        scene.add(text);
+        hudText = text; hudLast = '';
+    } catch (_) { }
+}
+function update3DHud(lines) {
+    try {
+        ensure3DHud();
+        const content = lines.join('\n');
+        if (hudText && content !== hudLast) { hudText.text = content; hudText.sync(); hudLast = content; }
     } catch (_) { }
 }
 
@@ -1553,8 +1348,6 @@ function onPointerDown(e) {
     fsm.onPointerDown(mouseDownPos.x, mouseDownPos.y, mouseDownTime);
     try { renderer.domElement.setPointerCapture?.(e.pointerId); } catch (_) { }
 
-    console.log(`[POINTER-DOWN] Starting click detection. Front-row cubes: ${cubes.length}, Shelf cubes: ${shelfCubes.length}`);
-
     // Temporary: check UI locks first; if hit, set guard and disable controls
     try {
         const rect0 = renderer.domElement.getBoundingClientRect();
@@ -1571,10 +1364,8 @@ function onPointerDown(e) {
     raycaster.setFromCamera(pointer, camera);
     raycaster.layers.set(1);
     let hits = raycaster.intersectObjects(cubes, true);
-    console.log(`[POINTER-DOWN] Front-row hits: ${hits.length}`);
     if (hits.length > 0) {
         let obj = resolveCubeFromObject(hits[0].object);
-        console.log(`[POINTER-DOWN] Setting pendingObj to front-row: ${obj?.userData?.roman}`);
         pendingObj = obj;
         controls.enabled = !adjustMode;
         return;
@@ -1817,26 +1608,16 @@ function onPointerUp(e) {
     if (pendingObj) {
         const rect = renderer.domElement.getBoundingClientRect();
         const res = fsm.classifyRelease(e.clientX - rect.left, e.clientY - rect.top, now);
-        console.log(`[FSM] pendingObj: ${pendingObj?.userData?.roman}, isClick: ${res.isClick}, moved: ${res.moved}, elapsed: ${res.elapsed}`);
         if (res.isClick) {
             const hits = getIntersects(e);
-            console.log(`[CLICK] ===== CLICK DETECTED =====`);
-            console.log(`[CLICK] Total hits: ${hits.length}`);
-            console.log(`[CLICK] Hit objects:`, hits.map(h => `${h.object?.userData?.isCenterPlay ? 'CENTER-PLAY' : h.object?.userData?.isOverlay ? 'OVERLAY' : h.object?.userData?.isShelfProxy ? 'SHELF-PROXY' : 'FACE'} for ${resolveCubeFromObject(h.object)?.userData?.roman || 'unknown'}`));
             // Global 3D play button check
-            for (const h of hits) {
-                if (h.object?.userData?.isPlayButton) {
-                    console.log(`[CLICK] Play button hit - starting progression`);
-                    playFrontRowProgression(); pendingObj = null; return;
-                }
-            }
+            for (const h of hits) { if (h.object?.userData?.isPlayButton) { playFrontRowProgression(); pendingObj = null; return; } }
             // Use screen-space rectangle picking for shelf cubes
             let shelfHit = null;
             try { shelfHit = pickShelfCubeAtPointer(e); } catch (_) { }
             // If we pressed a FRONT-ROW cube on pointerdown, force it as the target for click handling
             const frontOverride = !!(pendingObj && !pendingObj.userData?.isShelf);
             const fromShelfBand = frontOverride ? false : isPointerOverShelf(e);
-            console.log(`[CLICK] pendingObj: ${pendingObj?.userData?.roman}, frontOverride: ${frontOverride}, fromShelfBand: ${fromShelfBand}`);
             // If polygon picker already chose a shelf cube at mousedown, trust it
             if (pendingObj && pendingObj.userData?.isShelf) {
                 try {
@@ -1886,7 +1667,6 @@ function onPointerUp(e) {
             } else {
                 targetObj = shelfFromRay || ((pendingObj && pendingObj.userData?.isShelf) ? pendingObj : resolveCubeFromObject(hits[0]?.object));
             }
-            console.log(`[CLICK] targetObj: ${targetObj?.userData?.roman}, isShelf: ${!!targetObj?.userData?.isShelf}`);
             if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) {
@@ -1898,23 +1678,14 @@ function onPointerUp(e) {
                 enqueueShelfAdd(targetObj); pendingObj = null; return;
             }
             if (targetObj.userData?.isShelf) { pendingObj = null; return; }
-            // Center play priority for the pressed cube
-            const centerHit = pickCenterPlay(hits, targetObj);
-            if (centerHit) {
-                console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
-                playChordForObject(targetObj); pendingObj = null; return;
-            }
             // Find a hit belonging to the pressed cube (overlay or face)
             let hit = null;
             for (const h of hits) { const o = resolveCubeFromObject(h.object); if (o === targetObj) { hit = h; break; } }
             if (hit) {
-                console.log(`[CLICK] Found hit for ${targetObj.userData.roman}, processing...`);
                 // Then overlay/front, then faces
                 const isOverlay = isFrontOverlayHit(hit, targetObj);
                 const normalZ = isOverlay ? 1 : (hit.face?.normal?.z ?? 0);
-                console.log(`[HIT DEBUG] ${targetObj.userData.roman} isOverlay=${isOverlay}, normalZ=${normalZ}`);
                 if (Math.abs(normalZ - 1) < 0.5) {
-                    console.log(`[CLICK] ENTERING QUADRANT LOGIC for ${targetObj.userData.roman}`);
                     const local = targetObj.worldToLocal(hit.point.clone());
                     const absX = Math.abs(local.x);
                     const absY = Math.abs(local.y);
@@ -1923,27 +1694,20 @@ function onPointerUp(e) {
                     const cw = (targetToneIndex - r + 4) % 4; const ccw = (r - targetToneIndex + 4) % 4;
                     let angle = 0; let delta = 0;
                     if (cw <= ccw) { angle = -cw * (Math.PI / 2); delta = +cw; } else { angle = ccw * (Math.PI / 2); delta = -ccw; }
-
-                    // CRITICAL FIX: Set rotation to TARGET tone index for immediate audio (like shelf clicks)
-                    const originalRotationIndex = targetObj.userData.rotationIndex;
-                    targetObj.userData.rotationIndex = targetToneIndex; // Use clicked quadrant directly
-
-                    console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
-
-                    // Play audio immediately with the clicked tone (future state)
-                    playChordForObject(targetObj);
-
                     if (angle !== 0) {
                         const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
                         const finalQ = targetObj.quaternion.clone().multiply(extra);
                         if (hasActiveTweenFor(targetObj)) cancelTweensFor(targetObj);
-                        // Start gentle eased rotation animation
+                        // v1.0 behavior: update rotationIndex first, then play oscillator chord immediately, then animate
+                        targetObj.userData.rotationIndex = (targetObj.userData.rotationIndex + (delta + 4)) % 4;
+                        playChordForObjectV1(targetObj);
                         animateQuaternion(targetObj, finalQ, 650);
+                        // keep rotationIndex normalized
+                        targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
                     } else {
-                        // No rotation needed, but keep the target rotation index
-                        targetObj.userData.rotationIndex = targetToneIndex;
+                        // No rotation needed; still play immediate v1.0 oscillator audition
+                        playChordForObjectV1(targetObj);
                     }
-                    // Ensure rotation index is normalized (targetToneIndex should already be 0-3)
                     targetObj.userData.rotationIndex = ((targetObj.userData.rotationIndex % 4) + 4) % 4;
                 } else if (hit.face) {
                     // Determine voice by world orientation: bottom→bass, top→melody, sides→chord
@@ -1999,6 +1763,10 @@ function onPointerUp(e) {
                         else { console.error('[obs-cubes] Chord instrument missing; no oscillator fallback.'); }
                     }
                 }
+            } else {
+                // If we didn't resolve a face hit, allow center play fallback now
+                const centerHit = pickCenterPlay(hits, targetObj);
+                if (centerHit) { playChordForObject(targetObj); pendingObj = null; return; }
             }
         }
         pendingObj = null;
@@ -2060,7 +1828,7 @@ function addQuadrantOverlay(parentCube) {
     parentCube.userData.overlay = overlay;
     overlay.userData = { isOverlay: true, parent: parentCube };
     // Center play circle (half the face width); never triggers rotation
-    const radius = (1.15 * 0.5) / 6; // much smaller to allow quadrant clicks
+    const radius = (1.15 * 0.5) / 2; // half the square width
     const circleGeom = new THREE.CircleGeometry(radius, 48);
     const circleMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.12, side: THREE.DoubleSide });
     const centerCircle = new THREE.Mesh(circleGeom, circleMat);
@@ -2369,17 +2137,6 @@ bassLockIcon?.addEventListener('click', async () => {
 });
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
-
-// Optional URL controls: ?bpm=120&bpc=4
-(function readPerfParams() {
-    try {
-        const params = new URLSearchParams(window.location.search);
-        const bpm = parseInt(params.get('bpm') || '');
-        const bpc = parseInt(params.get('bpc') || '');
-        if (!isNaN(bpm) && bpm > 20 && bpm < 400) progressionBpm = bpm;
-        if (!isNaN(bpc) && bpc >= 1 && bpc <= 16) beatsPerChord = bpc;
-    } catch (_) { }
-})();
 resetBtn?.addEventListener('click', () => {
     // Return all active cubes to their shelf origin and clear lineup
     for (const c of [...lineup]) {
@@ -2508,23 +2265,26 @@ function animate() {
         const done = activeTweens[i].tick(now);
         if (done) activeTweens.splice(i, 1);
     }
-    // Live bottom/top indices per cube (derived from rotationIndex via compass)
+    // Live bottom/top tone indices for lineup and debug readout
     try {
+        const names = [];
         const hudLines = ['BOTTOM/TOP (live):'];
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
-            // Ensure rotationIndex is synced to quaternion orientation
-            syncRotationIndexFromQuaternion(cube);
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const bottomIdx = r;
-            const topIdx = (r + 2) % 4;
-            cube.userData.bottomToneIdxLive = bottomIdx;
-            cube.userData.topToneIdxLive = topIdx;
+            const b = getBottomToneIdxFromQuat(cube);
+            const t = getTopToneIdxFromQuat(cube);
+            cube.userData.bottomToneIdxLive = b;
+            cube.userData.topToneIdxLive = t;
             const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
-            const names = transposeNotes(tones, currentKey);
-            hudLines.push(`${i}:${cube.userData.roman} B=${names[bottomIdx]}(${bottomIdx}) T=${names[topIdx]}(${topIdx})`);
+            const tn = transposeNotes(tones, currentKey);
+            const bottomName = tn[b];
+            const topName = tn[t];
+            const line = `${i}:${cube.userData.roman} B=${bottomName}(${b}) T=${topName}(${t})`;
+            names.push(line);
+            hudLines.push(line);
         }
-        if (debugEnabled) { ensureDebugOverlayPosition(); updateDebugOverlay(`Key=${currentKey}\n` + hudLines.join('\n')); }
+        if (debugEnabled) updateDebugOverlay(`Key=${currentKey}\n` + names.join('\n'));
+        update3DHud(hudLines);
     } catch (_) { }
     diag.update && diag.update();
     // Harmonized drag smoothing
@@ -2554,19 +2314,6 @@ function animate() {
         const showMel = above; const showBass = !above;
         [melodyLockLeft, melodyLockRight].forEach(o => { if (o) o.visible = showMel; });
         [bassLockLeft, bassLockRight].forEach(o => { if (o) o.visible = showBass; });
-        // When camera is below plane (bass view), darken the scene like performance mode
-        const below = !above;
-        // Fade a darkening plane and adjust lights for bass view
-        if (below) {
-            try { darkPlane.material.opacity = 0.55; } catch (_) { }
-            if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
-            stageSpot.intensity = 2.2;
-            dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
-        } else {
-            try { darkPlane.material.opacity = 0.0; } catch (_) { }
-            stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
-            dir.intensity = 0.7; frontFill.intensity = 0.45; frontKey.intensity = 0.85;
-        }
     } catch (_) { }
     // TEMP DEBUG: log one pivot angle occasionally
     try {
@@ -2716,6 +2463,72 @@ function parseNoteName(name) {
 }
 // Pitch-class helpers
 function pcOf(name) { return parseNoteName(name).idx; }
+
+// v1.0 helpers for inversion audio from rotationIndex
+function getFaceOrder(rotationIndex, includeSeventh) {
+    const r = ((rotationIndex % 4) + 4) % 4;
+    const b = r; // bottom
+    const right = (r + 1) % 4;
+    const top = (r + 2) % 4;
+    const left = (r + 3) % 4; // 7th face
+    if (includeSeventh) return [b, right, left, top];
+    return [b, right, top];
+}
+function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
+    const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const order = getFaceOrder(rotationIndex || 0, includeSeventh);
+    const midiOf = (name) => {
+        const { idx, octave } = parseNoteName(name);
+        return idx + 12 * (octave || 4);
+    };
+    const semis = order.map(i => midiOf(names[i]));
+    const asc = [];
+    let prev = semis[0];
+    asc.push(prev);
+    for (let k = 1; k < semis.length; k++) {
+        let m = semis[k];
+        while (m < prev) m += 12;
+        asc.push(m);
+        prev = m;
+    }
+    return asc.map(m => 440 * Math.pow(2, (m - (9 + 12 * 4)) / 12));
+}
+
+// v1.0 chord audition using WebAudio oscillators (independent of soundfont loading)
+function playChordForObjectV1(obj) {
+    const ctx = ensureAudio();
+    const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
+    const now = ctx.currentTime;
+    const duration = 1.1;
+    // Master
+    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
+    const chordBus = ctx.createGain(); chordBus.gain.value = 0.22; chordBus.connect(master);
+    const bassBus = ctx.createGain(); bassBus.gain.value = 0.28; bassBus.connect(master);
+    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.24; melodyBus.connect(master);
+    const env = (g, t0, d) => { g.gain.setValueAtTime(0.0, t0); g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01); g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03); g.gain.linearRampToValueAtTime(0.0, t0 + d); };
+    const lowest = freqsAsc[0];
+    const highest = freqsAsc[freqsAsc.length - 1];
+    // Chord bed
+    freqsAsc.forEach((f, i) => {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = i === 3 ? 'triangle' : 'sine';
+        osc.frequency.value = f; osc.connect(g).connect(chordBus);
+        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
+    });
+    // Bass
+    if (lowest) {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = 'sawtooth'; osc.frequency.value = lowest; osc.connect(g).connect(bassBus);
+        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
+    }
+    // Melody
+    if (highest) {
+        const osc = ctx.createOscillator(); const g = ctx.createGain();
+        osc.type = 'square'; osc.frequency.value = highest; osc.connect(g).connect(melodyBus);
+        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
+    }
+}
 function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
 function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
 
@@ -2756,15 +2569,25 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+    const idxLive = (typeof obj?.userData?.bottomToneIdxLive === 'number') ? obj.userData.bottomToneIdxLive : getBottomToneIdxFromQuat(obj);
     const rootPc = pcOf(names[0]);
-    const bottomPc = pcOf(names[r]);
+    const bottomPc = pcOf(names[idxLive]);
     const baseC2 = 36; // low register
     const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
     const diff = (bottomPc - rootPc + 12) % 12;
-    const finalMidi = rootBaseMidi + diff;
-    console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${finalMidi}`);
-    return finalMidi; // within one octave above root
+    return rootBaseMidi + diff; // within one octave above root
+}
+
+// Ultra-direct helper: compute bass midi from a provided bottom tone index (0..3) for this cube
+function getBassMidiForObjectWithBottomIdx(obj, bottomIdx) {
+    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+    const names = transposeNotes(tones, currentKey);
+    const rootPc = pcOf(names[0]);
+    const bottomPc = pcOf(names[((bottomIdx % 4) + 4) % 4]);
+    const baseC2 = 36;
+    const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
+    const diff = (bottomPc - rootPc + 12) % 12;
+    return rootBaseMidi + diff;
 }
 
 // Melody: map top-face tone into a higher octave anchored to the chord root
@@ -2772,15 +2595,12 @@ function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    const topIdx = (r + 2) % 4;
     const rootPc = pcOf(names[0]);
-    const topPc = pcOf(names[topIdx]);
+    const topPc = pcOf(names[(r + 2) % 4]);
     const baseC5 = 72; // higher register
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
     const diff = (topPc - rootPc + 12) % 12;
-    const finalMidi = rootBaseMidi + diff;
-    console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${finalMidi}`);
-    return finalMidi;
+    return rootBaseMidi + diff;
 }
 
 function makeNumberPlane(text, width = 0.9) {
@@ -2847,9 +2667,6 @@ function playChordForObject(obj) {
     const now = ctx.currentTime;
     const duration = 1.1;
 
-    console.log(`[AUDIO] ===== PLAYING CHORD FOR ${obj.userData.roman} =====`);
-    console.log(`[AUDIO] rotationIndex: ${obj.userData.rotationIndex}, isShelf: ${!!obj.userData.isShelf}`);
-
     if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
 
     // Master
@@ -2868,12 +2685,10 @@ function playChordForObject(obj) {
         g.gain.linearRampToValueAtTime(0.0, t0 + d);
     };
 
-    // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
+    // Chord bed: locked octave C4..C5
     const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
-    const idxForObj = lineup.indexOf(obj);
-    const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
     if (sfChord && sfChord.play) {
-        bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+        chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
     } else {
         console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
     }
@@ -2931,7 +2746,6 @@ async function animateShelfClickAdd(shelf) {
         addQuadrantOverlay(clone);
         scene.add(clone);
         cubes.push(clone);
-        console.log(`[SHELF-TO-FRONT] Added ${clone.userData.roman} to front row. Total front-row cubes: ${cubes.length}`);
         // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
         const xs = computeSlotPositions(lineup.length + 1);
         const targetX = xs[lineup.length];
@@ -2963,6 +2777,8 @@ async function animateShelfClickAdd(shelf) {
             clone.userData.animatingIn = false;
             // Apply rotation index delta exactly once
             if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+            // Hard re-sync from quaternion to ensure rotationIndex exactly matches visual orientation
+            try { syncRotationIndexFromQuaternion(clone); } catch (_) { }
             reflowLineup();
         }, 470);
         // Play with intended inversion immediately
@@ -2976,10 +2792,8 @@ async function animateShelfClickAdd(shelf) {
 let progressionEnabled = false;
 let progressionArrows = [];
 let progressionPoints = [];
-let progressionBpm = 120; // default metronome BPM
-let beatsPerChord = 4;    // 4 beats per chord default
 let playButtonMesh = null;
-// legacy var removed (we now compute via bpm & beatsPerChord)
+let progressionBpm = 30; // 30 BPM → 2s per chord by default
 // Smooth camera follow of active chord
 let cameraFocusTween = null;
 function focusCameraOnCube(cube, durationMs = 700) {
@@ -3015,256 +2829,33 @@ function readFlagsFromUrl() {
     } catch (_) { /* ignore */ }
 }
 
-// CLAUDE'S PART 5: FIXED UI CREATION FUNCTION
+// Tempo/Metronome UI
 function ensureTempoUi() {
-    console.log('[UNIFIED-WIDGET] Creating drum/metronome control...');
-
-    // Check if transport is available
-    if (!window.chordCubesTransport) {
-        console.error('[UNIFIED-WIDGET] Transport not available - cannot create UI');
-        return;
-    }
-
-    // Remove any existing UI
-    const existingUi = document.getElementById('unified-rhythm-widget');
-    if (existingUi) {
-        existingUi.remove();
-    }
-
-    // Create the widget
-    const widget = document.createElement('div');
-    widget.id = 'unified-rhythm-widget';
-    widget.innerHTML = `
-        <div class="rhythm-controls">
-            <div class="control-row">
-                <label>BPM: <span id="bpm-value">120</span></label>
-                <input type="range" id="bpm-slider" min="60" max="180" value="120">
-            </div>
-            <div class="control-row">
-                <button id="drum-toggle" class="control-btn">Drums: Off</button>
-                <button id="metronome-toggle" class="control-btn">Metronome: Off</button>
-            </div>
-            <div class="control-row">
-                <label>Style:</label>
-                <select id="style-selector">
-                    <option value="rock">Rock</option>
-                    <option value="jazz">Jazz</option>
-                    <option value="electronic">Electronic</option>
-                    <option value="funk">Funk</option>
-                    <option value="latin">Latin</option>
-                    <option value="hiphop">Hip-Hop</option>
-                </select>
-            </div>
-        </div>
-    `;
-
-    // CRITICAL: Force visibility with inline styles
-    widget.style.cssText = `
-        position: fixed !important;
-        top: 10px !important;
-        right: 10px !important;
-        z-index: 2147483647 !important;
-        background: rgba(0, 0, 0, 0.9) !important;
-        color: white !important;
-        padding: 15px !important;
-        border-radius: 10px !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        min-width: 250px !important;
-        font-family: Arial, sans-serif !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
-    `;
-
-    // Add to body (not to a container that might be hidden)
-    document.body.appendChild(widget);
-
-    // Setup event listeners
-    setupRhythmControls();
-
-    console.log('[UNIFIED-WIDGET] ✅ Widget created and attached to body');
-
-    // Verify visibility
-    setTimeout(() => {
-        const rect = widget.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-            console.error('[UNIFIED-WIDGET] Widget has zero dimensions!');
-            console.log('Widget computed style:', window.getComputedStyle(widget));
-        } else {
-            console.log('[UNIFIED-WIDGET] Widget visible at:', rect);
+    if (tempoUi) return;
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
+    const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
+    const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
+    const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
+    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
+    const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
+    btn.onclick = async () => {
+        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
+        if (!metroLoop && window.Tone) {
+            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
         }
-    }, 100);
-
-    // Store references for compatibility
-    tempoUi = widget;
-}
-
-function setupRhythmControls() {
-    const transport = window.chordCubesTransport;
-    if (!transport) {
-        console.error('[CONTROLS] Transport not available');
-        return;
-    }
-
-    // BPM Slider
-    const bpmSlider = document.getElementById('bpm-slider');
-    const bpmValue = document.getElementById('bpm-value');
-
-    if (bpmSlider) {
-        bpmSlider.addEventListener('input', (e) => {
-            const bpm = parseInt(e.target.value);
-            transport.setBPM(bpm);
-            bpmValue.textContent = bpm;
-        });
-    }
-
-    // Drum Toggle
-    const drumToggle = document.getElementById('drum-toggle');
-    if (drumToggle) {
-        drumToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Drum button clicked');
-
-            // Ensure audio context is started
-            await transport.ensureAudioContext();
-
-            // Toggle drums
-            const drumsOn = transport.toggleDrums();
-            drumToggle.textContent = `Drums: ${drumsOn ? 'On' : 'Off'}`;
-            drumToggle.style.backgroundColor = drumsOn ? '#4CAF50' : '#333';
-
-            // Start/stop transport if needed
-            if (drumsOn && !transport.isPlaying) {
-                await transport.start();
-            } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) {
-                transport.stop();
-            }
-        });
-    }
-
-    // Metronome Toggle
-    const metronomeToggle = document.getElementById('metronome-toggle');
-    if (metronomeToggle) {
-        metronomeToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Metronome button clicked');
-
-            // Ensure audio context is started
-            await transport.ensureAudioContext();
-
-            // Toggle metronome
-            const metronomOn = transport.toggleMetronome();
-            metronomeToggle.textContent = `Metronome: ${metronomOn ? 'On' : 'Off'}`;
-            metronomeToggle.style.backgroundColor = metronomOn ? '#4CAF50' : '#333';
-
-            // Start/stop transport if needed
-            if (metronomOn && !transport.isPlaying) {
-                await transport.start();
-            } else if (!metronomOn && !transport.drumsOn && transport.isPlaying) {
-                transport.stop();
-            }
-        });
-    }
-
-    // Style Selector
-    const styleSelector = document.getElementById('style-selector');
-    if (styleSelector) {
-        styleSelector.addEventListener('change', (e) => {
-            transport.setStyle(e.target.value);
-            console.log(`[CONTROLS] Style changed to ${e.target.value}`);
-        });
-    }
-
-    console.log('[CONTROLS] ✅ Event listeners attached');
-}
-
-function createEmergencyUI() {
-    console.log('[EMERGENCY] Creating emergency UI...');
-
-    // Remove any existing emergency UI
-    const existing = document.getElementById('emergency-ui');
-    if (existing) existing.remove();
-
-    // Create emergency UI
-    const emergencyDiv = document.createElement('div');
-    emergencyDiv.id = 'emergency-ui';
-    emergencyDiv.innerHTML = `
-        <h3>🚨 EMERGENCY DRUM CONTROLS 🚨</h3>
-        <p>Transport: ${window.chordCubesTransport ? '✅ Available' : '❌ Missing'}</p>
-        <button id="emergency-drums">DRUMS: OFF</button>
-        <button id="emergency-test">TEST SOUND</button>
-        <div>BPM: <input type="range" id="emergency-bpm" min="60" max="180" value="120"> <span id="emergency-bpm-val">120</span></div>
-    `;
-
-    emergencyDiv.style.cssText = `
-        position: fixed !important;
-        top: 100px !important;
-        left: 50px !important;
-        z-index: 2147483647 !important;
-        background: rgba(255, 0, 0, 0.95) !important;
-        color: white !important;
-        padding: 20px !important;
-        border-radius: 10px !important;
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto !important;
-        min-width: 300px !important;
-        font-family: Arial, sans-serif !important;
-        font-size: 16px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.8) !important;
-        border: 3px solid yellow !important;
-    `;
-
-    document.body.appendChild(emergencyDiv);
-
-    // Add emergency event listeners
-    const drumBtn = document.getElementById('emergency-drums');
-    const testBtn = document.getElementById('emergency-test');
-    const bpmSlider = document.getElementById('emergency-bpm');
-    const bpmVal = document.getElementById('emergency-bpm-val');
-
-    if (drumBtn && window.chordCubesTransport) {
-        drumBtn.onclick = async () => {
-            try {
-                await window.chordCubesTransport.ensureAudioContext();
-                const drumsOn = window.chordCubesTransport.toggleDrums();
-                drumBtn.textContent = `DRUMS: ${drumsOn ? 'ON' : 'OFF'}`;
-                drumBtn.style.backgroundColor = drumsOn ? 'green' : 'red';
-
-                if (drumsOn && !window.chordCubesTransport.isPlaying) {
-                    await window.chordCubesTransport.start();
-                } else if (!drumsOn && window.chordCubesTransport.isPlaying) {
-                    window.chordCubesTransport.stop();
-                }
-
-                console.log('[EMERGENCY] Drums toggled:', drumsOn);
-            } catch (error) {
-                console.error('[EMERGENCY] Drum toggle failed:', error);
-            }
-        };
-    }
-
-    if (testBtn && window.chordCubesTransport) {
-        testBtn.onclick = async () => {
-            try {
-                await window.chordCubesTransport.ensureAudioContext();
-                window.chordCubesTransport.playDrumSound('kick');
-                console.log('[EMERGENCY] Test sound played');
-            } catch (error) {
-                console.error('[EMERGENCY] Test sound failed:', error);
-            }
-        };
-    }
-
-    if (bpmSlider && bpmVal && window.chordCubesTransport) {
-        bpmSlider.oninput = () => {
-            const bpm = parseInt(bpmSlider.value);
-            window.chordCubesTransport.setBPM(bpm);
-            bpmVal.textContent = bpm;
-        };
-    }
-
-    console.log('[EMERGENCY] ✅ Emergency UI created and functional');
+        if (!metroOn) {
+            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
+            btn.textContent = 'Metronome: On'; metroOn = true;
+        } else {
+            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
+            btn.textContent = 'Metronome: Off'; metroOn = false;
+        }
+    };
+    box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+    document.body.appendChild(box);
+    tempoUi = box; tempoSlider = slider; metroBtn = btn;
 }
 
 function createPlayButton() {
@@ -3395,49 +2986,6 @@ function shimmerMelodyLane() {
             // child[1] is the diamond mesh in makeLaneNode
             const diamond = node.children?.[1];
             if (diamond && diamond.material) shimmerMaterial(diamond.material);
-        });
-    } catch (_) { }
-}
-
-// Ultra flash: big radial ring + confetti pulse at center of lineup
-function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
-    try {
-        const ringGeo = new THREE.RingGeometry(0.2, 0.22, 48);
-        const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.position.set(0, 0.01, 0);
-        ring.rotation.x = -Math.PI / 2;
-        scene.add(ring);
-        tweenObject({
-            duration: durationMs, owner: ring, onUpdate: (v) => {
-                try { ring.scale.setScalar(1 + v * 6); ringMat.opacity = 0.8 * (1 - v); } catch (_) { }
-            }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); ring.material.dispose(); } catch (_) { } }
-        });
-
-        // Confetti sprinkles
-        for (let i = 0; i < 24; i++) {
-            const c = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.02), new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
-            c.position.set((Math.random() - 0.5) * 0.8, 0.02, (Math.random() - 0.5) * 0.8);
-            c.rotation.x = -Math.PI / 2; c.rotation.z = Math.random() * Math.PI;
-            scene.add(c);
-            const dx = (Math.random() - 0.5) * 3.5; const dz = (Math.random() - 0.5) * 3.5;
-            const start = c.position.clone(); const end = start.clone().add(new THREE.Vector3(dx, 0, dz));
-            tweenObject({
-                duration: 620 + Math.random() * 260, owner: c, onUpdate: (v) => {
-                    try { c.position.lerpVectors(start, end, v); c.material.opacity = 0.9 * (1 - v); c.rotation.z += 0.4; } catch (_) { }
-                }, onComplete: () => { try { scene.remove(c); c.geometry.dispose(); c.material.dispose(); } catch (_) { } }
-            });
-        }
-    } catch (_) { }
-}
-
-function pulseLockIcons(kind, durationMs = 400) {
-    try {
-        const targets = kind === 'melody' ? [melodyLockLeft, melodyLockRight] : [bassLockLeft, bassLockRight];
-        targets.forEach(node => {
-            if (!node) return;
-            const s0 = node.scale.x;
-            tweenObject({ duration: durationMs, owner: node, onUpdate: (v) => { try { const s = s0 * (1 + 0.3 * Math.sin(v * Math.PI)); node.scale.setScalar(s); } catch (_) { } }, onComplete: () => { try { node.scale.setScalar(s0); } catch (_) { } } });
         });
     } catch (_) { }
 }
@@ -3575,96 +3123,207 @@ function updateLanePositions() {
     }
 }
 
-function lockInMelody() {
-    if (lineup.length === 0) return;
-    // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
-    const rotating = lineup.some(c => hasActiveTweenFor(c));
-    if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
-    // Re-verify each cube's current orientation → rotationIndex from quaternion
-    for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
-    // Capture current melody using the freshly verified rotationIndex
-    const snapshot = [];
+// Ensure rotationIndex for the active lineup exactly matches current visuals
+function resyncLineupFromQuaternions() {
+    try {
+        for (const cube of lineup) { syncRotationIndexFromQuaternion(cube); }
+    } catch (_) { }
+}
+
+// Quaternion-based face queries (no rotationIndex assumptions)
+function getTopToneIdxFromQuat(cube) {
+    try {
+        const base = [
+            new THREE.Vector3(0, -1, 0), // bottom → toneIdx 0
+            new THREE.Vector3(1, 0, 0),  // right  → toneIdx 1
+            new THREE.Vector3(0, 1, 0),  // top    → toneIdx 2
+            new THREE.Vector3(-1, 0, 0), // left   → toneIdx 3
+        ];
+        const up = new THREE.Vector3(0, 1, 0);
+        let best = 0, bestDot = -Infinity;
+        for (let i = 0; i < 4; i++) {
+            const d = base[i].clone().applyQuaternion(cube.quaternion).dot(up);
+            if (d > bestDot) { bestDot = d; best = i; }
+        }
+        return best; // directly maps to toneIdx ordering [1,3,5,7]
+    } catch (_) { return 2; }
+}
+
+// --- Lock flash effects (massive glow/flame) ---
+function makeRadialGlowTexture(hex) {
+    const size = 256;
+    const c = document.createElement('canvas'); c.width = size; c.height = size;
+    const ctx = c.getContext('2d');
+    const g = ctx.createRadialGradient(size / 2, size / 2, 10, size / 2, size / 2, size / 2);
+    const col = new THREE.Color(hex);
+    const c1 = `rgba(${Math.round(col.r * 255)},${Math.round(col.g * 255)},${Math.round(col.b * 255)},1)`;
+    const c2 = `rgba(${Math.round(col.r * 255)},${Math.round(col.g * 255)},${Math.round(col.b * 255)},0)`;
+    g.addColorStop(0.0, 'rgba(255,255,255,0.95)');
+    g.addColorStop(0.15, c1);
+    g.addColorStop(1.0, c2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, size, size);
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true; return tex;
+}
+
+function spawnLockFlash(cube, colorHex, verticalOffset = 0.0) {
+    try {
+        const tex = makeRadialGlowTexture(colorHex);
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+        const geo = new THREE.PlaneGeometry(2.2, 2.2);
+        const mesh = new THREE.Mesh(geo, mat);
+        const wp = new THREE.Vector3(); cube.getWorldPosition(wp);
+        const half = (cubeSize * (cube.scale?.x || cube.scale || 1)) / 2;
+        mesh.position.set(wp.x, wp.y + verticalOffset, wp.z + 0.001);
+        mesh.rotation.x = -Math.PI / 2; // lay flat by default
+        mesh.renderOrder = 6;
+        scene.add(mesh);
+        // Animate scale/opacity for a big flame burst
+        const startS = 0.4, endS = 3.2;
+        const startA = 0.95;
+        const start = { s: startS, a: startA };
+        tweenObject({
+            duration: 700, owner: mesh, onUpdate: (v) => {
+                const t = easeInOutCubic(v);
+                const s = startS + (endS - startS) * t;
+                mesh.scale.set(s, s, s);
+                const a = Math.max(0, startA * (1 - t));
+                if (mesh.material) mesh.material.opacity = a;
+            }, onComplete: () => {
+                try { scene.remove(mesh); mesh.material?.map?.dispose?.(); mesh.material?.dispose?.(); mesh.geometry?.dispose?.(); } catch (_) { }
+            }
+        });
+    } catch (_) { }
+}
+
+function flashLockedLine(isMelody) {
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
-        // Use helper that references rotationIndex for top face
-        const midiTop = (() => {
-            const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
-            const names = transposeNotes(tones, currentKey);
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topPc = pcOf(names[(r + 2) % 4]);
-            let m = 72 + ((topPc - 0 + 12) % 12);
-            while (m > 84) m -= 12; while (m < 60) m += 12;
-            return m;
-        })();
-        snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
+        const colorHex = borderColorForRoman(cube.userData.roman);
+        const half = (cubeSize * (cube.scale?.x || cube.scale || 1)) / 2;
+        const yOff = isMelody ? (half + 0.2) : -(half + 0.2);
+        spawnLockFlash(cube, colorHex, yOff);
     }
-    lockedMelody = snapshot;
-    renderMelodyLane();
-    ultraFlash(0x66ccff, 540);
-    pulseLockIcons('melody');
-    melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
-    if (lockedBass && lockedBass.length === lineup.length) {
-        setTimeout(() => {
-            for (const cube of lineup) {
-                cube.userData.rotationIndex = 0;
-                const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
-                animateQuaternion(cube, to, 280);
-            }
-            maybeEnterStageMode();
-        }, 1000);
-    }
+}
+
+function getBottomToneIdxFromQuat(cube) {
     try {
-        if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
-        melodyGiantGroup = new THREE.Group();
-        const xs = computeSlotPositions(lineup.length);
+        const base = [
+            new THREE.Vector3(0, -1, 0),
+            new THREE.Vector3(1, 0, 0),
+            new THREE.Vector3(0, 1, 0),
+            new THREE.Vector3(-1, 0, 0),
+        ];
+        const down = new THREE.Vector3(0, -1, 0);
+        let best = 0, bestDot = -Infinity;
+        for (let i = 0; i < 4; i++) {
+            const d = base[i].clone().applyQuaternion(cube.quaternion).dot(down);
+            if (d > bestDot) { bestDot = d; best = i; }
+        }
+        return best;
+    } catch (_) { return 0; }
+}
+
+function lockInMelody() {
+    if (lineup.length === 0) return;
+    // If any cube is still rotating, wait a tick so we capture the final state
+    const rotating = lineup.some(c => hasActiveTweenFor(c));
+    const nowTs = performance.now();
+    const recentRot = lineup.some(c => (nowTs - (c?.userData?.rotEventTs || 0)) < 120);
+    if (rotating || recentRot) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
+    // Give any recent pulls/rotations a brief frame budget, then resync + capture
+    setTimeout(() => {
+        // Capture current melody AFTER re-syncing each cube's index from its visual orientation
+        resyncLineupFromQuaternions();
+        // Capture current melody BEFORE any possible normalization using current rotationIndex
+        const snapshot = [];
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
-            // Ensure visual index is in sync before deciding topIdx
-            syncRotationIndexFromQuaternion(cube);
-            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topIdx = (rIdx + 2) % 4;
-            const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
-            const ROT_DEGS = [0, 270, 180, 90];
-            const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
-            const symbol = degs[topIdx];
-            const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
-            try { faceMat.side = THREE.DoubleSide; } catch (_) { }
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
-            // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
-            const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
-            const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
-            plane.rotation.z = melUpright;
-            plane.userData.uprightZ = melUpright;
-            plane.position.z = 0.002;
-            const group = new THREE.Group();
-            group.add(plane);
-            const p = new THREE.Vector3(); cube.getWorldPosition(p);
-            const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
-            const zBack = p.z - half - 0.002;
-            const yTop = p.y + half;
-            const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
-            const centerY = yTop + diamondHalf;
-            group.position.set(p.x, centerY, zBack);
-            group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
-            melodyGiantGroup.add(group);
+            // Use quaternion-based top face detection for absolute correctness
+            const midiTop = (() => {
+                const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+                const names = transposeNotes(tones, currentKey);
+                const topToneIdx = getTopToneIdxFromQuat(cube);
+                const topPc = pcOf(names[topToneIdx]);
+                let m = 72 + ((topPc - 0 + 12) % 12);
+                while (m > 84) m -= 12; while (m < 60) m += 12;
+                return m;
+            })();
+            const toneIdx = getTopToneIdxFromQuat(cube);
+            snapshot.push({ roman: cube.userData.roman, midi: midiTop, toneIdx, color: borderColorForRoman(cube.userData.roman) });
+            // Attach per-cube lock reference to avoid lineup index mismatches
+            cube.userData.lockedMelody = { toneIdx, midi: midiTop };
         }
-        melodyGiantGroup.visible = !!(showGiantMelodyEl?.checked ?? true);
-        scene.add(melodyGiantGroup);
-    } catch (_) { }
+        lockedMelody = snapshot;
+        renderMelodyLane();
+        melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
+        flashLockedLine(true);
+        if (lockedBass && lockedBass.length === lineup.length) {
+            setTimeout(() => {
+                for (const cube of lineup) {
+                    cube.userData.rotationIndex = 0;
+                    const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
+                    animateQuaternion(cube, to, 280);
+                }
+                maybeEnterStageMode();
+            }, 1000);
+        }
+        try {
+            if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
+            melodyGiantGroup = new THREE.Group();
+            const xs = computeSlotPositions(lineup.length);
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i];
+                const lockedTopIdx = (cube.userData?.lockedMelody?.toneIdx != null) ? cube.userData.lockedMelody.toneIdx : (lockedMelody?.[i]?.toneIdx);
+                const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+                const topIdx = (typeof lockedTopIdx === 'number') ? lockedTopIdx : ((rIdx + 2) % 4);
+                const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+                const ROT_DEGS = [0, 270, 180, 90];
+                const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+                const symbol = degs[topIdx];
+                const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
+                try { faceMat.side = THREE.DoubleSide; } catch (_) { }
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
+                // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+                const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
+                const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
+                plane.rotation.z = melUpright;
+                plane.userData.uprightZ = melUpright;
+                plane.position.z = 0.002;
+                const group = new THREE.Group();
+                group.add(plane);
+                const p = new THREE.Vector3(); cube.getWorldPosition(p);
+                const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
+                const zBack = p.z - half - 0.002;
+                const yTop = p.y + half;
+                const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+                const centerY = yTop + diamondHalf;
+                group.position.set(p.x, centerY, zBack);
+                group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
+                melodyGiantGroup.add(group);
+            }
+            melodyGiantGroup.visible = !!(showGiantMelodyEl?.checked ?? true);
+            scene.add(melodyGiantGroup);
+        } catch (_) { }
+    }, 60);
 }
 
 function lockInBass() {
     if (lineup.length === 0) return;
+    // FORCE snapshot from live bottom face data RIGHT NOW
     lockedBass = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
-        let midi = getBassMidiForObject(cube);
+        const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const liveIdx = (typeof cube.userData.bottomToneIdxLive === 'number') ? cube.userData.bottomToneIdxLive : getBottomToneIdxFromQuat(cube);
+        const bottomPc = pcOf(names[liveIdx]);
+        let midi = 36 + ((bottomPc - 0 + 12) % 12);
         while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
-        lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
+        lockedBass.push({ roman: cube.userData.roman, midi, toneIdx: liveIdx, color: borderColorForRoman(cube.userData.roman) });
+        cube.userData.lockedBass = { toneIdx: liveIdx, midi };
     }
     renderBassLane();
-    ultraFlash(0xffcc66, 540);
-    pulseLockIcons('bass');
+    flashLockedLine(false);
     bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
     // If both voices locked, normalize all cubes to root-down orientation for easy reading
     if (lockedMelody && lockedMelody.length === lineup.length) {
@@ -3685,7 +3344,8 @@ function lockInBass() {
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
             const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const bottomIdx = rIdx; // bottom face degree index
+            const lockedIdx = (cube.userData?.lockedBass?.toneIdx != null) ? cube.userData.lockedBass.toneIdx : (lockedBass?.[i]?.toneIdx);
+            const bottomIdx = (typeof lockedIdx === 'number') ? lockedIdx : rIdx; // bottom face degree index
             const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
             const symbol = (labelMode === 'roman') ? degs[bottomIdx] : transposeNotes(noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'], currentKey)[bottomIdx];
             const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
@@ -3734,29 +3394,11 @@ async function playLockSound() {
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
     const msPerBeat = Math.round(60000 / progressionBpm);
-    const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
+    const perChordMs = 1000; // 1 second per chord per request
     for (let i = 0; i < lineup.length; i++) {
         const c = lineup[i];
         // Ultra-flashy active chord highlight + camera dolly follow
-        try {
-            highlightChordEffect(c, 900); pulseGiantAt(i, 700);
-            // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
-            const tDur = 700;
-            const fromPos = camera.position.clone();
-            const fromTgt = controls.target.clone();
-            const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
-            const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
-            const tStart = performance.now();
-            const tween = {
-                owner: camera, tick: (now) => {
-                    const v = Math.min(1, (now - tStart) / tDur);
-                    camera.position.lerpVectors(fromPos, toPos, v);
-                    controls.target.lerpVectors(fromTgt, toTgt, v);
-                    return v >= 1;
-                }, cancelled: false
-            };
-            activeTweens.push(tween);
-        } catch (_) { }
+        try { highlightChordEffect(c, 900); pulseGiantAt(i, 700); focusCameraOnCube(c, 600); } catch (_) { }
         if (lockedMelody || lockedBass) {
             // Use locked lines if present; fallback to face-derived where missing
             const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
@@ -3764,11 +3406,14 @@ async function playFrontRowProgression() {
             // chord bed stays the same
             const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
             if (sfChord && sfChord.play) chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
-            // bass
+            // bass — FORCE from live bottom or locked snapshot; no voice-leading when locked
             if (bassEnabled) {
-                let bassMidi = lockedBass?.[i]?.midi ?? getBassMidiForObject(c);
+                const hasLocked = !!(lineup[i]?.userData?.lockedBass?.midi || (lockedBass && lockedBass[i] && typeof lockedBass[i].midi === 'number'));
+                const lockedMidi = lineup[i]?.userData?.lockedBass?.midi ?? lockedBass?.[i]?.midi;
+                let bassMidi = hasLocked ? lockedMidi : getBassMidiForObject(c);
                 while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
-                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+                // No voice-leading when locked; optional when unlocked
+                if (!hasLocked) bassMidi = nearestOctave(bassMidi, lastBassMidi);
                 if (sfBass && sfBass.play) { sfBass.play(bassMidi, now, { duration, gain: 0.34 }); lastBassMidi = bassMidi; }
             }
             // melody
@@ -3787,56 +3432,5 @@ async function playFrontRowProgression() {
 }
 
 // Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()
-
-// ============================================
-// CLAUDE'S PART 7: DEBUGGING HELPERS
-// ============================================
-
-// Add these to help debug UI visibility issues
-window.debugUI = function () {
-    const widget = document.getElementById('unified-rhythm-widget');
-    if (!widget) {
-        console.error('Widget not found in DOM');
-        return;
-    }
-
-    const rect = widget.getBoundingClientRect();
-    const computed = window.getComputedStyle(widget);
-
-    console.log('Widget Debug Info:');
-    console.log('- Position:', rect);
-    console.log('- Display:', computed.display);
-    console.log('- Visibility:', computed.visibility);
-    console.log('- Z-Index:', computed.zIndex);
-    console.log('- Opacity:', computed.opacity);
-    console.log('- Parent:', widget.parentElement);
-
-    // Check if something is covering it
-    const elementAtPoint = document.elementFromPoint(rect.left + 10, rect.top + 10);
-    console.log('- Element at widget position:', elementAtPoint);
-
-    // Force to front
-    widget.style.zIndex = '2147483647';
-    console.log('Forced z-index to maximum');
-};
-
-window.forceShowUI = function () {
-    const widget = document.getElementById('unified-rhythm-widget');
-    if (widget) {
-        widget.style.cssText = `
-            position: fixed !important;
-            top: 10px !important;
-            right: 10px !important;
-            z-index: 2147483647 !important;
-            background: red !important;
-            width: 300px !important;
-            height: 200px !important;
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
-        `;
-        console.log('Forced widget to red box for visibility');
-    }
-};
 
 
