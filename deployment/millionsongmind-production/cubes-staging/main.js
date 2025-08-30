@@ -10,8 +10,117 @@ import { setupDiagnostics } from './diagnosticsOverlay.js'
 import { createBridge } from './integration/bridge.js'
 import { setState } from './stateStore.js'
 // Enterprise-level transport and style system
-import { chordCubesTransport } from './transport-bridge.js'
-import { createStyleSelector } from './style-selector.js'
+// CLAUDE'S AUDIOCONTEXT SINGLETON MANAGER - ELIMINATES 30+ WARNINGS (MOVED TO TOP)
+class AudioContextManager {
+    constructor() {
+        this.initialized = false;
+        this.initPromise = null;
+        this.warningCount = 0;
+
+        // Override Tone.js console warnings
+        this.suppressWarnings();
+    }
+
+    suppressWarnings() {
+        // Store original console.warn
+        const originalWarn = console.warn;
+
+        // Override console.warn to filter AudioContext warnings
+        console.warn = (...args) => {
+            const message = args[0]?.toString() || '';
+
+            // Suppress specific AudioContext warning
+            if (message.includes('AudioContext was not allowed to start')) {
+                this.warningCount++;
+                // Only show first warning
+                if (this.warningCount === 1) {
+                    console.log('[AUDIO] AudioContext requires user gesture (normal behavior)');
+                }
+                return; // Don't show the warning
+            }
+
+            // Pass through other warnings
+            originalWarn.apply(console, args);
+        };
+    }
+
+    async initialize() {
+        // Return existing promise if already initializing
+        if (this.initPromise) {
+            return this.initPromise;
+        }
+
+        // Already initialized
+        if (this.initialized) {
+            return Promise.resolve();
+        }
+
+        // Create initialization promise
+        this.initPromise = new Promise((resolve, reject) => {
+            const initAudio = async () => {
+                try {
+                    // Check if Tone.js context exists
+                    if (typeof Tone === 'undefined') {
+                        throw new Error('Tone.js not loaded');
+                    }
+
+                    // Only start if not already running
+                    if (Tone.context.state !== 'running') {
+                        console.log('[AUDIO] Starting Tone.js context...');
+                        await Tone.start();
+                        console.log('[AUDIO] Tone.js context started successfully');
+                    } else {
+                        console.log('[AUDIO] Tone.js context already running');
+                    }
+
+                    this.initialized = true;
+
+                    // Remove gesture listeners
+                    document.removeEventListener('click', initAudio);
+                    document.removeEventListener('touchstart', initAudio);
+                    document.removeEventListener('keydown', initAudio);
+
+                    resolve();
+                } catch (error) {
+                    console.error('[AUDIO] Failed to initialize:', error);
+                    reject(error);
+                }
+            };
+
+            // Check if we can start immediately (user already interacted)
+            if (typeof Tone !== 'undefined' && Tone.context.state === 'running') {
+                this.initialized = true;
+                resolve();
+            } else {
+                // Wait for user gesture
+                console.log('[AUDIO] Waiting for user gesture to start audio...');
+                document.addEventListener('click', initAudio, { once: true });
+                document.addEventListener('touchstart', initAudio, { once: true });
+                document.addEventListener('keydown', initAudio, { once: true });
+            }
+        });
+
+        return this.initPromise;
+    }
+}
+
+// Create global singleton instance and initialize immediately
+window.audioContextManager = new AudioContextManager();
+
+// PREVENT MULTIPLE TONE INITIALIZATIONS
+function ensureSingleToneInit() {
+    // Prevent multiple Tone.js initializations
+    if (!window.toneInitialized) {
+        window.toneInitialized = true;
+        console.log('[AUDIO] Tone.js initialization controlled by singleton');
+    }
+}
+
+// Call this at the very start of your app
+ensureSingleToneInit();
+
+import { chordCubesTransport } from './transport-bridge.js';
+import { createiPadMenuSystem } from './ipad-menu-system.js'
 
 const canvas = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
@@ -686,7 +795,7 @@ function addEpicTitles() {
     if (!bgTitleMesh) {
         // MASSIVE all-caps, very tight leading
         const bgTex = makeTitleTexture(['MILLION', 'SONG', 'MIND'], { width: 4096, height: 4096, size: 520, lineGap: 0.52, weight: 1000 });
-        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0xff69b4 });
+        const bgMat = new THREE.MeshBasicMaterial({ map: bgTex, transparent: true, opacity: 0.3, depthWrite: false, color: 0x000000 });
         const scaleFactor = 15; // towering
         const bgGeo = new THREE.PlaneGeometry(18 * scaleFactor, 18 * scaleFactor);
         bgTitleMesh = new THREE.Mesh(bgGeo, bgMat);
@@ -1448,6 +1557,27 @@ function isPointerOverShelf(e) {
 function onPointerDown(e) {
     // Only honor left-click for selections/drags
     if (typeof e.button === 'number' && e.button !== 0) return;
+
+    // CRITICAL: Check if click is on UI elements first (prevent chord selection everywhere)
+    const clickX = e.clientX;
+    const clickY = e.clientY;
+
+    // Define UI exclusion zones (responsive to viewport)
+    const uiZones = [
+        { x: 0, y: 0, width: 100, height: 100 }, // Top-left corner (menu button)
+        { x: window.innerWidth - 100, y: 0, width: 100, height: 100 }, // Top-right corner
+        { x: 0, y: window.innerHeight - 100, width: window.innerWidth, height: 100 } // Bottom strip
+    ];
+
+    // Check if click is in any UI zone
+    for (const zone of uiZones) {
+        if (clickX >= zone.x && clickX <= zone.x + zone.width &&
+            clickY >= zone.y && clickY <= zone.y + zone.height) {
+            console.log(`[POINTER-DOWN] Click in UI zone, ignoring chord selection`);
+            return; // Don't process chord selection
+        }
+    }
+
     const rect = renderer.domElement.getBoundingClientRect();
     mouseDownPos.set(e.clientX - rect.left, e.clientY - rect.top);
     mouseDownTime = performance.now();
@@ -1788,6 +1918,18 @@ function onPointerUp(e) {
                 targetObj = shelfFromRay || ((pendingObj && pendingObj.userData?.isShelf) ? pendingObj : resolveCubeFromObject(hits[0]?.object));
             }
             console.log(`[CLICK] targetObj: ${targetObj?.userData?.roman}, isShelf: ${!!targetObj?.userData?.isShelf}`);
+
+            // Check if it's the 3D menu button
+            if (targetObj && (targetObj.userData.isMenuButton || targetObj.userData.roman === 'MENU')) {
+                console.log('[CLICK] 3D MENU BUTTON CLICKED!');
+                if (window.leftSideMenu) {
+                    window.leftSideMenu.style.left = '0px';
+                    console.log('[LEFT-MENU] Menu opened via 3D button');
+                }
+                pendingObj = null;
+                return;
+            }
+
             if (!targetObj) { pendingObj = null; return; }
             // If clicking a shelf cube, enqueue add + audio and return
             if (!adjustMode && targetObj.userData?.isShelf) {
@@ -2271,7 +2413,7 @@ bassLockIcon?.addEventListener('click', async () => {
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => {
     // Use enterprise transport if available, fallback to original
-    if (enterpriseTransportEnabled) {
+    if (enterpriseTransportEnabled && window.chordCubesTransport) {
         playFrontRowProgressionWithTiming();
     } else {
         playFrontRowProgression();
@@ -2964,7 +3106,7 @@ function focusCameraOnCube(cube, durationMs = 700) {
 }
 // Metronome/tempo UI + engine
 let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
-let metroOn = false; let metroSynth = null; let metroLoop = null;
+let metroOn = false; let metroSynth = null; let metroLoop = null; let drumsOn = false;
 
 function readFlagsFromUrl() {
     try {
@@ -2978,33 +3120,456 @@ function readFlagsFromUrl() {
     } catch (_) { /* ignore */ }
 }
 
-// Tempo/Metronome UI
-function ensureTempoUi() {
-    if (tempoUi) return;
-    const box = document.createElement('div');
-    box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
-    const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
-    const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
-    const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
-    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
-    const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
-    btn.onclick = async () => {
-        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
-        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
-        if (!metroLoop && window.Tone) {
-            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
-        }
-        if (!metroOn) {
-            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
-            btn.textContent = 'Metronome: On'; metroOn = true;
-        } else {
-            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
-            btn.textContent = 'Metronome: Off'; metroOn = false;
+// 3D Menu Button Creation (UNMISSABLE in 3D space)
+function create3DMenuButton() {
+    console.log('[3D-MENU] Creating 3D menu button...');
+
+    // Create a bright, pulsing sphere for the menu button
+    const geometry = new THREE.SphereGeometry(1.5, 32, 32);
+    const material = new THREE.MeshBasicMaterial({
+        color: 0xff0080,
+        transparent: true,
+        opacity: 0.9
+    });
+
+    const menuSphere = new THREE.Mesh(geometry, material);
+
+    // Position it prominently in the scene (top-left of view)
+    menuSphere.position.set(-8, 8, 5); // Top-left, forward
+    menuSphere.userData.isMenuButton = true;
+    menuSphere.userData.roman = 'MENU'; // For identification
+
+    // Add text texture for "MENU"
+    const canvas = document.createElement('canvas');
+    canvas.width = 512;
+    canvas.height = 512;
+    const ctx = canvas.getContext('2d');
+
+    // Draw MENU text
+    ctx.fillStyle = '#000000';
+    ctx.fillRect(0, 0, 512, 512);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 80px Arial';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('MENU', 256, 256);
+
+    const textTexture = new THREE.CanvasTexture(canvas);
+    const textMaterial = new THREE.MeshBasicMaterial({
+        map: textTexture,
+        transparent: true
+    });
+
+    // Create text plane
+    const textGeometry = new THREE.PlaneGeometry(2, 2);
+    const textMesh = new THREE.Mesh(textGeometry, textMaterial);
+    textMesh.position.set(0, 0, 1.6); // Slightly in front of sphere
+
+    // Group sphere and text
+    const menuGroup = new THREE.Group();
+    menuGroup.add(menuSphere);
+    menuGroup.add(textMesh);
+    menuGroup.userData.isMenuButton = true;
+    menuGroup.userData.roman = 'MENU';
+
+    // Add pulsing animation
+    let pulseTime = 0;
+    const originalScale = 1;
+
+    const animateMenu = () => {
+        pulseTime += 0.05;
+        const scale = originalScale + Math.sin(pulseTime) * 0.2;
+        menuGroup.scale.setScalar(scale);
+
+        // Color cycling
+        const hue = (Date.now() * 0.001) % 1;
+        material.color.setHSL(hue, 1, 0.5);
+
+        requestAnimationFrame(animateMenu);
+    };
+    animateMenu();
+
+    console.log('[3D-MENU] 3D menu button created with animation');
+    return menuGroup;
+}
+
+// Left-side menu panel creation
+function createLeftSideMenu() {
+    console.log('[LEFT-MENU] Creating left-side menu...');
+
+    const menuPanel = document.createElement('div');
+    menuPanel.id = 'left-side-menu';
+    menuPanel.style.cssText = `
+        position: fixed !important;
+        top: 0 !important;
+        left: -400px !important;
+        width: 400px !important;
+        height: 100vh !important;
+        background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(40, 40, 40, 0.95)) !important;
+        border-right: 2px solid #007AFF !important;
+        z-index: 50000 !important;
+        backdrop-filter: blur(20px) !important;
+        transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+        overflow-y: auto !important;
+        padding: 20px !important;
+        box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3) !important;
+    `;
+
+    // Menu content
+    menuPanel.innerHTML = `
+        <div style="color: white; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
+            <h1 style="color: #007AFF; margin: 0 0 20px 0; font-size: 28px;">ChordCubes Pro</h1>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #FF0080; margin: 0 0 15px 0;">🎛️ Transport Controls</h3>
+                <button id="menu-play" style="background: #34C759; border: none; color: white; padding: 12px 20px; border-radius: 8px; margin: 5px; cursor: pointer; font-weight: 600;">▶ Play</button>
+                <button id="menu-stop" style="background: #FF3B30; border: none; color: white; padding: 12px 20px; border-radius: 8px; margin: 5px; cursor: pointer; font-weight: 600;">⏹ Stop</button>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #FF0080; margin: 0 0 15px 0;">🥁 Drum Styles</h3>
+                <select id="menu-style" style="width: 100%; padding: 12px; background: #2a2a2a; color: white; border: 1px solid #007AFF; border-radius: 8px; font-size: 16px;">
+                    <option value="hip-hop">Hip Hop</option>
+                    <option value="country">Country</option>
+                    <option value="techno">Techno</option>
+                    <option value="orchestra">Orchestra</option>
+                    <option value="quartet">Quartet</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #FF0080; margin: 0 0 15px 0;">⏱️ Tempo</h3>
+                <input id="menu-bpm" type="range" min="60" max="180" value="120" style="width: 100%; margin-bottom: 10px;">
+                <div id="menu-bpm-display" style="color: #00FF41; font-family: monospace; font-size: 20px; text-align: center;">120 BPM</div>
+            </div>
+            
+            <div style="margin-bottom: 30px;">
+                <h3 style="color: #FF0080; margin: 0 0 15px 0;">🎹 Chord Settings</h3>
+                <button id="menu-show-chords" style="background: #007AFF; border: none; color: white; padding: 12px 20px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: 600;">Show Chord Controls</button>
+            </div>
+            
+            <button id="menu-close" style="background: #666; border: none; color: white; padding: 12px 20px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: 600; margin-top: 20px;">Close Menu</button>
+        </div>
+    `;
+
+    document.body.appendChild(menuPanel);
+
+    // Setup menu interactions
+    setupMenuInteractions(menuPanel);
+
+    return menuPanel;
+}
+
+function setupMenuInteractions(menuPanel) {
+    // Close button
+    document.getElementById('menu-close').onclick = () => {
+        menuPanel.style.left = '-400px';
+        console.log('[LEFT-MENU] Menu closed');
+    };
+
+    // Show chord controls
+    document.getElementById('menu-show-chords').onclick = () => {
+        const ui = document.getElementById('ui');
+        if (ui) {
+            ui.style.display = ui.style.display === 'none' ? 'block' : 'none';
+            console.log('[LEFT-MENU] Toggled chord controls');
         }
     };
-    box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+
+    // BPM control
+    const bpmSlider = document.getElementById('menu-bpm');
+    const bpmDisplay = document.getElementById('menu-bpm-display');
+    bpmSlider.oninput = () => {
+        const bpm = parseInt(bpmSlider.value);
+        progressionBpm = bpm;
+        if (window.chordCubesTransport) {
+            window.chordCubesTransport.setBpm(bpm);
+        }
+        bpmDisplay.textContent = `${bpm} BPM`;
+        console.log(`[LEFT-MENU] BPM set to ${bpm}`);
+    };
+
+    // Style selector
+    document.getElementById('menu-style').onchange = (e) => {
+        if (window.chordCubesTransport) {
+            window.chordCubesTransport.setDrumStyle(e.target.value);
+            console.log(`[LEFT-MENU] Style set to ${e.target.value}`);
+        }
+    };
+
+    // Transport controls
+    document.getElementById('menu-play').onclick = async () => {
+        if (window.chordCubesTransport) {
+            await window.chordCubesTransport.start();
+            console.log('[LEFT-MENU] Transport started');
+        }
+    };
+
+    document.getElementById('menu-stop').onclick = () => {
+        if (window.chordCubesTransport) {
+            window.chordCubesTransport.stop();
+            console.log('[LEFT-MENU] Transport stopped');
+        }
+    };
+}
+
+// CLAUDE'S UNIFIED DRUM + METRONOME WIDGET WITH SAFETY CHECKS
+function ensureTempoUi() {
+    if (tempoUi) return;
+
+    console.log('[UNIFIED-WIDGET] Creating single drum/metronome control...');
+
+    // CLAUDE'S SAFETY CHECK: Ensure transport exists
+    if (!window.chordCubesTransport) {
+        console.error('[UNIFIED-WIDGET] Transport not available - deferring UI creation');
+        // Retry in 100ms
+        setTimeout(ensureTempoUi, 100);
+        return;
+    }
+
+    // Remove any existing unified widget
+    const existingWidget = document.getElementById('unified-rhythm-widget');
+    if (existingWidget) {
+        existingWidget.remove();
+    }
+
+    // CLAUDE'S BULLETPROOF UI CONTAINER
+    const box = document.createElement('div');
+    box.id = 'unified-rhythm-widget';
+    box.style.cssText = `
+        position: fixed !important;
+        top: 10px !important;
+        right: 10px !important;
+        background: rgba(0, 0, 0, 0.95) !important;
+        border: 3px solid #00ff00 !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        z-index: 2147483647 !important;
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        min-width: 300px !important;
+        box-shadow: 0 0 30px rgba(0, 255, 0, 0.8) !important;
+        transform: translateZ(0) !important;
+        will-change: transform !important;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+        color: white !important;
+    `;
+
+    // Title
+    const title = document.createElement('span');
+    title.textContent = '🎵 RHYTHM';
+    title.style.cssText = 'font-weight: 700 !important; color: #34C759 !important; font-size: 14px !important;';
+
+    // Style dropdown
+    const styleSelect = document.createElement('select');
+    styleSelect.style.cssText = `
+        background: #333 !important;
+        color: white !important;
+        border: 1px solid #666 !important;
+        border-radius: 6px !important;
+        padding: 6px 8px !important;
+        font-size: 12px !important;
+    `;
+    styleSelect.innerHTML = `
+        <option value="hip-hop">Hip Hop</option>
+        <option value="country">Country</option>
+        <option value="techno">Techno</option>
+        <option value="orchestra">Orchestra</option>
+        <option value="quartet">Quartet</option>
+    `;
+
+    // BPM slider (single control for both)
+    const bpmSlider = document.createElement('input');
+    bpmSlider.type = 'range';
+    bpmSlider.min = '60';
+    bpmSlider.max = '180';
+    bpmSlider.value = String(progressionBpm);
+    bpmSlider.style.cssText = 'width: 100px !important;';
+
+    // BPM display
+    const bpmDisplay = document.createElement('span');
+    bpmDisplay.textContent = `${progressionBpm} BPM`;
+    bpmDisplay.style.cssText = 'font-weight: 600 !important; min-width: 60px !important; font-size: 12px !important;';
+
+    // Metronome toggle
+    const metroBtn = document.createElement('button');
+    metroBtn.textContent = 'Click: Off';
+    metroBtn.style.cssText = `
+        background: #666 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 6px 10px !important;
+        cursor: pointer !important;
+        font-size: 11px !important;
+    `;
+
+    // Drum toggle
+    const drumBtn = document.createElement('button');
+    drumBtn.textContent = 'Drums: Off';
+    drumBtn.style.cssText = `
+        background: #007AFF !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 6px !important;
+        padding: 6px 10px !important;
+        cursor: pointer !important;
+        font-size: 11px !important;
+    `;
+
+    // Assemble widget
+    box.appendChild(title);
+    box.appendChild(styleSelect);
+    box.appendChild(bpmSlider);
+    box.appendChild(bpmDisplay);
+    box.appendChild(metroBtn);
+    box.appendChild(drumBtn);
     document.body.appendChild(box);
-    tempoUi = box; tempoSlider = slider; metroBtn = btn;
+
+    // Setup unified BPM control
+    bpmSlider.oninput = () => {
+        const bpm = parseInt(bpmSlider.value);
+        progressionBpm = bpm;
+        bpmDisplay.textContent = bpm + ' BPM';
+
+        // Update both systems
+        if (window.Tone) {
+            try { window.Tone.Transport.bpm.value = bpm; } catch (_) { }
+        }
+        if (window.chordCubesTransport) {
+            try { window.chordCubesTransport.setBpm(bpm); } catch (_) { }
+        }
+        console.log('[UNIFIED-WIDGET] BPM set to', bpm);
+    };
+
+    // Metronome control
+    metroBtn.onclick = async () => {
+        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+
+        if (!metroSynth && window.Tone) {
+            metroSynth = new window.Tone.MembraneSynth({
+                envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 }
+            }).toDestination();
+        }
+        if (!metroLoop && window.Tone) {
+            metroLoop = new window.Tone.Loop((time) => {
+                try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { }
+            }, '4n');
+        }
+
+        if (!metroOn) {
+            try {
+                window.Tone.Transport.bpm.value = progressionBpm;
+                metroLoop?.start(0);
+                window.Tone.Transport.start();
+            } catch (_) { }
+            metroBtn.textContent = 'Click: On';
+            metroBtn.style.background = '#34C759';
+            metroOn = true;
+            console.log('[UNIFIED-WIDGET] Metronome started');
+        } else {
+            try {
+                metroLoop?.stop(0);
+                window.Tone.Transport.stop();
+            } catch (_) { }
+            metroBtn.textContent = 'Click: Off';
+            metroBtn.style.background = '#666';
+            metroOn = false;
+            console.log('[UNIFIED-WIDGET] Metronome stopped');
+        }
+    };
+
+    // Drum control (OFFICIAL user gesture pattern)
+    drumBtn.onclick = async () => {
+        console.log('[UNIFIED-WIDGET] Drum button clicked, drumsOn:', drumsOn);
+
+        // OFFICIAL: Start Tone.js first (required for AudioContext)
+        try {
+            if (window.Tone) {
+                console.log('[UNIFIED-WIDGET] Starting Tone.js context...');
+                await window.Tone.start();
+                console.log('[UNIFIED-WIDGET] Tone.js context started');
+            }
+        } catch (e) {
+            console.error('[UNIFIED-WIDGET] Tone.js start failed:', e);
+        }
+
+        if (!window.chordCubesTransport) {
+            console.error('[UNIFIED-WIDGET] Transport not available');
+            return;
+        }
+
+        if (!drumsOn) {
+            try {
+                console.log('[UNIFIED-WIDGET] Starting drums...');
+                const success = await window.chordCubesTransport.start();
+                if (success) {
+                    drumBtn.textContent = 'Drums: On';
+                    drumBtn.style.background = '#34C759';
+                    drumsOn = true;
+                    console.log('[UNIFIED-WIDGET] ✅ Drums started successfully');
+                } else {
+                    console.error('[UNIFIED-WIDGET] ❌ Drum start returned false');
+                }
+            } catch (e) {
+                console.error('[UNIFIED-WIDGET] ❌ Drum start failed:', e);
+            }
+        } else {
+            try {
+                console.log('[UNIFIED-WIDGET] Stopping drums...');
+                window.chordCubesTransport.stop();
+                drumBtn.textContent = 'Drums: Off';
+                drumBtn.style.background = '#007AFF';
+                drumsOn = false;
+                console.log('[UNIFIED-WIDGET] ✅ Drums stopped');
+            } catch (e) {
+                console.error('[UNIFIED-WIDGET] ❌ Drum stop failed:', e);
+            }
+        }
+    };
+
+    // Style control
+    styleSelect.onchange = () => {
+        if (window.chordCubesTransport) {
+            try {
+                window.chordCubesTransport.setDrumStyle(styleSelect.value);
+                console.log('[UNIFIED-WIDGET] Style set to', styleSelect.value);
+            } catch (e) {
+                console.error('[UNIFIED-WIDGET] Style change failed:', e);
+            }
+        }
+    };
+
+    // Force append to body with maximum priority
+    document.body.appendChild(box);
+
+    // CLAUDE'S VISIBILITY CHECK after render
+    setTimeout(() => {
+        const element = document.getElementById('unified-rhythm-widget');
+        if (element) {
+            const rect = element.getBoundingClientRect();
+            console.log('[UNIFIED-WIDGET] Widget dimensions:', rect);
+            if (rect.width === 0 || rect.height === 0) {
+                console.error('[UNIFIED-WIDGET] Widget has zero dimensions!');
+                // Force re-render
+                element.style.display = 'none';
+                element.offsetHeight; // Force reflow
+                element.style.display = 'block';
+            } else {
+                console.log('[UNIFIED-WIDGET] ✅ Widget is visible with dimensions:', rect.width, 'x', rect.height);
+            }
+        }
+    }, 100);
+
+    tempoUi = box;
+    tempoSlider = bpmSlider;
+    window.metroBtn = metroBtn;
+    window.drumBtn = drumBtn;
+    window.styleSelect = styleSelect;
+
+    console.log('[UNIFIED-WIDGET] Unified rhythm control created and visible');
 }
 
 function createPlayButton() {
@@ -3569,62 +4134,92 @@ async function playFrontRowProgression() {
     }
 }
 
-// Enterprise Transport System Initialization
-let styleSelector = null;
+// Enterprise UI System Initialization
+let iPadMenu = null;
 let enterpriseTransportEnabled = false;
 
-// Initialize enterprise systems after app load
-(async () => {
+// CLAUDE'S FIX: Initialize transport BEFORE UI creation
+async function initializeTransportFirst() {
+    console.log('[INIT] Starting early transport initialization...');
+
+    // Import and expose transport IMMEDIATELY
+    const { chordCubesTransport } = await import('./transport-bridge.js');
+    window.chordCubesTransport = chordCubesTransport;
+    console.log('[INIT] Transport exposed to global scope');
+
+    // Initialize audio system with user gesture handling
+    let audioInitialized = false;
+
+    const initAudioOnGesture = async () => {
+        if (audioInitialized) return;
+
+        try {
+            // Start Tone.js context
+            if (window.Tone && window.Tone.context.state !== 'running') {
+                await window.Tone.start();
+                console.log('[INIT] Tone.js context started');
+            }
+
+            // Initialize transport audio
+            await window.chordCubesTransport.initAudioSystem();
+            audioInitialized = true;
+            console.log('[INIT] Transport audio system initialized');
+
+            // Remove listener after successful init
+            document.removeEventListener('click', initAudioOnGesture);
+            document.removeEventListener('touchstart', initAudioOnGesture);
+        } catch (error) {
+            console.error('[INIT] Audio initialization error:', error);
+        }
+    };
+
+    // Add listeners for user gesture
+    document.addEventListener('click', initAudioOnGesture, { once: false });
+    document.addEventListener('touchstart', initAudioOnGesture, { once: false });
+
+    // Return promise that resolves when transport is ready
+    return new Promise((resolve) => {
+        // Check if transport is available
+        const checkTransport = setInterval(() => {
+            if (window.chordCubesTransport) {
+                clearInterval(checkTransport);
+                console.log('[INIT] Transport ready for UI creation');
+                resolve();
+            }
+        }, 10);
+    });
+}
+
+// CLAUDE'S ENTERPRISE INITIALIZATION SEQUENCE
+async function initializeEnterpriseDrumSystem() {
     try {
         console.log('[ENTERPRISE] Starting initialization...');
 
-        // Wait for app to be ready
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        console.log('[ENTERPRISE] App ready, initializing transport...');
+        // Step 1: Initialize transport FIRST
+        await initializeTransportFirst();
 
-        // Initialize transport system
-        await chordCubesTransport.initAudioSystem();
-        console.log('[ENTERPRISE] Transport audio system ready');
+        // Step 2: Wait for loadSet to complete
+        await new Promise(resolve => {
+            const checkLoaded = () => {
+                if (shelfCubes.length > 0) {
+                    resolve();
+                } else {
+                    setTimeout(checkLoaded, 100);
+                }
+            };
+            checkLoaded();
+        });
 
-        // Create style selector UI
-        console.log('[ENTERPRISE] Creating style selector...');
-        styleSelector = createStyleSelector(chordCubesTransport);
-        console.log('[ENTERPRISE] Style selector created successfully');
+        // Step 3: Create UI only after transport is ready
+        console.log('[ENTERPRISE] Creating UI with transport available...');
 
-        // Add style selector toggle button to existing UI
-        console.log('[ENTERPRISE] Creating toggle button...');
-        const toggleBtn = document.createElement('button');
-        toggleBtn.textContent = '🎵 Styles';
-        toggleBtn.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4a90e2;
-            border: none;
-            border-radius: 8px;
-            color: white;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-weight: 600;
-            z-index: 999;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        `;
-        toggleBtn.onclick = () => {
-            console.log('[ENTERPRISE] Style button clicked');
-            if (styleSelector) {
-                styleSelector.toggle();
-            } else {
-                console.error('[ENTERPRISE] Style selector not available');
-            }
-        };
-        document.body.appendChild(toggleBtn);
-        console.log('[ENTERPRISE] Toggle button added to DOM');
+        // Step 4: Set initial BPM
+        if (window.chordCubesTransport) {
+            window.chordCubesTransport.setBpm(progressionBpm);
+            console.log('[ENTERPRISE] BPM synced:', progressionBpm);
+        }
 
-        // Sync BPM with existing system
-        chordCubesTransport.setBpm(progressionBpm);
-        console.log('[ENTERPRISE] BPM synced:', progressionBpm);
-
-        // Expose functions for enterprise transport integration
+        // Step 5: Expose functions globally
         window.playChordForObject = playChordForObject;
         window.lineup = lineup;
         window.progressionBpm = progressionBpm;
@@ -3635,10 +4230,12 @@ let enterpriseTransportEnabled = false;
         console.log('[ENTERPRISE] ✅ TRANSPORT SYSTEM INITIALIZED SUCCESSFULLY');
 
     } catch (error) {
-        console.error('[ENTERPRISE] ❌ FAILED TO INITIALIZE:', error);
-        console.error('[ENTERPRISE] Error stack:', error.stack);
+        console.error('[ENTERPRISE] Initialization failed:', error);
     }
-})();
+}
+
+// Initialize enterprise systems with proper timing
+initializeEnterpriseDrumSystem();
 
 // Enhanced progression with enterprise transport integration
 async function playFrontRowProgressionWithTiming() {

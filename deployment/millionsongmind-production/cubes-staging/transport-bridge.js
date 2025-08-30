@@ -69,110 +69,111 @@ export class ChordCubesTransport {
         };
     }
 
-    // Initialize audio system (based on Novaxe MetroComponent)
+    // Initialize audio system (SIMPLIFIED Tone.js synthesis - no external scripts)
     async initAudioSystem() {
         try {
-            console.log('[TRANSPORT] Initializing audio system...');
+            console.log('[TRANSPORT] Initializing audio system using Tone.js synthesis...');
 
-            if (!this.audioContext) {
-                this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                console.log('[TRANSPORT] AudioContext created');
+            // OFFICIAL: Use Tone.js context
+            if (window.Tone) {
+                console.log('[TRANSPORT] Using Tone.js AudioContext');
+                this.audioContext = window.Tone.context.rawContext;
+
+                // Ensure Tone.js context is started
+                if (window.Tone.context.state !== 'running') {
+                    await window.Tone.start();
+                    console.log('[TRANSPORT] Tone.js context started');
+                }
+            } else {
+                console.error('[TRANSPORT] Tone.js not available');
+                return false;
             }
 
-            if (this.audioContext.state === 'suspended') {
-                await this.audioContext.resume();
-                console.log('[TRANSPORT] AudioContext resumed');
-            }
+            // Create drum sounds using Tone.js synthesis (no external files needed)
+            console.log('[TRANSPORT] Creating drum synthesizers...');
+            this.createDrumSynths();
 
-            // Load WebAudioFont drum instruments with timeout (enterprise resilience)
-            console.log('[TRANSPORT] Loading drum instruments with 5s timeout...');
-            try {
-                await Promise.race([
-                    this.loadDrumInstruments(),
-                    new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error('Instrument loading timeout')), 5000)
-                    )
-                ]);
-                console.log('[TRANSPORT] Drum instruments loaded successfully');
-            } catch (error) {
-                console.warn('[TRANSPORT] Drum loading failed, continuing without drums:', error.message);
-                // Continue without drums - basic functionality preserved
-            }
-
-            console.log('[TRANSPORT] Audio system initialized successfully');
+            this.isInitialized = true;
+            console.log('[TRANSPORT] ✅ Audio system initialized successfully');
             return true;
         } catch (error) {
             console.error('[TRANSPORT] Audio system initialization failed:', error);
-            console.error('[TRANSPORT] Error details:', error.message);
-            console.error('[TRANSPORT] Error stack:', error.stack);
             return false;
         }
     }
 
-    // Load drum instruments using WebAudioFont (enterprise pattern from Novaxe)
-    async loadDrumInstruments() {
-        console.log('[TRANSPORT] Starting drum instrument loading...');
+    // Create drum sounds using Tone.js synthesis
+    createDrumSynths() {
+        // Kick drum - low frequency membrane
+        this.drumSynths = {
+            kick: new window.Tone.MembraneSynth({
+                pitchDecay: 0.05,
+                octaves: 10,
+                oscillator: { type: "triangle" },
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.4,
+                    sustain: 0.01,
+                    release: 1.4
+                }
+            }).toDestination(),
 
-        const instrumentUrls = {
-            kick: 'https://surikov.github.io/webaudiofontdata/sound/12835_17_JCLive_sf2_file.js',
-            snare: 'https://surikov.github.io/webaudiofontdata/sound/12840_1_JCLive_sf2_file.js',
-            hihat: 'https://surikov.github.io/webaudiofontdata/sound/12875_0_FluidR3_GM_sf2_file.js',
-            timpani: 'https://surikov.github.io/webaudiofontdata/sound/12847_0_FluidR3_GM_sf2_file.js',
-            cymbal: 'https://surikov.github.io/webaudiofontdata/sound/12849_0_FluidR3_GM_sf2_file.js',
-            triangle: 'https://surikov.github.io/webaudiofontdata/sound/12881_0_FluidR3_GM_sf2_file.js',
-            shaker: 'https://surikov.github.io/webaudiofontdata/sound/12882_0_FluidR3_GM_sf2_file.js'
+            // Snare drum - noise with sharp attack
+            snare: new window.Tone.NoiseSynth({
+                noise: { type: "white" },
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.2,
+                    sustain: 0
+                }
+            }).toDestination(),
+
+            // Hi-hat - metallic synthesis
+            hihat: new window.Tone.MetalSynth({
+                frequency: 250,
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.1,
+                    release: 0.01
+                },
+                harmonicity: 3.1,
+                modulationIndex: 16,
+                octaves: 0.5,
+                resonance: 4000
+            }).toDestination(),
+
+            // Timpani for orchestral
+            timpani: new window.Tone.MembraneSynth({
+                pitchDecay: 0.1,
+                octaves: 6,
+                oscillator: { type: "triangle" },
+                envelope: {
+                    attack: 0.01,
+                    decay: 0.8,
+                    sustain: 0.1,
+                    release: 2.0
+                }
+            }).toDestination(),
+
+            // Cymbal - bright metallic
+            cymbal: new window.Tone.MetalSynth({
+                frequency: 500,
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.5,
+                    release: 2.0
+                },
+                harmonicity: 8,
+                modulationIndex: 32,
+                octaves: 1.5,
+                resonance: 8000
+            }).toDestination()
         };
 
-        console.log('[TRANSPORT] Instrument URLs prepared:', Object.keys(instrumentUrls));
-
-        // Load instruments dynamically
-        const loadPromises = Object.entries(instrumentUrls).map(([name, url]) => {
-            console.log(`[TRANSPORT] Loading ${name} from ${url}`);
-            return this.loadInstrument(name, url);
-        });
-
-        try {
-            await Promise.all(loadPromises);
-            console.log('[TRANSPORT] All drum instruments loaded successfully');
-        } catch (error) {
-            console.error('[TRANSPORT] Error loading drum instruments:', error);
-            throw error;
-        }
+        console.log('[TRANSPORT] ✅ Drum synthesizers created');
     }
 
-    // Load individual instrument (WebAudioFont pattern)
-    loadInstrument(name, url) {
-        return new Promise((resolve, reject) => {
-            console.log(`[TRANSPORT] Creating script element for ${name}`);
-
-            const script = document.createElement('script');
-            script.src = url;
-
-            script.onload = () => {
-                console.log(`[TRANSPORT] Script loaded for ${name}`);
-                const instrumentKey = url.split('/').pop().replace('.js', '');
-                console.log(`[TRANSPORT] Looking for window.${instrumentKey}`);
-
-                this.drumInstruments[name] = window[instrumentKey];
-
-                if (this.drumInstruments[name]) {
-                    console.log(`[TRANSPORT] ✅ Successfully loaded ${name} instrument`);
-                } else {
-                    console.warn(`[TRANSPORT] ⚠️ Instrument ${name} loaded but not found in window.${instrumentKey}`);
-                }
-
-                resolve();
-            };
-
-            script.onerror = (error) => {
-                console.error(`[TRANSPORT] ❌ Failed to load ${name} from ${url}:`, error);
-                reject(error);
-            };
-
-            document.head.appendChild(script);
-            console.log(`[TRANSPORT] Script element added to DOM for ${name}`);
-        });
-    }
+    // Using Tone.js synthesis - no external loading needed
 
     // Set BPM (enterprise pattern from Novaxe)
     setBpm(bpm) {
@@ -205,21 +206,39 @@ export class ChordCubesTransport {
         return this.chordPlacements.get(key);
     }
 
-    // Start transport (enterprise playback system)
+    // Start transport (OFFICIAL Tone.js + WebAudioFont pattern)
     async start() {
-        if (!await this.initAudioSystem()) return false;
+        try {
+            console.log('[TRANSPORT] Starting transport...');
 
-        this.state = 'playing';
-        this.startTime = this.audioContext.currentTime;
-        this.clock_ms = 0;
+            // OFFICIAL: Ensure Tone.js is started first (required for AudioContext)
+            if (window.Tone && window.Tone.context.state !== 'running') {
+                console.log('[TRANSPORT] Starting Tone.js context...');
+                await window.Tone.start();
+                console.log('[TRANSPORT] Tone.js context started');
+            }
 
-        // Start the timing loop (60fps for smooth updates)
-        this.timingLoop = setInterval(() => {
-            this.updateTiming();
-        }, 16.67); // ~60fps
+            // Initialize audio system after Tone.js is ready
+            if (!await this.initAudioSystem()) {
+                console.error('[TRANSPORT] Audio system initialization failed');
+                return false;
+            }
 
-        console.log('[TRANSPORT] Transport started');
-        return true;
+            this.state = 'playing';
+            this.startTime = this.audioContext.currentTime;
+            this.clock_ms = 0;
+
+            // Start the timing loop (60fps for smooth updates)
+            this.timingLoop = setInterval(() => {
+                this.updateTiming();
+            }, 16.67); // ~60fps
+
+            console.log('[TRANSPORT] ✅ Transport started successfully');
+            return true;
+        } catch (error) {
+            console.error('[TRANSPORT] ❌ Transport start failed:', error);
+            return false;
+        }
     }
 
     // Stop transport
@@ -293,25 +312,40 @@ export class ChordCubesTransport {
         });
     }
 
-    // Play individual drum sound
+    // Play individual drum sound (RELIABLE Tone.js synthesis)
     playDrumSound(instrument, when = 0) {
-        if (!this.drumInstruments[instrument] || !this.audioContext) return;
+        if (!this.drumSynths || !this.drumSynths[instrument]) {
+            console.log(`[TRANSPORT] Cannot play ${instrument}: synth not available`);
+            return;
+        }
 
         try {
-            // WebAudioFont playback pattern
-            const preset = this.drumInstruments[instrument];
-            if (preset && window.WebAudioFontPlayer) {
-                const player = new window.WebAudioFontPlayer();
-                player.queueWaveTable(
-                    this.audioContext,
-                    this.audioContext.destination,
-                    preset,
-                    when,
-                    60, // MIDI note
-                    0.5, // duration
-                    0.7  // volume
-                );
+            const synth = this.drumSynths[instrument];
+            const time = when || this.audioContext.currentTime;
+
+            // Play appropriate note for each drum type
+            switch (instrument) {
+                case 'kick':
+                    synth.triggerAttackRelease("C1", "8n", time);
+                    break;
+                case 'snare':
+                    synth.triggerAttackRelease("4n", time);
+                    break;
+                case 'hihat':
+                    synth.triggerAttackRelease("32n", time, 0.3);
+                    break;
+                case 'timpani':
+                    synth.triggerAttackRelease("C2", "4n", time);
+                    break;
+                case 'cymbal':
+                    synth.triggerAttackRelease("2n", time, 0.5);
+                    break;
+                default:
+                    console.warn(`[TRANSPORT] Unknown instrument: ${instrument}`);
+                    return;
             }
+
+            console.log(`[TRANSPORT] ✅ ${instrument} played`);
         } catch (error) {
             console.error(`[TRANSPORT] Error playing ${instrument}:`, error);
         }
