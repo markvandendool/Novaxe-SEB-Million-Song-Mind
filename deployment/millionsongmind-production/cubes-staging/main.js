@@ -584,27 +584,90 @@ function candidatePngNamesForRoman(roman) {
     return names;
 }
 
-function loadFaceTexture(label, romanLabel) {
-    // AUTOMATICALLY ADD 7TH NOTATION for diminished and I7 chords
+function loadFaceTexture(label, romanLabel, force7th = false) {
+    // AUTOMATICALLY ADD 7TH NOTATION for diminished, I7, V(b7)(b9) chords, OR when global withSeventh is true
     let displayLabel = label;
     const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
     const isI7 = romanLabel === 'I7' || romanLabel === 'i7';
+    const isV7b9 = romanLabel === 'V(7)(b9)' || romanLabel === 'V(b7)(b9)';
 
-    // Add 7th to display if not already present for special chords
-    if ((isDiminished || isI7) && !label.includes('7') && !label.includes('(7)')) {
+    // Check if we should show 7th: special chords, global setting, or forced
+    const shouldShow7th = isDiminished || isI7 || isV7b9 || withSeventh || force7th;
+
+    // Add 7th to display if not already present
+    if (shouldShow7th && !label.includes('7') && !label.includes('(7)')) {
         if (isDiminished && romanLabel.includes('º') && !romanLabel.includes('º7')) {
             // For diminished, show º7 instead of just º
             displayLabel = label.replace('º', 'º7');
+        } else if (isDiminished && romanLabel.includes('ø') && !romanLabel.includes('ø7')) {
+            // For half-diminished, show ø7 instead of just ø
+            displayLabel = label.replace('ø', 'ø7');
         } else if (isI7) {
             // For I7, add (7) superscript
+            displayLabel = label + '(7)';
+        } else if (!isV7b9) {
+            // For all other chords (except V(b7)(b9) which already has full notation)
             displayLabel = label + '(7)';
         }
     }
 
-    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel})`);
+    // V(b7)(b9) chords should always show full notation (already in the label)
+    // This chord is special - it must always include the b9 to differentiate from basic V
+
+    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel}, withSeventh: ${withSeventh}, force7th: ${force7th})`);
 
     // Always use canvas-rendered texture; no PNGs
     return makeFrontLabelTextureStyled(displayLabel, romanLabel);
+}
+
+// Refresh all cube faces to reflect current 7th setting
+async function refreshAllCubeFaces() {
+    console.log(`[REFRESH FACES] Updating all cube faces for withSeventh: ${withSeventh}`);
+
+    try {
+        // Update front-row cubes
+        for (const cube of cubes) {
+            if (cube.userData && cube.userData.roman) {
+                const roman = cube.userData.roman;
+                const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
+
+                // Generate new texture with current 7th setting
+                const newTexture = loadFaceTexture(label, roman);
+
+                // Update the front face material (index 0)
+                if (cube.material && cube.material[0]) {
+                    // Dispose old texture
+                    if (cube.material[0].map) cube.material[0].map.dispose();
+                    cube.material[0].map = newTexture;
+                    cube.material[0].needsUpdate = true;
+                }
+            }
+        }
+
+        // Update shelf cubes
+        for (const cube of shelfCubes) {
+            if (cube.userData && cube.userData.roman) {
+                const roman = cube.userData.roman;
+                const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
+
+                // Generate new texture with current 7th setting
+                const newTexture = loadFaceTexture(label, roman);
+
+                // Update the front face material (index 0)
+                if (cube.material && cube.material[0]) {
+                    // Dispose old texture
+                    if (cube.material[0].map) cube.material[0].map.dispose();
+                    cube.material[0].map = newTexture;
+                    cube.material[0].needsUpdate = true;
+                }
+            }
+        }
+
+        console.log(`[REFRESH FACES] ✅ Updated ${cubes.length} front-row and ${shelfCubes.length} shelf cubes`);
+
+    } catch (error) {
+        console.error('[REFRESH FACES] Error updating cube faces:', error);
+    }
 }
 
 // SHIFT+CLICK: Temporarily update front face with 7th notation
@@ -1966,20 +2029,18 @@ function onPointerUp(e) {
             if (centerHit) {
                 console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
 
-                // SHIFT+CLICK: Temporarily force 7th for this chord
+                // SHIFT+CLICK: Force 7th for this single chord play
                 const isShiftClick = e.shiftKey;
+                const shouldUse7th = withSeventh || isShiftClick;
+
                 if (isShiftClick) {
                     console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman}`);
-                    const originalWithSeventh = withSeventh;
-                    withSeventh = true;
-                    playChordForObject(targetObj);
-                    withSeventh = originalWithSeventh; // Restore original setting
-
                     // Update front face texture to show 7th notation temporarily
                     updateChordFaceWith7th(targetObj);
-                } else {
-                    playChordForObject(targetObj);
                 }
+
+                // Play chord with 7th if global setting OR shift-click
+                playChordForObjectWith7th(targetObj, shouldUse7th);
 
                 pendingObj = null; return;
             }
@@ -2009,21 +2070,18 @@ function onPointerUp(e) {
 
                     console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
 
-                    // SHIFT+CLICK: Temporarily force 7th for this chord
+                    // SHIFT+CLICK: Force 7th for this single chord play
                     const isShiftClick = e.shiftKey;
+                    const shouldUse7th = withSeventh || isShiftClick;
+
                     if (isShiftClick) {
                         console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman} (quadrant)`);
-                        const originalWithSeventh = withSeventh;
-                        withSeventh = true;
-                        playChordForObject(targetObj);
-                        withSeventh = originalWithSeventh; // Restore original setting
-
                         // Update front face texture to show 7th notation temporarily
                         updateChordFaceWith7th(targetObj);
-                    } else {
-                        // Play audio immediately with the clicked tone (future state)
-                        playChordForObject(targetObj);
                     }
+
+                    // Play chord with 7th if global setting OR shift-click
+                    playChordForObjectWith7th(targetObj, shouldUse7th);
 
                     if (angle !== 0) {
                         const extra = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), angle);
@@ -2428,8 +2486,13 @@ bassEnabled = !!(bassEnabledEl && bassEnabledEl.checked);
 melodyEnabled = !!(melodyEnabledEl && melodyEnabledEl.checked);
 // Instrument dropdowns are currently cosmetic with WebAudioFont presets
 try { setState({ key: currentKey, withSeventh, bassEnabled, melodyEnabled }); } catch (_) { }
-with7th?.addEventListener('change', () => {
+with7th?.addEventListener('change', async () => {
     withSeventh = !!with7th.checked;
+    console.log(`[7TH SETTING] Changed to: ${withSeventh}`);
+
+    // Refresh all cube face textures to show/hide 7th notation
+    await refreshAllCubeFaces();
+
     try { setState({ withSeventh }); bridge.emit('settingsChanged', { withSeventh }); } catch (_) { }
 });
 bassEnabledEl?.addEventListener('change', () => {
@@ -2840,7 +2903,8 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     // ALWAYS include 7th for diminished chords and I7 chords
     const isDiminished = roman.includes('º') || roman.includes('ø');
     const isI7 = roman === 'I7' || roman === 'i7';
-    const forceSeventhForSpecialChords = isDiminished || isI7;
+    const isV7b9 = roman === 'V(7)(b9)' || roman === 'V(b7)(b9)';
+    const forceSeventhForSpecialChords = isDiminished || isI7 || isV7b9;
 
     const use = (includeSeventh || forceSeventhForSpecialChords) ? names.slice(0, 4) : names.slice(0, 3);
     const baseC4 = 60; // MIDI C4
@@ -2940,13 +3004,14 @@ function showNVXDebugText(text) {
     // Expose a helper for manual updates
     try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
 }
-function playChordForObject(obj) {
+// New unified function that accepts a 7th parameter
+function playChordForObjectWith7th(obj, use7th = false) {
     const ctx = ensureAudio();
     const now = ctx.currentTime;
     const duration = 1.1;
 
     console.log(`[AUDIO] ===== PLAYING CHORD FOR ${obj.userData.roman} =====`);
-    console.log(`[AUDIO] rotationIndex: ${obj.userData.rotationIndex}, isShelf: ${!!obj.userData.isShelf}`);
+    console.log(`[AUDIO] rotationIndex: ${obj.userData.rotationIndex}, isShelf: ${!!obj.userData.isShelf}, use7th: ${use7th}`);
 
     if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
 
@@ -2967,7 +3032,7 @@ function playChordForObject(obj) {
     };
 
     // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
-    const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
+    const chordMidis = buildLockedChordBedMidis(obj.userData.roman, use7th);
     const idxForObj = lineup.indexOf(obj);
     const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
     if (sfChord && sfChord.play) {
@@ -2999,7 +3064,12 @@ function playChordForObject(obj) {
             console.error('[obs-cubes] Melody instrument missing; skipping melody note.');
         }
     }
-    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
+    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh: use7th, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
+}
+
+// Legacy function - just calls the new one with global withSeventh setting
+function playChordForObject(obj) {
+    return playChordForObjectWith7th(obj, withSeventh);
 }
 
 // Shelf-click sequencing
