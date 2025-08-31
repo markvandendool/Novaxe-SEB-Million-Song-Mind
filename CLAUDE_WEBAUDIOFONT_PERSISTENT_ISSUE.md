@@ -182,3 +182,4 @@ If the legacy system is too problematic, provide a complete replacement that:
 ```
 
 **CLAUDE: Please provide the definitive fix that will make this work without any more "still loading" messages!**
+

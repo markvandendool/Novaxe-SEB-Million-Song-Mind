@@ -793,6 +793,8 @@ async function makeMaterials(label, romanLabel) {
     // Roman mode: show degrees using our canonical degreeSets by chord and selected key
     const degrees = degreeSets[romanLabel] || notesToDegreesInC(notes, currentKey);
     const display = (labelMode === 'roman') ? degrees : transposed;
+
+
     // rotate faces so that a 90° cube rotation around Z keeps diamond labels upright
     const faceBottom = makeCircleDiamondFace(display[0], '#2ecc71', 0);     // root
     const faceRight = makeCircleDiamondFace(display[1], '#e74c3c', 270);    // 3rd (upright from below/above)
@@ -911,8 +913,8 @@ function makeTitleTexture(lines, opts = {}) {
         ctx.shadowColor = 'rgba(0,0,0,0.6)';
         ctx.shadowBlur = 6; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4;
     } else {
-    ctx.shadowColor = 'rgba(0,0,0,0.4)';
-    ctx.shadowBlur = 24; ctx.shadowOffsetY = 6;
+        ctx.shadowColor = 'rgba(0,0,0,0.4)';
+        ctx.shadowBlur = 24; ctx.shadowOffsetY = 6;
     }
     const total = lines.length;
     const blockHeight = size * gap * (total - 1);
@@ -957,7 +959,7 @@ function addEpicTitles() {
         melodyPlayMesh.renderOrder = 1;
         scene.add(melodyPlayMesh);
         uiPickables.push(melodyPlayMesh);
-        
+
         // Store reference for opacity control
         window.melodyPlayMesh = melodyPlayMesh;
         // Add 3D lock icons flanking the word MELODY
@@ -1006,7 +1008,7 @@ function addEpicTitles() {
         bassPlayMesh.renderOrder = 1;
         scene.add(bassPlayMesh);
         uiPickables.push(bassPlayMesh);
-        
+
         // Store reference for opacity control
         window.bassPlayMesh = bassPlayMesh;
         // Bass locks
@@ -1187,12 +1189,30 @@ async function loadShelfMap() {
         localStorage.removeItem('obsCubes.map');
         localStorage.removeItem('shelf_map');
     } catch { }
-    try {
-        const json = await loadOfficialMap('./Shelf%20Map%20Official.json');
-        applyShelfMap(json);
-        return;
-    } catch { }
-    // If fetch fails, keep built-in defaults; do not read localStorage
+
+    // Try multiple shelf map file names in priority order
+    const mapFileNames = [
+        './shelf_map.json',                    // NEW: User's current file
+        './Shelf%20Map%20aug31.json',         // User's Aug 31 file
+        './Shelf%20Map%20Official.json',      // Original expected file
+        './shelf-map.json',                   // Alternative naming
+        './shelfmap.json'                     // Another alternative
+    ];
+
+    for (const fileName of mapFileNames) {
+        try {
+            console.log(`[SHELF MAP] Trying to load: ${fileName}`);
+            const json = await loadOfficialMap(fileName);
+            console.log(`[SHELF MAP] ✅ Successfully loaded: ${fileName}`);
+            applyShelfMap(json);
+            return;
+        } catch (error) {
+            console.log(`[SHELF MAP] ❌ Failed to load ${fileName}:`, error.message);
+        }
+    }
+
+    // If all files fail, keep built-in defaults
+    console.log('[SHELF MAP] ⚠️ No shelf map files found, using built-in defaults');
 }
 
 function applyShelfMap(json) {
@@ -1289,6 +1309,209 @@ function snapToGrid(vec3) {
 // Active lineup management
 let lineup = [];
 let previewIndex = null;
+
+// Progression arrow system - REBUILT FROM SCRATCH
+let progressionArrows = [];
+let shelfClickHistory = [];
+let arrowsEnabled = false;
+let maxArrows = 20;
+let chordProgressionIndices = {}; // Track which progression indices each chord has been used at
+let globalProgressionIndex = 0; // Global counter that never resets
+
+// Volume controls for independent voice mixing
+let chordVolume = 0.6;
+let bassVolume = 0.8;
+let melodyVolume = 0.5;
+
+// Track last played notes for progression voice leading
+let lastProgressionBassMidi = null;
+let lastProgressionMelodyMidi = null;
+
+// Volume control event listeners
+function setupVolumeControls() {
+    const chordVol = document.getElementById('chord-volume');
+    const bassVol = document.getElementById('bass-volume');
+    const melodyVol = document.getElementById('melody-volume');
+
+    if (chordVol) {
+        chordVol.addEventListener('input', (e) => {
+            chordVolume = parseFloat(e.target.value);
+            console.log('[VOLUME] Chord volume:', chordVolume);
+        });
+    }
+
+    if (bassVol) {
+        bassVol.addEventListener('input', (e) => {
+            bassVolume = parseFloat(e.target.value);
+            console.log('[VOLUME] Bass volume:', bassVolume);
+        });
+    }
+
+    if (melodyVol) {
+        melodyVol.addEventListener('input', (e) => {
+            melodyVolume = parseFloat(e.target.value);
+            console.log('[VOLUME] Melody volume:', melodyVolume);
+        });
+    }
+}
+
+// Camera height compensation - DISABLED for now as it interferes with existing zoom logic
+function adjustCameraHeightForDistance() {
+    // DISABLED: The existing zoom logic in melody/bass view functions already handles this properly
+    // The original system was working correctly, so we don't need additional intervention
+    return; // Early exit - let the existing system handle camera positioning
+}
+
+// Create progression index label with circular background
+function createProgressionLabel(roman, indices, position) {
+    if (!indices || indices.length === 0) return null;
+
+    // Create text showing comma-separated indices
+    const indicesText = indices.join(', ');
+
+    // Create canvas for text rendering
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 128;
+    canvas.height = 64;
+
+    // Set font and measure text
+    context.font = 'bold 20px Arial';
+    const textWidth = context.measureText(indicesText).width;
+    const padding = 8;
+    const circleRadius = Math.max(textWidth / 2 + padding, 16);
+
+    // Clear canvas and draw black circle background
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = 'black';
+    context.beginPath();
+    context.arc(canvas.width / 2, canvas.height / 2, circleRadius, 0, 2 * Math.PI);
+    context.fill();
+
+    // Draw white text
+    context.fillStyle = 'white';
+    context.textAlign = 'center';
+    context.textBaseline = 'middle';
+    context.fillText(indicesText, canvas.width / 2, canvas.height / 2);
+
+    // Create texture and material
+    const texture = new THREE.CanvasTexture(canvas);
+    const material = new THREE.SpriteMaterial({ map: texture });
+    const sprite = new THREE.Sprite(material);
+
+    // Position slightly to the right of chord center
+    sprite.position.set(position.x + 0.3, position.y, position.z);
+    sprite.scale.set(0.4, 0.2, 1); // Scale to appropriate size
+    sprite.userData = { isProgressionLabel: true, roman: roman };
+
+    scene.add(sprite);
+    console.log(`[PROGRESSION LABEL] Created label "${indicesText}" for ${roman} at (${sprite.position.x.toFixed(2)}, ${sprite.position.y.toFixed(2)}, ${sprite.position.z.toFixed(2)})`);
+
+    return sprite;
+}
+
+// Simple arrow creation using chord center positions (NO Z manipulation)
+function createSimpleArrow(fromRoman, toRoman) {
+    if (!arrowsEnabled || !fromRoman || !toRoman) return null;
+
+    const fromOrigin = shelfOriginByRoman[fromRoman];
+    const toOrigin = shelfOriginByRoman[toRoman];
+
+    if (!fromOrigin || !toOrigin) {
+        console.warn(`[ARROW] Missing shelf position for ${fromRoman} or ${toRoman}`);
+        return null;
+    }
+
+    // CALCULATED: IV chord center Z=-4.2, cubeSize=1.2, scale=1.2, scaledSize=1.44, face Z=-4.2+0.72=-3.48, arrows 1px closer: Z=-3.47
+    const fromPos = new THREE.Vector3(fromOrigin.position.x, fromOrigin.position.y, -3.47);
+    const toPos = new THREE.Vector3(toOrigin.position.x, toOrigin.position.y, -3.47);
+
+    console.log(`[ARROW] ${fromRoman} → ${toRoman}: (${fromPos.x.toFixed(2)}, ${fromPos.y.toFixed(2)}, ${fromPos.z.toFixed(2)}) → (${toPos.x.toFixed(2)}, ${toPos.y.toFixed(2)}, ${toPos.z.toFixed(2)})`);
+
+    // Simple straight line
+    const geometry = new THREE.BufferGeometry().setFromPoints([fromPos, toPos]);
+    const material = new THREE.LineBasicMaterial({
+        color: 0xFFFF00,
+        linewidth: 45000  // 10x thicker line stroke ONLY (4500 * 10 = 45000)
+    });
+
+    const line = new THREE.Line(geometry, material);
+
+    // Small arrowhead at destination
+    const arrowHead = new THREE.Mesh(
+        new THREE.ConeGeometry(0.03, 0.1, 6),
+        new THREE.MeshBasicMaterial({ color: 0xFFFF00 })
+    );
+
+    const direction = new THREE.Vector3().subVectors(toPos, fromPos).normalize();
+    arrowHead.position.copy(toPos);  // Already at Z=5.0 from toPos
+    arrowHead.lookAt(toPos.clone().add(direction));
+    arrowHead.rotateX(Math.PI / 2);
+
+    const arrowGroup = new THREE.Group();
+    arrowGroup.add(line);
+    arrowGroup.add(arrowHead);
+    arrowGroup.userData = { fromRoman, toRoman, isProgressionArrow: true };
+
+    scene.add(arrowGroup);
+    console.log(`[ARROW] Created ${fromRoman} → ${toRoman}`);
+    return arrowGroup;
+}
+
+function addArrow(fromRoman, toRoman) {
+    const arrow = createSimpleArrow(fromRoman, toRoman);
+    if (!arrow) return;
+
+    progressionArrows.push(arrow);
+
+    // Remove oldest if over limit
+    while (progressionArrows.length > maxArrows) {
+        const oldest = progressionArrows.shift();
+        scene.remove(oldest);
+        oldest.traverse(child => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(m => m.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
+    }
+}
+
+function clearArrows() {
+    // Clear arrows
+    progressionArrows.forEach(arrow => {
+        scene.remove(arrow);
+        arrow.traverse(child => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(m => m.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
+    });
+    progressionArrows = [];
+
+    // Clear progression labels
+    const labelsToRemove = scene.children.filter(child => child.userData?.isProgressionLabel);
+    labelsToRemove.forEach(label => {
+        scene.remove(label);
+        if (label.material?.map) label.material.map.dispose();
+        if (label.material) label.material.dispose();
+    });
+
+    // Clear tracking data
+    shelfClickHistory = [];
+    chordProgressionIndices = {};
+    globalProgressionIndex = 0; // Reset global counter
+    console.log('[CLEAR ARROWS] Cleared all arrows, labels, and progression data');
+}
 
 function computeSlotPositions(n) {
     const startX = -((n - 1) * gridSize) / 2;
@@ -2046,11 +2269,23 @@ function onPointerUp(e) {
                     lockedBass = null; renderBassLane(); setBassLockVisual('open');
                 }
             } else if (ud.isMelodyPlayButton) {
-                console.log('[MELODY PLAY] Starting melody-only playback');
-                playMelodyOnly();
+                // BULLETPROOF: Double-check camera position for melody view
+                const toTarget = camera.position.clone().sub(controls.target);
+                if (toTarget.y >= 0) { // Confirmed melody view (camera above plane)
+                    console.log('[MELODY PLAY] ✅ Melody view confirmed - playing melody');
+                    playMelodyOnly();
+                } else {
+                    console.log('[MELODY PLAY] ❌ Camera below plane - ignoring melody button click');
+                }
             } else if (ud.isBassPlayButton) {
-                console.log('[BASS PLAY] Starting bass-only playback');
-                playBassOnly();
+                // BULLETPROOF: Double-check camera position for bass view
+                const toTarget = camera.position.clone().sub(controls.target);
+                if (toTarget.y < 0) { // Confirmed bass view (camera below plane)
+                    console.log('[BASS PLAY] ✅ Bass view confirmed - playing bass');
+                    playBassOnly();
+                } else {
+                    console.log('[BASS PLAY] ❌ Camera above plane - ignoring bass button click');
+                }
             }
             pendingObj = null; uiLockClick = false; controls.enabled = true; e.stopPropagation?.(); e.preventDefault?.();
             return;
@@ -2086,6 +2321,32 @@ function onPointerUp(e) {
             console.log(`[CLICK] pendingObj: ${pendingObj?.userData?.roman}, frontOverride: ${frontOverride}, fromShelfBand: ${fromShelfBand}`);
             // If polygon picker already chose a shelf cube at mousedown, trust it
             if (pendingObj && pendingObj.userData?.isShelf) {
+                // IMPROV MODE: Queue chord instead of adding to front row
+                if (improvMode && window.drumMachine && window.drumMachine.isPlaying) {
+                    console.log(`[IMPROV SHELF CLICK] Queueing ${pendingObj.userData.roman} instead of adding to front row`);
+
+                    // CRITICAL: Capture rotation delta for Creation mode BEFORE queueing
+                    try {
+                        const d = decideShelfDeltaScreen(pendingObj, e);
+                        pendingObj.userData.desiredRotationDelta = d;
+                        console.log(`[IMPROV SHELF CLICK] Captured rotation delta: ${d} for ${pendingObj.userData.roman}`);
+                    } catch (_) {
+                        pendingObj.userData.desiredRotationDelta = 0;
+                        console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${pendingObj.userData.roman}`);
+                    }
+
+                    const isModifierClick = globalModifierState.altPressed || e.altKey || globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isModifierClick;
+                    queueChordForDownbeat(pendingObj, shouldUse7th);
+
+                    // CRITICAL: Ensure proper cleanup to prevent mouse sticking
+                    pendingObj = null;
+                    controls.enabled = true; // Re-enable camera controls
+                    e.stopPropagation?.();
+                    e.preventDefault?.();
+                    return;
+                }
+
                 try {
                     const d = decideShelfDeltaScreen(pendingObj, e);
                     pendingObj.userData.desiredRotationDelta = d;
@@ -2158,14 +2419,40 @@ function onPointerUp(e) {
                     }
                     pendingObj = null; return;
                 } else {
+                    // IMPROV MODE CHECK: Queue chord instead of adding to front row
+                    if (improvMode && window.drumMachine && window.drumMachine.isPlaying) {
+                        console.log(`[IMPROV SHELF CLICK] Queueing ${targetObj.userData.roman} instead of adding to front row`);
+
+                        // CRITICAL: Capture rotation delta for Creation mode BEFORE queueing
+                        try {
+                            const d = decideShelfDeltaScreen(targetObj, e);
+                            targetObj.userData.desiredRotationDelta = d;
+                            console.log(`[IMPROV SHELF CLICK] Captured rotation delta: ${d} for ${targetObj.userData.roman}`);
+                        } catch (_) {
+                            targetObj.userData.desiredRotationDelta = 0;
+                            console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${targetObj.userData.roman}`);
+                        }
+
+                        const isModifierClick = globalModifierState.altPressed || e.altKey || globalModifierState.shiftPressed || e.shiftKey;
+                        const shouldUse7th = withSeventh || isModifierClick;
+                        queueChordForDownbeat(targetObj, shouldUse7th);
+
+                        // CRITICAL: Ensure proper cleanup to prevent mouse sticking
+                        pendingObj = null;
+                        controls.enabled = true; // Re-enable camera controls
+                        e.stopPropagation?.();
+                        e.preventDefault?.();
+                        return;
+                    }
+
                     // NORMAL MODE: Create clone and add to front row
-                try {
-                    const d = decideShelfDeltaScreen(targetObj, e);
-                    targetObj.userData.desiredRotationDelta = d;
-                    console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
-                } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
-                enqueueShelfAdd(targetObj); pendingObj = null; return;
-            }
+                    try {
+                        const d = decideShelfDeltaScreen(targetObj, e);
+                        targetObj.userData.desiredRotationDelta = d;
+                        console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
+                    } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
+                    enqueueShelfAdd(targetObj); pendingObj = null; return;
+                }
             }
             // Center play priority for the pressed cube
             const centerHit = pickCenterPlay(hits, targetObj);
@@ -2282,7 +2569,7 @@ function onPointerUp(e) {
                         // Force into a strong low register around C2..C3 for presence
                         while (midi > 55) midi -= 12; // keep <= G#2
                         while (midi < 36) midi += 12; // keep >= C2
-                        
+
                         // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
                         const context = getVoiceLeadingContext(targetObj.userData.roman, 'bass');
                         midi = voiceLeadMidi(midi, lastBassMidi, context);
@@ -2301,7 +2588,7 @@ function onPointerUp(e) {
                         // Keep melody modest: around C4..C6
                         while (midi > 84) midi -= 12; // <= C6
                         while (midi < 60) midi += 12; // >= C4
-                        
+
                         // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
                         const context = getVoiceLeadingContext(targetObj.userData.roman, 'melody');
                         midi = voiceLeadMidi(midi, lastMelodyMidi, context);
@@ -2317,10 +2604,10 @@ function onPointerUp(e) {
                         }
                     } else {
                         const midi = 60 + pcOf(names[idx]);
-                        if (sfChord && sfChord.play) sfChord.play(midi, t0, { duration: 0.4, gain: 0.22 });
+                        if (sfChord && sfChord.play) sfChord.play(midi, t0, { duration: 0.4, gain: 0.22 * chordVolume });
                         else { console.error('[obs-cubes] Chord instrument missing; no oscillator fallback.'); }
                     }
-                    
+
                     // UPDATE CHORD CONTEXT: Track this chord for next voice leading decision
                     const playedMidis = {};
                     if (voice === 'bass' && lastBassMidi != null) playedMidis.bass = lastBassMidi;
@@ -2569,8 +2856,9 @@ let chordHistory = []; // Array of recent chords for advanced voice leading anal
 let lockedMelody = null; // [{ roman, midi, color } ...]
 let lockedBass = null;   // [{ roman, midi, color } ...]
 
-// IMPROV MODE - Chord queueing system
+// IMPROV MODE - Chord queueing system with dual modes
 let improvMode = false;
+let improvModeType = 'free'; // 'free' or 'creation'
 let queuedChord = null;
 let lastDownbeatTime = 0;
 let nextDownbeatTime = 0;
@@ -3389,7 +3677,7 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples`);
             try {
-                instrument.sampler.triggerAttackRelease(notes, duration + 's', undefined, volume);
+                instrument.sampler.triggerAttackRelease(notes, duration + 's', undefined, volume * chordVolume);
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
             }
@@ -3446,7 +3734,7 @@ class OrchestralAudioEngine {
                 let when = Tone.now();
                 notes.forEach((note, i) => {
                     const duration = durations[i] || 0.5;
-                    instrument.sampler.triggerAttackRelease(note, duration + 's', when);
+                    instrument.sampler.triggerAttackRelease(note, duration + 's', when, melodyVolume);
                     when += duration;
                 });
             } catch (error) {
@@ -3511,7 +3799,7 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples for bass`);
             try {
-                instrument.sampler.triggerAttackRelease(note, duration + 's', undefined, volume);
+                instrument.sampler.triggerAttackRelease(note, duration + 's', undefined, volume * bassVolume);
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler bass error:', error);
             }
@@ -3831,6 +4119,40 @@ bassLockIcon?.addEventListener('click', async () => {
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 
+// Progression arrows UI controls
+const progressionArrowsCheckbox = document.getElementById('progression-arrows');
+const maxArrowsInput = document.getElementById('max-arrows');
+
+// Rebuilt arrow UI controls
+progressionArrowsCheckbox?.addEventListener('change', (e) => {
+    arrowsEnabled = e.target.checked;
+    console.log(`[ARROWS] ${arrowsEnabled ? 'Enabled' : 'Disabled'}`);
+    if (!arrowsEnabled) clearArrows();
+});
+
+maxArrowsInput?.addEventListener('input', (e) => {
+    const newMax = parseInt(e.target.value) || 5;
+    maxArrows = Math.max(1, Math.min(20, newMax));
+    e.target.value = maxArrows;
+    console.log(`[ARROWS] Max set to: ${maxArrows}`);
+
+    // Trim if needed
+    while (progressionArrows.length > maxArrows) {
+        const oldest = progressionArrows.shift();
+        scene.remove(oldest);
+        oldest.traverse(child => {
+            if (child.geometry) child.geometry.dispose();
+            if (child.material) {
+                if (Array.isArray(child.material)) {
+                    child.material.forEach(m => m.dispose());
+                } else {
+                    child.material.dispose();
+                }
+            }
+        });
+    }
+});
+
 // Optional URL controls: ?bpm=120&bpc=4
 (function readPerfParams() {
     try {
@@ -3843,6 +4165,8 @@ playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 })();
 resetBtn?.addEventListener('click', () => {
     console.log('[RESET] Resetting to melody view and clearing lineup');
+
+    clearArrows(); // Clear arrows on reset
 
     // Return all active cubes to their shelf origin and clear lineup
     for (const c of [...lineup]) {
@@ -3980,6 +4304,10 @@ textureManifest = null;
 // Animation loop
 function animate() {
     controls.update();
+
+    // Camera height compensation - DISABLED as it interferes with existing zoom
+    // adjustCameraHeightForDistance();
+
     // drive tweens
     const now = performance.now();
     for (let i = activeTweens.length - 1; i >= 0; i--) {
@@ -4066,12 +4394,23 @@ function animate() {
             melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
             // PLAY BUTTONS: Only melody play button visible when above, bass play button invisible
             if (window.melodyPlayMesh) {
-                window.melodyPlayMesh.material.opacity = 0.9; // Visible and clickable
+                window.melodyPlayMesh.material.opacity = 0.4; // Match text opacity
                 window.melodyPlayMesh.visible = true;
             }
             if (window.bassPlayMesh) {
                 window.bassPlayMesh.material.opacity = 0; // Invisible and unclickable
                 window.bassPlayMesh.visible = false;
+            }
+            // MELODY VIEW LIGHTING: Restore full shelf lighting
+            if (ambient) ambient.intensity = 0.7; // Full shelf lighting
+            if (dir) dir.intensity = 0.7; // Full shelf lighting
+            // SPOTLIGHT: Turn off front row spotlight in melody view
+            if (frontKey) {
+                frontKey.intensity = 0.85; // Return to normal intensity
+                // Return to original position
+                frontKey.position.set(0, 2.4, 4.2);
+                frontKey.target.position.set(0, 0, 2.8);
+                frontKey.target.updateMatrixWorld();
             }
         } else { // below plane
             melodyMat.opacity = 0; bassMat.opacity = alpha; belowAlpha = alpha;
@@ -4081,17 +4420,35 @@ function animate() {
                 window.melodyPlayMesh.visible = false;
             }
             if (window.bassPlayMesh) {
-                window.bassPlayMesh.material.opacity = 0.9; // Visible and clickable
+                window.bassPlayMesh.material.opacity = 0.4; // Match text opacity
                 window.bassPlayMesh.visible = true;
+            }
+            // BASS VIEW LIGHTING: Dim shelf lighting like performance mode
+            if (ambient) ambient.intensity = 0.15; // Same as performance mode
+            if (dir) dir.intensity = 0.25; // Same as performance mode
+            // SPOTLIGHT: Follow camera down to shine up on front row bass
+            if (frontKey) {
+                frontKey.intensity = 1.2; // Bright spotlight on front row
+                // Position spotlight below and behind camera, shining up at front row
+                const cameraPos = camera.position.clone();
+                frontKey.position.set(cameraPos.x, cameraPos.y - 1.0, cameraPos.z - 1.5);
+                frontKey.target.position.set(0, 0.5, 2.8); // Shine at front row
+                frontKey.target.updateMatrixWorld();
             }
         }
     }
-    // Link shelf plane opacity to camera being below the plane for legibility
-    if (shelfPlane && shelfPlane.material && typeof belowAlpha === 'number') {
+    // VENN DIAGRAM (shelfPlane): 20% opacity in bass view, full opacity in melody view
+    if (shelfPlane && shelfPlane.material) {
+        const toTarget = camera.position.clone().sub(controls.target);
+        const isBelowPlane = toTarget.y < 0;
         shelfPlane.material.transparent = true;
-        shelfPlane.material.opacity = Math.max(shelfPlane.material.opacity ?? 0, belowAlpha);
-        // When above plane, keep the original texture fully visible (no forced fade)
-        if (belowAlpha === 0) shelfPlane.material.opacity = 1.0;
+        if (isBelowPlane) {
+            // BASS VIEW: MEGA DIM to 20% opacity
+            shelfPlane.material.opacity = 0.20;
+        } else {
+            // MELODY VIEW: Full opacity
+            shelfPlane.material.opacity = 1.0;
+        }
     }
     // Darkening plane: smoothly increase up to 0.20 opacity at -25° and below
     if (darkPlane && darkPlane.material) {
@@ -4227,14 +4584,14 @@ function voiceLeadMidi(targetMidi, referenceMidi, context = {}) {
     // Legacy modes for backwards compatibility
     if (voiceLeadingMode === 'vl1') return nearestOctave(targetMidi, referenceMidi);
     if (voiceLeadingMode === 'vl2') {
-    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
-    let best = targetMidi, bestDist = Infinity;
-    for (let o = -2; o <= 2; o++) {
-        const cand = targetMidi + o * 12;
-        const d = Math.abs(cand - referenceMidi);
-        if (d < bestDist) { bestDist = d; best = cand; }
-    }
-    return best;
+        if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+        let best = targetMidi, bestDist = Infinity;
+        for (let o = -2; o <= 2; o++) {
+            const cand = targetMidi + o * 12;
+            const d = Math.abs(cand - referenceMidi);
+            if (d < bestDist) { bestDist = d; best = cand; }
+        }
+        return best;
     }
 
     // Voice Leading 3: Advanced academic voice leading
@@ -4260,6 +4617,34 @@ function voiceLeadAcademic(targetMidi, referenceMidi, context = {}) {
 
     console.log(`[VL3] ${voice.toUpperCase()} voice leading: ${previousChord}→${currentChord}, ref=${referenceMidi}, target=${targetMidi}`);
 
+    // HARD RULE: 3-SEMITONE RULE - If target is within 3 half steps, MUST use closest octave
+    // This overrides ALL other considerations including register boundaries
+    const targetPC = targetMidi % 12;
+    const referencePC = referenceMidi % 12;
+    const pitchClassDistance = Math.min(
+        Math.abs(targetPC - referencePC),
+        12 - Math.abs(targetPC - referencePC)
+    );
+
+    if (pitchClassDistance <= 3) {
+        // Find the closest octave placement regardless of register boundaries
+        let bestCandidate = targetMidi;
+        let bestDistance = Math.abs(targetMidi - referenceMidi);
+
+        // Try all octaves within reasonable range
+        for (let octave = -4; octave <= 4; octave++) {
+            const candidate = targetMidi + (octave * 12);
+            const distance = Math.abs(candidate - referenceMidi);
+            if (distance < bestDistance) {
+                bestDistance = distance;
+                bestCandidate = candidate;
+            }
+        }
+
+        console.log(`[VL3] 🔥 3-SEMITONE RULE: ${pitchClassDistance} semitones apart, using closest octave ${bestCandidate} (was ${targetMidi})`);
+        return bestCandidate;
+    }
+
     // BASS REGISTER CONSTRAINT: Extreme bias to stay near tonic
     if (voice === 'bass') {
         return voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context);
@@ -4276,7 +4661,7 @@ function voiceLeadAcademic(targetMidi, referenceMidi, context = {}) {
     // If the target note exists in the previous chord, strongly prefer keeping it
     const targetPitchClass = targetMidi % 12;
     const referencePitchClass = referenceMidi % 12;
-    
+
     if (previousChordTones.length > 0) {
         const previousPCs = previousChordTones.map(midi => midi % 12);
         if (previousPCs.includes(targetPitchClass)) {
@@ -4332,13 +4717,13 @@ function voiceLeadAcademic(targetMidi, referenceMidi, context = {}) {
 // CRITICAL: NEVER violate chord tones - only affects OCTAVE selection within the chord tone
 function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context) {
     const { currentChord, previousChord } = context;
-    
+
     // MANDATORY: Preserve the exact pitch class from the cube inversion
     // The targetMidi comes from the cube face - we MUST respect this chord tone
     const targetPitchClass = targetMidi % 12;
-    
+
     console.log(`[BASS CONSTRAINT] ${previousChord}→${currentChord}, PRESERVING chord tone pitch class: ${targetPitchClass}, ref=${referenceMidi}, target=${targetMidi}`);
-    
+
     // Generate candidate octaves for the SAME pitch class only
     const candidates = [];
     for (let octave = 1; octave <= 4; octave++) { // C1 to C4 range
@@ -4347,21 +4732,21 @@ function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context)
             candidates.push(candidate);
         }
     }
-    
+
     // BASS REGISTER PREFERENCE: Prefer lower octaves but stay musical
     const bassRegisterCandidates = candidates.filter(midi => midi >= 36 && midi <= 55); // C2-G#2 preferred
     const extendedCandidates = candidates.filter(midi => midi >= 24 && midi <= 67); // C1-G3 allowed
-    
+
     // Sort by distance from reference, preferring bass register
     const sortedCandidates = [
         ...bassRegisterCandidates.sort((a, b) => Math.abs(a - referenceMidi) - Math.abs(b - referenceMidi)),
         ...extendedCandidates.filter(c => !bassRegisterCandidates.includes(c))
             .sort((a, b) => Math.abs(a - referenceMidi) - Math.abs(b - referenceMidi))
     ];
-    
+
     // EXCEPTION RULES: Allow extreme movement for specific resolutions
     const needsExtremeResolution = checkBassExtremeResolution(previousChord, currentChord, referenceMidi, targetMidi);
-    
+
     if (needsExtremeResolution) {
         console.log(`[BASS CONSTRAINT] Allowing extreme resolution: ${needsExtremeResolution.reason}`);
         // Still must use the correct pitch class, just allow wider octave range
@@ -4369,10 +4754,10 @@ function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context)
         console.log(`[BASS CONSTRAINT] Resolution candidate: ${resolutionCandidate} (preserving pitch class ${targetPitchClass})`);
         return resolutionCandidate;
     }
-    
+
     // REGISTER BIAS: Prefer bass register, but use voice leading for octave choice
     let bestCandidate = sortedCandidates[0];
-    
+
     // If reference is way too high, bias toward lower octaves
     if (referenceMidi > 60) { // Above C4
         const lowerCandidates = sortedCandidates.filter(midi => midi <= 48); // C3 and below
@@ -4381,7 +4766,7 @@ function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context)
             console.log(`[BASS CONSTRAINT] Biasing toward lower octave due to high reference: ${bestCandidate}`);
         }
     }
-    
+
     console.log(`[BASS CONSTRAINT] Using chord tone ${targetPitchClass} in octave: ${bestCandidate} (interval: ${Math.abs(bestCandidate - referenceMidi)} semitones)`);
     return bestCandidate;
 }
@@ -4389,7 +4774,7 @@ function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context)
 // Check if bass needs extreme resolution (7th resolution, leading tone resolution)
 function checkBassExtremeResolution(fromChord, toChord, referenceMidi, targetMidi) {
     if (!fromChord || !toChord) return null;
-    
+
     // Leading tone resolution: V→I (3rd of V resolves up to 1 of I)
     if ((fromChord === 'V' || fromChord === 'V7') && toChord === 'I') {
         const interval = targetMidi - referenceMidi;
@@ -4397,7 +4782,7 @@ function checkBassExtremeResolution(fromChord, toChord, referenceMidi, targetMid
             return { reason: 'Leading tone resolution V→I' };
         }
     }
-    
+
     // 7th resolution: Any 7th chord resolving down by step
     if (fromChord.includes('7') && !toChord.includes('7')) {
         const interval = targetMidi - referenceMidi;
@@ -4405,12 +4790,12 @@ function checkBassExtremeResolution(fromChord, toChord, referenceMidi, targetMid
             return { reason: '7th chord resolution downward' };
         }
     }
-    
+
     // Dominant resolution: V7→I (7th resolves down, 3rd resolves up)
     if ((fromChord === 'V7' || fromChord === 'V(7)(b9)') && toChord === 'I') {
         return { reason: 'Dominant 7th resolution V7→I' };
     }
-    
+
     return null;
 }
 
@@ -4446,11 +4831,11 @@ function voiceLeadChordProgression(chords, voices = ['bass', 'melody']) {
     for (let i = 0; i < chords.length; i++) {
         const currentChord = chords[i];
         const previousChord = i > 0 ? chords[i - 1] : null;
-        
+
         // Get chord tones for current and previous chords
         const currentTones = noteSetsC[currentChord] || ['C', 'E', 'G', 'B'];
         const previousTones = previousChord ? (noteSetsC[previousChord] || ['C', 'E', 'G', 'B']) : [];
-        
+
         const currentMidis = currentTones.map(note => noteToMidi(note, 4)); // C4 octave
         const previousMidis_chord = previousTones.map(note => noteToMidi(note, 4));
 
@@ -4488,9 +4873,9 @@ function noteToMidi(noteName, octave = 4) {
 
 // REAL-TIME VOICE LEADING: Update chord context for intelligent connections
 function updateChordContext(roman, playedMidis = {}) {
-    const chordTones = noteSetsC[roman] ? 
+    const chordTones = noteSetsC[roman] ?
         noteSetsC[roman].map(note => noteToMidi(note, 4)) : [];
-    
+
     // Store the last played chord with context
     lastPlayedChord = {
         roman,
@@ -4498,13 +4883,13 @@ function updateChordContext(roman, playedMidis = {}) {
         playedMidis: { ...playedMidis }, // { bass: 48, melody: 72, chord: [60, 64, 67] }
         timestamp: Date.now()
     };
-    
+
     // Add to chord history (keep last 10 chords for advanced analysis)
     chordHistory.push(lastPlayedChord);
     if (chordHistory.length > 10) {
         chordHistory.shift();
     }
-    
+
     console.log(`[VL3 CONTEXT] Updated: ${roman}, History: ${chordHistory.map(c => c.roman).join('→')}`);
 }
 
@@ -4514,16 +4899,16 @@ function getVoiceLeadingContext(currentChord, voice) {
         currentChord,
         previousChord: lastPlayedChord?.roman || null,
         voice,
-        chordTones: noteSetsC[currentChord] ? 
+        chordTones: noteSetsC[currentChord] ?
             noteSetsC[currentChord].map(note => noteToMidi(note, voice === 'bass' ? 2 : 5)) : [],
         previousChordTones: lastPlayedChord ? lastPlayedChord.chordTones : []
     };
-    
+
     // Add played MIDI context if available
     if (lastPlayedChord?.playedMidis[voice]) {
         context.previousPlayedMidi = lastPlayedChord.playedMidis[voice];
     }
-    
+
     return context;
 }
 
@@ -4655,7 +5040,7 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
     const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
 
     if (sfChord && sfChord.play) {
-        chordMidis.forEach(m => sfChord.play(m, now, { duration: sustainSeconds, gain: 0.18 }));
+        chordMidis.forEach(m => sfChord.play(m, now, { duration: sustainSeconds, gain: 0.18 * chordVolume }));
     }
     if (bassEnabled) {
         const bassMidi = getBassMidiForObject(obj);
@@ -4678,7 +5063,7 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
 }
 
 // New unified function that accepts a 7th parameter
-function playChordForObjectWith7th(obj, use7th = false) {
+function playChordForObjectWith7th(obj, use7th = false, options = {}) {
     if (!window.audioEngine) {
         console.error('[AUDIO ENGINE] Audio engine not initialized');
         return;
@@ -4687,8 +5072,12 @@ function playChordForObjectWith7th(obj, use7th = false) {
     const chordKey = obj.userData.roman;
     const duration = 1.1;
 
-    console.log(`[AUDIO ENGINE] ===== PLAYING CHORD FOR ${chordKey} =====`);
-    console.log(`[AUDIO ENGINE] rotationIndex: ${obj.userData.rotationIndex}, isShelf: ${!!obj.userData.isShelf}, use7th: ${use7th}`);
+    // FREE IMPROV: Override rotation to force root position
+    const effectiveRotationIndex = options.forceRootPosition ? 0 : obj.userData.rotationIndex;
+    const modeNote = options.forceRootPosition ? ' (FORCED ROOT)' : '';
+
+    console.log(`[AUDIO ENGINE] ===== PLAYING CHORD FOR ${chordKey}${modeNote} =====`);
+    console.log(`[AUDIO ENGINE] rotationIndex: ${effectiveRotationIndex}, isShelf: ${!!obj.userData.isShelf}, use7th: ${use7th}`);
 
     // CLAUDE'S FIX: Remove legacy instrumentsReady gate - engine always has immediate fallbacks
     // No more blocking checks - audio plays immediately!
@@ -4707,21 +5096,30 @@ function playChordForObjectWith7th(obj, use7th = false) {
 
     // Bass: if locked, use locked line; else use cube bottom face - WITH VOICE LEADING 3
     if (bassEnabled) {
+        // Temporarily override rotation index for Free Improv mode
+        const originalRotationIndex = obj.userData.rotationIndex;
+        if (options.forceRootPosition) {
+            obj.userData.rotationIndex = 0;
+        }
+
         let bassMidi = getBassMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') {
             bassMidi = lockedBass[idx].midi;
         }
-        
+
+        // Restore original rotation index
+        obj.userData.rotationIndex = originalRotationIndex;
+
         // Force into bass register
         while (bassMidi > 55) bassMidi -= 12; // keep <= G#2
         while (bassMidi < 36) bassMidi += 12; // keep >= C2
-        
+
         // VOICE LEADING 3: Apply intelligent voice leading for bass
         const bassContext = getVoiceLeadingContext(chordKey, 'bass');
         bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, bassContext);
         lastBassMidi = bassMidi;
-        
+
         const bassNoteName = midiToNoteName(bassMidi);
         console.log('[CHORD PLAYBACK] 🎵 Playing bass with VL3:', bassNoteName, 'from', bassContext.previousChord, '→', bassContext.currentChord);
         window.audioEngine.playBass(bassNoteName, duration, 0.6);
@@ -4729,26 +5127,35 @@ function playChordForObjectWith7th(obj, use7th = false) {
 
     // Melody: if locked, use locked line; else use cube top face - WITH VOICE LEADING 3
     if (melodyEnabled) {
+        // Temporarily override rotation index for Free Improv mode
+        const originalRotationIndex = obj.userData.rotationIndex;
+        if (options.forceRootPosition) {
+            obj.userData.rotationIndex = 0;
+        }
+
         let melMidi = getMelodyMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') {
             melMidi = lockedMelody[idx].midi;
         }
-        
+
+        // Restore original rotation index
+        obj.userData.rotationIndex = originalRotationIndex;
+
         // Force into melody register
         while (melMidi > 84) melMidi -= 12; // <= C6
         while (melMidi < 60) melMidi += 12; // >= C4
-        
+
         // VOICE LEADING 3: Apply intelligent voice leading for melody
         const melodyContext = getVoiceLeadingContext(chordKey, 'melody');
         melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, melodyContext);
         lastMelodyMidi = melMidi;
-        
+
         const melodyNoteName = midiToNoteName(melMidi);
         console.log('[CHORD PLAYBACK] 🎵 Playing melody with VL3:', melodyNoteName, 'from', melodyContext.previousChord, '→', melodyContext.currentChord);
         window.audioEngine.playMelody([melodyNoteName], [duration], 0.4);
     }
-    
+
     // UPDATE CHORD CONTEXT: Track this chord for next voice leading decision
     const playedMidis = {};
     if (bassEnabled && lastBassMidi != null) playedMidis.bass = lastBassMidi;
@@ -4776,6 +5183,68 @@ const shelfClickQueue = [];
 let processingShelfQueue = false;
 async function enqueueShelfAdd(shelfMesh) {
     shelfClickQueue.push(shelfMesh);
+
+    // Arrow tracking and progression index management
+    if (arrowsEnabled && shelfMesh?.userData?.roman) {
+        const roman = shelfMesh.userData.roman;
+        globalProgressionIndex++; // Increment global counter
+        const progressionIndex = globalProgressionIndex;
+
+        shelfClickHistory.push({ roman, timestamp: Date.now(), index: progressionIndex });
+
+        // Track progression indices for this chord
+        if (!chordProgressionIndices[roman]) {
+            chordProgressionIndices[roman] = [];
+        }
+        chordProgressionIndices[roman].push(progressionIndex);
+
+        // Remove old progression label if it exists
+        const oldLabels = scene.children.filter(child =>
+            child.userData?.isProgressionLabel && child.userData?.roman === roman);
+        oldLabels.forEach(label => {
+            scene.remove(label);
+            if (label.material?.map) label.material.map.dispose();
+            if (label.material) label.material.dispose();
+        });
+
+        // Create new progression label with all indices
+        const shelfOrigin = shelfOriginByRoman[roman];
+        if (shelfOrigin) {
+            const labelPosition = new THREE.Vector3(shelfOrigin.position.x, shelfOrigin.position.y, -3.47);
+            createProgressionLabel(roman, chordProgressionIndices[roman], labelPosition);
+        }
+
+        if (shelfClickHistory.length > 1) {
+            const prev = shelfClickHistory[shelfClickHistory.length - 2];
+            const curr = shelfClickHistory[shelfClickHistory.length - 1];
+            console.log(`[ARROW TRACK] ${prev.roman} → ${curr.roman} (index ${progressionIndex})`);
+            addArrow(prev.roman, curr.roman);
+        }
+
+        // Keep history trimmed
+        while (shelfClickHistory.length > maxArrows + 1) {
+            const removed = shelfClickHistory.shift();
+            // Clean up progression indices for removed items
+            if (removed && chordProgressionIndices[removed.roman]) {
+                const indexToRemove = chordProgressionIndices[removed.roman].indexOf(removed.index);
+                if (indexToRemove !== -1) {
+                    chordProgressionIndices[removed.roman].splice(indexToRemove, 1);
+                    if (chordProgressionIndices[removed.roman].length === 0) {
+                        delete chordProgressionIndices[removed.roman];
+                        // Remove label
+                        const labelsToRemove = scene.children.filter(child =>
+                            child.userData?.isProgressionLabel && child.userData?.roman === removed.roman);
+                        labelsToRemove.forEach(label => {
+                            scene.remove(label);
+                            if (label.material?.map) label.material.map.dispose();
+                            if (label.material) label.material.dispose();
+                        });
+                    }
+                }
+            }
+        }
+    }
+
     if (!processingShelfQueue) processShelfQueue();
 }
 async function processShelfQueue() {
@@ -4854,7 +5323,7 @@ async function animateShelfClickAdd(shelf) {
 }
 
 let progressionEnabled = false;
-let progressionArrows = [];
+// progressionArrows declared above at line 1296
 let progressionPoints = [];
 let progressionBpm = 120; // default metronome BPM
 let beatsPerChord = 4;    // 4 beats per chord default
@@ -5697,8 +6166,21 @@ function startSoloProgression(soloType) {
         if (soloType === 'melody') {
             if (lockedMelody) {
                 let melMidi = lockedMelody[index % lineup.length]?.midi ?? getMelodyMidiForObject(c);
-                while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
-                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
+
+                // Apply voice leading with proper context
+                if (index > 0 && lastMelodyMidi != null) {
+                    const context = {
+                        voice: 'melody',
+                        currentChord: c.userData.roman,
+                        previousChord: lineup[(index - 1) % lineup.length]?.userData.roman,
+                        progressionIndex: index,
+                        isProgression: true
+                    };
+                    melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, context);
+                } else {
+                    // First chord: apply basic register constraints
+                    while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+                }
 
                 // NEW AUDIO ENGINE: Use real melody instruments
                 Tone.Draw.schedule(() => {
@@ -5708,19 +6190,51 @@ function startSoloProgression(soloType) {
                     lastMelodyMidi = melMidi;
                 }, time);
             } else {
-                // Use face-derived melody
+                // Use face-derived melody with VOICE LEADING
                 Tone.Draw.schedule(() => {
-                    const melMidi = getMelodyMidiForObject(c);
+                    let melMidi = getMelodyMidiForObject(c);
+
+                    // Apply voice leading with proper context
+                    if (index > 0 && lastMelodyMidi != null) {
+                        const context = {
+                            voice: 'melody',
+                            chordRoman: c.userData.roman,
+                            prevChordRoman: lineup[(index - 1) % lineup.length]?.userData.roman,
+                            progressionIndex: index,
+                            isProgression: true
+                        };
+                        console.log(`[MELODY SOLO] 🎼 Applying VL3 to face-derived melody: ${lastMelodyMidi} → ${melMidi}`);
+                        melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, context);
+                        console.log(`[MELODY SOLO] 🎼 VL3 result for face-derived melody: ${melMidi}`);
+                    } else {
+                        // First chord: apply basic register constraints
+                        while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+                    }
+
                     const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
-                    console.log('[MELODY SOLO] 🎵 Playing face-derived melody:', melodyNote);
+                    console.log('[MELODY SOLO] 🎵 Playing voice-led face-derived melody:', melodyNote);
                     window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.4);
+                    lastMelodyMidi = melMidi;
                 }, time);
             }
         } else if (soloType === 'bass') {
             if (lockedBass) {
                 let bassMidi = lockedBass[index % lineup.length]?.midi ?? getBassMidiForObject(c);
-                while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
-                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+
+                // Apply voice leading with proper context
+                if (index > 0 && lastBassMidi != null) {
+                    const context = {
+                        voice: 'bass',
+                        currentChord: c.userData.roman,
+                        previousChord: lineup[(index - 1) % lineup.length]?.userData.roman,
+                        progressionIndex: index,
+                        isProgression: true
+                    };
+                    bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, context);
+                } else {
+                    // First chord: apply basic register constraints
+                    while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+                }
 
                 // NEW AUDIO ENGINE: Use real bass instruments
                 Tone.Draw.schedule(() => {
@@ -5730,12 +6244,31 @@ function startSoloProgression(soloType) {
                     lastBassMidi = bassMidi;
                 }, time);
             } else {
-                // Use face-derived bass
+                // Use face-derived bass with VOICE LEADING
                 Tone.Draw.schedule(() => {
-                    const bassMidi = getBassMidiForObject(c);
+                    let bassMidi = getBassMidiForObject(c);
+
+                    // Apply voice leading with proper context
+                    if (index > 0 && lastBassMidi != null) {
+                        const context = {
+                            voice: 'bass',
+                            chordRoman: c.userData.roman,
+                            prevChordRoman: lineup[(index - 1) % lineup.length]?.userData.roman,
+                            progressionIndex: index,
+                            isProgression: true
+                        };
+                        console.log(`[BASS SOLO] 🎼 Applying VL3 to face-derived bass: ${lastBassMidi} → ${bassMidi}`);
+                        bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, context);
+                        console.log(`[BASS SOLO] 🎼 VL3 result for face-derived bass: ${bassMidi}`);
+                    } else {
+                        // First chord: apply basic register constraints
+                        while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+                    }
+
                     const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
-                    console.log('[BASS SOLO] 🎵 Playing face-derived bass:', bassNote);
+                    console.log('[BASS SOLO] 🎵 Playing voice-led face-derived bass:', bassNote);
                     window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5);
+                    lastBassMidi = bassMidi;
                 }, time);
             }
         }
@@ -6038,20 +6571,40 @@ function initializeFontControlSystem() {
 // IMPROV MODE FUNCTIONS
 function enableImprovMode() {
     improvMode = true;
-    console.log('[IMPROV MODE] Enabled - chords will queue for downbeats');
+    console.log(`[IMPROV MODE] Enabled - ${improvModeType.toUpperCase()} mode - chords will queue for downbeats`);
 
-    // Add visual indicator
+    // Add visual indicator with mode selection and queue status
     const improvIndicator = document.createElement('div');
     improvIndicator.id = 'improv-indicator';
-    improvIndicator.innerHTML = '🎵 IMPROV! 🎵';
-    improvIndicator.style.cssText = `
-        position: fixed; top: 20px; right: 20px; z-index: 1000;
-        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
-        color: white; padding: 10px 20px; border-radius: 25px;
-        font-weight: bold; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;
+
+    const modeColor = improvModeType === 'free' ? '#ff6b6b, #ff9f43' : '#4ecdc4, #45b7d1';
+    const modeIcon = improvModeType === 'free' ? '🎵' : '🎼';
+    const modeTitle = improvModeType === 'free' ? 'FREE IMPROV' : 'CREATION IMPROV';
+    const modeDescription = improvModeType === 'free' ? 'Root position only' : 'Full inversions + front row';
+
+    improvIndicator.innerHTML = `
+        ${modeIcon} ${modeTitle} ${modeIcon}<br>
+        <small style="opacity: 0.8; font-size: 12px;">${modeDescription}</small><br>
+        <small style="opacity: 0.6; font-size: 10px;">Switch modes: Click 🎵 or 🎼 in drum panel</small><br>
+        <span id="queue-status" style="font-size: 12px;">Click chords to queue for downbeat</span>
     `;
+
+    improvIndicator.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 10000;
+        background: linear-gradient(45deg, ${modeColor});
+        color: white; padding: 15px 20px; border-radius: 25px;
+        font-weight: bold; font-size: 14px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;
+        text-align: center; line-height: 1.2; display: block !important; visibility: visible !important;
+        min-width: 180px;
+    `;
+
     document.body.appendChild(improvIndicator);
+    console.log('[IMPROV UI] Indicator added to DOM:', improvIndicator);
+    console.log('[IMPROV UI] Indicator innerHTML:', improvIndicator.innerHTML);
+
+    // Add mode switching event listeners to drum machine emojis
+    setupImprovModeEmojis();
 
     // Add CSS animation
     if (!document.getElementById('improv-styles')) {
@@ -6062,12 +6615,13 @@ function enableImprovMode() {
                 0%, 100% { transform: scale(1); opacity: 1; }
                 50% { transform: scale(1.05); opacity: 0.8; }
             }
+            #queue-status { font-size: 12px; opacity: 0.9; font-weight: normal; }
         `;
         document.head.appendChild(style);
     }
 
-    // Track downbeats
-    scheduleDownbeatTracking();
+    // Setup downbeat callback system (replaces old scheduleDownbeatTracking)
+    setupDownbeatCallback();
 }
 
 function disableImprovMode() {
@@ -6078,63 +6632,256 @@ function disableImprovMode() {
     // Remove visual indicator
     const indicator = document.getElementById('improv-indicator');
     if (indicator) indicator.remove();
+
+    // Clear downbeat tracker
+    if (window.improvDownbeatTracker) {
+        window.improvDownbeatTracker.stop();
+        window.improvDownbeatTracker.dispose();
+        window.improvDownbeatTracker = null;
+    }
+
+    // Clear downbeat callback
+    window.onDownbeat = null;
 }
 
+// IMPROV MODE SWITCHING VIA DRUM MACHINE EMOJIS
+function setupImprovModeEmojis() {
+    // Add a small delay to ensure DOM is ready
+    setTimeout(() => {
+        const freeEmoji = document.getElementById('improv-mode-free');
+        const creationEmoji = document.getElementById('improv-mode-creation');
+
+        console.log('[IMPROV EMOJIS] Free emoji found:', !!freeEmoji);
+        console.log('[IMPROV EMOJIS] Creation emoji found:', !!creationEmoji);
+
+        if (freeEmoji) {
+            freeEmoji.addEventListener('click', () => {
+                console.log('[IMPROV EMOJIS] Free emoji clicked');
+                switchImprovMode('free');
+            });
+        }
+        if (creationEmoji) {
+            creationEmoji.addEventListener('click', () => {
+                console.log('[IMPROV EMOJIS] Creation emoji clicked');
+                switchImprovMode('creation');
+            });
+        }
+
+        // Update emoji visual states
+        updateEmojiStates();
+    }, 100);
+}
+
+function updateEmojiStates() {
+    const freeEmoji = document.getElementById('improv-mode-free');
+    const creationEmoji = document.getElementById('improv-mode-creation');
+
+    if (freeEmoji) {
+        freeEmoji.style.opacity = improvModeType === 'free' ? '1' : '0.4';
+        freeEmoji.style.transform = improvModeType === 'free' ? 'scale(1.2)' : 'scale(1)';
+    }
+    if (creationEmoji) {
+        creationEmoji.style.opacity = improvModeType === 'creation' ? '1' : '0.4';
+        creationEmoji.style.transform = improvModeType === 'creation' ? 'scale(1.2)' : 'scale(1)';
+    }
+}
+
+function switchImprovMode(newMode) {
+    if (newMode === improvModeType) return; // Already in this mode
+
+    const oldMode = improvModeType;
+    improvModeType = newMode;
+
+    console.log(`[IMPROV MODE] Switching from ${oldMode.toUpperCase()} to ${newMode.toUpperCase()}`);
+
+    // Clear any queued chord when switching modes
+    if (queuedChord) {
+        try {
+            if (queuedChord.chord && queuedChord.chord.material && queuedChord.chord.material.emissive) {
+                queuedChord.chord.material.emissive.setHex(0x000000);
+            }
+        } catch (e) {
+            console.warn('[IMPROV MODE SWITCH] Could not clear queued chord visual:', e);
+        }
+        queuedChord = null;
+    }
+
+    // Update emoji states
+    updateEmojiStates();
+
+    // Refresh the UI to show new mode
+    if (improvMode) {
+        const indicator = document.getElementById('improv-indicator');
+        if (indicator) indicator.remove();
+        enableImprovMode(); // Recreate with new mode
+    }
+}
+
+// EXPOSE FUNCTIONS TO WINDOW FOR DRUM MACHINE ACCESS
+window.enableImprovMode = enableImprovMode;
+window.disableImprovMode = disableImprovMode;
+
 function queueChordForDownbeat(chordObj, use7th) {
+    // MODE-SPECIFIC LOGIC
+    let actualChordObj = chordObj;
+    let actualUse7th = use7th;
+
+    if (improvModeType === 'free') {
+        // FREE IMPROV: Force root position, no 7ths
+        actualUse7th = false;
+        console.log(`[FREE IMPROV] Forcing ${chordObj.userData.roman} to root position, no 7th`);
+
+        // For free improv, we'll play the chord but force root position in the playback
+        // The queuedChord stores the original shelf object but playback will override rotation
+    } else {
+        // CREATION IMPROV: Use exact inversion and 7th as clicked
+        console.log(`[CREATION IMPROV] Preserving ${chordObj.userData.roman} inversion and 7th: ${use7th}`);
+    }
+
     // VOICE LEADING 3: Pre-calculate intelligent voice leading for queued chord
     const bassContext = getVoiceLeadingContext(chordObj.userData.roman, 'bass');
     const melodyContext = getVoiceLeadingContext(chordObj.userData.roman, 'melody');
-    
-    queuedChord = { 
-        chord: chordObj, 
-        use7th: use7th, 
+
+    queuedChord = {
+        chord: actualChordObj,
+        use7th: actualUse7th,
         queueTime: window.Tone.now(),
+        improvModeType: improvModeType, // Store mode for later reference
+        originalUse7th: use7th, // Store original for creation mode
         voiceLeadingContext: {
             bass: bassContext,
             melody: melodyContext
         }
     };
-    
+
     console.log(`[IMPROV QUEUE] ${chordObj.userData.roman} queued for next downbeat with VL3 context`);
     console.log(`[IMPROV QUEUE] Previous chord: ${bassContext.previousChord} → Current: ${bassContext.currentChord}`);
 
-    // Visual feedback for queued chord
-    highlightChordEffect(chordObj, 300);
-    chordObj.material.emissive.setHex(0x444400); // Yellow glow for queued
-    setTimeout(() => {
-        chordObj.material.emissive.setHex(0x000000);
-    }, 300);
+    // Clear previous queued chord visual feedback
+    if (queuedChord && queuedChord.chord && queuedChord.chord !== chordObj) {
+        try {
+            if (queuedChord.chord.material && queuedChord.chord.material.emissive) {
+                queuedChord.chord.material.emissive.setHex(0x000000);
+            }
+            console.log(`[IMPROV QUEUE] Replacing queued chord ${queuedChord.chord.userData.roman} with ${chordObj.userData.roman}`);
+        } catch (e) {
+            console.warn('[IMPROV QUEUE] Could not clear previous chord visual:', e);
+        }
+    }
+
+    // Enhanced visual feedback for queued chord
+    highlightChordEffect(chordObj, 500);
+    try {
+        if (chordObj.material && chordObj.material.emissive) {
+            chordObj.material.emissive.setHex(0x444400); // Yellow glow for queued
+        } else {
+            console.warn('[IMPROV QUEUE] Chord object has no emissive material:', chordObj);
+        }
+    } catch (e) {
+        console.warn('[IMPROV QUEUE] Could not set chord visual feedback:', e);
+    }
+
+    // Update UI to show queued chord
+    updateQueueStatusUI(`⏳ ${chordObj.userData.roman}${use7th ? '7' : ''} queued for downbeat`);
+
+    // Keep the yellow glow until played or replaced (no timeout)
 }
 
-function scheduleDownbeatTracking() {
-    if (!window.Tone || !window.Tone.Transport) return;
+// NEW: Callback-based downbeat system that connects to drum machine
+function setupDownbeatCallback() {
+    console.log('[IMPROV DOWNBEAT] Setting up callback system for drum machine sync');
 
-    // Schedule a repeating callback every measure to track downbeats
-    const downbeatTracker = new window.Tone.Sequence((time) => {
+    // Create the callback function that drum machine will call
+    window.onDownbeat = (time) => {
         lastDownbeatTime = time;
         nextDownbeatTime = time + window.Tone.Transport.toSeconds('1m');
 
+        console.log(`[IMPROV DOWNBEAT] Callback triggered at time: ${time}`);
+
         // Play queued chord on downbeat
         if (queuedChord && improvMode) {
-            const { chord, use7th } = queuedChord;
-            console.log(`[IMPROV DOWNBEAT] Playing queued chord: ${chord.userData.roman}`);
+            const { chord, use7th, voiceLeadingContext, improvModeType: queuedMode, originalUse7th } = queuedChord;
+            console.log(`[IMPROV DOWNBEAT] Playing queued chord: ${chord.userData.roman} in ${queuedMode.toUpperCase()} mode`);
 
+            // Schedule the chord playback
             window.Tone.Draw.schedule(() => {
-                playChordForObjectWith7th(chord, use7th);
+                // Apply the pre-calculated voice leading context
+                if (voiceLeadingContext) {
+                    console.log(`[IMPROV VL3] Applying pre-calculated context for ${chord.userData.roman}`);
+                }
+
+                if (queuedMode === 'free') {
+                    // FREE IMPROV: Play root position only, no front row addition
+                    playChordForObjectWith7th(chord, false, { forceRootPosition: true });
+                    console.log(`[FREE IMPROV] Played ${chord.userData.roman} in root position only`);
+                } else {
+                    // CREATION IMPROV: Play with exact inversion, then add to front row
+
+                    // CRITICAL: Apply rotation delta to shelf chord BEFORE playing for correct inversion
+                    const rotationDelta = chord.userData?.desiredRotationDelta || 0;
+                    const originalRotationIndex = chord.userData.rotationIndex || 0;
+                    const targetRotationIndex = ((originalRotationIndex + rotationDelta) % 4 + 4) % 4;
+
+                    // Temporarily set the correct rotation index for audio playback
+                    chord.userData.rotationIndex = targetRotationIndex;
+                    console.log(`[CREATION IMPROV] Applying rotation: ${originalRotationIndex} + ${rotationDelta} = ${targetRotationIndex} for ${chord.userData.roman}`);
+
+                    playChordForObjectWith7th(chord, originalUse7th);
+                    console.log(`[CREATION IMPROV] Played ${chord.userData.roman} with inversion (rotationIndex: ${targetRotationIndex}), scheduling front row addition`);
+
+                    // Restore original rotation index (shelf should stay at 0)
+                    chord.userData.rotationIndex = originalRotationIndex;
+
+                    // Schedule front row addition after a brief delay
+                    setTimeout(() => {
+                        try {
+                            // Create clone with the exact rotation from the shelf click
+                            const d = chord.userData?.desiredRotationDelta || 0;
+                            chord.userData.desiredRotationDelta = d;
+                            enqueueShelfAdd(chord);
+                            console.log(`[CREATION IMPROV] Added ${chord.userData.roman} to front row with rotation delta: ${d}`);
+                        } catch (e) {
+                            console.warn('[CREATION IMPROV] Could not add to front row:', e);
+                        }
+                    }, 100);
+                }
+
                 // Strong visual feedback for downbeat chord
-                highlightChordEffect(chord, 1000);
-                chord.material.emissive.setHex(0x004400); // Green flash for played
+                highlightChordEffect(chord, 1200);
+                try {
+                    if (chord.material && chord.material.emissive) {
+                        chord.material.emissive.setHex(0x004400); // Green flash for played
+                        setTimeout(() => {
+                            if (chord.material && chord.material.emissive) {
+                                chord.material.emissive.setHex(0x000000);
+                            }
+                        }, 1200);
+                    }
+                } catch (e) {
+                    console.warn('[IMPROV DOWNBEAT] Could not set chord visual feedback:', e);
+                }
+
+                // Update queue status UI
+                updateQueueStatusUI('🎵 Chord played on downbeat!');
                 setTimeout(() => {
-                    chord.material.emissive.setHex(0x000000);
-                }, 1000);
+                    updateQueueStatusUI('Click chords to queue for downbeat');
+                }, 2000);
+
             }, time);
 
-            queuedChord = null; // Clear queue
+            queuedChord = null; // Clear queue after playing
         }
-    }, [0], '1m');
+    };
 
-    downbeatTracker.start(0);
-    window.improvDownbeatTracker = downbeatTracker;
+    console.log('[IMPROV DOWNBEAT] Callback system ready - waiting for drum machine downbeats');
+}
+
+// Helper function to update queue status in UI
+function updateQueueStatusUI(message) {
+    const queueStatus = document.getElementById('queue-status');
+    if (queueStatus) {
+        queueStatus.textContent = message;
+    }
 }
 
 async function playLockSound() {
@@ -6170,11 +6917,18 @@ async function playFrontRowProgression() {
 
     console.log(`[PLAY PROGRESSION] Starting ${lineup.length} chords x ${loopCount} loops = ${totalChords} total - USING TONE.JS TRANSPORT`);
 
-    // Clear any existing progression sequence
+    // Reset progression voice leading tracking
+    lastProgressionBassMidi = null;
+    lastProgressionMelodyMidi = null;
+    console.log('[PLAY PROGRESSION] 🔄 Reset voice leading tracking');
+
+    // Clear any existing progression sequence and arrow history
     if (window.chordProgressionSequence) {
         window.chordProgressionSequence.dispose();
         window.chordProgressionSequence = null;
     }
+
+    // Note: Progression arrows now track shelf clicks, not playback progression
 
     // TRANSPORT-BASED PROGRESSION - Perfect sync with drum machine
     const progressionSequence = new Tone.Sequence((time, index) => {
@@ -6216,27 +6970,29 @@ async function playFrontRowProgression() {
 
         console.log(`[TRANSPORT] Loop ${currentLoop}/${loopCount}, Chord ${chordInLoop}/${lineup.length}: ${c.userData.roman} at time ${time.toFixed(3)}s, BPM: ${currentBpm}, sustain: ${chordDurationSeconds.toFixed(2)}s`);
 
+        // Progression arrows are now handled by shelf click tracking, not playback
+
         // Schedule visual effects on main thread
         Tone.Draw.schedule(() => {
             try {
                 highlightChordEffect(c, 900);
                 pulseGiantAt(index % lineup.length, 700);
                 // Camera dolly
-            const tDur = 700;
-            const fromPos = camera.position.clone();
-            const fromTgt = controls.target.clone();
+                const tDur = 700;
+                const fromPos = camera.position.clone();
+                const fromTgt = controls.target.clone();
                 const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
                 const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
-            const tStart = performance.now();
-            const tween = {
-                owner: camera, tick: (now) => {
-                    const v = Math.min(1, (now - tStart) / tDur);
-                    camera.position.lerpVectors(fromPos, toPos, v);
-                    controls.target.lerpVectors(fromTgt, toTgt, v);
-                    return v >= 1;
-                }, cancelled: false
-            };
-            activeTweens.push(tween);
+                const tStart = performance.now();
+                const tween = {
+                    owner: camera, tick: (now) => {
+                        const v = Math.min(1, (now - tStart) / tDur);
+                        camera.position.lerpVectors(fromPos, toPos, v);
+                        controls.target.lerpVectors(fromTgt, toTgt, v);
+                        return v >= 1;
+                    }, cancelled: false
+                };
+                activeTweens.push(tween);
                 addProgressionPointFromCube(c);
             } catch (err) {
                 console.warn('[TRANSPORT] Visual effect error:', err);
@@ -6263,23 +7019,73 @@ async function playFrontRowProgression() {
                     // Play bass if enabled - SKIP if locked bass exists (will be played below)
                     if (bassEnabled && !lockedBass) {
                         let bassMidi = getBassMidiForObject(c);
-                        while (bassMidi > 55) bassMidi -= 12;
-                        while (bassMidi < 36) bassMidi += 12;
+
+                        // APPLY VOICE LEADING 3 (Academic Grade) to face-derived bass
+                        if (index > 0 && lastProgressionBassMidi !== null) {
+                            const prevChord = lineup[(index - 1) % lineup.length];
+
+                            // Create voice leading context for bass
+                            const context = {
+                                voice: 'bass',
+                                currentChord: c.userData.roman,
+                                previousChord: prevChord.userData.roman,
+                                progressionIndex: index,
+                                isProgression: true
+                            };
+
+                            console.log(`[PLAY PROGRESSION] 🎼 Applying VL3 to bass: ${lastProgressionBassMidi} → ${bassMidi}`);
+                            bassMidi = voiceLeadMidi(bassMidi, lastProgressionBassMidi, context);
+                            console.log(`[PLAY PROGRESSION] 🎼 VL3 result for bass: ${bassMidi}`);
+                        } else {
+                            // First chord: apply basic register constraints
+                            while (bassMidi > 55) bassMidi -= 12;
+                            while (bassMidi < 36) bassMidi += 12;
+                            console.log(`[PLAY PROGRESSION] 🎵 First chord bass (no VL): ${bassMidi}`);
+                        }
+
+                        // Track the actual played bass note for next chord
+                        lastProgressionBassMidi = bassMidi;
+
                         const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
-                        console.log('[PLAY PROGRESSION] 🎵 Playing face-derived bass:', bassNote);
+                        console.log('[PLAY PROGRESSION] 🎵 Playing voice-led bass:', bassNote);
                         window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8);
                     }
 
                     // Play melody if enabled - SKIP if locked melody exists (will be played below)
                     if (melodyEnabled && !lockedMelody) {
                         let melMidi = getMelodyMidiForObject(c);
-                        while (melMidi > 84) melMidi -= 12;
-                        while (melMidi < 60) melMidi += 12;
+
+                        // APPLY VOICE LEADING 3 (Academic Grade) to face-derived melody
+                        if (index > 0 && lastProgressionMelodyMidi !== null) {
+                            const prevChord = lineup[(index - 1) % lineup.length];
+
+                            // Create voice leading context for melody
+                            const context = {
+                                voice: 'melody',
+                                currentChord: c.userData.roman,
+                                previousChord: prevChord.userData.roman,
+                                progressionIndex: index,
+                                isProgression: true
+                            };
+
+                            console.log(`[PLAY PROGRESSION] 🎼 Applying VL3 to melody: ${lastProgressionMelodyMidi} → ${melMidi}`);
+                            melMidi = voiceLeadMidi(melMidi, lastProgressionMelodyMidi, context);
+                            console.log(`[PLAY PROGRESSION] 🎼 VL3 result for melody: ${melMidi}`);
+                        } else {
+                            // First chord: apply basic register constraints
+                            while (melMidi > 84) melMidi -= 12;
+                            while (melMidi < 60) melMidi += 12;
+                            console.log(`[PLAY PROGRESSION] 🎵 First chord melody (no VL): ${melMidi}`);
+                        }
+
+                        // Track the actual played melody note for next chord
+                        lastProgressionMelodyMidi = melMidi;
+
                         const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
-                        console.log('[PLAY PROGRESSION] 🎵 Playing face-derived melody:', melodyNote);
+                        console.log('[PLAY PROGRESSION] 🎵 Playing voice-led melody:', melodyNote);
                         window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.5);
-            }
-        } else {
+                    }
+                } else {
                     console.warn('[PLAY PROGRESSION] Audio engine not available');
                 }
             } catch (error) {
@@ -6291,9 +7097,9 @@ async function playFrontRowProgression() {
         if (lockedBass && bassEnabled) {
             let bassMidi = lockedBass[index % lineup.length]?.midi;
             if (bassMidi) {
-                while (bassMidi > 55) bassMidi -= 12; 
+                while (bassMidi > 55) bassMidi -= 12;
                 while (bassMidi < 36) bassMidi += 12;
-                
+
                 // Enhanced context for Voice Leading 3 in progressions
                 const currentChord = lineup[index % lineup.length]?.userData.roman;
                 const prevChord = index > 0 ? lineup[(index - 1) % lineup.length]?.userData.roman : null;
@@ -6301,9 +7107,9 @@ async function playFrontRowProgression() {
                     currentChord,
                     previousChord: prevChord,
                     voice: 'bass',
-                    chordTones: currentChord && noteSetsC[currentChord] ? 
+                    chordTones: currentChord && noteSetsC[currentChord] ?
                         noteSetsC[currentChord].map(note => noteToMidi(note, 2)) : [],
-                    previousChordTones: prevChord && noteSetsC[prevChord] ? 
+                    previousChordTones: prevChord && noteSetsC[prevChord] ?
                         noteSetsC[prevChord].map(note => noteToMidi(note, 2)) : []
                 };
                 bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, context);
@@ -6316,13 +7122,13 @@ async function playFrontRowProgression() {
                 }, time);
             }
         }
-        
+
         if (lockedMelody && melodyEnabled) {
             let melMidi = lockedMelody[index % lineup.length]?.midi;
             if (melMidi) {
-                while (melMidi > 84) melMidi -= 12; 
+                while (melMidi > 84) melMidi -= 12;
                 while (melMidi < 60) melMidi += 12;
-                
+
                 // Enhanced context for Voice Leading 3 in progressions
                 const currentChord = lineup[index % lineup.length]?.userData.roman;
                 const prevChord = index > 0 ? lineup[(index - 1) % lineup.length]?.userData.roman : null;
@@ -6330,9 +7136,9 @@ async function playFrontRowProgression() {
                     currentChord,
                     previousChord: prevChord,
                     voice: 'melody',
-                    chordTones: currentChord && noteSetsC[currentChord] ? 
+                    chordTones: currentChord && noteSetsC[currentChord] ?
                         noteSetsC[currentChord].map(note => noteToMidi(note, 5)) : [],
-                    previousChordTones: prevChord && noteSetsC[prevChord] ? 
+                    previousChordTones: prevChord && noteSetsC[prevChord] ?
                         noteSetsC[prevChord].map(note => noteToMidi(note, 5)) : []
                 };
                 melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, context);
@@ -6409,5 +7215,11 @@ window.forceShowUI = function () {
         console.log('Forced widget to red box for visibility');
     }
 };
+
+// Initialize volume controls and camera compensation
+setupVolumeControls();
+
+// Add camera height compensation to existing animate loop
+// (This will be called from the existing animate function)
 
 

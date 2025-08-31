@@ -38,7 +38,7 @@
 class ProfessionalDrumMachine {
     constructor() {
         this.isPlaying = false;
-        this.bpm = 120;
+        this.bpm = 100;
         this.currentGenre = 'rock';
         this.currentStep = 0;
         this.sequence = null;
@@ -301,15 +301,38 @@ class ProfessionalDrumMachine {
             this.sequence = new Tone.Sequence((time, step) => {
                 const pattern = this.patterns[this.currentGenre];
 
-                // Play sounds
-                if (pattern.kick[step]) {
-                    this.kick.triggerAttackRelease("C1", "8n", time);
+                // DOWNBEAT CALLBACK: Notify main app on step 0 (downbeat)
+                if (step === 0 && window.onDownbeat && typeof window.onDownbeat === 'function') {
+                    console.log(`[DRUM MACHINE] Downbeat at step ${step}, time: ${time} - calling main app callback`);
+                    window.onDownbeat(time);
                 }
-                if (pattern.snare[step]) {
-                    this.snare.triggerAttackRelease("4n", time);
+
+                // Play sounds with proper timing - more aggressive safety
+                const now = Tone.now();
+                const safeTime = Math.max(time, now + 0.01); // Larger safety margin
+                
+                try {
+                    if (pattern.kick[step]) {
+                        this.kick.triggerAttackRelease("C1", "8n", safeTime);
+                    }
+                } catch (e) {
+                    console.warn('[DRUM MACHINE] Kick timing error:', e);
                 }
-                if (pattern.hihat[step]) {
-                    this.hihat.triggerAttackRelease("32n", time, 0.3);
+                
+                try {
+                    if (pattern.snare[step]) {
+                        this.snare.triggerAttackRelease("4n", safeTime);
+                    }
+                } catch (e) {
+                    console.warn('[DRUM MACHINE] Snare timing error:', e);
+                }
+                
+                try {
+                    if (pattern.hihat[step]) {
+                        this.hihat.triggerAttackRelease("32n", safeTime, 0.3);
+                    }
+                } catch (e) {
+                    console.warn('[DRUM MACHINE] Hihat timing error:', e);
                 }
 
                 // Update UI on next tick
