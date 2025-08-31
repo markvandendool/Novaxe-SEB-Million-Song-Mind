@@ -174,3 +174,4 @@ If WebAudioFont is problematic, provide alternatives:
 
 **CLAUDE: Please provide a complete, working solution with exact instrument IDs and verified loading code that will give us real orchestral samples instead of Tone.js fallbacks!**
 
+

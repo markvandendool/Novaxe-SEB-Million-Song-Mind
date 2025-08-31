@@ -1,95 +1,215 @@
 {
-  "magic18_idml_coordinates": {
-    "document_info": {
-      "source": "charts interactive for Copilot.idml",
-      "spread": "Spread_u14a.xml",
-      "pages": "8-9 or 116-117",
-      "extraction_date": "2025-01-27",
-      "coordinate_system": "IDML points (1/72 inch)"
-    },
-    "chord_elements": {
-      "A": {
-        "standard": {
-          "left": { "transform": "1 0 0 1 52.9134 394.2047", "bounds": "52.9134 394.2047" },
-          "right": { "transform": "1 0 0 1 52.9134 394.2047", "bounds": "52.9134 394.2047" },
-          "title": { "transform": "1 0 0 1 52.9134 394.2047", "bounds": "52.9134 394.2047" },
-          "x": { "transform": "1 0 0 1 52.9134 394.2047", "bounds": "52.9134 394.2047" }
+    "magic18_idml_coordinates": {
+        "document_info": {
+            "source": "charts interactive for Copilot.idml",
+            "spread": "Spread_u14a.xml",
+            "pages": "8-9 or 116-117",
+            "extraction_date": "2025-01-27",
+            "coordinate_system": "IDML points (1/72 inch)"
         },
-        "pentatonic": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        }
-      },
-      "C": {
-        "standard": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
+        "chord_elements": {
+            "A": {
+                "standard": {
+                    "left": {
+                        "transform": "1 0 0 1 52.9134 394.2047",
+                        "bounds": "52.9134 394.2047"
+                    },
+                    "right": {
+                        "transform": "1 0 0 1 52.9134 394.2047",
+                        "bounds": "52.9134 394.2047"
+                    },
+                    "title": {
+                        "transform": "1 0 0 1 52.9134 394.2047",
+                        "bounds": "52.9134 394.2047"
+                    },
+                    "x": {
+                        "transform": "1 0 0 1 52.9134 394.2047",
+                        "bounds": "52.9134 394.2047"
+                    }
+                },
+                "pentatonic": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                }
+            },
+            "C": {
+                "standard": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                },
+                "pentatonic": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                }
+            },
+            "D": {
+                "standard": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                },
+                "pentatonic": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                }
+            },
+            "E": {
+                "standard": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                },
+                "pentatonic": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                }
+            },
+            "G": {
+                "standard": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                },
+                "pentatonic": {
+                    "left": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "right": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "title": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    },
+                    "x": {
+                        "transform": "TBD",
+                        "bounds": "TBD"
+                    }
+                }
+            }
         },
-        "pentatonic": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        }
-      },
-      "D": {
-        "standard": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
+        "conversion_formulas": {
+            "idml_to_css": {
+                "points_to_pixels": "multiply by 1.333 (96dpi)",
+                "coordinate_origin": "top-left corner",
+                "transform_matrix": "CSS matrix(a, b, c, d, e, f) = IDML transform"
+            }
         },
-        "pentatonic": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
+        "interactive_behaviors": {
+            "button_actions": "TBD - extract from Interactive.xml",
+            "hover_effects": "TBD - from IDML button states",
+            "click_handlers": "TBD - map to Angular component methods"
         }
-      },
-      "E": {
-        "standard": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        },
-        "pentatonic": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        }
-      },
-      "G": {
-        "standard": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        },
-        "pentatonic": {
-          "left": { "transform": "TBD", "bounds": "TBD" },
-          "right": { "transform": "TBD", "bounds": "TBD" },
-          "title": { "transform": "TBD", "bounds": "TBD" },
-          "x": { "transform": "TBD", "bounds": "TBD" }
-        }
-      }
-    },
-    "conversion_formulas": {
-      "idml_to_css": {
-        "points_to_pixels": "multiply by 1.333 (96dpi)",
-        "coordinate_origin": "top-left corner",
-        "transform_matrix": "CSS matrix(a, b, c, d, e, f) = IDML transform"
-      }
-    },
-    "interactive_behaviors": {
-      "button_actions": "TBD - extract from Interactive.xml",
-      "hover_effects": "TBD - from IDML button states",
-      "click_handlers": "TBD - map to Angular component methods"
     }
-  }
 }

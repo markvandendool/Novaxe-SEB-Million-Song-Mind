@@ -147,11 +147,13 @@ const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerH
 let shelfPickCamera = null; // orthographic camera used only for shelf picking
 // CRITICAL: Enable all layers on camera
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
-// Melody/Bass presets – lowered angle by ~10° + 7% zoom out
+// Melody/Bass/Back presets – lowered angle by ~10° + 7% zoom out
 const melodyTarget = new THREE.Vector3(0, 1.4, 0);
 const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5 * 1.07); // 7% zoom out
 const bassTarget = melodyTarget.clone();
 const bassCamPos = new THREE.Vector3(0, -5.8, 11.5 * 1.07); // 7% zoom out
+const backTarget = melodyTarget.clone();
+const backCamPos = new THREE.Vector3(0, 1.4, -11.5 * 1.07); // Behind the cubes
 camera.position.copy(melodyCamPos);
 // Ensure camera renders default, front, and shelf layers
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
@@ -192,19 +194,31 @@ stageSpot.target.position.set(0, 0.6, 0);
 scene.add(stageSpot);
 scene.add(stageSpot.target);
 
-// Special bass view lighting: bottom face illumination
-const bassBottomSpot = new THREE.SpotLight(0xffffff, 0.0, 8.0, Math.PI / 3, 0.2, 1.0);
-bassBottomSpot.position.set(0, -2.0, 3.0); // From below, shining up
-bassBottomSpot.target.position.set(0, 0, 3.0);
-scene.add(bassBottomSpot);
-scene.add(bassBottomSpot.target);
+// EXTENDED BASS VIEW LIGHTING SYSTEM: Multiple lights to cover up to 30+ chords
+const bassLights = [];
 
-// Special bass view lighting: front face illumination  
-const bassFrontSpot = new THREE.SpotLight(0xffffff, 0.0, 8.0, Math.PI / 4, 0.3, 1.0);
-bassFrontSpot.position.set(0, 1.5, 6.0); // From front, shining back
-bassFrontSpot.target.position.set(0, 1.0, 3.0);
-scene.add(bassFrontSpot);
-scene.add(bassFrontSpot.target);
+// Create 5 powerful spotlights positioned to cover entire front row
+for (let i = 0; i < 5; i++) {
+    // Bottom illumination lights (from below)
+    const bottomSpot = new THREE.SpotLight(0xffffff, 0.0, 12.0, Math.PI / 2.5, 0.15, 0.8);
+    bottomSpot.position.set((i - 2) * 8, -2.5, 3.0); // Spread across X axis
+    bottomSpot.target.position.set((i - 2) * 8, 0, 3.0);
+    scene.add(bottomSpot);
+    scene.add(bottomSpot.target);
+    bassLights.push(bottomSpot);
+
+    // Front face illumination lights (from front)
+    const frontSpot = new THREE.SpotLight(0xffffff, 0.0, 12.0, Math.PI / 3, 0.2, 0.8);
+    frontSpot.position.set((i - 2) * 8, 2.0, 8.0); // From front, spread across X
+    frontSpot.target.position.set((i - 2) * 8, 1.0, 3.0);
+    scene.add(frontSpot);
+    scene.add(frontSpot.target);
+    bassLights.push(frontSpot);
+}
+
+// Additional wide-area ambient lighting for bass view
+const bassAmbientBoost = new THREE.AmbientLight(0xffffff, 0.0);
+scene.add(bassAmbientBoost);
 let stageMode = false;
 let stageTween = null;
 function enterStageMode() {
@@ -405,6 +419,25 @@ function setViewAbove() {
 
     animateVector(camera.position, targetPos, 650);
     animateVector(controls.target, targetLookAt, 650);
+    pokeInteraction();
+}
+function setViewBack() {
+    currentStickyView = 'back';
+
+    // RESPONSIVE ZOOM: Adjust back view based on chord progression length
+    const chordCount = lineup.length;
+    let targetPos = backCamPos.clone();
+    let targetLookAt = backTarget.clone();
+
+    if (chordCount > 8) {
+        // Calculate zoom-out factor based on chord count (reduced by ~2x)
+        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.075); // Max 3x zoom out
+        targetPos.multiplyScalar(zoomFactor);
+        // Compensate camera height to maintain consistent viewing angle (double the factor)
+        targetPos.y += (zoomFactor - 1) * 2.8; // Double compensation
+    }
+
+    smoothCameraTransition(targetPos, targetLookAt);
     pokeInteraction();
 }
 function setViewBelow() {
@@ -627,7 +660,7 @@ function candidatePngNamesForRoman(roman) {
     return names;
 }
 
-function loadFaceTexture(label, romanLabel, force7th = false) {
+function loadFaceTexture(label, romanLabel, force7th = false, extensions = null) {
     // AUTOMATICALLY ADD 7TH NOTATION for diminished, I7, V(b7)(b9) chords, OR when global withSeventh is true
     let displayLabel = label;
     const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
@@ -654,6 +687,13 @@ function loadFaceTexture(label, romanLabel, force7th = false) {
         }
     }
 
+    // ADD EXTENSION NOTATION if extensions are provided
+    if (extensions && extensions.length > 0) {
+        const extensionText = extensions.map(ext => ext.name).join('');
+        displayLabel = displayLabel + extensionText;
+        console.log(`[FONT] Added extensions: ${displayLabel} (extensions: ${extensions.map(e => e.name).join(', ')})`);
+    }
+
     // V(b7)(b9) chords should always show full notation (already in the label)
     // This chord is special - it must always include the b9 to differentiate from basic V
 
@@ -674,15 +714,16 @@ async function refreshAllCubeFaces() {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current 7th setting
-                const newTexture = loadFaceTexture(label, roman);
+                // Generate new texture with current 7th setting and extensions
+                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
 
-                // Update the front face material (index 0)
-                if (cube.material && cube.material[0]) {
+                // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
+                const frontFaceIndex = 5;
+                if (cube.material && cube.material[frontFaceIndex]) {
                     // Dispose old texture
-                    if (cube.material[0].map) cube.material[0].map.dispose();
-                    cube.material[0].map = newTexture;
-                    cube.material[0].needsUpdate = true;
+                    if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
+                    cube.material[frontFaceIndex].map = newTexture;
+                    cube.material[frontFaceIndex].needsUpdate = true;
                 }
             }
         }
@@ -693,15 +734,16 @@ async function refreshAllCubeFaces() {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current 7th setting
-                const newTexture = loadFaceTexture(label, roman);
+                // Generate new texture with current 7th setting and extensions
+                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
 
-                // Update the front face material (index 0)
-                if (cube.material && cube.material[0]) {
+                // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
+                const frontFaceIndex = 5;
+                if (cube.material && cube.material[frontFaceIndex]) {
                     // Dispose old texture
-                    if (cube.material[0].map) cube.material[0].map.dispose();
-                    cube.material[0].map = newTexture;
-                    cube.material[0].needsUpdate = true;
+                    if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
+                    cube.material[frontFaceIndex].map = newTexture;
+                    cube.material[frontFaceIndex].needsUpdate = true;
                 }
             }
         }
@@ -736,19 +778,24 @@ function updateChordFaceWith7th(targetObj) {
         // Generate new texture with 7th notation
         const newTexture = makeFrontLabelTextureStyled(displayWith7th, roman);
 
-        // Update the front face material (index 0)
-        if (targetObj.material && targetObj.material[0]) {
-            targetObj.material[0].map = newTexture;
-            targetObj.material[0].needsUpdate = true;
+        // FIXED: Update the actual front-facing face, not always index 0
+        // Face mapping: [px(3rd), nx(7th), py(5th), ny(root), pz(back), nz(front)]
+        // The front face is always index 5 (nz), regardless of rotation
+        const frontFaceIndex = 5;
+
+        if (targetObj.material && targetObj.material[frontFaceIndex]) {
+            targetObj.material[frontFaceIndex].map = newTexture;
+            targetObj.material[frontFaceIndex].needsUpdate = true;
+            console.log(`[CTRL+CLICK] Updated front face (index ${frontFaceIndex}) with 7th notation`);
         }
 
         // Reset back to original after 2 seconds
         setTimeout(() => {
             console.log(`[CTRL+CLICK] Resetting face back to: ${originalLabel}`);
             const originalTexture = loadFaceTexture(originalLabel, roman);
-            if (targetObj.material && targetObj.material[0]) {
-                targetObj.material[0].map = originalTexture;
-                targetObj.material[0].needsUpdate = true;
+            if (targetObj.material && targetObj.material[frontFaceIndex]) {
+                targetObj.material[frontFaceIndex].map = originalTexture;
+                targetObj.material[frontFaceIndex].needsUpdate = true;
             }
         }, 2000);
 
@@ -794,11 +841,264 @@ function makeCircleDiamondFace(text, color, rotateDeg = 0, transparentBg = false
     return new THREE.MeshStandardMaterial({ map: tex, transparent: true });
 }
 
-async function makeMaterials(label, romanLabel) {
+// EXTENSION DIAMOND SYSTEM - Create back face with 3 REAL extension diamonds
+function calculateChordExtensions(romanLabel) {
+    // SMART NEXT-CHORD-UP PATTERN!
+    // If chord I → next chord ii → spell DFA = 2,4,6
+    // If chord ii → next chord iii → spell EGB = 3,5,7
+    // If chord IV → next chord V → spell GBD = 5,7,2
+
+    const chordToNextChordExtensions = {
+        // MAJOR KEY PROGRESSIONS
+        'I': ['2', '4', '6'],        // I → ii (DFA) = 2,4,6
+        'ii': ['3', '5', '7'],       // ii → iii (EGB) = 3,5,7  
+        'iii': ['4', '6', '1'],      // iii → IV (FAC) = 4,6,1
+        'IV': ['5', '7', '2'],       // IV → V (GBD) = 5,7,2
+        'V': ['6', '1', '3'],        // V → vi (ACE) = 6,1,3
+        'vi': ['7', '2', '4'],       // vi → vii° (BDF) = 7,2,4
+        'vii°': ['1', '3', '5'],     // vii° → I (CEG) = 1,3,5
+
+        // MINOR KEY PROGRESSIONS  
+        'i': ['2', '4', 'b6'],       // i → iiø (DFAb) = 2,4,b6
+        'ii°': ['b3', '5', 'b7'],    // iiø → III (EbGB♭) = b3,5,b7
+        'III': ['4', 'b6', '1'],     // III → iv (FAbC) = 4,b6,1
+        'iv': ['5', 'b7', '2'],      // iv → V (GBbD) = 5,b7,2
+        'V': ['b6', '1', 'b3'],      // V → VI (AbCEb) = b6,1,b3
+        'VI': ['b7', '2', '4'],      // VI → vii° (BbDF) = b7,2,4
+        'vii°': ['1', 'b3', '5'],    // vii° → i (CEbG) = 1,b3,5
+
+        // 7TH CHORDS (common ones)
+        'I7': ['2', '4', '6'],       // Same pattern
+        'ii7': ['3', '5', '7'],      // Same pattern
+        'V7': ['6', '1', '3'],       // Same pattern
+        'i7': ['2', '4', 'b6'],      // Minor key pattern
+
+        // APPLIED CHORDS
+        'V/ii': ['b7', '2', '4'],    // Treat as secondary dominant
+        'V/V': ['3', '5', '7'],      // Treat as secondary dominant
+    };
+
+    // Get extensions or fallback to generic pattern
+    return chordToNextChordExtensions[romanLabel] || ['2', '4', '6'];
+}
+
+function makeExtensionBackFace(romanLabel) {
+    const extensions = calculateChordExtensions(romanLabel);
+
+    // PIXEL-PERFECT SVG TEMPLATE RECREATION
+    // Template: 645.47×640px, convert to 512×512 with exact proportions
+    const size = 512;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+
+    // Wood background
+    ctx.fillStyle = '#f0e6d8';
+    ctx.fillRect(0, 0, size, size);
+
+    // EXACT SVG PROPORTIONS (scaled from 645.47×640 to 512×512)
+    const scaleX = size / 645.47;  // 0.793
+    const scaleY = size / 640;     // 0.8
+
+    // PRECISE DIAMOND SPECIFICATIONS from SVG template
+    const diamondWidth = 122.45 * scaleX;   // 97.12px
+    const diamondHeight = 122.45 * scaleY;  // 97.96px
+
+    // EXACT CORNER POSITIONS from SVG coordinates
+    const positions = [
+        {
+            // Bottom-left: x="1.67" y="516.4" width="122.45" height="122.46"
+            x: (1.67 + 122.45 / 2) * scaleX,      // Center X: 98.4px
+            y: (516.4 + 122.46 / 2) * scaleY,     // Center Y: 465.9px
+            note: extensions[0],
+            // Text positions from SVG: translate(169.88 618.64) rotate(-90)
+            mainTextX: 169.88 * scaleX,          // 134.7px
+            mainTextY: 618.64 * scaleY,          // 494.9px
+            mainTextRotate: -90,
+            // Label text: translate(152.56 591.97) rotate(-90) scale(.58)
+            labelTextX: 152.56 * scaleX,         // 121.0px
+            labelTextY: 591.97 * scaleY,         // 473.6px
+            labelTextRotate: -90,
+            labelText: 'nd'
+        },
+        {
+            // Top-left: x="1.69" y="3.3" width="122.45" height="122.45"
+            x: (1.69 + 122.45 / 2) * scaleX,      // Center X: 98.5px
+            y: (3.3 + 122.45 / 2) * scaleY,       // Center Y: 52.2px
+            note: extensions[1],
+            // Text positions from SVG: translate(32.77 169.82)
+            mainTextX: 32.77 * scaleX,           // 26.0px
+            mainTextY: 169.82 * scaleY,          // 135.9px
+            mainTextRotate: 0,
+            // Label text: translate(59.45 152.51) scale(.58)
+            labelTextX: 59.45 * scaleX,          // 47.1px
+            labelTextY: 152.51 * scaleY,         // 122.0px
+            labelTextRotate: 0,
+            labelText: 'th'
+        },
+        {
+            // Top-right: x="521.68" y="3.3" width="122.45" height="122.45"
+            x: (521.68 + 122.45 / 2) * scaleX,    // Center X: 463.4px
+            y: (3.3 + 122.45 / 2) * scaleY,       // Center Y: 52.2px
+            note: extensions[2],
+            // Text positions from SVG: translate(508.01 104.15) rotate(-90)
+            mainTextX: 508.01 * scaleX,          // 402.9px
+            mainTextY: 104.15 * scaleY,          // 83.3px
+            mainTextRotate: -90,
+            // Label text: translate(490.69 77.47) rotate(-90) scale(.58)
+            labelTextX: 490.69 * scaleX,         // 389.2px
+            labelTextY: 77.47 * scaleY,          // 62.0px
+            labelTextRotate: -90,
+            labelText: 'th'
+        }
+    ];
+
+    positions.forEach(pos => {
+        // BOTH DIAMOND AND TEXT ROTATED EXACTLY THE SAME: 45° LEFT
+        const rotation = -Math.PI / 4; // 45° LEFT (COUNTER-CLOCKWISE)
+
+        // WOODEN DIAMOND SHAPE - ROTATED 45° LEFT 
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(rotation); // APPLY SAME ROTATION TO DIAMOND
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 2;
+        // Draw SQUARE that becomes diamond when rotated
+        const squareSize = diamondWidth * 0.4;
+        ctx.beginPath();
+        ctx.rect(-squareSize / 2, -squareSize / 2, squareSize, squareSize);
+        ctx.stroke();
+        ctx.restore();
+
+        // EXTENSION NOTE TEXT IN DIAMOND CENTER - ROTATED 45° LEFT (SAME ROTATION)
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        ctx.rotate(rotation); // APPLY EXACT SAME ROTATION TO TEXT
+        ctx.fillStyle = '#000000';
+        // Large font for diamond center text
+        const diamondFontSize = 32 * scaleY; // Readable size in diamond
+        ctx.font = `bold ${diamondFontSize}px 'Bravura Text', 'Noto Music', Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const pretty = toMusicalGlyphs(pos.note);
+        ctx.fillText(pretty, 0, 0);
+        ctx.restore();
+
+        // MAIN NUMBER TEXT OUTSIDE DIAMOND - EXACT SVG SPECIFICATIONS
+        ctx.save();
+        ctx.translate(pos.mainTextX, pos.mainTextY);
+        if (pos.mainTextRotate) ctx.rotate((pos.mainTextRotate * Math.PI) / 180);
+        ctx.fillStyle = '#000000';
+        // SVG: font-size: 52px, MyriadPro-Regular (scaled to our canvas)
+        const mainFontSize = 52 * scaleY; // 41.6px
+        ctx.font = `${mainFontSize}px 'Myriad Pro', 'Helvetica Neue', Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        // Show the scale degree number (2, 4, 6)
+        const scaleNumber = pos.note.replace(/[b#]/g, ''); // Remove accidentals for display
+        ctx.fillText(scaleNumber, 0, 0);
+        ctx.restore();
+
+        // EXTENSION LABEL TEXT - EXACT SVG SPECIFICATIONS
+        ctx.save();
+        ctx.translate(pos.labelTextX, pos.labelTextY);
+        if (pos.labelTextRotate) ctx.rotate((pos.labelTextRotate * Math.PI) / 180);
+        ctx.fillStyle = '#000000';
+        // SVG: font-size: 52px * scale(.58) = 30.16px (scaled to our canvas)
+        const labelFontSize = 52 * 0.58 * scaleY; // 24.1px
+        ctx.font = `${labelFontSize}px 'Myriad Pro', 'Helvetica Neue', Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pos.labelText, 0, 0);
+        ctx.restore();
+    });
+
+    // ADD THE COMPOUND INTERVAL NUMBERS (9th, 11th, 13th) from SVG
+    const compoundPositions = [
+        {
+            // 9th text: translate(33.53 508.84)
+            x: 33.53 * scaleX,    // 26.6px
+            y: 508.84 * scaleY,   // 407.1px
+            text: '9',
+            rotate: 0
+        },
+        {
+            // 11th text: translate(169.88 104.15) rotate(-90)
+            x: 169.88 * scaleX,   // 134.7px
+            y: 104.15 * scaleY,   // 83.3px
+            text: '11',
+            rotate: -90
+        },
+        {
+            // 13th text: translate(544.27 169.82)
+            x: 544.27 * scaleX,   // 431.5px
+            y: 169.82 * scaleY,   // 135.9px
+            text: '13',
+            rotate: 0
+        }
+    ];
+
+    compoundPositions.forEach(pos => {
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        if (pos.rotate) ctx.rotate((pos.rotate * Math.PI) / 180);
+        ctx.fillStyle = '#000000';
+        const mainFontSize = 52 * scaleY; // 41.6px
+        ctx.font = `${mainFontSize}px 'Myriad Pro', 'Helvetica Neue', Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pos.text, 0, 0);
+        ctx.restore();
+    });
+
+    // ADD THE 'th' LABELS for compound intervals
+    const compoundLabelPositions = [
+        {
+            // 9th label: translate(60.2 491.53) scale(.58)
+            x: 60.2 * scaleX,     // 47.7px
+            y: 491.53 * scaleY,   // 393.2px
+            text: 'th',
+            rotate: 0
+        },
+        {
+            // 11th label: translate(152.56 50.8) rotate(-90) scale(.58)
+            x: 152.56 * scaleX,   // 121.0px
+            y: 50.8 * scaleY,     // 40.6px
+            text: 'th',
+            rotate: -90
+        },
+        {
+            // 13th label: translate(597.1 152.51) scale(.58)
+            x: 597.1 * scaleX,    // 473.5px
+            y: 152.51 * scaleY,   // 122.0px
+            text: 'th',
+            rotate: 0
+        }
+    ];
+
+    compoundLabelPositions.forEach(pos => {
+        ctx.save();
+        ctx.translate(pos.x, pos.y);
+        if (pos.rotate) ctx.rotate((pos.rotate * Math.PI) / 180);
+        ctx.fillStyle = '#000000';
+        const labelFontSize = 52 * 0.58 * scaleY; // 24.1px
+        ctx.font = `${labelFontSize}px 'Myriad Pro', 'Helvetica Neue', Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(pos.text, 0, 0);
+        ctx.restore();
+    });
+
+    const texture = new THREE.CanvasTexture(canvas);
+    return new THREE.MeshStandardMaterial({ map: texture, transparent: true });
+}
+
+async function makeMaterials(label, romanLabel, extensions = null) {
     // Front face: chord name label texture (strong bias always facing camera)
-    const labelTex = await loadFaceTexture(label, romanLabel);
+    const labelTex = await loadFaceTexture(label, romanLabel, false, extensions);
     const front = new THREE.MeshStandardMaterial({ map: labelTex, transparent: true });
-    const wood = new THREE.MeshStandardMaterial({ color: 0xd5b38a });
+    const wood = new THREE.MeshStandardMaterial({ color: 0xf0e6d8 }); // Lighter wood color for better text legibility
 
     // Determine ingredients (root,3rd,5th,7th)
     const notes = noteSetsC[romanLabel] || ['-', '-', '-', '-'];
@@ -813,7 +1113,7 @@ async function makeMaterials(label, romanLabel) {
     const faceRight = makeCircleDiamondFace(display[1], '#e74c3c', 270);    // 3rd (upright from below/above)
     const faceTop = makeCircleDiamondFace(display[2], '#3498db', 180);      // 5th
     const faceLeft = makeCircleDiamondFace(display[3], '#bdc3c7', 90);      // 7th (upright)
-    
+
     // DEBUG: Log V chord face details
     if (romanLabel === 'V') {
         console.log(`[V CHORD DEBUG] Roman: ${romanLabel}, Display: [${display.join(', ')}]`);
@@ -829,7 +1129,7 @@ async function makeMaterials(label, romanLabel) {
     materials[2] = faceTop;   // +y top → 5th
     materials[3] = faceBottom;// -y bottom → root
     materials[4] = front;     // +z front chord label (toward camera)
-    materials[5] = wood;      // -z back
+    materials[5] = makeExtensionBackFace(romanLabel); // -z back with extension diamonds
     return materials;
 }
 
@@ -1299,6 +1599,78 @@ let dragging = null;
 let dragOffset = new THREE.Vector3();
 const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let pendingObj = null;
+
+// ZONE-BASED MOUSE CONTROL SYSTEM
+let currentMouseZone = 'camera'; // 'cube' or 'camera'
+let zoneCheckEnabled = true;
+let dragStartZone = null; // Track zone where drag started
+let isDraggingCamera = false; // Track camera drag state
+
+// Calculate if mouse cursor is within cube interaction zone
+function isInCubeZone(clientX, clientY) {
+    const rect = renderer.domElement.getBoundingClientRect();
+    const canvasWidth = rect.width;
+    const canvasHeight = rect.height;
+
+    // Define generous interaction zones (screen coordinates)
+    // Shelf zone: horizontal band across middle of screen  
+    const shelfZone = {
+        left: 0.1 * canvasWidth,   // 10% padding from left
+        right: 0.9 * canvasWidth,  // 10% padding from right
+        top: 0.45 * canvasHeight,  // Shelf area starts ~45% down (LOWERED)
+        bottom: 0.85 * canvasHeight // Shelf area ends ~85% down
+    };
+
+    // Front row zone: upper portion of screen - EXTENDS TO VERY TOP OF VENN DIAGRAMS
+    const frontRowZone = {
+        left: 0.1 * canvasWidth,
+        right: 0.9 * canvasWidth,
+        top: 0.05 * canvasHeight,  // VERY TOP - reaches venn diagram tops
+        bottom: 0.55 * canvasHeight // Overlaps with shelf zone
+    };
+
+    const mouseX = clientX - rect.left;
+    const mouseY = clientY - rect.top;
+
+    // Check if mouse is in either zone
+    const inShelfZone = (mouseX >= shelfZone.left && mouseX <= shelfZone.right &&
+        mouseY >= shelfZone.top && mouseY <= shelfZone.bottom);
+
+    const inFrontRowZone = (mouseX >= frontRowZone.left && mouseX <= frontRowZone.right &&
+        mouseY >= frontRowZone.top && mouseY <= frontRowZone.bottom);
+
+    return inShelfZone || inFrontRowZone;
+}
+
+// Update mouse zone and camera controls
+function updateMouseZone(clientX, clientY) {
+    if (!zoneCheckEnabled) return;
+
+    // CRITICAL: If camera is being dragged, maintain camera control regardless of zone
+    if (isDraggingCamera) {
+        controls.enabled = true;
+        return;
+    }
+
+    const inCubeZone = isInCubeZone(clientX, clientY);
+    const newZone = inCubeZone ? 'cube' : 'camera';
+
+    if (newZone !== currentMouseZone) {
+        currentMouseZone = newZone;
+
+        if (currentMouseZone === 'cube') {
+            // Entering cube zone - disable camera, enable cube interactions
+            controls.enabled = false;
+            renderer.domElement.style.cursor = 'pointer';
+            console.log('[ZONE] 🎯 Cube interaction zone - camera locked');
+        } else {
+            // Entering camera zone - enable camera, disable cube interactions  
+            controls.enabled = true;
+            renderer.domElement.style.cursor = 'grab';
+            console.log('[ZONE] 📷 Camera control zone - cube interactions disabled');
+        }
+    }
+}
 let mouseDownPos = new THREE.Vector2();
 let mouseDownTime = 0;
 // Initialize FSM with inline thresholds to avoid TDZ on consts declared later
@@ -1346,33 +1718,7 @@ let melodyVolume = 0.5;
 let lastProgressionBassMidi = null;
 let lastProgressionMelodyMidi = null;
 
-// Volume control event listeners
-function setupVolumeControls() {
-    const chordVol = document.getElementById('chord-volume');
-    const bassVol = document.getElementById('bass-volume');
-    const melodyVol = document.getElementById('melody-volume');
-
-    if (chordVol) {
-        chordVol.addEventListener('input', (e) => {
-            chordVolume = parseFloat(e.target.value);
-            console.log('[VOLUME] Chord volume:', chordVolume);
-        });
-    }
-
-    if (bassVol) {
-        bassVol.addEventListener('input', (e) => {
-            bassVolume = parseFloat(e.target.value);
-            console.log('[VOLUME] Bass volume:', bassVolume);
-        });
-    }
-
-    if (melodyVol) {
-        melodyVol.addEventListener('input', (e) => {
-            melodyVolume = parseFloat(e.target.value);
-            console.log('[VOLUME] Melody volume:', melodyVolume);
-        });
-    }
-}
+// Legacy volume control setup - removed (merged into main setupVolumeControls)
 
 // Camera height compensation - DISABLED for now as it interferes with existing zoom logic
 function adjustCameraHeightForDistance() {
@@ -1558,6 +1904,8 @@ function reflowLineup() {
             setViewAbove(); // This will now auto-zoom based on lineup.length
         } else if (currentStickyView === 'below') {
             setViewBelow(); // This will now auto-zoom based on lineup.length
+        } else if (currentStickyView === 'back') {
+            setViewBack(); // This will now auto-zoom based on lineup.length
         }
     }
 }
@@ -1747,7 +2095,7 @@ async function updateLabels() {
     };
     for (const c of cubes) {
         const label = makeFrontLabel(c);
-        const materials = await makeMaterials(label, c.userData.roman);
+        const materials = await makeMaterials(label, c.userData.roman, c.userData.extensions);
         c.material.forEach(m => { if (m.map) m.map.dispose(); m.dispose(); });
         c.material = materials;
     }
@@ -2020,6 +2368,16 @@ function isPointerOverShelf(e) {
 }
 
 function onPointerDown(e) {
+    // Track where drag started for continuity
+    dragStartZone = currentMouseZone;
+
+    // ZONE-BASED CONTROL: Only process cube interactions if starting in cube zone
+    if (dragStartZone !== 'cube') {
+        console.log('[ZONE] 🚫 Ignoring click - started in camera zone');
+        isDraggingCamera = true; // Enable camera drag continuity
+        return; // Let camera controls handle this
+    }
+
     // Only honor left-click for selections/drags
     if (typeof e.button === 'number' && e.button !== 0) return;
     const rect = renderer.domElement.getBoundingClientRect();
@@ -2078,6 +2436,15 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
+    // ZONE-BASED CONTROL: Only process cube dragging if in cube zone
+    if (currentMouseZone !== 'cube' && (pendingObj || dragging)) {
+        console.log('[ZONE] 🚫 Canceling drag - moved to camera zone');
+        // Cancel any ongoing drag when leaving cube zone
+        dragging = null;
+        pendingObj = null;
+        return;
+    }
+
     if (!pendingObj && !dragging) return;
     const rect = renderer.domElement.getBoundingClientRect();
     pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
@@ -2181,6 +2548,10 @@ function onPointerMove(e) {
 function onPointerUp(e) {
     const now = performance.now();
     try { renderer.domElement.releasePointerCapture?.(e.pointerId); } catch (_) { }
+
+    // ZONE-BASED CONTROL: Reset drag state
+    isDraggingCamera = false;
+    dragStartZone = null;
     if (dragging) {
         const r = dragging.userData.roman;
         // Adjust mode: persist shelf edits and do not snap
@@ -2585,9 +2956,9 @@ function onPointerUp(e) {
                     const t0 = ensureAudio().currentTime;
                     if (voice === 'bass') {
                         let midi = getBassMidiForObject(targetObj);
-                        // Force into a strong low register around C2..C3 for presence
-                        while (midi > 55) midi -= 12; // keep <= G#2
-                        while (midi < 36) midi += 12; // keep >= C2
+                        // Apply industry standard range constraints based on selected instrument
+                        const bassInstrument = document.getElementById('bass-inst')?.value || 'contrabass';
+                        midi = constrainToInstrumentRange(midi, bassInstrument, 'bass');
 
                         // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
                         const context = getVoiceLeadingContext(targetObj.userData.roman, 'bass');
@@ -2604,9 +2975,9 @@ function onPointerUp(e) {
                         }
                     } else if (voice === 'melody') {
                         let midi = getMelodyMidiForObject(targetObj);
-                        // Keep melody modest: around C4..C6
-                        while (midi > 84) midi -= 12; // <= C6
-                        while (midi < 60) midi += 12; // >= C4
+                        // Apply industry standard range constraints based on selected instrument
+                        const melodyInstrument = document.getElementById('melody-inst')?.value || 'violin';
+                        midi = constrainToInstrumentRange(midi, melodyInstrument, 'melody');
 
                         // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
                         const context = getVoiceLeadingContext(targetObj.userData.roman, 'melody');
@@ -2781,10 +3152,21 @@ renderer.domElement.addEventListener('pointermove', onPointerMove);
 window.addEventListener('pointerup', onPointerUp);
 renderer.domElement.addEventListener('pointerdown', pokeInteraction);
 renderer.domElement.addEventListener('wheel', pokeInteraction, { passive: true });
+
+// ZONE-BASED MOUSE CONTROL - Track cursor position for camera/cube mode switching
+renderer.domElement.addEventListener('mousemove', (e) => {
+    updateMouseZone(e.clientX, e.clientY);
+});
 // Right-click toggles between Melody (above) and Bassline (below) views
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-    if (currentStickyView === 'above') setViewBelow(); else setViewAbove();
+    if (currentStickyView === 'above') {
+        setViewBelow();
+    } else if (currentStickyView === 'below') {
+        setViewBack();
+    } else {
+        setViewAbove();
+    }
 });
 
 // Scale shelf cubes with the mouse wheel in adjust mode
@@ -2804,6 +3186,7 @@ renderer.domElement.addEventListener('wheel', (e) => {
 
 document.getElementById('view-down').addEventListener('click', setViewAbove);
 document.getElementById('view-up').addEventListener('click', setViewBelow);
+document.getElementById('view-back').addEventListener('click', setViewBack);
 
 // GLOBAL MODIFIER KEY STATE TRACKING
 let globalModifierState = {
@@ -2835,6 +3218,18 @@ document.addEventListener('keyup', (e) => {
 // Audio state (declare before any usage)
 let audioCtx = null;
 let withSeventh = false;
+// Volume-based enabling - voices are enabled when volume > 0
+function isBassEnabled() {
+    const bassVolume = document.getElementById('bass-volume');
+    return bassVolume ? parseFloat(bassVolume.value) > 0 : false; // Start UNLOCKED
+}
+
+function isMelodyEnabled() {
+    const melodyVolume = document.getElementById('melody-volume');
+    return melodyVolume ? parseFloat(melodyVolume.value) > 0 : false; // Start UNLOCKED
+}
+
+// Legacy compatibility
 let bassEnabled = true;
 let melodyEnabled = false;
 let instrumentsReady = false;
@@ -4070,12 +4465,16 @@ async function loadInstruments() {
 }
 
 // UI wiring
-const setSelect = document.getElementById('set-select');
+// Set toggle checkboxes
+const setMajor = document.getElementById('set-major');
+const setMinor = document.getElementById('set-minor');
+const setApplied = document.getElementById('set-applied');
 const labelSelect = document.getElementById('label-mode');
 const keySelect = document.getElementById('key-select');
 const with7th = document.getElementById('with-7th');
-const bassEnabledEl = document.getElementById('bass-enabled');
-const melodyEnabledEl = document.getElementById('melody-enabled');
+// Volume controls replace checkboxes
+const bassVolumeEl = document.getElementById('bass-volume');
+const melodyVolumeEl = document.getElementById('melody-volume');
 const chordInstEl = document.getElementById('chord-inst');
 const bassInstEl = document.getElementById('bass-inst');
 const melodyInstEl = document.getElementById('melody-inst');
@@ -4095,8 +4494,8 @@ const menuUnlockBassBtn = document.getElementById('menu-unlock-bass');
 // Initialize labelMode from current UI so startup respects it
 labelMode = labelSelect ? labelSelect.value : labelMode;
 withSeventh = !!(with7th && with7th.checked);
-bassEnabled = !!(bassEnabledEl && bassEnabledEl.checked);
-melodyEnabled = !!(melodyEnabledEl && melodyEnabledEl.checked);
+bassEnabled = isBassEnabled();
+melodyEnabled = isMelodyEnabled();
 // Instrument dropdowns are currently cosmetic with WebAudioFont presets
 try { setState({ key: currentKey, withSeventh, bassEnabled, melodyEnabled }); } catch (_) { }
 with7th?.addEventListener('change', async () => {
@@ -4108,12 +4507,13 @@ with7th?.addEventListener('change', async () => {
 
     try { setState({ withSeventh }); bridge.emit('settingsChanged', { withSeventh }); } catch (_) { }
 });
-bassEnabledEl?.addEventListener('change', () => {
-    bassEnabled = !!bassEnabledEl.checked;
+// Volume-based enabling - update when volume changes
+bassVolumeEl?.addEventListener('input', () => {
+    bassEnabled = isBassEnabled();
     try { setState({ bassEnabled }); bridge.emit('settingsChanged', { bassEnabled }); } catch (_) { }
 });
-melodyEnabledEl?.addEventListener('change', () => {
-    melodyEnabled = !!melodyEnabledEl.checked;
+melodyVolumeEl?.addEventListener('input', () => {
+    melodyEnabled = isMelodyEnabled();
     try { setState({ melodyEnabled }); bridge.emit('settingsChanged', { melodyEnabled }); } catch (_) { }
 });
 showGiantMelodyEl?.addEventListener('change', () => { if (melodyGiantGroup) melodyGiantGroup.visible = !!showGiantMelodyEl.checked; });
@@ -4192,6 +4592,433 @@ function makeDrumMachineDraggable() {
 // Initialize draggable drum machine
 setTimeout(makeDrumMachineDraggable, 100);
 
+// TOGGLE-STYLE LOCK BUTTONS (now work with volume controls)
+function setupLockButtons() {
+    const lockBassBtn = document.getElementById('lock-bass');
+    const lockMelodyBtn = document.getElementById('lock-melody');
+
+    // Initialize button states - UNLOCKED by default (false = unlocked state)
+    updateLockButtonStyle(lockBassBtn, false); // Start unlocked
+    updateLockButtonStyle(lockMelodyBtn, false); // Start unlocked
+
+    // Bass lock button - CALLS EXACT SACRED FUNCTION
+    let lastBassVolume = 0.5;
+    lockBassBtn?.addEventListener('click', () => {
+        const bassVolume = document.getElementById('bass-volume');
+        const currentVolume = parseFloat(bassVolume.value);
+
+        if (currentVolume > 0) {
+            // LOCK BASS - call sacred function
+            lastBassVolume = currentVolume;
+            try {
+                lockInBass();
+                setBassLockVisual('closed');
+                bassVolume.value = lastBassVolume.toString(); // Keep volume but lock state
+                console.log('[SACRED LOCK] Bass locked with lockInBass()');
+            } catch (_) { }
+        } else {
+            // UNLOCK BASS - call sacred unlock
+            try {
+                lockedBass = null;
+                renderBassLane();
+                setBassLockVisual('open');
+                bassVolume.value = lastBassVolume.toString();
+                console.log('[SACRED UNLOCK] Bass unlocked');
+            } catch (_) { }
+        }
+
+        bassEnabled = isBassEnabled();
+        updateLockButtonStyle(lockBassBtn, currentVolume > 0); // Show locked state
+    });
+
+    // Melody lock button - CALLS EXACT SACRED FUNCTION
+    let lastMelodyVolume = 0.05;
+    lockMelodyBtn?.addEventListener('click', () => {
+        const melodyVolume = document.getElementById('melody-volume');
+        const currentVolume = parseFloat(melodyVolume.value);
+
+        if (currentVolume > 0) {
+            // LOCK MELODY - call sacred function
+            lastMelodyVolume = currentVolume;
+            try {
+                lockInMelody();
+                setMelodyLockVisual('closed');
+                melodyVolume.value = lastMelodyVolume.toString(); // Keep volume but lock state
+                console.log('[SACRED LOCK] Melody locked with lockInMelody()');
+            } catch (_) { }
+        } else {
+            // UNLOCK MELODY - call sacred unlock
+            try {
+                lockedMelody = null;
+                renderMelodyLane();
+                setMelodyLockVisual('open');
+                melodyVolume.value = lastMelodyVolume.toString();
+                console.log('[SACRED UNLOCK] Melody unlocked');
+            } catch (_) { }
+        }
+
+        melodyEnabled = isMelodyEnabled();
+        updateLockButtonStyle(lockMelodyBtn, currentVolume > 0); // Show locked state
+    });
+}
+
+function updateLockButtonStyle(button, isLocked) {
+    if (!button) return;
+
+    if (isLocked) {
+        // Pressed/locked style
+        button.style.background = '#00ff00';
+        button.style.color = '#000';
+        button.style.borderColor = '#00ff00';
+        button.style.boxShadow = 'inset 0 2px 4px rgba(0,0,0,0.3)';
+        button.textContent = button.id === 'lock-bass' ? 'Bass Locked' : 'Melody Locked';
+    } else {
+        // Released/unlocked style
+        button.style.background = '#333';
+        button.style.color = '#fff';
+        button.style.borderColor = '#555';
+        button.style.boxShadow = 'none';
+        button.textContent = button.id === 'lock-bass' ? 'Lock Bass' : 'Lock Melody';
+    }
+}
+
+// Initialize lock buttons when DOM is ready
+setTimeout(setupLockButtons, 100);
+
+// MUTE/BOOST VOLUME CONTROLS
+function setupVolumeControls() {
+    // Get volume sliders
+    const bassVolumeEl = document.getElementById('bass-volume');
+    const chordVolumeEl = document.getElementById('chord-volume');
+    const melodyVolumeEl = document.getElementById('melody-volume');
+
+    // Legacy volume change handlers
+    bassVolumeEl?.addEventListener('input', (e) => {
+        bassVolume = parseFloat(e.target.value);
+        console.log('[VOLUME] Bass volume:', bassVolume);
+    });
+
+    chordVolumeEl?.addEventListener('input', (e) => {
+        chordVolume = parseFloat(e.target.value);
+        console.log('[VOLUME] Chord volume:', chordVolume);
+    });
+
+    melodyVolumeEl?.addEventListener('input', (e) => {
+        melodyVolume = parseFloat(e.target.value);
+        console.log('[VOLUME] Melody volume:', melodyVolume);
+    });
+
+    // Bass volume controls
+    const bassMute = document.getElementById('bass-mute');
+    const bassBoost = document.getElementById('bass-boost');
+
+    bassMute?.addEventListener('click', () => {
+        bassVolumeEl.value = '0';
+        console.log('[BASS] Muted');
+    });
+
+    bassBoost?.addEventListener('click', () => {
+        bassVolumeEl.value = '1.15';
+        console.log('[BASS] Boosted to 115%');
+    });
+
+    // Chord volume controls
+    const chordMute = document.getElementById('chord-mute');
+    const chordBoost = document.getElementById('chord-boost');
+
+    chordMute?.addEventListener('click', () => {
+        chordVolumeEl.value = '0';
+        console.log('[CHORD] Muted');
+    });
+
+    chordBoost?.addEventListener('click', () => {
+        chordVolumeEl.value = '1.15';
+        console.log('[CHORD] Boosted to 115%');
+    });
+
+    // Melody volume controls
+    const melodyMute = document.getElementById('melody-mute');
+    const melodyBoost = document.getElementById('melody-boost');
+
+    melodyMute?.addEventListener('click', () => {
+        melodyVolumeEl.value = '0';
+        console.log('[MELODY] Muted');
+    });
+
+    melodyBoost?.addEventListener('click', () => {
+        melodyVolumeEl.value = '1.15';
+        console.log('[MELODY] Boosted to 115%');
+    });
+}
+
+// Initialize volume controls
+setTimeout(setupVolumeControls, 100);
+
+// 3D FONT PREVIEW SYSTEM
+let fontPreviewScene, fontPreviewCamera, fontPreviewRenderer, fontPreviewCube;
+let fontPreviewAutoRotate = false;
+
+function init3DFontPreview() {
+    const container = document.getElementById('font-preview-3d');
+    if (!container) return;
+
+    // Create scene
+    fontPreviewScene = new THREE.Scene();
+    fontPreviewScene.background = new THREE.Color(0x222222);
+
+    // Create camera
+    fontPreviewCamera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    fontPreviewCamera.position.set(2, 2, 2);
+    fontPreviewCamera.lookAt(0, 0, 0);
+
+    // Create renderer
+    fontPreviewRenderer = new THREE.WebGLRenderer({ antialias: true });
+    fontPreviewRenderer.setSize(200, 200);
+    container.appendChild(fontPreviewRenderer.domElement);
+
+    // Create cube with sample text
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+
+    // Create materials for each face
+    const materials = [];
+    for (let i = 0; i < 6; i++) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Wood background
+        ctx.fillStyle = '#d4a574';
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Add wood texture pattern
+        ctx.fillStyle = '#b8955f';
+        for (let j = 0; j < 10; j++) {
+            ctx.fillRect(Math.random() * 512, 0, 2, 512);
+            ctx.fillRect(0, Math.random() * 512, 512, 2);
+        }
+
+        // Sample text
+        const sampleTexts = ['I', 'V', 'vi', 'IV', '7', 'iii'];
+        ctx.fillStyle = '#333';
+        ctx.font = 'bold 200px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(sampleTexts[i], 256, 256);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        materials.push(new THREE.MeshBasicMaterial({ map: texture }));
+    }
+
+    fontPreviewCube = new THREE.Mesh(geometry, materials);
+    fontPreviewScene.add(fontPreviewCube);
+
+    // Add lighting
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+    fontPreviewScene.add(ambientLight);
+
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    directionalLight.position.set(1, 1, 1);
+    fontPreviewScene.add(directionalLight);
+
+    // Setup controls
+    setupFontPreviewControls();
+
+    // Start render loop
+    animate3DFontPreview();
+}
+
+function setupFontPreviewControls() {
+    document.getElementById('rotate-up')?.addEventListener('click', () => {
+        fontPreviewCube.rotation.x -= Math.PI / 4;
+    });
+
+    document.getElementById('rotate-down')?.addEventListener('click', () => {
+        fontPreviewCube.rotation.x += Math.PI / 4;
+    });
+
+    document.getElementById('rotate-left')?.addEventListener('click', () => {
+        fontPreviewCube.rotation.y -= Math.PI / 4;
+    });
+
+    document.getElementById('rotate-right')?.addEventListener('click', () => {
+        fontPreviewCube.rotation.y += Math.PI / 4;
+    });
+
+    document.getElementById('auto-rotate')?.addEventListener('click', () => {
+        fontPreviewAutoRotate = !fontPreviewAutoRotate;
+        const btn = document.getElementById('auto-rotate');
+        btn.style.background = fontPreviewAutoRotate ? '#f44336' : '#FF9800';
+        btn.textContent = fontPreviewAutoRotate ? '⏸ Stop Rotate' : '🔄 Auto Rotate';
+    });
+}
+
+function animate3DFontPreview() {
+    requestAnimationFrame(animate3DFontPreview);
+
+    if (fontPreviewAutoRotate && fontPreviewCube) {
+        fontPreviewCube.rotation.x += 0.01;
+        fontPreviewCube.rotation.y += 0.01;
+    }
+
+    if (fontPreviewRenderer && fontPreviewScene && fontPreviewCamera) {
+        fontPreviewRenderer.render(fontPreviewScene, fontPreviewCamera);
+    }
+}
+
+function update3DFontPreview() {
+    if (!fontPreviewCube) return;
+
+    // Get current font settings
+    const fontFamily = document.getElementById('font-family')?.value || 'Arial';
+    const fontSize = document.getElementById('font-size')?.value || '200';
+    const fontWeight = document.getElementById('font-weight')?.value || 'bold';
+    const opacity = document.getElementById('font-opacity')?.value || '100';
+
+    // Update cube faces with new settings
+    fontPreviewCube.material.forEach((material, index) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Wood background
+        ctx.fillStyle = '#d4a574';
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Add wood texture pattern
+        ctx.fillStyle = '#b8955f';
+        for (let j = 0; j < 10; j++) {
+            ctx.fillRect(Math.random() * 512, 0, 2, 512);
+            ctx.fillRect(0, Math.random() * 512, 512, 2);
+        }
+
+        // Sample text with current settings
+        const sampleTexts = ['I', 'V', 'vi', 'IV', '7', 'iii'];
+        ctx.globalAlpha = opacity / 100;
+        ctx.fillStyle = '#333';
+        ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(sampleTexts[index], 256, 256);
+
+        material.map.image = canvas;
+        material.map.needsUpdate = true;
+    });
+}
+
+// Initialize 3D preview when font modal opens
+document.addEventListener('DOMContentLoaded', () => {
+    const fontModal = document.getElementById('font-control-modal');
+    if (fontModal) {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                    if (fontModal.style.display !== 'none' && !fontPreviewRenderer) {
+                        setTimeout(init3DFontPreview, 100);
+                    }
+                }
+            });
+        });
+        observer.observe(fontModal, { attributes: true });
+    }
+
+    // Update preview when settings change
+    ['font-family', 'font-size', 'font-weight', 'font-opacity'].forEach(id => {
+        document.getElementById(id)?.addEventListener('change', update3DFontPreview);
+        document.getElementById(id)?.addEventListener('input', update3DFontPreview);
+    });
+});
+
+// CHROMATIC EXTENSION KEYBOARD HANDLERS
+document.addEventListener('keydown', (e) => {
+    const key = e.key;
+
+    // Handle chromatic extensions (number keys and minus)
+    if (CHROMATIC_EXTENSIONS[key] && !extensionKeyStates[key]) {
+        extensionKeyStates[key] = true;
+
+        const extension = e.shiftKey ?
+            CHROMATIC_EXTENSIONS[key].shift :
+            CHROMATIC_EXTENSIONS[key].normal;
+
+        activeExtensions.add(extension);
+        console.log(`[CHORD EXT] Added ${extension.name} (${extension.description})`);
+
+        // Visual feedback - could add UI indicator here
+        showExtensionFeedback(extension);
+
+        e.preventDefault();
+    }
+
+    // Handle Alt+7 for 7th toggle (replacing old shift+7)
+    if (key === '7' && e.altKey && !e.shiftKey) {
+        const with7thCheckbox = document.getElementById('with-7th');
+        if (with7thCheckbox) {
+            with7thCheckbox.checked = !with7thCheckbox.checked;
+            console.log(`[7TH TOGGLE] ${with7thCheckbox.checked ? 'Enabled' : 'Disabled'} 7ths via Alt+7`);
+        }
+        e.preventDefault();
+    }
+
+    // DEBUG: Alt+T to test b7th for all chords
+    if (key === 't' && e.altKey) {
+        testB7thForAllChords();
+        e.preventDefault();
+    }
+});
+
+document.addEventListener('keyup', (e) => {
+    const key = e.key;
+
+    // Remove extension when key is released
+    if (CHROMATIC_EXTENSIONS[key] && extensionKeyStates[key]) {
+        extensionKeyStates[key] = false;
+
+        const extension = e.shiftKey ?
+            CHROMATIC_EXTENSIONS[key].shift :
+            CHROMATIC_EXTENSIONS[key].normal;
+
+        activeExtensions.delete(extension);
+        console.log(`[CHORD EXT] Removed ${extension.name}`);
+
+        // Clear visual feedback
+        clearExtensionFeedback(extension);
+    }
+});
+
+// Visual feedback for active extensions
+function showExtensionFeedback(extension) {
+    // Create or update extension indicator
+    let indicator = document.getElementById('extension-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'extension-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 255, 0, 0.9);
+            color: black;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            z-index: 10000;
+            pointer-events: none;
+        `;
+        document.body.appendChild(indicator);
+    }
+
+    const activeList = Array.from(activeExtensions).map(ext => ext.name).join(', ');
+    indicator.textContent = activeList ? `Extensions: ${activeList}` : '';
+    indicator.style.display = activeList ? 'block' : 'none';
+}
+
+function clearExtensionFeedback(extension) {
+    showExtensionFeedback(); // Refresh the display
+}
+
 // Fix AudioContext warnings - add click handler to start audio
 function initAudioOnFirstClick() {
     const startAudio = async () => {
@@ -4211,6 +5038,232 @@ function initAudioOnFirstClick() {
 
 // Initialize audio fix
 initAudioOnFirstClick();
+
+// CHROMATIC CHORD EXTENSION SYSTEM
+// Maps number keys to chromatic intervals from root
+const CHROMATIC_EXTENSIONS = {
+    '1': {
+        normal: { interval: 1, name: 'b2', description: 'minor 2nd' },
+        shift: { interval: 13, name: 'b9', description: 'minor 9th (compound)' }
+    },
+    '2': {
+        normal: { interval: 2, name: 'sus2', description: 'suspended 2nd' },
+        shift: { interval: 14, name: 'add9', description: 'added 9th' }
+    },
+    '3': {
+        normal: { interval: 3, name: '#9', description: 'sharp 9th' },
+        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound)' }
+    },
+    // '4' is major 3rd - currently unused
+    '5': {
+        normal: { interval: 5, name: 'sus4', description: 'suspended 4th' },
+        shift: { interval: 17, name: 'add11', description: 'added 11th' }
+    },
+    '6': {
+        normal: { interval: 6, name: '#4/#11', description: 'sharp 4th/11th' },
+        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound)' }
+    },
+    '7': {
+        normal: { interval: 7, name: '5', description: 'perfect 5th (power chord)' },
+        shift: { interval: 19, name: '5', description: 'perfect 5th (compound)' }
+    },
+    '8': {
+        normal: { interval: 8, name: 'b6', description: 'minor 6th' },
+        shift: { interval: 20, name: 'b13', description: 'minor 13th' }
+    },
+    '9': {
+        normal: { interval: 9, name: '6', description: 'major 6th' },
+        shift: { interval: 21, name: '13', description: 'major 13th' }
+    },
+    '0': {
+        normal: { interval: 10, name: 'b7', description: 'minor 7th (override)' },
+        shift: { interval: 22, name: 'b7', description: 'minor 7th (compound)' }
+    },
+    '-': {
+        normal: { interval: 11, name: 'maj7', description: 'major 7th (override)' },
+        shift: { interval: 23, name: 'maj7', description: 'major 7th (compound)' }
+    }
+};
+
+// Track currently held extensions
+let activeExtensions = new Set();
+let extensionKeyStates = {};
+
+// DEBUG: Test b7th extension for all chord types
+function testB7thForAllChords() {
+    console.log('\n=== B7TH EXTENSION TEST FOR ALL CHORDS ===');
+    const testChords = ['I', 'ii', 'iii', 'IV', 'V', 'vi', 'viiø', 'i', 'iiø', 'bIII', 'iv', 'v', 'bVI', 'bVII'];
+
+    testChords.forEach(chordKey => {
+        const rootNote = getChordRootNote(chordKey);
+        const originalNotes = noteSetsC[chordKey] || [];
+        const transposedOriginal = transposeNotes(originalNotes, currentKey);
+
+        // Calculate b7th
+        const b7thNote = intervalToNoteName(rootNote, 10);
+        const b7thBase = b7thNote ? b7thNote.replace(/[0-9]/g, '') : 'unknown';
+
+        // Check if b7th already exists
+        const alreadyHasB7th = transposedOriginal.some(note => note.replace(/[0-9]/g, '') === b7thBase);
+
+        console.log(`${chordKey}: Root=${rootNote} | Original=[${transposedOriginal.join(',')}] | b7th=${b7thNote} | AlreadyHas=${alreadyHasB7th}`);
+    });
+    console.log('=== END B7TH TEST ===\n');
+}
+
+// Get the actual root note for a chord based on its Roman numeral and current key
+function getChordRootNote(chordKey) {
+    // Get the root note in C major from noteSetsC
+    const notesInC = noteSetsC[chordKey];
+    if (!notesInC || notesInC.length === 0) {
+        console.warn(`[CHORD EXT] No notes found for chord ${chordKey}`);
+        return 'C4'; // fallback
+    }
+
+    // Get the root note (first note) in C major
+    const rootInC = notesInC[0];
+
+    // Transpose to current key
+    const transposedNotes = transposeNotes([rootInC], currentKey);
+    const rootNote = transposedNotes[0];
+
+    console.log(`[CHORD EXT] Root for ${chordKey} in key ${currentKey}: ${rootNote}`);
+    return rootNote + '4'; // Add octave for proper calculation
+}
+
+// Convert semitone interval to note name relative to root
+function intervalToNoteName(rootNote, semitones) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    const rootIndex = noteNames.indexOf(rootNote.replace(/[0-9]/g, ''));
+    if (rootIndex === -1) return null;
+
+    const targetIndex = (rootIndex + semitones) % 12;
+    const octave = Math.floor(semitones / 12);
+    const baseOctave = parseInt(rootNote.match(/\d+/)?.[0] || '4');
+
+    return noteNames[targetIndex] + (baseOctave + octave);
+}
+
+// Apply chromatic extensions to a chord
+function applyChordExtensions(baseNotes, rootNote, extensions) {
+    if (!extensions || extensions.size === 0) return baseNotes;
+
+    let extendedNotes = [...baseNotes];
+
+    // Check for sus chords first - these REPLACE the 3rd
+    const hasSus2 = Array.from(extensions).some(ext => ext.name === 'sus2');
+    const hasSus4 = Array.from(extensions).some(ext => ext.name === 'sus4');
+
+    if (hasSus2 || hasSus4) {
+        // Remove all 3rds (major and minor) from the chord
+        const rootNoteBase = rootNote.replace(/[0-9]/g, '');
+        const major3rd = intervalToNoteName(rootNote, 4); // major 3rd
+        const minor3rd = intervalToNoteName(rootNote, 3); // minor 3rd
+
+        extendedNotes = extendedNotes.filter(note => {
+            const noteBase = note.replace(/[0-9]/g, '');
+            const maj3rdBase = major3rd ? major3rd.replace(/[0-9]/g, '') : null;
+            const min3rdBase = minor3rd ? minor3rd.replace(/[0-9]/g, '') : null;
+            return noteBase !== maj3rdBase && noteBase !== min3rdBase;
+        });
+
+        console.log(`[CHORD EXT] Removed 3rds for sus chord. Remaining: ${extendedNotes.join(', ')}`);
+    }
+
+    // Now add the extensions
+    extensions.forEach(ext => {
+        const extNote = intervalToNoteName(rootNote, ext.interval);
+        if (extNote) {
+            const extNoteBase = extNote.replace(/[0-9]/g, '');
+            const alreadyInChord = extendedNotes.some(note => note.replace(/[0-9]/g, '') === extNoteBase);
+
+            if (!alreadyInChord) {
+                extendedNotes.push(extNote);
+                console.log(`[CHORD EXT] Added ${ext.name} (${extNote}) to chord`);
+            } else if (ext.description.includes('override')) {
+                // For override extensions (like b7th override), emphasize by adding in different octave
+                const higherOctave = extNote.replace(/[0-9]/g, '') + '5';
+                extendedNotes.push(higherOctave);
+                console.log(`[CHORD EXT] ${ext.name} (${extNote}) already in chord - added emphasis octave (${higherOctave})`);
+            } else {
+                console.log(`[CHORD EXT] ${ext.name} (${extNote}) already in chord - skipping`);
+            }
+        }
+    });
+
+    return extendedNotes.sort((a, b) => {
+        const aVal = Tone.Frequency(a).toMidi();
+        const bVal = Tone.Frequency(b).toMidi();
+        return aVal - bVal;
+    });
+}
+
+// INDUSTRY STANDARD INSTRUMENT RANGES (with half-octave grace period)
+const INSTRUMENT_RANGES = {
+    // Strings
+    'violin': { min: 55, max: 103, ideal_min: 55, ideal_max: 96 }, // G3-C8, ideal G3-C7
+    'viola': { min: 48, max: 88, ideal_min: 48, ideal_max: 81 }, // C3-E6, ideal C3-A5
+    'cello': { min: 36, max: 76, ideal_min: 36, ideal_max: 69 }, // C2-E5, ideal C2-A4
+    'contrabass': { min: 28, max: 67, ideal_min: 28, ideal_max: 60 }, // E1-G4, ideal E1-C4
+
+    // Winds
+    'flute': { min: 60, max: 96, ideal_min: 60, ideal_max: 89 }, // C4-C7, ideal C4-F6
+    'piccolo': { min: 74, max: 108, ideal_min: 74, ideal_max: 101 }, // D5-C8, ideal D5-F7
+    'clarinet': { min: 50, max: 91, ideal_min: 50, ideal_max: 84 }, // D3-G6, ideal D3-C6
+    'oboe': { min: 58, max: 91, ideal_min: 58, ideal_max: 84 }, // Bb3-G6, ideal Bb3-C6
+    'bassoon': { min: 34, max: 75, ideal_min: 34, ideal_max: 68 }, // Bb1-Eb5, ideal Bb1-Ab4
+    'saxophone': { min: 49, max: 83, ideal_min: 49, ideal_max: 76 }, // Db3-B5, ideal Db3-E5
+
+    // Brass
+    'trumpet': { min: 58, max: 94, ideal_min: 58, ideal_max: 87 }, // Bb3-Bb6, ideal Bb3-Eb6
+    'horn': { min: 41, max: 77, ideal_min: 41, ideal_max: 70 }, // F2-F5, ideal F2-Bb4
+    'trombone': { min: 40, max: 72, ideal_min: 40, ideal_max: 65 }, // E2-C5, ideal E2-F4
+    'tuba': { min: 28, max: 58, ideal_min: 28, ideal_max: 51 }, // E1-Bb3, ideal E1-Eb3
+
+    // Piano & Keyboard
+    'acoustic_grand_piano': { min: 21, max: 108, ideal_min: 36, ideal_max: 84 }, // A0-C8, ideal C2-C6
+    'electric_piano': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+
+    // Bass instruments
+    'acoustic_bass': { min: 28, max: 67, ideal_min: 28, ideal_max: 55 }, // E1-G4, ideal E1-G3
+    'electric_bass_finger': { min: 28, max: 72, ideal_min: 28, ideal_max: 60 }, // E1-C5, ideal E1-C4
+    'synth_bass_1': { min: 24, max: 72, ideal_min: 28, ideal_max: 60 }, // C1-C5, ideal E1-C4
+
+    // Choir & Voice
+    'choir_aahs': { min: 36, max: 84, ideal_min: 48, ideal_max: 72 }, // C2-C6, ideal C3-C5
+    'voice_oohs': { min: 36, max: 84, ideal_min: 48, ideal_max: 72 }, // C2-C6, ideal C3-C5
+
+    // Strings Ensemble
+    'string_ensemble_1': { min: 28, max: 96, ideal_min: 36, ideal_max: 84 }, // E1-C7, ideal C2-C6
+    'string_ensemble_2': { min: 28, max: 96, ideal_min: 36, ideal_max: 84 }, // E1-C7, ideal C2-C6
+
+    // Default ranges for unknown instruments
+    'default_melody': { min: 48, max: 84, ideal_min: 60, ideal_max: 72 }, // C3-C6, ideal C4-C5
+    'default_bass': { min: 28, max: 60, ideal_min: 28, ideal_max: 55 } // E1-C4, ideal E1-G3
+};
+
+// Function to constrain MIDI note to instrument range
+function constrainToInstrumentRange(midi, instrumentName, voice = 'melody') {
+    const ranges = INSTRUMENT_RANGES[instrumentName] || INSTRUMENT_RANGES[`default_${voice}`];
+    if (!ranges) return midi;
+
+    // First try to keep within ideal range
+    let constrainedMidi = midi;
+    while (constrainedMidi > ranges.ideal_max) constrainedMidi -= 12;
+    while (constrainedMidi < ranges.ideal_min) constrainedMidi += 12;
+
+    // If still outside absolute limits, apply hard constraints (with warning)
+    if (constrainedMidi > ranges.max) {
+        console.warn(`[RANGE WARNING] ${instrumentName} ${voice}: ${constrainedMidi} > ${ranges.max} (max), clamping`);
+        while (constrainedMidi > ranges.max) constrainedMidi -= 12;
+    }
+    if (constrainedMidi < ranges.min) {
+        console.warn(`[RANGE WARNING] ${instrumentName} ${voice}: ${constrainedMidi} < ${ranges.min} (min), clamping`);
+        while (constrainedMidi < ranges.min) constrainedMidi += 12;
+    }
+
+    return constrainedMidi;
+}
 
 // Progression arrows UI controls
 const progressionArrowsCheckbox = document.getElementById('progression-arrows');
@@ -4296,19 +5349,20 @@ resetBtn?.addEventListener('click', () => {
 
 // Lock icon events handled above via melodyLockIcon/bassLockIcon
 
-setSelect.addEventListener('change', () => {
-    // Toggle shelf visibility only; default shows all
-    const val = setSelect.value;
-    currentSet = val;
+// Handle set toggle checkboxes
+function updateSetVisibility() {
     const show = new Set();
-    if (val === 'major') chordSetsC.major.forEach(c => show.add(c.roman));
-    else if (val === 'minor') chordSetsC.minor.forEach(c => show.add(c.roman));
-    else if (val === 'applied') chordSetsC.applied.forEach(c => show.add(c.roman));
-    else {
-        [...chordSetsC.major, ...chordSetsC.minor, ...chordSetsC.applied].forEach(c => show.add(c.roman));
-    }
+    if (setMajor?.checked) chordSetsC.major.forEach(c => show.add(c.roman));
+    if (setMinor?.checked) chordSetsC.minor.forEach(c => show.add(c.roman));
+    if (setApplied?.checked) chordSetsC.applied.forEach(c => show.add(c.roman));
+
     for (const s of shelfCubes) { s.visible = show.has(s.userData.roman); }
-});
+    console.log(`[SET TOGGLES] Visible sets: Major=${setMajor?.checked}, Minor=${setMinor?.checked}, Applied=${setApplied?.checked}`);
+}
+
+setMajor?.addEventListener('change', updateSetVisibility);
+setMinor?.addEventListener('change', updateSetVisibility);
+setApplied?.addEventListener('change', updateSetVisibility);
 
 labelSelect.addEventListener('change', () => {
     labelMode = labelSelect.value;
@@ -4467,9 +5521,9 @@ function animate() {
             frontSpotL.intensity = 1.2; // Left front row spotlight
             frontSpotR.intensity = 1.2; // Right front row spotlight
 
-            // SPECIAL BASS VIEW LIGHTING: Quadruple lighting on bottom and front faces
-            bassBottomSpot.intensity = 6.0; // Strong bottom illumination from below
-            bassFrontSpot.intensity = 6.0; // Strong front face illumination
+            // EXTENDED BASS VIEW LIGHTING: Activate all bass lights for full coverage
+            bassLights.forEach(light => light.intensity = 8.0); // Very bright illumination
+            bassAmbientBoost.intensity = 0.3; // Additional ambient boost
         } else {
             try { darkPlane.material.opacity = 0.0; } catch (_) { }
             stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
@@ -4480,9 +5534,9 @@ function animate() {
             frontSpotL.intensity = 0.0;
             frontSpotR.intensity = 0.0;
 
-            // Turn off special bass view lighting in melody view
-            bassBottomSpot.intensity = 0.0;
-            bassFrontSpot.intensity = 0.0;
+            // Turn off extended bass view lighting in melody view
+            bassLights.forEach(light => light.intensity = 0.0);
+            bassAmbientBoost.intensity = 0.0;
         }
     } catch (_) { }
     // TEMP DEBUG: log one pivot angle occasionally
@@ -5153,7 +6207,7 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
     if (sfChord && sfChord.play) {
         chordMidis.forEach(m => sfChord.play(m, now, { duration: sustainSeconds, gain: 0.18 * chordVolume }));
     }
-    if (bassEnabled) {
+    if (isBassEnabled()) {
         const bassMidi = getBassMidiForObject(obj);
         // NEW AUDIO ENGINE: Use real bass instruments
         if (window.audioEngine && window.audioEngine.playBass) {
@@ -5162,7 +6216,7 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
             window.audioEngine.playBass(bassNote, sustainSeconds, 0.34);
         }
     }
-    if (melodyEnabled) {
+    if (isMelodyEnabled()) {
         const melMidi = getMelodyMidiForObject(obj);
         // NEW AUDIO ENGINE: Use real melody instruments
         if (window.audioEngine && window.audioEngine.playMelody) {
@@ -5181,7 +6235,13 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
     }
 
     const chordKey = obj.userData.roman;
-    const duration = 1.1;
+
+    // Calculate full measure duration based on current BPM (same as progression)
+    const currentBpm = Tone.Transport.bpm.value || 120; // Default to 120 BPM if not set
+    const beatsPerMeasure = 4;
+    const duration = (60 / currentBpm) * beatsPerMeasure; // Full measure duration
+
+    console.log(`[CHORD CLICK] Playing ${chordKey} with full sustain: ${duration.toFixed(2)}s (BPM: ${currentBpm})`);
 
     // FREE IMPROV: Override rotation to force root position
     const effectiveRotationIndex = options.forceRootPosition ? 0 : obj.userData.rotationIndex;
@@ -5200,13 +6260,66 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
 
     // Convert MIDI numbers to note names for WebAudioFont
-    const noteNames = bedMidis.map(midi => midiToNoteName(midi));
+    let noteNames = bedMidis.map(midi => midiToNoteName(midi));
+    console.log(`[CHORD EXT DEBUG] ${chordKey} original notes: [${noteNames.join(', ')}], bedMidis: [${bedMidis.join(', ')}]`);
+
+    // APPLY STORED EXTENSIONS from chord userData (for playback)
+    if (obj && obj.userData && obj.userData.extensions && obj.userData.extensions.length > 0) {
+        console.log(`[PLAYBACK EXT] Found stored extensions for ${chordKey}:`, obj.userData.extensions);
+        const rootNote = getChordRootNote(chordKey);
+        const storedExtensions = new Set(obj.userData.extensions.map(ext => ({
+            name: ext.name,
+            interval: ext.interval,
+            description: ext.description
+        })));
+        noteNames = applyChordExtensions(noteNames, rootNote, storedExtensions);
+        console.log(`[PLAYBACK EXT] Applied stored extensions: ${noteNames.join(', ')}`);
+    }
+    // APPLY CHROMATIC EXTENSIONS if any are currently active (live playing)
+    else if (activeExtensions.size > 0) {
+        console.log(`[CHORD EXT DEBUG] Active extensions: [${Array.from(activeExtensions).map(ext => ext.name).join(', ')}]`);
+        const rootNote = getChordRootNote(chordKey); // Get actual root from Roman numeral
+        console.log(`[CHORD EXT DEBUG] Root note: ${rootNote}`);
+        noteNames = applyChordExtensions(noteNames, rootNote, activeExtensions);
+        console.log(`[CHORD EXT] Extended chord for ${chordKey}: ${noteNames.join(', ')}`);
+
+        // HARDCODE EXTENSIONS INTO CHORD OBJECT FOR PERSISTENCE
+        if (obj && obj.userData) {
+            obj.userData.extensions = Array.from(activeExtensions).map(ext => ({
+                name: ext.name,
+                interval: ext.interval,
+                description: ext.description
+            }));
+            console.log(`[CHORD PERSISTENCE] Saved extensions to ${chordKey}:`, obj.userData.extensions);
+
+            // UPDATE CHORD FACE IMMEDIATELY TO SHOW EXTENSIONS
+            const label = (labelMode === 'roman') ? obj.userData.roman : obj.userData.letter || obj.userData.roman;
+            const newTexture = loadFaceTexture(label, obj.userData.roman, false, obj.userData.extensions);
+            if (obj.material && obj.material[4]) { // Front face index
+                obj.material[4].map = newTexture;
+                obj.material[4].needsUpdate = true;
+            }
+        }
+    } else {
+        // Clear extensions if none are active
+        if (obj && obj.userData) {
+            delete obj.userData.extensions;
+
+            // UPDATE CHORD FACE TO REMOVE EXTENSIONS
+            const label = (labelMode === 'roman') ? obj.userData.roman : obj.userData.letter || obj.userData.roman;
+            const newTexture = loadFaceTexture(label, obj.userData.roman, false, null);
+            if (obj.material && obj.material[4]) { // Front face index
+                obj.material[4].map = newTexture;
+                obj.material[4].needsUpdate = true;
+            }
+        }
+    }
 
     // Play chord using orchestral engine
     window.audioEngine.playChord(noteNames, duration, 0.5);
 
     // Bass: if locked, use locked line; else use cube bottom face - WITH VOICE LEADING 3
-    if (bassEnabled) {
+    if (isBassEnabled()) {
         // Temporarily override rotation index for Free Improv mode
         const originalRotationIndex = obj.userData.rotationIndex;
         if (options.forceRootPosition) {
@@ -5237,7 +6350,7 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
     }
 
     // Melody: if locked, use locked line; else use cube top face - WITH VOICE LEADING 3
-    if (melodyEnabled) {
+    if (isMelodyEnabled()) {
         // Temporarily override rotation index for Free Improv mode
         const originalRotationIndex = obj.userData.rotationIndex;
         if (options.forceRootPosition) {
@@ -5269,11 +6382,11 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
 
     // UPDATE CHORD CONTEXT: Track this chord for next voice leading decision
     const playedMidis = {};
-    if (bassEnabled && lastBassMidi != null) playedMidis.bass = lastBassMidi;
-    if (melodyEnabled && lastMelodyMidi != null) playedMidis.melody = lastMelodyMidi;
+    if (isBassEnabled() && lastBassMidi != null) playedMidis.bass = lastBassMidi;
+    if (isMelodyEnabled() && lastMelodyMidi != null) playedMidis.melody = lastMelodyMidi;
     updateChordContext(chordKey, playedMidis);
 
-    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh: use7th, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
+    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh: use7th, bassEnabled: isBassEnabled(), melodyEnabled: isMelodyEnabled(), rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
 }
 
 // Helper function to convert MIDI numbers to note names
@@ -7122,7 +8235,20 @@ async function playFrontRowProgression() {
 
                     // Get chord notes
                     const chordMidis = buildLockedChordBedMidis(c.userData.roman, withSeventh);
-                    const chordNotes = chordMidis.map(midi => Tone.Frequency(midi, "midi").toNote());
+                    let chordNotes = chordMidis.map(midi => Tone.Frequency(midi, "midi").toNote());
+
+                    // APPLY STORED EXTENSIONS for playback
+                    if (c.userData && c.userData.extensions && c.userData.extensions.length > 0) {
+                        console.log(`[TRANSPORT EXT] Applying stored extensions for ${c.userData.roman}:`, c.userData.extensions);
+                        const rootNote = getChordRootNote(c.userData.roman);
+                        const storedExtensions = new Set(c.userData.extensions.map(ext => ({
+                            name: ext.name,
+                            interval: ext.interval,
+                            description: ext.description
+                        })));
+                        chordNotes = applyChordExtensions(chordNotes, rootNote, storedExtensions);
+                        console.log(`[TRANSPORT EXT] Extended chord notes: ${chordNotes.join(', ')}`);
+                    }
 
                     // Play with NEW AUDIO ENGINE using FULL DURATION
                     window.audioEngine.playChord(chordNotes, chordDurationSeconds, 0.7);
@@ -7130,6 +8256,10 @@ async function playFrontRowProgression() {
                     // Play bass if enabled - SKIP if locked bass exists (will be played below)
                     if (bassEnabled && !lockedBass) {
                         let bassMidi = getBassMidiForObject(c);
+
+                        // Apply industry standard range constraints
+                        const bassInstrument = document.getElementById('bass-inst')?.value || 'contrabass';
+                        bassMidi = constrainToInstrumentRange(bassMidi, bassInstrument, 'bass');
 
                         // APPLY VOICE LEADING 3 (Academic Grade) to face-derived bass
                         if (index > 0 && lastProgressionBassMidi !== null) {
@@ -7165,6 +8295,10 @@ async function playFrontRowProgression() {
                     // Play melody if enabled - SKIP if locked melody exists (will be played below)
                     if (melodyEnabled && !lockedMelody) {
                         let melMidi = getMelodyMidiForObject(c);
+
+                        // Apply industry standard range constraints
+                        const melodyInstrument = document.getElementById('melody-inst')?.value || 'violin';
+                        melMidi = constrainToInstrumentRange(melMidi, melodyInstrument, 'melody');
 
                         // APPLY VOICE LEADING 3 (Academic Grade) to face-derived melody
                         if (index > 0 && lastProgressionMelodyMidi !== null) {
@@ -7327,8 +8461,7 @@ window.forceShowUI = function () {
     }
 };
 
-// Initialize volume controls and camera compensation
-setupVolumeControls();
+// Volume controls already initialized via setTimeout above
 
 // Add camera height compensation to existing animate loop
 // (This will be called from the existing animate function)

@@ -13,6 +13,7 @@ export const chordSetsC = {
     ],
     applied: [
         { roman: 'I7', letter: 'C7' },
+        { roman: 'i7', letter: 'Cm7' },
         { roman: 'iiiø', letter: 'Eø' },
         { roman: 'II(7)', letter: 'D(7)' },
         { roman: 'II', letter: 'D' },
@@ -96,6 +97,7 @@ export const noteSetsC = {
     '#iiº': ['D#', 'F#', 'A', 'C'],
     'VII': ['B', 'D#', 'F#', 'A#'],
     'i': ['C', 'Eb', 'G', 'Bb'],
+    'i7': ['C', 'Eb', 'G', 'Bb'],
     'iiø': ['D', 'F', 'Ab', 'C'],
     'bIII': ['Eb', 'G', 'Bb', 'D'],
     'iv': ['F', 'Ab', 'C', 'Eb'],
