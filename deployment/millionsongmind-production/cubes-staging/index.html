@@ -449,10 +449,12 @@
 			</select>
 			<label style="margin-left:12px;">Voice Leading</label>
 			<select id="voice-leading-mode">
-				<option value="vl1" selected>Voice leading 1</option>
-				<option value="vl2">Voice leading 2</option>
+				<option value="vl1">Voice leading 1</option>
+				<option value="vl2" selected>Voice leading 2</option>
 			</select>
 			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
+			<label style="margin-left:8px;">Loops:</label>
+			<input type="number" id="progression-loops" min="1" max="99" value="1" style="width:50px; margin-left:4px;">
 		</div>
 		<div class="row small">
 			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
@@ -570,7 +572,7 @@
 	<!-- Tonal for voice-leading utilities (mode 2) -->
 	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
 	<script type="module" src="./chords.js?v=1"></script>
-	<script type="module" src="./main.js?v=40"></script>
+	<script type="module" src="./main.js?v=41"></script>
 	<script src="./professional-drum-machine.js?v=5"></script>
 </body>
 

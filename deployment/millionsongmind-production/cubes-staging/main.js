@@ -895,6 +895,18 @@ function addEpicTitles() {
         melodyMesh.rotation.x = -Math.PI / 2; // on ground, readable from above
         melodyMesh.position.set(0, 0.002, 2.8);
         scene.add(melodyMesh);
+        
+        // MELODY PLAY BUTTON
+        const melodyPlayTex = makeTitleTexture(['▶'], { width: 512, height: 512, size: 300, weight: 1000 });
+        const melodyPlayMat = new THREE.MeshBasicMaterial({ map: melodyPlayTex, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false });
+        const melodyPlayGeo = new THREE.PlaneGeometry(2, 2);
+        const melodyPlayMesh = new THREE.Mesh(melodyPlayGeo, melodyPlayMat);
+        melodyPlayMesh.rotation.x = -Math.PI / 2; // on ground, readable from above
+        melodyPlayMesh.position.set(9, 0.01, 2.8); // Next to MELODY text
+        melodyPlayMesh.userData = { isMelodyPlayButton: true, isUi: true };
+        melodyPlayMesh.renderOrder = 1;
+        scene.add(melodyPlayMesh);
+        uiPickables.push(melodyPlayMesh);
         // Add 3D lock icons flanking the word MELODY
         const lockMatOpen = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
         const lockMatClosed = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
@@ -929,6 +941,18 @@ function addEpicTitles() {
         bassMesh.position.set(0, 0.002, 2.8);
         bassMesh.renderOrder = 1; // draw after darkening plane
         scene.add(bassMesh);
+        
+        // BASSLINE PLAY BUTTON
+        const bassPlayTex = makeTitleTexture(['▶'], { width: 512, height: 512, size: 300, weight: 1000 });
+        const bassPlayMat = new THREE.MeshBasicMaterial({ map: bassPlayTex, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false });
+        const bassPlayGeo = new THREE.PlaneGeometry(2, 2);
+        const bassPlayMesh = new THREE.Mesh(bassPlayGeo, bassPlayMat);
+        bassPlayMesh.rotation.x = Math.PI / 2;
+        bassPlayMesh.position.set(9, 0.01, 2.8); // Next to BASSLINE text
+        bassPlayMesh.userData = { isBassPlayButton: true, isUi: true };
+        bassPlayMesh.renderOrder = 1;
+        scene.add(bassPlayMesh);
+        uiPickables.push(bassPlayMesh);
         // Bass locks
         const iconGeo2 = new THREE.PlaneGeometry(1.2, 1.2);
         const iconTexOpen2 = makeTitleTexture(['🔓'], { width: 256, height: 256, size: 200, weight: 900 });
@@ -1787,12 +1811,20 @@ function onPointerMove(e) {
         if (raycaster.ray.intersectPlane(plane, worldPoint)) {
             // worldPoint is the cursor hit on the fixed ground plane
             const desiredXFromPlane = worldPoint.x - dragOffsetX;
-            // Depth control via vertical mouse motion
+            // Depth control via vertical mouse motion - RESTRICTED IN ADJUST MODE
             const dyScreen = e.clientY - dragStartScreenY;
             const r = dragging.userData.roman;
             const shelfY0 = dragging.userData.shelfY0 ?? (shelfOriginByRoman[r]?.position.y ?? shelfY);
             const desired = ensureDesired(dragging.userData);
-            if (dragging.userData.fromShelf) {
+            
+            if (adjustMode && dragging.userData?.isShelf) {
+                // ADJUST MODE: Free X/Y movement, LOCK Z position
+                desired.x = desiredXFromPlane;
+                desired.y = shelfY0 + (dyScreen * -0.01); // Allow up/down movement
+                desired.z = dragStartZ; // LOCK Z - no depth changes in adjust mode
+                desired.s = dragging.userData.shelfScale0 ?? dragging.scale.x;
+                console.log(`[SHELF ADJUST] Free XY movement - X: ${desired.x.toFixed(2)}, Y: ${desired.y.toFixed(2)}, Z: LOCKED at ${desired.z.toFixed(2)}`);
+            } else if (dragging.userData.fromShelf) {
                 const zFromMouse = THREE.MathUtils.clamp(dragStartZ + dyScreen * DRAG_Z_PER_PX, shelfZ, FRONT_ROW_FORWARD_Z);
                 const t = THREE.MathUtils.clamp((zFromMouse - shelfZ) / (0 - shelfZ), 0, 1);
                 const yMapped = THREE.MathUtils.lerp(shelfY0, 0, t);
@@ -1930,6 +1962,12 @@ function onPointerUp(e) {
                 } else {
                     lockedBass = null; renderBassLane(); setBassLockVisual('open');
                 }
+            } else if (ud.isMelodyPlayButton) {
+                console.log('[MELODY PLAY] Starting melody-only playback');
+                playMelodyOnly();
+            } else if (ud.isBassPlayButton) {
+                console.log('[BASS PLAY] Starting bass-only playback');
+                playBassOnly();
             }
             pendingObj = null; uiLockClick = false; controls.enabled = true; e.stopPropagation?.(); e.preventDefault?.();
             return;
@@ -2368,7 +2406,7 @@ let sfChord = null, sfBass = null, sfMelody = null;
 let chordInst = null, bassInst = null, melodyInst = null;
 // Voice-leading state for closest-octave selection
 let lastBassMidi = null, lastMelodyMidi = null;
-let voiceLeadingMode = 'vl1'; // 'vl1' nearest-octave, 'vl2' tonal.js assisted
+let voiceLeadingMode = 'vl2'; // 'vl1' nearest-octave, 'vl2' tonal.js assisted - DEFAULT TO VL2
 let lockedMelody = null; // [{ roman, midi, color } ...]
 let lockedBass = null;   // [{ roman, midi, color } ...]
 let melodyLaneGroup = null, bassLaneGroup = null;
@@ -2405,10 +2443,41 @@ function setBassLockVisual(state /* 'open' | 'closed' */) {
         bassLockRight.material.map = tex; bassLockRight.material.needsUpdate = true;
     }
 }
+// PROFESSIONAL ORCHESTRAL SOUND LIBRARIES
+const ORCHESTRAL_PRESETS = {
+    // CHORD SECTION - Rich Orchestral Textures
+    chord: {
+        strings: { url: 'https://surikov.github.io/webaudiofontdata/sound/0480_FluidR3_GM_sf2_file.js', var: '_tone_0480_FluidR3_GM_sf2_file', name: 'String Ensemble' },
+        brass: { url: 'https://surikov.github.io/webaudiofontdata/sound/0610_FluidR3_GM_sf2_file.js', var: '_tone_0610_FluidR3_GM_sf2_file', name: 'Brass Section' },
+        piano: { url: 'https://surikov.github.io/webaudiofontdata/sound/0000_FluidR3_GM_sf2_file.js', var: '_tone_0000_FluidR3_GM_sf2_file', name: 'Concert Grand' },
+        pad: { url: 'https://surikov.github.io/webaudiofontdata/sound/0900_FluidR3_GM_sf2_file.js', var: '_tone_0900_FluidR3_GM_sf2_file', name: 'Warm Pad' }
+    },
+    // BASS SECTION - Deep Orchestral Bass
+    bass: {
+        contrabass: { url: 'https://surikov.github.io/webaudiofontdata/sound/0430_FluidR3_GM_sf2_file.js', var: '_tone_0430_FluidR3_GM_sf2_file', name: 'Contrabass' },
+        cello: { url: 'https://surikov.github.io/webaudiofontdata/sound/0420_FluidR3_GM_sf2_file.js', var: '_tone_0420_FluidR3_GM_sf2_file', name: 'Cello' },
+        tuba: { url: 'https://surikov.github.io/webaudiofontdata/sound/0580_FluidR3_GM_sf2_file.js', var: '_tone_0580_FluidR3_GM_sf2_file', name: 'Tuba' },
+        electric: { url: 'https://surikov.github.io/webaudiofontdata/sound/0330_FluidR3_GM_sf2_file.js', var: '_tone_0330_FluidR3_GM_sf2_file', name: 'Electric Bass' }
+    },
+    // MELODY SECTION - Expressive Lead Instruments  
+    melody: {
+        violin: { url: 'https://surikov.github.io/webaudiofontdata/sound/0400_FluidR3_GM_sf2_file.js', var: '_tone_0400_FluidR3_GM_sf2_file', name: 'Violin' },
+        flute: { url: 'https://surikov.github.io/webaudiofontdata/sound/0730_FluidR3_GM_sf2_file.js', var: '_tone_0730_FluidR3_GM_sf2_file', name: 'Flute' },
+        trumpet: { url: 'https://surikov.github.io/webaudiofontdata/sound/0560_FluidR3_GM_sf2_file.js', var: '_tone_0560_FluidR3_GM_sf2_file', name: 'Trumpet' },
+        oboe: { url: 'https://surikov.github.io/webaudiofontdata/sound/0680_FluidR3_GM_sf2_file.js', var: '_tone_0680_FluidR3_GM_sf2_file', name: 'Oboe' }
+    }
+};
+
+// Current instrument selection - defaults to orchestral
+let currentChordInstrument = 'strings';
+let currentBassInstrument = 'contrabass';  
+let currentMelodyInstrument = 'violin';
+
+// Legacy WAF_PRESETS for backward compatibility
 const WAF_PRESETS = {
-    chord: { url: 'https://surikov.github.io/webaudiofontdata/sound/0480_FluidR3_GM_sf2_file.js', var: '_tone_0480_FluidR3_GM_sf2_file' },
-    bass: { url: 'https://surikov.github.io/webaudiofontdata/sound/0430_FluidR3_GM_sf2_file.js', var: '_tone_0430_FluidR3_GM_sf2_file' },
-    melody: { url: 'https://surikov.github.io/webaudiofontdata/sound/0400_FluidR3_GM_sf2_file.js', var: '_tone_0400_FluidR3_GM_sf2_file' },
+    chord: ORCHESTRAL_PRESETS.chord[currentChordInstrument],
+    bass: ORCHESTRAL_PRESETS.bass[currentBassInstrument],
+    melody: ORCHESTRAL_PRESETS.melody[currentMelodyInstrument],
 };
 
 function initializeWebAudioFont() {
@@ -2503,6 +2572,31 @@ const melodyEnabledEl = document.getElementById('melody-enabled');
 const chordInstEl = document.getElementById('chord-inst');
 const bassInstEl = document.getElementById('bass-inst');
 const melodyInstEl = document.getElementById('melody-inst');
+
+// ORCHESTRAL INSTRUMENT CHANGE HANDLERS
+chordInstEl?.addEventListener('change', () => {
+    const newInstrument = chordInstEl.value;
+    console.log(`[ORCHESTRAL] Switching chord instrument to: ${newInstrument}`);
+    currentChordInstrument = newInstrument;
+    WAF_PRESETS.chord = ORCHESTRAL_PRESETS.chord[currentChordInstrument];
+    // TODO: Reload instrument if needed
+});
+
+bassInstEl?.addEventListener('change', () => {
+    const newInstrument = bassInstEl.value;
+    console.log(`[ORCHESTRAL] Switching bass instrument to: ${newInstrument}`);
+    currentBassInstrument = newInstrument;
+    WAF_PRESETS.bass = ORCHESTRAL_PRESETS.bass[currentBassInstrument];
+    // TODO: Reload instrument if needed
+});
+
+melodyInstEl?.addEventListener('change', () => {
+    const newInstrument = melodyInstEl.value;
+    console.log(`[ORCHESTRAL] Switching melody instrument to: ${newInstrument}`);
+    currentMelodyInstrument = newInstrument;
+    WAF_PRESETS.melody = ORCHESTRAL_PRESETS.melody[currentMelodyInstrument];
+    // TODO: Reload instrument if needed
+});
 const playProgBtn = document.getElementById('play-progression');
 const resetBtn = document.getElementById('reset-btn');
 const voiceLeadingSelect = document.getElementById('voice-leading-mode');
@@ -2951,17 +3045,18 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
     const names = transposeNotes(tones, currentKey);
 
-    // ALWAYS include 7th for diminished chords and I7 chords
+        // ALWAYS include 7th for diminished chords and I7 chords
     const isDiminished = roman.includes('º') || roman.includes('ø');
     const isI7 = roman === 'I7' || roman === 'i7';
     const isV7b9 = roman === 'V(7)(b9)' || roman === 'V(b7)(b9)';
     const forceSeventhForSpecialChords = isDiminished || isI7;
-
-    // V(7)(b9) ALWAYS uses all 4 notes (root, 3rd, 5th, b9th) - b9th is always present
+    
+    // V(7)(b9) uses 3 notes (root, 3rd, b9th) - NO forced 7th, only the distinctive b9th
     let use;
     if (isV7b9) {
-        use = names.slice(0, 4); // Always use all 4 notes for V(b7)(b9) - b9th is mandatory
-        console.log(`[V7B9 DEBUG] ${roman} using all 4 notes (including b9th):`, use);
+        // Only use root, 3rd, and b9th - no 7th unless explicitly requested
+        use = includeSeventh ? names.slice(0, 4) : [names[0], names[1], names[3]]; // root, 3rd, b9th
+        console.log(`[V7B9 DEBUG] ${roman} using ${use.length} notes (b9th mandatory, 7th=${includeSeventh ? 'included' : 'excluded'}):`, use);
     } else {
         use = (includeSeventh || forceSeventhForSpecialChords) ? names.slice(0, 4) : names.slice(0, 3);
     }
@@ -3982,6 +4077,147 @@ function lockInBass() {
     } catch (_) { }
 }
 
+// SOLO PLAYBACK FUNCTIONS - Play only melody or bass with transport sync
+function playMelodyOnly() {
+    if (lineup.length === 0) {
+        console.log('[MELODY SOLO] No chords in lineup');
+        return;
+    }
+    
+    console.log('[MELODY SOLO] Starting melody-only progression');
+    startSoloProgression('melody');
+}
+
+function playBassOnly() {
+    if (lineup.length === 0) {
+        console.log('[BASS SOLO] No chords in lineup');
+        return;
+    }
+    
+    console.log('[BASS SOLO] Starting bass-only progression');
+    startSoloProgression('bass');
+}
+
+function startSoloProgression(soloType) {
+    // Get loop count from UI
+    const loopsInput = document.getElementById('progression-loops');
+    const loopCount = parseInt(loopsInput?.value || '1');
+    const totalChords = lineup.length * loopCount;
+    
+    console.log(`[${soloType.toUpperCase()} SOLO] ${lineup.length} chords x ${loopCount} loops = ${totalChords} total`);
+    
+    // Clear any existing progression sequence
+    if (window.chordProgressionSequence) {
+        window.chordProgressionSequence.dispose();
+        window.chordProgressionSequence = null;
+    }
+    
+    // Start drum machine if not playing
+    if (window.drumMachine && !window.drumMachine.isPlaying) {
+        console.log(`[${soloType.toUpperCase()} SOLO] Starting drum machine transport`);
+        window.drumMachine.toggleDrums();
+    }
+    
+    // Create solo progression sequence
+    const soloSequence = new Tone.Sequence((time, index) => {
+        if (index >= totalChords) {
+            // Solo progression complete
+            console.log(`[${soloType.toUpperCase()} SOLO] Progression complete`);
+            soloSequence.dispose();
+            window.chordProgressionSequence = null;
+            
+            // Stop drum machine
+            if (window.drumMachine && window.drumMachine.isPlaying) {
+                setTimeout(() => window.drumMachine.toggleDrums(), 100);
+            }
+            
+            // Auto-reset to melody view
+            setTimeout(() => {
+                setViewAbove();
+                ambient.intensity = 0.7;
+                dir.intensity = 0.7;
+                frontSpot.intensity = 0.0;
+                frontSpotL.intensity = 0.0;
+                frontSpotR.intensity = 0.0;
+                stageSpot.intensity = 0.0;
+                stageMode = false;
+                console.log(`[${soloType.toUpperCase()} SOLO] Auto-reset complete`);
+            }, 1000);
+            
+            return;
+        }
+        
+        const c = lineup[index % lineup.length];
+        const currentLoop = Math.floor(index / lineup.length) + 1;
+        const chordInLoop = (index % lineup.length) + 1;
+        
+        // Calculate sustain duration
+        const currentBpm = Tone.Transport.bpm.value;
+        const beatsPerMeasure = 4;
+        const chordDurationSeconds = (60 / currentBpm) * beatsPerMeasure;
+        
+        console.log(`[${soloType.toUpperCase()} SOLO] Loop ${currentLoop}/${loopCount}, Chord ${chordInLoop}/${lineup.length}: ${c.userData.roman}`);
+        
+        // Schedule visual effects
+        Tone.Draw.schedule(() => {
+            try {
+                highlightChordEffect(c, 900);
+                pulseGiantAt(index % lineup.length, 700);
+                addProgressionPointFromCube(c);
+            } catch (err) {
+                console.warn(`[${soloType.toUpperCase()} SOLO] Visual effect error:`, err);
+            }
+        }, time);
+        
+        // Schedule ONLY the selected voice (melody or bass)
+        const roman = c.userData.roman;
+        if (soloType === 'melody') {
+            if (lockedMelody) {
+                let melMidi = lockedMelody[index % lineup.length]?.midi ?? getMelodyMidiForObject(c);
+                while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
+                if (sfMelody && sfMelody.play) {
+                    sfMelody.play(melMidi, time, { duration: chordDurationSeconds, gain: 0.4 });
+                    lastMelodyMidi = melMidi;
+                }
+            } else {
+                // Use face-derived melody
+                Tone.Draw.schedule(() => {
+                    const melMidi = getMelodyMidiForObject(c);
+                    if (sfMelody && sfMelody.play) {
+                        sfMelody.play(melMidi, Tone.now(), { duration: chordDurationSeconds, gain: 0.4 });
+                    }
+                }, time);
+            }
+        } else if (soloType === 'bass') {
+            if (lockedBass) {
+                let bassMidi = lockedBass[index % lineup.length]?.midi ?? getBassMidiForObject(c);
+                while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+                if (sfBass && sfBass.play) {
+                    sfBass.play(bassMidi, time, { duration: chordDurationSeconds, gain: 0.5 });
+                    lastBassMidi = bassMidi;
+                }
+            } else {
+                // Use face-derived bass
+                Tone.Draw.schedule(() => {
+                    const bassMidi = getBassMidiForObject(c);
+                    if (sfBass && sfBass.play) {
+                        sfBass.play(bassMidi, Tone.now(), { duration: chordDurationSeconds, gain: 0.5 });
+                    }
+                }, time);
+            }
+        }
+        
+    }, Array.from({ length: totalChords + 1 }, (_, i) => i), "1m");
+    
+    // Store reference and start
+    window.chordProgressionSequence = soloSequence;
+    soloSequence.start(0);
+    
+    console.log(`[${soloType.toUpperCase()} SOLO] Transport sequence started`);
+}
+
 async function playLockSound() {
     try {
         if (!window.Tone) return;
@@ -4008,8 +4244,13 @@ async function playFrontRowProgression() {
         await window.drumMachine.toggleDrums();
     }
 
-    console.log(`[PLAY PROGRESSION] Starting with ${lineup.length} chords - USING TONE.JS TRANSPORT`);
-
+        // Get loop count from UI
+    const loopsInput = document.getElementById('progression-loops');
+    const loopCount = parseInt(loopsInput?.value || '1');
+    const totalChords = lineup.length * loopCount;
+    
+    console.log(`[PLAY PROGRESSION] Starting ${lineup.length} chords x ${loopCount} loops = ${totalChords} total - USING TONE.JS TRANSPORT`);
+    
     // Clear any existing progression sequence
     if (window.chordProgressionSequence) {
         window.chordProgressionSequence.dispose();
@@ -4018,7 +4259,7 @@ async function playFrontRowProgression() {
 
     // TRANSPORT-BASED PROGRESSION - Perfect sync with drum machine
     const progressionSequence = new Tone.Sequence((time, index) => {
-        if (index >= lineup.length) {
+        if (index >= totalChords) {
             // Progression complete
             console.log('[TRANSPORT] Progression complete - cleaning up');
             progressionSequence.dispose();
@@ -4045,20 +4286,22 @@ async function playFrontRowProgression() {
             return;
         }
 
-        const c = lineup[index];
+        const c = lineup[index % lineup.length]; // Loop through the progression
+        const currentLoop = Math.floor(index / lineup.length) + 1;
+        const chordInLoop = (index % lineup.length) + 1;
 
         // Calculate chord sustain duration based on CURRENT transport BPM - USE MEASURES
         const currentBpm = Tone.Transport.bpm.value;
         const beatsPerMeasure = 4; // Standard 4/4 time
         const chordDurationSeconds = (60 / currentBpm) * beatsPerMeasure; // Full measure duration
 
-        console.log(`[TRANSPORT] Chord ${index + 1}/${lineup.length}: ${c.userData.roman} at time ${time.toFixed(3)}s, BPM: ${currentBpm}, sustain: ${chordDurationSeconds.toFixed(2)}s`);
+        console.log(`[TRANSPORT] Loop ${currentLoop}/${loopCount}, Chord ${chordInLoop}/${lineup.length}: ${c.userData.roman} at time ${time.toFixed(3)}s, BPM: ${currentBpm}, sustain: ${chordDurationSeconds.toFixed(2)}s`);
 
         // Schedule visual effects on main thread
         Tone.Draw.schedule(() => {
             try {
                 highlightChordEffect(c, 900);
-                pulseGiantAt(index, 700);
+                pulseGiantAt(index % lineup.length, 700);
                 // Camera dolly
                 const tDur = 700;
                 const fromPos = camera.position.clone();
@@ -4089,7 +4332,7 @@ async function playFrontRowProgression() {
                 chordMidis.forEach(m => sfChord.play(m, time, { duration: chordDurationSeconds, gain: 0.18 }));
             }
             if (bassEnabled) {
-                let bassMidi = lockedBass?.[index]?.midi ?? getBassMidiForObject(c);
+                let bassMidi = lockedBass?.[index % lineup.length]?.midi ?? getBassMidiForObject(c);
                 while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
                 bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
                 if (sfBass && sfBass.play) {
@@ -4098,7 +4341,7 @@ async function playFrontRowProgression() {
                 }
             }
             if (melodyEnabled) {
-                let melMidi = lockedMelody?.[index]?.midi ?? getMelodyMidiForObject(c);
+                let melMidi = lockedMelody?.[index % lineup.length]?.midi ?? getMelodyMidiForObject(c);
                 while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
                 melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
                 if (sfMelody && sfMelody.play) {
@@ -4113,13 +4356,13 @@ async function playFrontRowProgression() {
             }, time);
         }
 
-    }, Array.from({ length: lineup.length + 1 }, (_, i) => i), "1m"); // 1 measure per chord
+    }, Array.from({ length: totalChords + 1 }, (_, i) => i), "1m"); // 1 measure per chord
 
     // Store reference and start
     window.chordProgressionSequence = progressionSequence;
     progressionSequence.start(0);
 
-    console.log(`[TRANSPORT] Sequence started with 1 measure per chord (4 beats each)`);
+    console.log(`[TRANSPORT] Sequence started: ${lineup.length} chords x ${loopCount} loops = ${totalChords} measures`);
 
     // Progression now runs via Transport - no more await needed!
 }
