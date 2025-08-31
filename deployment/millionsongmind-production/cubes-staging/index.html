@@ -449,8 +449,9 @@
 			</select>
 			<label style="margin-left:12px;">Voice Leading</label>
 			<select id="voice-leading-mode">
-				<option value="vl1">Voice leading 1</option>
-				<option value="vl2" selected>Voice leading 2</option>
+				<option value="vl1">Voice leading 1 (Nearest Octave)</option>
+				<option value="vl2">Voice leading 2 (Minimal Distance)</option>
+				<option value="vl3" selected>Voice leading 3 (Academic Grade)</option>
 			</select>
 			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
 			<label style="margin-left:8px;">Loops:</label>
@@ -579,7 +580,7 @@
 	<!-- Tonal for voice-leading utilities (mode 2) -->
 	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
 	<script type="module" src="./chords.js?v=2"></script>
-	<script type="module" src="./main.js?v=69"></script>
+	<script type="module" src="./main.js?v=76"></script>
 	<script src="./professional-drum-machine.js?v=6"></script>
 
 	<!-- PROFESSIONAL FONT CONTROL MODAL -->

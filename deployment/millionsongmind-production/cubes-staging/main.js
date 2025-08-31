@@ -147,11 +147,11 @@ const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerH
 let shelfPickCamera = null; // orthographic camera used only for shelf picking
 // CRITICAL: Enable all layers on camera
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
-// Melody/Bass presets – lowered angle by ~10°
+// Melody/Bass presets – lowered angle by ~10° + 7% zoom out
 const melodyTarget = new THREE.Vector3(0, 1.4, 0);
-const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5);
+const melodyCamPos = new THREE.Vector3(0, 5.8, 11.5 * 1.07); // 7% zoom out
 const bassTarget = melodyTarget.clone();
-const bassCamPos = new THREE.Vector3(0, -5.8, 11.5);
+const bassCamPos = new THREE.Vector3(0, -5.8, 11.5 * 1.07); // 7% zoom out
 camera.position.copy(melodyCamPos);
 // Ensure camera renders default, front, and shelf layers
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
@@ -911,8 +911,8 @@ function makeTitleTexture(lines, opts = {}) {
         ctx.shadowColor = 'rgba(0,0,0,0.6)';
         ctx.shadowBlur = 6; ctx.shadowOffsetX = 4; ctx.shadowOffsetY = 4;
     } else {
-        ctx.shadowColor = 'rgba(0,0,0,0.4)';
-        ctx.shadowBlur = 24; ctx.shadowOffsetY = 6;
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 24; ctx.shadowOffsetY = 6;
     }
     const total = lines.length;
     const blockHeight = size * gap * (total - 1);
@@ -946,17 +946,20 @@ function addEpicTitles() {
         melodyMesh.position.set(0, 0.002, 2.8);
         scene.add(melodyMesh);
 
-        // MELODY PLAY BUTTON
+        // MELODY PLAY BUTTON - Positioned between text and right lock
         const melodyPlayTex = makeTitleTexture(['▶'], { width: 512, height: 512, size: 300, weight: 1000 });
-        const melodyPlayMat = new THREE.MeshBasicMaterial({ map: melodyPlayTex, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false });
-        const melodyPlayGeo = new THREE.PlaneGeometry(2, 2);
+        const melodyPlayMat = new THREE.MeshBasicMaterial({ map: melodyPlayTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+        const melodyPlayGeo = new THREE.PlaneGeometry(1.5, 1.5); // Slightly smaller
         const melodyPlayMesh = new THREE.Mesh(melodyPlayGeo, melodyPlayMat);
         melodyPlayMesh.rotation.x = -Math.PI / 2; // on ground, readable from above
-        melodyPlayMesh.position.set(9, 0.01, 2.8); // Next to MELODY text
+        melodyPlayMesh.position.set(3.5, 0.01, 2.8); // Between text (0) and right lock (6.2)
         melodyPlayMesh.userData = { isMelodyPlayButton: true, isUi: true };
         melodyPlayMesh.renderOrder = 1;
         scene.add(melodyPlayMesh);
         uiPickables.push(melodyPlayMesh);
+        
+        // Store reference for opacity control
+        window.melodyPlayMesh = melodyPlayMesh;
         // Add 3D lock icons flanking the word MELODY
         const lockMatOpen = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
         const lockMatClosed = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
@@ -992,17 +995,20 @@ function addEpicTitles() {
         bassMesh.renderOrder = 1; // draw after darkening plane
         scene.add(bassMesh);
 
-        // BASSLINE PLAY BUTTON
+        // BASSLINE PLAY BUTTON - Positioned between text and right lock
         const bassPlayTex = makeTitleTexture(['▶'], { width: 512, height: 512, size: 300, weight: 1000 });
-        const bassPlayMat = new THREE.MeshBasicMaterial({ map: bassPlayTex, transparent: true, opacity: 0.8, side: THREE.DoubleSide, depthWrite: false });
-        const bassPlayGeo = new THREE.PlaneGeometry(2, 2);
+        const bassPlayMat = new THREE.MeshBasicMaterial({ map: bassPlayTex, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+        const bassPlayGeo = new THREE.PlaneGeometry(1.5, 1.5); // Slightly smaller
         const bassPlayMesh = new THREE.Mesh(bassPlayGeo, bassPlayMat);
         bassPlayMesh.rotation.x = Math.PI / 2;
-        bassPlayMesh.position.set(9, 0.01, 2.8); // Next to BASSLINE text
+        bassPlayMesh.position.set(3.5, 0.01, 2.8); // Between text (0) and right lock (6.2)
         bassPlayMesh.userData = { isBassPlayButton: true, isUi: true };
         bassPlayMesh.renderOrder = 1;
         scene.add(bassPlayMesh);
         uiPickables.push(bassPlayMesh);
+        
+        // Store reference for opacity control
+        window.bassPlayMesh = bassPlayMesh;
         // Bass locks
         const iconGeo2 = new THREE.PlaneGeometry(1.2, 1.2);
         const iconTexOpen2 = makeTitleTexture(['🔓'], { width: 256, height: 256, size: 200, weight: 900 });
@@ -1045,40 +1051,36 @@ try {
 // Shelf anchor map. If shelf_map.json exists or localStorage has an override,
 // we will load into this at runtime. Otherwise we start with approximations.
 let shelfSlots = {
-    // Anchor big three to circle centers
-    'I': new THREE.Vector3(0, shelfY + 0.8, shelfZ),
-    'IV': new THREE.Vector3(2.2, shelfY - 0.6, shelfZ),
-    'V': new THREE.Vector3(-2.2, shelfY - 0.6, shelfZ),
-    'ii': new THREE.Vector3(3.4, shelfY - 2.1, shelfZ),
-    'viiø': new THREE.Vector3(-3.4, shelfY - 2.1, shelfZ),
-    'vi': new THREE.Vector3(0.9, shelfY + 0.2, shelfZ),
-    'iii': new THREE.Vector3(-0.9, shelfY + 0.2, shelfZ),
-    // Minor placements (approximate)
-    'i': new THREE.Vector3(0, shelfY - 0.9, shelfZ),
-    'iiø': new THREE.Vector3(3.8, shelfY - 2.4, shelfZ),
-    'bIII': new THREE.Vector3(-0.5, shelfY - 0.4, shelfZ),
-    // Minor iv should be smaller and nearer the center than IV major
-    'iv': new THREE.Vector3(1.31, shelfY - 0.03, shelfZ),
-    'v': new THREE.Vector3(-2.2, shelfY - 1.7, shelfZ),
-    'bVI': new THREE.Vector3(0.6, shelfY - 0.5, shelfZ),
-    'bVII': new THREE.Vector3(-0.6, shelfY - 0.6, shelfZ),
-    'V(7)(b9)': new THREE.Vector3(-1.8, shelfY - 2.0, shelfZ),
-    'viiº7': new THREE.Vector3(-3.0, shelfY - 2.3, shelfZ),
-    // Applied placements (approximate, around intersections)
-    'I7': new THREE.Vector3(0.2, shelfY + 0.6, shelfZ),
-    'iiiø': new THREE.Vector3(-0.9, shelfY - 0.1, shelfZ),
-    // Align applied columns between iiiø→#ivø and I7→II
-    'II(7)': new THREE.Vector3(2.5, shelfY - 0.7, shelfZ),
-    '#ivø': new THREE.Vector3(2.9, shelfY - 1.5, shelfZ),
-    'III(7)': new THREE.Vector3(0.4, shelfY - 0.2, shelfZ),
-    '#vº': new THREE.Vector3(-2.9, shelfY - 1.6, shelfZ),
-    'VI(7)': new THREE.Vector3(1.3, shelfY - 0.3, shelfZ),
-    '#iº': new THREE.Vector3(0.3, shelfY - 1.1, shelfZ),
-    'VII(7)': new THREE.Vector3(-2.5, shelfY - 0.7, shelfZ),
-    '#iiº': new THREE.Vector3(2.6, shelfY - 2.4, shelfZ),
-    // New plain dominants (II and VII) slotted just beyond their altered neighbors
-    'II': new THREE.Vector3(3.2, shelfY - 0.7, shelfZ),
-    'VII': new THREE.Vector3(-3.2, shelfY - 0.7, shelfZ),
+    // NEW SHELF MAP - Updated positions
+    'I': new THREE.Vector3(0.019018198116636284, 4.846715767636794, -4.2),
+    'IV': new THREE.Vector3(2.5670545677226477, 0.9745924940699253, -4.2),
+    'V': new THREE.Vector3(-2.3070721156909144, 0.9488519294015659, -4.2),
+    'ii': new THREE.Vector3(3.162693516382339, -0.2639810152339269, -4.2),
+    'viiø': new THREE.Vector3(-3.0301174968955604, -0.18915940646469753, -4.2),
+    'vi': new THREE.Vector3(0.9433381282819779, 3.403626667588608, -4.2),
+    'iii': new THREE.Vector3(-1.1125527530506958, 3.11976311292227, -4.2),
+    'i': new THREE.Vector3(0.006777527436186316, 3.625915650256669, -4.2),
+    'iiø': new THREE.Vector3(1.0399187808863832, -0.5091135627464931, -4.2),
+    'bIII': new THREE.Vector3(1.3650323066645556, 2.629216473657123, -4.2),
+    'iv': new THREE.Vector3(1.3100941554240706, 0.17190241200717638, -4.2),
+    'v': new THREE.Vector3(-1.5944162259268038, 2.41980905926983, -4.2),
+    'bVI': new THREE.Vector3(1.7346269345447038, 2.065668580041144, -4.2),
+    'bVII': new THREE.Vector3(-2.1765618215573275, 1.995052699742096, -4.2),
+    'V(7)(b9)': new THREE.Vector3(-3.43396403579002, 0.8105892259030323, -4.2),
+    'viiº7': new THREE.Vector3(-3.5559390281444574, -0.7795397035630596, -4.2),
+    'I7': new THREE.Vector3(0.242068729799989, -0.5447640887067791, -4.2),
+    'iiiø': new THREE.Vector3(-0.3716762812855209, -0.5367009756847119, -4.2),
+    'II(7)': new THREE.Vector3(0.21591257900643301, 1.9217459541229251, -4.2),
+    '#ivø': new THREE.Vector3(-0.35756750603768317, 1.9293605174602437, -4.2),
+    'III(7)': new THREE.Vector3(0.22899074293377203, 0.7121595075238272, -4.2),
+    '#vº': new THREE.Vector3(-0.36690809470190994, 0.7097856208005415, -4.2),
+    'VI(7)': new THREE.Vector3(0.21079385183653004, 1.3320772421667515, -4.2),
+    '#iº': new THREE.Vector3(-0.36093316503017536, 1.328791858230934, -4.2),
+    'VII(7)': new THREE.Vector3(0.22856061424028473, 0.093391910874558, -4.2),
+    '#iiº': new THREE.Vector3(-0.38317696961983916, 0.0894362124218917, -4.2),
+    // Keep the plain dominants (II and VII) as they were
+    'II': new THREE.Vector3(3.2, 0.9000000000000001, -4.2),
+    'VII': new THREE.Vector3(-3.2, 0.9000000000000001, -4.2),
 };
 // Color families (approximated from reference image; can be overridden later)
 let COLOR_TONIC = 0x62d1e6;      // cyan/teal for I/vi family
@@ -1143,13 +1145,33 @@ function borderColorForRoman(roman) {
 }
 const shelfCubes = [];
 let scaleByRoman = {
-    // Major: 1.0 for I/IV/V; slightly smaller for others
-    'I': 1.2, 'IV': 1.2, 'V': 1.2,
-    'ii': 0.7, 'iii': 0.7, 'vi': 0.7, 'viiø': 0.6,
-    // Minor reduced family
-    'i': 0.65, 'iiø': 0.55, 'bIII': 0.55, 'iv': 0.55, 'v': 0.55, 'bVI': 0.55, 'bVII': 0.55, 'V(7)(b9)': 0.55, 'viiº7': 0.55,
-    // Applied compact
-    'I7': 0.5, 'iiiø': 0.5, 'II(7)': 0.5, '#ivø': 0.5, 'III(7)': 0.5, '#vº': 0.5, 'VI(7)': 0.5, '#iº': 0.5, 'VII(7)': 0.5, '#iiº': 0.5,
+    // NEW SHELF MAP - Updated scales
+    'I': 1.0039123985964813,
+    'IV': 1.2,
+    'V': 1.2,
+    'ii': 0.7,
+    'iii': 0.7,
+    'vi': 0.7,
+    'viiø': 0.6,
+    'i': 0.65,
+    'iiø': 0.5298678523565713,
+    'bIII': 0.55,
+    'iv': 0.55,
+    'v': 0.55,
+    'bVI': 0.55,
+    'bVII': 0.55,
+    'V(7)(b9)': 0.55,
+    'viiº7': 0.55,
+    'I7': 0.5,
+    'iiiø': 0.5,
+    'II(7)': 0.5,
+    '#ivø': 0.5,
+    'III(7)': 0.5,
+    '#vº': 0.5,
+    'VI(7)': 0.5,
+    '#iº': 0.5,
+    'VII(7)': 0.5,
+    '#iiº': 0.5,
 };
 
 // Remember the exact shelf origin transform for each roman
@@ -2137,13 +2159,13 @@ function onPointerUp(e) {
                     pendingObj = null; return;
                 } else {
                     // NORMAL MODE: Create clone and add to front row
-                    try {
-                        const d = decideShelfDeltaScreen(targetObj, e);
-                        targetObj.userData.desiredRotationDelta = d;
-                        console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
-                    } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
-                    enqueueShelfAdd(targetObj); pendingObj = null; return;
-                }
+                try {
+                    const d = decideShelfDeltaScreen(targetObj, e);
+                    targetObj.userData.desiredRotationDelta = d;
+                    console.log('[shelf] target click screen delta =', d, 'for', targetObj.userData?.roman);
+                } catch (_) { targetObj.userData.desiredRotationDelta = 0; }
+                enqueueShelfAdd(targetObj); pendingObj = null; return;
+            }
             }
             // Center play priority for the pressed cube
             const centerHit = pickCenterPlay(hits, targetObj);
@@ -2260,14 +2282,17 @@ function onPointerUp(e) {
                         // Force into a strong low register around C2..C3 for presence
                         while (midi > 55) midi -= 12; // keep <= G#2
                         while (midi < 36) midi += 12; // keep >= C2
-                        midi = voiceLeadMidi(midi, lastBassMidi);
+                        
+                        // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
+                        const context = getVoiceLeadingContext(targetObj.userData.roman, 'bass');
+                        midi = voiceLeadMidi(midi, lastBassMidi, context);
 
                         // NEW AUDIO ENGINE: Use the real bass instruments
                         if (window.audioEngine && window.audioEngine.playBass) {
                             const bassNote = Tone.Frequency(midi, "midi").toNote();
                             window.audioEngine.playBass(bassNote, 0.45, 0.34);
                             lastBassMidi = midi;
-                            console.log('[CHORD CLICK] 🎵 Playing bass with new audio engine:', bassNote);
+                            console.log('[CHORD CLICK] 🎵 Playing bass with VL3:', bassNote, 'from', context.previousChord, '→', context.currentChord);
                         } else {
                             console.error('[obs-cubes] New audio engine not available for bass');
                         }
@@ -2276,14 +2301,17 @@ function onPointerUp(e) {
                         // Keep melody modest: around C4..C6
                         while (midi > 84) midi -= 12; // <= C6
                         while (midi < 60) midi += 12; // >= C4
-                        midi = voiceLeadMidi(midi, lastMelodyMidi);
+                        
+                        // REAL-TIME VOICE LEADING 3: Get intelligent context from last played chord
+                        const context = getVoiceLeadingContext(targetObj.userData.roman, 'melody');
+                        midi = voiceLeadMidi(midi, lastMelodyMidi, context);
 
                         // NEW AUDIO ENGINE: Use the real melody instruments
                         if (window.audioEngine && window.audioEngine.playMelody) {
                             const melodyNote = Tone.Frequency(midi, "midi").toNote();
                             window.audioEngine.playMelody([melodyNote], [0.45], 0.32);
                             lastMelodyMidi = midi;
-                            console.log('[CHORD CLICK] 🎵 Playing melody with new audio engine:', melodyNote);
+                            console.log('[CHORD CLICK] 🎵 Playing melody with VL3:', melodyNote, 'from', context.previousChord, '→', context.currentChord);
                         } else {
                             console.error('[obs-cubes] New audio engine not available for melody');
                         }
@@ -2292,6 +2320,12 @@ function onPointerUp(e) {
                         if (sfChord && sfChord.play) sfChord.play(midi, t0, { duration: 0.4, gain: 0.22 });
                         else { console.error('[obs-cubes] Chord instrument missing; no oscillator fallback.'); }
                     }
+                    
+                    // UPDATE CHORD CONTEXT: Track this chord for next voice leading decision
+                    const playedMidis = {};
+                    if (voice === 'bass' && lastBassMidi != null) playedMidis.bass = lastBassMidi;
+                    if (voice === 'melody' && lastMelodyMidi != null) playedMidis.melody = lastMelodyMidi;
+                    updateChordContext(targetObj.userData.roman, playedMidis);
                 }
             }
         }
@@ -2527,7 +2561,11 @@ let sfChord = null, sfBass = null, sfMelody = null;
 let chordInst = null, bassInst = null, melodyInst = null;
 // Voice-leading state for closest-octave selection
 let lastBassMidi = null, lastMelodyMidi = null;
-let voiceLeadingMode = 'vl2'; // 'vl1' nearest-octave, 'vl2' tonal.js assisted - DEFAULT TO VL2
+let voiceLeadingMode = 'vl3'; // 'vl1' nearest-octave, 'vl2' minimal distance, 'vl3' academic grade - DEFAULT TO VL3
+
+// REAL-TIME VOICE LEADING CONTEXT - Track last played chord for intelligent connections
+let lastPlayedChord = null; // { roman: 'I', chordTones: [60, 64, 67, 71], timestamp: Date.now() }
+let chordHistory = []; // Array of recent chords for advanced voice leading analysis
 let lockedMelody = null; // [{ roman, midi, color } ...]
 let lockedBass = null;   // [{ roman, midi, color } ...]
 
@@ -4026,8 +4064,26 @@ function animate() {
         const alpha = 0.4 * t;
         if (toTarget.y >= 0) { // above plane
             melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
+            // PLAY BUTTONS: Only melody play button visible when above, bass play button invisible
+            if (window.melodyPlayMesh) {
+                window.melodyPlayMesh.material.opacity = 0.9; // Visible and clickable
+                window.melodyPlayMesh.visible = true;
+            }
+            if (window.bassPlayMesh) {
+                window.bassPlayMesh.material.opacity = 0; // Invisible and unclickable
+                window.bassPlayMesh.visible = false;
+            }
         } else { // below plane
             melodyMat.opacity = 0; bassMat.opacity = alpha; belowAlpha = alpha;
+            // PLAY BUTTONS: Only bass play button visible when below, melody play button invisible
+            if (window.melodyPlayMesh) {
+                window.melodyPlayMesh.material.opacity = 0; // Invisible and unclickable
+                window.melodyPlayMesh.visible = false;
+            }
+            if (window.bassPlayMesh) {
+                window.bassPlayMesh.material.opacity = 0.9; // Visible and clickable
+                window.bassPlayMesh.visible = true;
+            }
         }
     }
     // Link shelf plane opacity to camera being below the plane for legibility
@@ -4166,11 +4222,12 @@ function nearestOctave(targetMidi, referenceMidi) {
     return targetMidi + 12 * k;
 }
 
-// Voice leading 2 (tonal-assisted): prefer interval steps up to a 3rd/4th; fallback to nearest octave
-function voiceLeadMidi(targetMidi, referenceMidi) {
-    if (voiceLeadingMode !== 'vl2') return nearestOctave(targetMidi, referenceMidi);
+// Voice Leading 3: Academic-grade voice leading with music21 principles
+function voiceLeadMidi(targetMidi, referenceMidi, context = {}) {
+    // Legacy modes for backwards compatibility
+    if (voiceLeadingMode === 'vl1') return nearestOctave(targetMidi, referenceMidi);
+    if (voiceLeadingMode === 'vl2') {
     if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
-    // Evaluate target in a window of +/- 2 octaves and pick minimal absolute semitone distance
     let best = targetMidi, bestDist = Infinity;
     for (let o = -2; o <= 2; o++) {
         const cand = targetMidi + o * 12;
@@ -4178,6 +4235,296 @@ function voiceLeadMidi(targetMidi, referenceMidi) {
         if (d < bestDist) { bestDist = d; best = cand; }
     }
     return best;
+    }
+
+    // Voice Leading 3: Advanced academic voice leading
+    if (voiceLeadingMode !== 'vl3') return nearestOctave(targetMidi, referenceMidi);
+    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+
+    return voiceLeadAcademic(targetMidi, referenceMidi, context);
+}
+
+// VOICE LEADING 3: Academic-grade voice leading engine
+// Based on classical SATB principles and jazz guide tone techniques
+function voiceLeadAcademic(targetMidi, referenceMidi, context = {}) {
+    const {
+        currentChord = null,
+        previousChord = null,
+        voice = 'melody', // 'bass', 'melody', 'chord'
+        chordTones = [],
+        previousChordTones = []
+    } = context;
+
+    // If no reference, return target as-is
+    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+
+    console.log(`[VL3] ${voice.toUpperCase()} voice leading: ${previousChord}→${currentChord}, ref=${referenceMidi}, target=${targetMidi}`);
+
+    // BASS REGISTER CONSTRAINT: Extreme bias to stay near tonic
+    if (voice === 'bass') {
+        return voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context);
+    }
+
+    // Generate candidate notes within ±2 octaves for non-bass voices
+    const candidates = [];
+    for (let octave = -2; octave <= 2; octave++) {
+        const candidate = targetMidi + (octave * 12);
+        candidates.push(candidate);
+    }
+
+    // PRINCIPLE 1: Common Tone Retention
+    // If the target note exists in the previous chord, strongly prefer keeping it
+    const targetPitchClass = targetMidi % 12;
+    const referencePitchClass = referenceMidi % 12;
+    
+    if (previousChordTones.length > 0) {
+        const previousPCs = previousChordTones.map(midi => midi % 12);
+        if (previousPCs.includes(targetPitchClass)) {
+            // This is a common tone - prefer minimal movement
+            console.log(`[VL3] Common tone detected: ${targetPitchClass} exists in previous chord`);
+            const commonToneCandidate = candidates.find(c => Math.abs(c - referenceMidi) <= 1);
+            if (commonToneCandidate) {
+                console.log(`[VL3] Using common tone with minimal movement: ${commonToneCandidate}`);
+                return commonToneCandidate;
+            }
+        }
+    }
+
+    // PRINCIPLE 2: Guide Tones (Jazz) - 3rd and 7th priority
+    if (currentChord && previousChord && (currentChord.includes('7') || previousChord.includes('7'))) {
+        const guideToneMovement = calculateGuideToneMovement(previousChord, currentChord, voice);
+        if (guideToneMovement) {
+            console.log(`[VL3] Guide tone movement detected: ${guideToneMovement}`);
+            // Prefer stepwise motion for guide tones
+            const stepwiseCandidate = candidates.find(c => {
+                const interval = Math.abs(c - referenceMidi);
+                return interval <= 2; // Half or whole step
+            });
+            if (stepwiseCandidate) return stepwiseCandidate;
+        }
+    }
+
+    // PRINCIPLE 3: Stepwise Motion Priority
+    // Prefer half-steps (1 semitone), then whole-steps (2 semitones), then thirds (3-4 semitones)
+    const stepwiseCandidates = candidates
+        .map(c => ({ midi: c, interval: Math.abs(c - referenceMidi) }))
+        .sort((a, b) => a.interval - b.interval);
+
+    for (const candidate of stepwiseCandidates) {
+        if (candidate.interval <= 2) { // Half or whole step
+            console.log(`[VL3] Stepwise motion (${candidate.interval} semitones): ${candidate.midi}`);
+            return candidate.midi;
+        }
+        if (candidate.interval <= 4) { // Minor or major third
+            console.log(`[VL3] Third motion (${candidate.interval} semitones): ${candidate.midi}`);
+            return candidate.midi;
+        }
+    }
+
+    // PRINCIPLE 4: Avoid Large Leaps (prefer smaller intervals)
+    // If we must leap, choose the smallest leap available
+    const bestCandidate = stepwiseCandidates[0];
+    console.log(`[VL3] Minimal leap (${bestCandidate.interval} semitones): ${bestCandidate.midi}`);
+    return bestCandidate.midi;
+}
+
+// BASS REGISTER CONSTRAINT: Specialized voice leading for bass with register management
+// CRITICAL: NEVER violate chord tones - only affects OCTAVE selection within the chord tone
+function voiceLeadBassWithRegisterConstraint(targetMidi, referenceMidi, context) {
+    const { currentChord, previousChord } = context;
+    
+    // MANDATORY: Preserve the exact pitch class from the cube inversion
+    // The targetMidi comes from the cube face - we MUST respect this chord tone
+    const targetPitchClass = targetMidi % 12;
+    
+    console.log(`[BASS CONSTRAINT] ${previousChord}→${currentChord}, PRESERVING chord tone pitch class: ${targetPitchClass}, ref=${referenceMidi}, target=${targetMidi}`);
+    
+    // Generate candidate octaves for the SAME pitch class only
+    const candidates = [];
+    for (let octave = 1; octave <= 4; octave++) { // C1 to C4 range
+        const candidate = targetPitchClass + (octave * 12);
+        if (candidate >= 24 && candidate <= 67) { // Extended bass range C1-G3
+            candidates.push(candidate);
+        }
+    }
+    
+    // BASS REGISTER PREFERENCE: Prefer lower octaves but stay musical
+    const bassRegisterCandidates = candidates.filter(midi => midi >= 36 && midi <= 55); // C2-G#2 preferred
+    const extendedCandidates = candidates.filter(midi => midi >= 24 && midi <= 67); // C1-G3 allowed
+    
+    // Sort by distance from reference, preferring bass register
+    const sortedCandidates = [
+        ...bassRegisterCandidates.sort((a, b) => Math.abs(a - referenceMidi) - Math.abs(b - referenceMidi)),
+        ...extendedCandidates.filter(c => !bassRegisterCandidates.includes(c))
+            .sort((a, b) => Math.abs(a - referenceMidi) - Math.abs(b - referenceMidi))
+    ];
+    
+    // EXCEPTION RULES: Allow extreme movement for specific resolutions
+    const needsExtremeResolution = checkBassExtremeResolution(previousChord, currentChord, referenceMidi, targetMidi);
+    
+    if (needsExtremeResolution) {
+        console.log(`[BASS CONSTRAINT] Allowing extreme resolution: ${needsExtremeResolution.reason}`);
+        // Still must use the correct pitch class, just allow wider octave range
+        const resolutionCandidate = sortedCandidates.find(midi => Math.abs(midi - referenceMidi) <= 12) || sortedCandidates[0];
+        console.log(`[BASS CONSTRAINT] Resolution candidate: ${resolutionCandidate} (preserving pitch class ${targetPitchClass})`);
+        return resolutionCandidate;
+    }
+    
+    // REGISTER BIAS: Prefer bass register, but use voice leading for octave choice
+    let bestCandidate = sortedCandidates[0];
+    
+    // If reference is way too high, bias toward lower octaves
+    if (referenceMidi > 60) { // Above C4
+        const lowerCandidates = sortedCandidates.filter(midi => midi <= 48); // C3 and below
+        if (lowerCandidates.length > 0) {
+            bestCandidate = lowerCandidates[0];
+            console.log(`[BASS CONSTRAINT] Biasing toward lower octave due to high reference: ${bestCandidate}`);
+        }
+    }
+    
+    console.log(`[BASS CONSTRAINT] Using chord tone ${targetPitchClass} in octave: ${bestCandidate} (interval: ${Math.abs(bestCandidate - referenceMidi)} semitones)`);
+    return bestCandidate;
+}
+
+// Check if bass needs extreme resolution (7th resolution, leading tone resolution)
+function checkBassExtremeResolution(fromChord, toChord, referenceMidi, targetMidi) {
+    if (!fromChord || !toChord) return null;
+    
+    // Leading tone resolution: V→I (3rd of V resolves up to 1 of I)
+    if ((fromChord === 'V' || fromChord === 'V7') && toChord === 'I') {
+        const interval = targetMidi - referenceMidi;
+        if (interval === 1 || interval === -11) { // Half step up (or down octave + half step)
+            return { reason: 'Leading tone resolution V→I' };
+        }
+    }
+    
+    // 7th resolution: Any 7th chord resolving down by step
+    if (fromChord.includes('7') && !toChord.includes('7')) {
+        const interval = targetMidi - referenceMidi;
+        if (interval === -1 || interval === -2 || interval === 11 || interval === 10) { // Step down
+            return { reason: '7th chord resolution downward' };
+        }
+    }
+    
+    // Dominant resolution: V7→I (7th resolves down, 3rd resolves up)
+    if ((fromChord === 'V7' || fromChord === 'V(7)(b9)') && toChord === 'I') {
+        return { reason: 'Dominant 7th resolution V7→I' };
+    }
+    
+    return null;
+}
+
+// Calculate guide tone movement for jazz progressions
+function calculateGuideToneMovement(fromChord, toChord, voice) {
+    // Common jazz progressions with guide tone movement
+    const guideToneProgressions = {
+        'ii7→V7': { '3rd': -1, '7th': -1 }, // Stepwise down
+        'V7→I': { '3rd': +1, '7th': -1 },   // 3rd up, 7th down
+        'vi7→ii7': { '3rd': 0, '7th': -1 }, // Common tone, 7th down
+        'I→vi': { '3rd': -1, '7th': 0 },    // 3rd down, common tone
+    };
+
+    // Detect common progressions
+    const progressionKey = `${fromChord}→${toChord}`;
+    if (guideToneProgressions[progressionKey]) {
+        return guideToneProgressions[progressionKey];
+    }
+
+    // Generic 7th chord movement
+    if (fromChord.includes('7') && toChord.includes('7')) {
+        return { '3rd': 'stepwise', '7th': 'stepwise' };
+    }
+
+    return null;
+}
+
+// Enhanced voice leading for chord progressions
+function voiceLeadChordProgression(chords, voices = ['bass', 'melody']) {
+    const result = { bass: [], melody: [], chord: [] };
+    let previousMidis = { bass: null, melody: null, chord: [] };
+
+    for (let i = 0; i < chords.length; i++) {
+        const currentChord = chords[i];
+        const previousChord = i > 0 ? chords[i - 1] : null;
+        
+        // Get chord tones for current and previous chords
+        const currentTones = noteSetsC[currentChord] || ['C', 'E', 'G', 'B'];
+        const previousTones = previousChord ? (noteSetsC[previousChord] || ['C', 'E', 'G', 'B']) : [];
+        
+        const currentMidis = currentTones.map(note => noteToMidi(note, 4)); // C4 octave
+        const previousMidis_chord = previousTones.map(note => noteToMidi(note, 4));
+
+        for (const voice of voices) {
+            const context = {
+                currentChord,
+                previousChord,
+                voice,
+                chordTones: currentMidis,
+                previousChordTones: previousMidis_chord
+            };
+
+            let targetMidi;
+            if (voice === 'bass') {
+                targetMidi = currentMidis[0] - 24; // Root in bass register
+            } else if (voice === 'melody') {
+                targetMidi = currentMidis[2] + 12; // 5th in melody register
+            }
+
+            const voiceLedMidi = voiceLeadMidi(targetMidi, previousMidis[voice], context);
+            result[voice].push(voiceLedMidi);
+            previousMidis[voice] = voiceLedMidi;
+        }
+    }
+
+    return result;
+}
+
+// Helper function to convert note name to MIDI number
+function noteToMidi(noteName, octave = 4) {
+    const noteMap = { 'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5, 'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11 };
+    const pitchClass = noteMap[noteName] || 0;
+    return (octave * 12) + pitchClass + 12; // +12 for MIDI offset
+}
+
+// REAL-TIME VOICE LEADING: Update chord context for intelligent connections
+function updateChordContext(roman, playedMidis = {}) {
+    const chordTones = noteSetsC[roman] ? 
+        noteSetsC[roman].map(note => noteToMidi(note, 4)) : [];
+    
+    // Store the last played chord with context
+    lastPlayedChord = {
+        roman,
+        chordTones,
+        playedMidis: { ...playedMidis }, // { bass: 48, melody: 72, chord: [60, 64, 67] }
+        timestamp: Date.now()
+    };
+    
+    // Add to chord history (keep last 10 chords for advanced analysis)
+    chordHistory.push(lastPlayedChord);
+    if (chordHistory.length > 10) {
+        chordHistory.shift();
+    }
+    
+    console.log(`[VL3 CONTEXT] Updated: ${roman}, History: ${chordHistory.map(c => c.roman).join('→')}`);
+}
+
+// Get enhanced voice leading context for any chord interaction
+function getVoiceLeadingContext(currentChord, voice) {
+    const context = {
+        currentChord,
+        previousChord: lastPlayedChord?.roman || null,
+        voice,
+        chordTones: noteSetsC[currentChord] ? 
+            noteSetsC[currentChord].map(note => noteToMidi(note, voice === 'bass' ? 2 : 5)) : [],
+        previousChordTones: lastPlayedChord ? lastPlayedChord.chordTones : []
+    };
+    
+    // Add played MIDI context if available
+    if (lastPlayedChord?.playedMidis[voice]) {
+        context.previousPlayedMidi = lastPlayedChord.playedMidis[voice];
+    }
+    
+    return context;
 }
 
 // Chord bed: lock voices into C4..C5 regardless of chord
@@ -4358,28 +4705,55 @@ function playChordForObjectWith7th(obj, use7th = false) {
     // Play chord using orchestral engine
     window.audioEngine.playChord(noteNames, duration, 0.5);
 
-    // Bass: if locked, use locked line; else use cube bottom face
+    // Bass: if locked, use locked line; else use cube bottom face - WITH VOICE LEADING 3
     if (bassEnabled) {
         let bassMidi = getBassMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') {
             bassMidi = lockedBass[idx].midi;
         }
+        
+        // Force into bass register
+        while (bassMidi > 55) bassMidi -= 12; // keep <= G#2
+        while (bassMidi < 36) bassMidi += 12; // keep >= C2
+        
+        // VOICE LEADING 3: Apply intelligent voice leading for bass
+        const bassContext = getVoiceLeadingContext(chordKey, 'bass');
+        bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, bassContext);
+        lastBassMidi = bassMidi;
+        
         const bassNoteName = midiToNoteName(bassMidi);
+        console.log('[CHORD PLAYBACK] 🎵 Playing bass with VL3:', bassNoteName, 'from', bassContext.previousChord, '→', bassContext.currentChord);
         window.audioEngine.playBass(bassNoteName, duration, 0.6);
     }
 
-    // Melody: if locked, use locked line; else use cube top face
+    // Melody: if locked, use locked line; else use cube top face - WITH VOICE LEADING 3
     if (melodyEnabled) {
         let melMidi = getMelodyMidiForObject(obj);
         const idx = lineup.indexOf(obj);
         if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') {
             melMidi = lockedMelody[idx].midi;
         }
+        
+        // Force into melody register
+        while (melMidi > 84) melMidi -= 12; // <= C6
+        while (melMidi < 60) melMidi += 12; // >= C4
+        
+        // VOICE LEADING 3: Apply intelligent voice leading for melody
+        const melodyContext = getVoiceLeadingContext(chordKey, 'melody');
+        melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, melodyContext);
+        lastMelodyMidi = melMidi;
+        
         const melodyNoteName = midiToNoteName(melMidi);
-        console.log('[LOCKED MELODY] 🎵 Playing locked melody note:', melodyNoteName, 'from midi:', melMidi);
+        console.log('[CHORD PLAYBACK] 🎵 Playing melody with VL3:', melodyNoteName, 'from', melodyContext.previousChord, '→', melodyContext.currentChord);
         window.audioEngine.playMelody([melodyNoteName], [duration], 0.4);
     }
+    
+    // UPDATE CHORD CONTEXT: Track this chord for next voice leading decision
+    const playedMidis = {};
+    if (bassEnabled && lastBassMidi != null) playedMidis.bass = lastBassMidi;
+    if (melodyEnabled && lastMelodyMidi != null) playedMidis.melody = lastMelodyMidi;
+    updateChordContext(chordKey, playedMidis);
 
     try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh: use7th, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
 }
@@ -5707,8 +6081,22 @@ function disableImprovMode() {
 }
 
 function queueChordForDownbeat(chordObj, use7th) {
-    queuedChord = { chord: chordObj, use7th: use7th, queueTime: window.Tone.now() };
-    console.log(`[IMPROV QUEUE] ${chordObj.userData.roman} queued for next downbeat (use7th: ${use7th})`);
+    // VOICE LEADING 3: Pre-calculate intelligent voice leading for queued chord
+    const bassContext = getVoiceLeadingContext(chordObj.userData.roman, 'bass');
+    const melodyContext = getVoiceLeadingContext(chordObj.userData.roman, 'melody');
+    
+    queuedChord = { 
+        chord: chordObj, 
+        use7th: use7th, 
+        queueTime: window.Tone.now(),
+        voiceLeadingContext: {
+            bass: bassContext,
+            melody: melodyContext
+        }
+    };
+    
+    console.log(`[IMPROV QUEUE] ${chordObj.userData.roman} queued for next downbeat with VL3 context`);
+    console.log(`[IMPROV QUEUE] Previous chord: ${bassContext.previousChord} → Current: ${bassContext.currentChord}`);
 
     // Visual feedback for queued chord
     highlightChordEffect(chordObj, 300);
@@ -5834,21 +6222,21 @@ async function playFrontRowProgression() {
                 highlightChordEffect(c, 900);
                 pulseGiantAt(index % lineup.length, 700);
                 // Camera dolly
-                const tDur = 700;
-                const fromPos = camera.position.clone();
-                const fromTgt = controls.target.clone();
+            const tDur = 700;
+            const fromPos = camera.position.clone();
+            const fromTgt = controls.target.clone();
                 const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
                 const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
-                const tStart = performance.now();
-                const tween = {
-                    owner: camera, tick: (now) => {
-                        const v = Math.min(1, (now - tStart) / tDur);
-                        camera.position.lerpVectors(fromPos, toPos, v);
-                        controls.target.lerpVectors(fromTgt, toTgt, v);
-                        return v >= 1;
-                    }, cancelled: false
-                };
-                activeTweens.push(tween);
+            const tStart = performance.now();
+            const tween = {
+                owner: camera, tick: (now) => {
+                    const v = Math.min(1, (now - tStart) / tDur);
+                    camera.position.lerpVectors(fromPos, toPos, v);
+                    controls.target.lerpVectors(fromTgt, toTgt, v);
+                    return v >= 1;
+                }, cancelled: false
+            };
+            activeTweens.push(tween);
                 addProgressionPointFromCube(c);
             } catch (err) {
                 console.warn('[TRANSPORT] Visual effect error:', err);
@@ -5890,8 +6278,8 @@ async function playFrontRowProgression() {
                         const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
                         console.log('[PLAY PROGRESSION] 🎵 Playing face-derived melody:', melodyNote);
                         window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.5);
-                    }
-                } else {
+            }
+        } else {
                     console.warn('[PLAY PROGRESSION] Audio engine not available');
                 }
             } catch (error) {
@@ -5905,7 +6293,20 @@ async function playFrontRowProgression() {
             if (bassMidi) {
                 while (bassMidi > 55) bassMidi -= 12; 
                 while (bassMidi < 36) bassMidi += 12;
-                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+                
+                // Enhanced context for Voice Leading 3 in progressions
+                const currentChord = lineup[index % lineup.length]?.userData.roman;
+                const prevChord = index > 0 ? lineup[(index - 1) % lineup.length]?.userData.roman : null;
+                const context = {
+                    currentChord,
+                    previousChord: prevChord,
+                    voice: 'bass',
+                    chordTones: currentChord && noteSetsC[currentChord] ? 
+                        noteSetsC[currentChord].map(note => noteToMidi(note, 2)) : [],
+                    previousChordTones: prevChord && noteSetsC[prevChord] ? 
+                        noteSetsC[prevChord].map(note => noteToMidi(note, 2)) : []
+                };
+                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi, context);
 
                 Tone.Draw.schedule(() => {
                     const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
@@ -5921,7 +6322,20 @@ async function playFrontRowProgression() {
             if (melMidi) {
                 while (melMidi > 84) melMidi -= 12; 
                 while (melMidi < 60) melMidi += 12;
-                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
+                
+                // Enhanced context for Voice Leading 3 in progressions
+                const currentChord = lineup[index % lineup.length]?.userData.roman;
+                const prevChord = index > 0 ? lineup[(index - 1) % lineup.length]?.userData.roman : null;
+                const context = {
+                    currentChord,
+                    previousChord: prevChord,
+                    voice: 'melody',
+                    chordTones: currentChord && noteSetsC[currentChord] ? 
+                        noteSetsC[currentChord].map(note => noteToMidi(note, 5)) : [],
+                    previousChordTones: prevChord && noteSetsC[prevChord] ? 
+                        noteSetsC[prevChord].map(note => noteToMidi(note, 5)) : []
+                };
+                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi, context);
 
                 Tone.Draw.schedule(() => {
                     const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
