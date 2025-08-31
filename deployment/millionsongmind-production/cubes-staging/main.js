@@ -670,7 +670,7 @@ async function refreshAllCubeFaces() {
     }
 }
 
-// SHIFT+CLICK: Temporarily update front face with 7th notation
+// CTRL+CLICK (CMD+CLICK on Mac): Temporarily update front face with 7th notation
 function updateChordFaceWith7th(targetObj) {
     try {
         const roman = targetObj.userData.roman;
@@ -688,7 +688,7 @@ function updateChordFaceWith7th(targetObj) {
             }
         }
 
-        console.log(`[SHIFT-CLICK] Updating face: ${originalLabel} → ${displayWith7th}`);
+        console.log(`[CTRL+CLICK] Updating face: ${originalLabel} → ${displayWith7th}`);
 
         // Generate new texture with 7th notation
         const newTexture = makeFrontLabelTextureStyled(displayWith7th, roman);
@@ -701,7 +701,7 @@ function updateChordFaceWith7th(targetObj) {
 
         // Reset back to original after 2 seconds
         setTimeout(() => {
-            console.log(`[SHIFT-CLICK] Resetting face back to: ${originalLabel}`);
+            console.log(`[CTRL+CLICK] Resetting face back to: ${originalLabel}`);
             const originalTexture = loadFaceTexture(originalLabel, roman);
             if (targetObj.material && targetObj.material[0]) {
                 targetObj.material[0].map = originalTexture;
@@ -710,7 +710,7 @@ function updateChordFaceWith7th(targetObj) {
         }, 2000);
 
     } catch (error) {
-        console.error('[SHIFT-CLICK] Error updating chord face:', error);
+        console.error('[CTRL+CLICK] Error updating chord face:', error);
     }
 }
 
@@ -2029,17 +2029,21 @@ function onPointerUp(e) {
             if (centerHit) {
                 console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
 
-                // SHIFT+CLICK: Force 7th for this single chord play
-                const isShiftClick = e.shiftKey;
-                const shouldUse7th = withSeventh || isShiftClick;
+                // BULLETPROOF MODIFIER DETECTION - Use global state + event state
+                const isModifierClick = globalModifierState.altPressed || e.altKey || globalModifierState.shiftPressed || e.shiftKey;
+                const shouldUse7th = withSeventh || isModifierClick;
 
-                if (isShiftClick) {
-                    console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman}`);
+                console.log(`[CLICK DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isModifierClick: ${isModifierClick}, shouldUse7th: ${shouldUse7th}`);
+                console.log(`[CLICK DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed}`);
+                console.log(`[CLICK DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
+
+                if (isModifierClick) {
+                    console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                     // Update front face texture to show 7th notation temporarily
                     updateChordFaceWith7th(targetObj);
                 }
 
-                // Play chord with 7th if global setting OR shift-click
+                // Play chord with 7th if global setting OR ANY modifier
                 playChordForObjectWith7th(targetObj, shouldUse7th);
 
                 pendingObj = null; return;
@@ -2070,17 +2074,21 @@ function onPointerUp(e) {
 
                     console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
 
-                    // SHIFT+CLICK: Force 7th for this single chord play
-                    const isShiftClick = e.shiftKey;
-                    const shouldUse7th = withSeventh || isShiftClick;
+                    // BULLETPROOF MODIFIER DETECTION - Use global state + event state
+                    const isModifierClick = globalModifierState.altPressed || e.altKey || globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isModifierClick;
 
-                    if (isShiftClick) {
-                        console.log(`[SHIFT-CLICK] Adding 7th to ${targetObj.userData.roman} (quadrant)`);
+                    console.log(`[QUADRANT DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isModifierClick: ${isModifierClick}, shouldUse7th: ${shouldUse7th}`);
+                    console.log(`[QUADRANT DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed}`);
+                    console.log(`[QUADRANT DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
+
+                    if (isModifierClick) {
+                        console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman} (quadrant)`);
                         // Update front face texture to show 7th notation temporarily
                         updateChordFaceWith7th(targetObj);
                     }
 
-                    // Play chord with 7th if global setting OR shift-click
+                    // Play chord with 7th if global setting OR ANY modifier
                     playChordForObjectWith7th(targetObj, shouldUse7th);
 
                     if (angle !== 0) {
@@ -2321,6 +2329,33 @@ renderer.domElement.addEventListener('wheel', (e) => {
 document.getElementById('view-down').addEventListener('click', setViewAbove);
 document.getElementById('view-up').addEventListener('click', setViewBelow);
 
+// GLOBAL MODIFIER KEY STATE TRACKING
+let globalModifierState = {
+    altPressed: false,
+    shiftPressed: false,
+    ctrlPressed: false,
+    metaPressed: false
+};
+
+// BULLETPROOF KEYBOARD MODIFIER DETECTION - HIGHEST PRIORITY
+document.addEventListener('keydown', (e) => {
+    globalModifierState.altPressed = e.altKey;
+    globalModifierState.shiftPressed = e.shiftKey;
+    globalModifierState.ctrlPressed = e.ctrlKey;
+    globalModifierState.metaPressed = e.metaKey;
+
+    console.log(`[GLOBAL KEYDOWN] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
+}, { capture: true, passive: false });
+
+document.addEventListener('keyup', (e) => {
+    globalModifierState.altPressed = e.altKey;
+    globalModifierState.shiftPressed = e.shiftKey;
+    globalModifierState.ctrlPressed = e.ctrlKey;
+    globalModifierState.metaPressed = e.metaKey;
+
+    console.log(`[GLOBAL KEYUP] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
+}, { capture: true, passive: false });
+
 // Audio state (declare before any usage)
 let audioCtx = null;
 let withSeventh = false;
@@ -2536,6 +2571,8 @@ playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
     } catch (_) { }
 })();
 resetBtn?.addEventListener('click', () => {
+    console.log('[RESET] Resetting to melody view and clearing lineup');
+
     // Return all active cubes to their shelf origin and clear lineup
     for (const c of [...lineup]) {
         const r = c.userData.roman;
@@ -2551,6 +2588,20 @@ resetBtn?.addEventListener('click', () => {
         const ci = cubes.indexOf(c); if (ci >= 0) cubes.splice(ci, 1);
     }
     lineup = [];
+
+    // RESTORE MELODY VIEW AND DEFAULT LIGHTING
+    console.log('[RESET] Restoring melody view and lighting');
+    setViewAbove(); // Return to melody view
+
+    // Reset lighting to default
+    ambient.intensity = 0.7;
+    dir.intensity = 0.7;
+    frontSpot.intensity = 0.0;
+    frontSpotL.intensity = 0.0;
+    frontSpotR.intensity = 0.0;
+    stageSpot.intensity = 0.0;
+    stageMode = false;
+
     // Also clear any locked lanes to avoid leftover markers
     try { clearLockedLines(); setMelodyLockVisual('open'); setBassLockVisual('open'); } catch (_) { }
 });
@@ -2904,9 +2955,16 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     const isDiminished = roman.includes('º') || roman.includes('ø');
     const isI7 = roman === 'I7' || roman === 'i7';
     const isV7b9 = roman === 'V(7)(b9)' || roman === 'V(b7)(b9)';
-    const forceSeventhForSpecialChords = isDiminished || isI7 || isV7b9;
+    const forceSeventhForSpecialChords = isDiminished || isI7;
 
-    const use = (includeSeventh || forceSeventhForSpecialChords) ? names.slice(0, 4) : names.slice(0, 3);
+    // V(7)(b9) ALWAYS uses all 4 notes (root, 3rd, 5th, b9th) - b9th is always present
+    let use;
+    if (isV7b9) {
+        use = names.slice(0, 4); // Always use all 4 notes for V(b7)(b9) - b9th is mandatory
+        console.log(`[V7B9 DEBUG] ${roman} using all 4 notes (including b9th):`, use);
+    } else {
+        use = (includeSeventh || forceSeventhForSpecialChords) ? names.slice(0, 4) : names.slice(0, 3);
+    }
     const baseC4 = 60; // MIDI C4
     const midis = use.map(n => baseC4 + pcOf(n));
     midis.sort((a, b) => a - b);
@@ -3004,6 +3062,32 @@ function showNVXDebugText(text) {
     // Expose a helper for manual updates
     try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
 }
+// Play chord with variable sustain duration - TRANSPORT COMPATIBLE
+function playChordForObjectWithSustain(obj, sustainSeconds) {
+    const roman = obj.userData.roman;
+    console.log(`[CHORD SUSTAIN] Playing ${roman} with ${sustainSeconds.toFixed(2)}s sustain`);
+
+    const ctx = ensureAudio();
+    const now = ctx.currentTime;
+    const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
+
+    if (sfChord && sfChord.play) {
+        chordMidis.forEach(m => sfChord.play(m, now, { duration: sustainSeconds, gain: 0.18 }));
+    }
+    if (bassEnabled) {
+        const bassMidi = getBassMidiForObject(obj);
+        if (sfBass && sfBass.play) {
+            sfBass.play(bassMidi, now, { duration: sustainSeconds, gain: 0.34 });
+        }
+    }
+    if (melodyEnabled) {
+        const melMidi = getMelodyMidiForObject(obj);
+        if (sfMelody && sfMelody.play) {
+            sfMelody.play(melMidi, now, { duration: sustainSeconds, gain: 0.3 });
+        }
+    }
+}
+
 // New unified function that accepts a 7th parameter
 function playChordForObjectWith7th(obj, use7th = false) {
     const ctx = ensureAudio();
@@ -3133,9 +3217,22 @@ async function animateShelfClickAdd(shelf) {
             if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
             reflowLineup();
         }, 470);
-        // Play with intended inversion immediately
+        // Play with intended inversion immediately - CHECK FOR MODIFIERS
         if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
-        playChordForObject(clone);
+
+        // BULLETPROOF MODIFIER DETECTION for shelf clicks too
+        const isModifierClick = globalModifierState.altPressed || globalModifierState.shiftPressed || globalModifierState.ctrlPressed || globalModifierState.metaPressed;
+        const shouldUse7th = withSeventh || isModifierClick;
+
+        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isModifierClick: ${isModifierClick}, shouldUse7th: ${shouldUse7th}`);
+        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed}, Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
+
+        if (isModifierClick) {
+            console.log(`[SHELF MODIFIER+CLICK] FORCING 7th for ${clone.userData.roman}`);
+            updateChordFaceWith7th(clone);
+        }
+
+        playChordForObjectWith7th(clone, shouldUse7th);
         addProgressionPointFromCube(shelf); // record from shelf origin too
         await new Promise(r => setTimeout(r, 180));
     } catch (_) { }
@@ -3911,68 +4008,120 @@ async function playFrontRowProgression() {
         await window.drumMachine.toggleDrums();
     }
 
-    // Use drum machine BPM if available, otherwise fallback
-    const drumBpm = window.drumMachine?.bpm || progressionBpm;
-    const msPerBeat = Math.round(60000 / drumBpm);
-    const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
+    console.log(`[PLAY PROGRESSION] Starting with ${lineup.length} chords - USING TONE.JS TRANSPORT`);
 
-    console.log(`[PLAY PROGRESSION] Using BPM: ${drumBpm}, ms per chord: ${perChordMs}`);
-    for (let i = 0; i < lineup.length; i++) {
-        const c = lineup[i];
-        // Ultra-flashy active chord highlight + camera dolly follow
-        try {
-            highlightChordEffect(c, 900); pulseGiantAt(i, 700);
-            // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
-            const tDur = 700;
-            const fromPos = camera.position.clone();
-            const fromTgt = controls.target.clone();
-            const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
-            const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
-            const tStart = performance.now();
-            const tween = {
-                owner: camera, tick: (now) => {
-                    const v = Math.min(1, (now - tStart) / tDur);
-                    camera.position.lerpVectors(fromPos, toPos, v);
-                    controls.target.lerpVectors(fromTgt, toTgt, v);
-                    return v >= 1;
-                }, cancelled: false
-            };
-            activeTweens.push(tween);
-        } catch (_) { }
+    // Clear any existing progression sequence
+    if (window.chordProgressionSequence) {
+        window.chordProgressionSequence.dispose();
+        window.chordProgressionSequence = null;
+    }
+
+    // TRANSPORT-BASED PROGRESSION - Perfect sync with drum machine
+    const progressionSequence = new Tone.Sequence((time, index) => {
+        if (index >= lineup.length) {
+            // Progression complete
+            console.log('[TRANSPORT] Progression complete - cleaning up');
+            progressionSequence.dispose();
+            window.chordProgressionSequence = null;
+
+            // Stop drum machine
+            if (window.drumMachine && window.drumMachine.isPlaying) {
+                setTimeout(() => window.drumMachine.toggleDrums(), 100);
+            }
+
+            // Auto-reset to melody view after brief delay
+            setTimeout(() => {
+                setViewAbove();
+                ambient.intensity = 0.7;
+                dir.intensity = 0.7;
+                frontSpot.intensity = 0.0;
+                frontSpotL.intensity = 0.0;
+                frontSpotR.intensity = 0.0;
+                stageSpot.intensity = 0.0;
+                stageMode = false;
+                console.log('[TRANSPORT] ✅ Auto-reset complete');
+            }, 1000);
+
+            return;
+        }
+
+        const c = lineup[index];
+
+        // Calculate chord sustain duration based on CURRENT transport BPM - USE MEASURES
+        const currentBpm = Tone.Transport.bpm.value;
+        const beatsPerMeasure = 4; // Standard 4/4 time
+        const chordDurationSeconds = (60 / currentBpm) * beatsPerMeasure; // Full measure duration
+
+        console.log(`[TRANSPORT] Chord ${index + 1}/${lineup.length}: ${c.userData.roman} at time ${time.toFixed(3)}s, BPM: ${currentBpm}, sustain: ${chordDurationSeconds.toFixed(2)}s`);
+
+        // Schedule visual effects on main thread
+        Tone.Draw.schedule(() => {
+            try {
+                highlightChordEffect(c, 900);
+                pulseGiantAt(index, 700);
+                // Camera dolly
+                const tDur = 700;
+                const fromPos = camera.position.clone();
+                const fromTgt = controls.target.clone();
+                const toTgt = new THREE.Vector3(c.position.x, 0.6, 0);
+                const toPos = toTgt.clone().add(new THREE.Vector3(0, 0, 9.5));
+                const tStart = performance.now();
+                const tween = {
+                    owner: camera, tick: (now) => {
+                        const v = Math.min(1, (now - tStart) / tDur);
+                        camera.position.lerpVectors(fromPos, toPos, v);
+                        controls.target.lerpVectors(fromTgt, toTgt, v);
+                        return v >= 1;
+                    }, cancelled: false
+                };
+                activeTweens.push(tween);
+                addProgressionPointFromCube(c);
+            } catch (err) {
+                console.warn('[TRANSPORT] Visual effect error:', err);
+            }
+        }, time);
+
+        // Schedule audio with variable sustain
         if (lockedMelody || lockedBass) {
-            // Use locked lines if present; fallback to face-derived where missing
-            const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
             const roman = c.userData.roman;
-            // chord bed stays the same
             const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
-            if (sfChord && sfChord.play) chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
-            // bass
+            if (sfChord && sfChord.play) {
+                chordMidis.forEach(m => sfChord.play(m, time, { duration: chordDurationSeconds, gain: 0.18 }));
+            }
             if (bassEnabled) {
-                let bassMidi = lockedBass?.[i]?.midi ?? getBassMidiForObject(c);
+                let bassMidi = lockedBass?.[index]?.midi ?? getBassMidiForObject(c);
                 while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
                 bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
-                if (sfBass && sfBass.play) { sfBass.play(bassMidi, now, { duration, gain: 0.34 }); lastBassMidi = bassMidi; }
+                if (sfBass && sfBass.play) {
+                    sfBass.play(bassMidi, time, { duration: chordDurationSeconds, gain: 0.34 });
+                    lastBassMidi = bassMidi;
+                }
             }
-            // melody
             if (melodyEnabled) {
-                let melMidi = lockedMelody?.[i]?.midi ?? getMelodyMidiForObject(c);
+                let melMidi = lockedMelody?.[index]?.midi ?? getMelodyMidiForObject(c);
                 while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
                 melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
-                if (sfMelody && sfMelody.play) { sfMelody.play(melMidi, now, { duration, gain: 0.3 }); lastMelodyMidi = melMidi; }
+                if (sfMelody && sfMelody.play) {
+                    sfMelody.play(melMidi, time, { duration: chordDurationSeconds, gain: 0.3 });
+                    lastMelodyMidi = melMidi;
+                }
             }
         } else {
-            playChordForObject(c);
+            // Schedule chord playback with proper sustain using Tone.Draw
+            Tone.Draw.schedule(() => {
+                playChordForObjectWithSustain(c, chordDurationSeconds);
+            }, time);
         }
-        addProgressionPointFromCube(c);
-        await new Promise(r => setTimeout(r, perChordMs));
-    }
 
-    // STOP DRUM MACHINE WHEN PROGRESSION COMPLETES
-    console.log('[PLAY PROGRESSION] Progression complete - stopping drum machine');
-    if (window.drumMachine && window.drumMachine.isPlaying) {
-        await window.drumMachine.toggleDrums(); // Stop drums
-        console.log('[PLAY PROGRESSION] Drum machine stopped');
-    }
+    }, Array.from({ length: lineup.length + 1 }, (_, i) => i), "1m"); // 1 measure per chord
+
+    // Store reference and start
+    window.chordProgressionSequence = progressionSequence;
+    progressionSequence.start(0);
+
+    console.log(`[TRANSPORT] Sequence started with 1 measure per chord (4 beats each)`);
+
+    // Progression now runs via Transport - no more await needed!
 }
 
 // Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()

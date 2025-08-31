@@ -69,7 +69,7 @@ export const degreeSets = {
     'v': ['5', 'b7', '2', '4'],
     'bVI': ['b6', '1', 'b3', '5'],
     'bVII': ['b7', '2', '4', 'b6'],
-    'V(7)(b9)': ['5', '7', '2', '4'],
+    'V(7)(b9)': ['5', '7', '2', 'b2'],  // Root, 3rd, 5th, b9th (b2 = b9th)
     'viiº7': ['7', '2', '4', 'b6'],
 };
 
@@ -100,7 +100,7 @@ export const noteSetsC = {
     'v': ['G', 'Bb', 'D', 'F'],
     'bVI': ['Ab', 'C', 'Eb', 'G'],
     'bVII': ['Bb', 'D', 'F', 'Ab'],
-    'V(7)(b9)': ['G', 'B', 'D', 'F'],
+    'V(7)(b9)': ['G', 'B', 'D', 'Ab'],  // Root, 3rd, 5th, b9th (b9th is the distinctive tone)
     'viiº7': ['B', 'D', 'F', 'Ab'],
 };
 

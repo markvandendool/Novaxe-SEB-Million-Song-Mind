@@ -184,9 +184,12 @@ class ProfessionalDrumMachine {
 
         if (bpmSlider && bpmDisplay) {
             bpmSlider.addEventListener('input', (e) => {
+                const oldBpm = this.bpm;
                 this.bpm = parseInt(e.target.value);
                 bpmDisplay.textContent = this.bpm;
                 Tone.Transport.bpm.value = this.bpm;
+
+                console.log(`[BPM CHANGE] ${oldBpm} → ${this.bpm} BPM ${this.isPlaying ? '(during playback)' : '(stopped)'}`);
 
                 // Update slider gradient
                 const percent = ((this.bpm - 60) / 140) * 100;
