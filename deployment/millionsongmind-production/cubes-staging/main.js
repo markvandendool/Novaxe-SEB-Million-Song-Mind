@@ -191,6 +191,20 @@ stageSpot.position.set(0, 3.2, 5.2);
 stageSpot.target.position.set(0, 0.6, 0);
 scene.add(stageSpot);
 scene.add(stageSpot.target);
+
+// Special bass view lighting: bottom face illumination
+const bassBottomSpot = new THREE.SpotLight(0xffffff, 0.0, 8.0, Math.PI / 3, 0.2, 1.0);
+bassBottomSpot.position.set(0, -2.0, 3.0); // From below, shining up
+bassBottomSpot.target.position.set(0, 0, 3.0);
+scene.add(bassBottomSpot);
+scene.add(bassBottomSpot.target);
+
+// Special bass view lighting: front face illumination  
+const bassFrontSpot = new THREE.SpotLight(0xffffff, 0.0, 8.0, Math.PI / 4, 0.3, 1.0);
+bassFrontSpot.position.set(0, 1.5, 6.0); // From front, shining back
+bassFrontSpot.target.position.set(0, 1.0, 3.0);
+scene.add(bassFrontSpot);
+scene.add(bassFrontSpot.target);
 let stageMode = false;
 let stageTween = null;
 function enterStageMode() {
@@ -381,8 +395,8 @@ function setViewAbove() {
     let targetLookAt = melodyTarget.clone();
 
     if (chordCount > 8) {
-        // Calculate zoom-out factor based on chord count
-        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.15); // Max 3x zoom out
+        // Calculate zoom-out factor based on chord count (reduced by ~2x)
+        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.075); // Max 3x zoom out
         targetPos.z *= zoomFactor; // Zoom out by moving camera back
         targetPos.y *= Math.sqrt(zoomFactor); // Less dramatic height change
 
@@ -402,8 +416,8 @@ function setViewBelow() {
     let targetLookAt = bassTarget.clone();
 
     if (chordCount > 8) {
-        // Calculate zoom-out factor based on chord count
-        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.15); // Max 3x zoom out
+        // Calculate zoom-out factor based on chord count (reduced by ~2x)
+        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.075); // Max 3x zoom out
         targetPos.z *= zoomFactor; // Zoom out by moving camera back
         targetPos.y *= Math.sqrt(zoomFactor); // Less dramatic height change (maintaining negative Y)
 
@@ -418,11 +432,10 @@ function setViewBelow() {
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    // Tight kerning around accidentals by removing stray spaces and using narrow no-break space
-    const NNBSP = '\u202F';
+    // VERY tight kerning around accidentals - no spacing between glyph and numeral
     let out = String(s)
-        .replace(/\s*#\s*/g, NNBSP + '♯')
-        .replace(/([A-Ga-g])\s*b/g, '$1' + NNBSP + '♭')   // Eb → E♭ with tight space
+        .replace(/\s*#\s*/g, '♯')  // No space before sharp
+        .replace(/([A-Ga-g])\s*b/g, '$1♭')   // Eb → E♭ with no space
         .replace(/\bb(?=(?:\d|[IViv]))/g, '♭'); // b3/bVI → ♭3/♭VI
     return out;
 }
@@ -800,6 +813,12 @@ async function makeMaterials(label, romanLabel) {
     const faceRight = makeCircleDiamondFace(display[1], '#e74c3c', 270);    // 3rd (upright from below/above)
     const faceTop = makeCircleDiamondFace(display[2], '#3498db', 180);      // 5th
     const faceLeft = makeCircleDiamondFace(display[3], '#bdc3c7', 90);      // 7th (upright)
+    
+    // DEBUG: Log V chord face details
+    if (romanLabel === 'V') {
+        console.log(`[V CHORD DEBUG] Roman: ${romanLabel}, Display: [${display.join(', ')}]`);
+        console.log(`[V CHORD DEBUG] Right face (index 1): "${display[1]}" with color #e74c3c`);
+    }
 
     // Face order: [px, nx, py, ny, pz, nz]
     // We'll orient so nz (index 5) is the front-facing chord-name; map sides accordingly
@@ -859,10 +878,10 @@ function makeShelfTexture() {
     }
     // REST centered at top center of the top circle (anchor ~ -90°)
     drawCurvedWord('REST', top.x, top.y, top.r - 22, -Math.PI / 2, { fill: '#223', spacingDeg: 14 });
-    // MOTION at 2 o'clock on the right circle (π/3 = 60°, but adjust for proper clock position)
-    drawCurvedWord('MOTION', right.x, right.y, right.r - 24, Math.PI / 6, { fill: '#000', spacingDeg: 10 });
-    // TENSION at 10 o'clock on the left circle (5π/6 = 150°, proper 10 o'clock position)
-    drawCurvedWord('TENSION', left.x, left.y, left.r - 24, (5 * Math.PI) / 6, { fill: '#000', spacingDeg: 10 });
+    // MOTION at top of right hemisphere, offset slightly right (-75°) - 80% opacity
+    drawCurvedWord('MOTION', right.x, right.y, right.r - 24, -Math.PI * 5 / 12, { fill: 'rgba(0,0,0,0.8)', spacingDeg: 10 });
+    // TENSION at top of left hemisphere, offset slightly left (-105°) - 80% opacity
+    drawCurvedWord('TENSION', left.x, left.y, left.r - 24, -Math.PI * 7 / 12, { fill: 'rgba(0,0,0,0.8)', spacingDeg: 10 });
     const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
 }
 
@@ -954,7 +973,7 @@ function addEpicTitles() {
         const melodyPlayGeo = new THREE.PlaneGeometry(1.5, 1.5); // Slightly smaller
         const melodyPlayMesh = new THREE.Mesh(melodyPlayGeo, melodyPlayMat);
         melodyPlayMesh.rotation.x = -Math.PI / 2; // on ground, readable from above
-        melodyPlayMesh.position.set(3.5, 0.01, 2.8); // Between text (0) and right lock (6.2)
+        melodyPlayMesh.position.set(-5.0, 0.01, 2.8); // BEFORE text: lock, play button, text, space, lock (moved further left)
         melodyPlayMesh.userData = { isMelodyPlayButton: true, isUi: true };
         melodyPlayMesh.renderOrder = 1;
         scene.add(melodyPlayMesh);
@@ -1003,7 +1022,7 @@ function addEpicTitles() {
         const bassPlayGeo = new THREE.PlaneGeometry(1.5, 1.5); // Slightly smaller
         const bassPlayMesh = new THREE.Mesh(bassPlayGeo, bassPlayMat);
         bassPlayMesh.rotation.x = Math.PI / 2;
-        bassPlayMesh.position.set(3.5, 0.01, 2.8); // Between text (0) and right lock (6.2)
+        bassPlayMesh.position.set(-5.0, 0.01, 2.8); // BEFORE text: lock, play button, text, space, lock (moved further left)
         bassPlayMesh.userData = { isBassPlayButton: true, isUi: true };
         bassPlayMesh.renderOrder = 1;
         scene.add(bassPlayMesh);
@@ -4119,6 +4138,80 @@ bassLockIcon?.addEventListener('click', async () => {
 // Removed dynamic instrument loading; WebAudioFont presets are fixed for stability
 playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 
+// Drum machine play progression button
+const drumPlayProgBtn = document.getElementById('drum-play-progression');
+drumPlayProgBtn?.addEventListener('click', () => {
+    console.log('[DRUM PLAY] Play progression clicked from drum machine');
+    playFrontRowProgression();
+});
+
+// Make drum machine draggable
+function makeDrumMachineDraggable() {
+    const drumPanel = document.getElementById('drum-control-panel');
+    if (!drumPanel) return;
+
+    let isDragging = false;
+    let startX, startY, startLeft, startTop;
+
+    drumPanel.addEventListener('mousedown', (e) => {
+        // Only start dragging if clicking on the header area, not controls
+        if (e.target.closest('.panel-header') || e.target === drumPanel) {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+
+            const rect = drumPanel.getBoundingClientRect();
+            startLeft = rect.left;
+            startTop = rect.top;
+
+            drumPanel.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        drumPanel.style.left = (startLeft + deltaX) + 'px';
+        drumPanel.style.top = (startTop + deltaY) + 'px';
+        drumPanel.style.right = 'auto';
+        drumPanel.style.transform = 'none';
+    });
+
+    document.addEventListener('mouseup', () => {
+        if (isDragging) {
+            isDragging = false;
+            drumPanel.style.cursor = 'move';
+        }
+    });
+}
+
+// Initialize draggable drum machine
+setTimeout(makeDrumMachineDraggable, 100);
+
+// Fix AudioContext warnings - add click handler to start audio
+function initAudioOnFirstClick() {
+    const startAudio = async () => {
+        try {
+            if (Tone.context.state !== 'running') {
+                await Tone.start();
+                console.log('[AUDIO] AudioContext started successfully');
+            }
+        } catch (e) {
+            console.warn('[AUDIO] AudioContext start failed:', e);
+        }
+        // Remove the listener after first click
+        document.removeEventListener('click', startAudio);
+    };
+    document.addEventListener('click', startAudio);
+}
+
+// Initialize audio fix
+initAudioOnFirstClick();
+
 // Progression arrows UI controls
 const progressionArrowsCheckbox = document.getElementById('progression-arrows');
 const maxArrowsInput = document.getElementById('max-arrows');
@@ -4368,10 +4461,28 @@ function animate() {
             if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
             stageSpot.intensity = 2.2;
             dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
+
+            // FRONT ROW LIGHTING: Light the bottom of cubes and faces normally for front row only
+            frontSpot.intensity = 1.5; // Bright spotlight on front row from above
+            frontSpotL.intensity = 1.2; // Left front row spotlight
+            frontSpotR.intensity = 1.2; // Right front row spotlight
+
+            // SPECIAL BASS VIEW LIGHTING: Quadruple lighting on bottom and front faces
+            bassBottomSpot.intensity = 6.0; // Strong bottom illumination from below
+            bassFrontSpot.intensity = 6.0; // Strong front face illumination
         } else {
             try { darkPlane.material.opacity = 0.0; } catch (_) { }
             stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
             dir.intensity = 0.7; frontFill.intensity = 0.45; frontKey.intensity = 0.85;
+
+            // Turn off front row spotlights in melody view
+            frontSpot.intensity = 0.0;
+            frontSpotL.intensity = 0.0;
+            frontSpotR.intensity = 0.0;
+
+            // Turn off special bass view lighting in melody view
+            bassBottomSpot.intensity = 0.0;
+            bassFrontSpot.intensity = 0.0;
         }
     } catch (_) { }
     // TEMP DEBUG: log one pivot angle occasionally

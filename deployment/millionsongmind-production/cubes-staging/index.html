@@ -5,7 +5,7 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>ChordCubes 2.0 - Million Song Mind</title>
-	<link rel="stylesheet" href="./styles.css" />
+	<link rel="stylesheet" href="./styles.css?v=2" />
 	<style>
 		@font-face {
 			font-family: 'NVXDiamond';
@@ -53,7 +53,7 @@
 		/* PROFESSIONAL DRUM MACHINE STYLES */
 		#drum-control-panel {
 			position: fixed !important;
-			top: 50% !important;
+			top: 55% !important;
 			transform: translateY(-50%) !important;
 			right: 20px !important;
 			width: 400px !important;
@@ -62,6 +62,9 @@
 			border: 2px solid #00ff00 !important;
 			border-radius: 20px !important;
 			padding: 30px !important;
+			resize: both !important;
+			overflow: auto !important;
+			cursor: move !important;
 			z-index: 2147483647 !important;
 			box-shadow:
 				0 0 50px rgba(0, 255, 0, 0.5),
@@ -432,6 +435,8 @@
 				<option value="choir_aahs">Choir</option>
 				<option value="string_ensemble_2">Strings 2</option>
 			</select>
+			<label style="margin-left:12px;">Chord Vol</label>
+			<input type="range" id="chord-volume" min="0" max="1" step="0.1" value="0.6" style="width:60px;">
 			<label style="margin-left:12px;">Bass Inst</label>
 			<select id="bass-inst">
 				<option value="contrabass" selected>Contrabass</option>
@@ -440,6 +445,8 @@
 				<option value="cello">Cello</option>
 				<option value="synth_bass_1">Synth Bass</option>
 			</select>
+			<label style="margin-left:12px;">Bass Vol</label>
+			<input type="range" id="bass-volume" min="0" max="1" step="0.1" value="0.8" style="width:60px;">
 			<label style="margin-left:12px;">Melody Inst</label>
 			<select id="melody-inst">
 				<option value="violin" selected>Violin</option>
@@ -448,11 +455,7 @@
 				<option value="trumpet">Trumpet</option>
 				<option value="cello">Cello</option>
 			</select>
-			<label style="margin-left:12px;">Chord Vol</label>
-			<input type="range" id="chord-volume" min="0" max="1" step="0.1" value="0.6" style="width:60px;">
-			<label style="margin-left:8px;">Bass Vol</label>
-			<input type="range" id="bass-volume" min="0" max="1" step="0.1" value="0.8" style="width:60px;">
-			<label style="margin-left:8px;">Melody Vol</label>
+			<label style="margin-left:12px;">Melody Vol</label>
 			<input type="range" id="melody-volume" min="0" max="1" step="0.1" value="0.5" style="width:60px;">
 			<label style="margin-left:12px;">Voice Leading</label>
 			<select id="voice-leading-mode">
@@ -512,6 +515,9 @@
 					style="cursor: pointer; margin-left: 8px; opacity: 0.4; font-size: 18px; transition: all 0.3s ease; transform: scale(1);"
 					title="Creation Improv: Full inversions + front row">🎼</span>
 			</h2>
+			<span id="drum-play-progression"
+				style="cursor: pointer; margin-left: 12px; margin-right: 8px; font-size: 14px; opacity: 0.8; transition: all 0.2s ease;"
+				title="Play Progression">▶</span>
 			<div class="status-indicator" id="status-light"></div>
 		</div>
 
@@ -600,7 +606,7 @@
 	<!-- Tonal for voice-leading utilities (mode 2) -->
 	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
 	<script type="module" src="./chords.js?v=3"></script>
-	<script type="module" src="./main.js?v=111"></script>
+	<script type="module" src="./main.js?v=118"></script>
 	<script src="./professional-drum-machine.js?v=9"></script>
 
 	<!-- PROFESSIONAL FONT CONTROL MODAL -->
