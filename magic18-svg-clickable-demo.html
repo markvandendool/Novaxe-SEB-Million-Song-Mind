@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,18 +12,18 @@
             background: #1a1a2e;
             color: white;
         }
-        
+
         .demo-container {
             max-width: 800px;
             margin: 0 auto;
         }
-        
+
         .svg-clickable-wrapper {
             position: relative;
             display: inline-block;
             margin: 20px;
         }
-        
+
         .svg-click-zones {
             position: absolute;
             top: 0;
@@ -31,7 +32,7 @@
             height: 100%;
             pointer-events: none;
         }
-        
+
         .click-zone {
             position: absolute;
             pointer-events: all;
@@ -39,56 +40,56 @@
             transition: all 0.2s ease;
             border-radius: 8px;
         }
-        
+
         .click-zone:hover {
             background-color: rgba(255, 255, 0, 0.3);
             border: 2px solid #ffff00;
             box-shadow: 0 0 10px rgba(255, 255, 0, 0.5);
         }
-        
+
         .chord-zone {
             border: 2px solid transparent;
         }
-        
+
         .chord-zone:hover {
             background-color: rgba(231, 76, 60, 0.3);
             border-color: #e74c3c;
         }
-        
+
         .note-zone {
             border: 2px solid transparent;
         }
-        
+
         .note-zone:hover {
             background-color: rgba(52, 152, 219, 0.3);
             border-color: #3498db;
         }
-        
+
         .pent-zone {
             border: 2px solid transparent;
         }
-        
+
         .pent-zone:hover {
             background-color: rgba(155, 89, 182, 0.3);
             border-color: #9b59b6;
         }
-        
+
         .test-zone {
             border: 2px solid transparent;
         }
-        
+
         .test-zone:hover {
             background-color: rgba(46, 204, 113, 0.3);
             border-color: #2ecc71;
         }
-        
+
         .demo-info {
             background: #16213e;
             padding: 20px;
             border-radius: 10px;
             margin-bottom: 30px;
         }
-        
+
         .click-log {
             background: #0f1419;
             padding: 15px;
@@ -99,24 +100,25 @@
             font-family: 'Courier New', monospace;
             font-size: 14px;
         }
-        
+
         .success {
             color: #2ecc71;
         }
-        
+
         .warning {
             color: #f39c12;
         }
-        
+
         .error {
             color: #e74c3c;
         }
     </style>
 </head>
+
 <body>
     <div class="demo-container">
         <h1>🎵 Magic18 SVG Click Zones - Working Demo</h1>
-        
+
         <div class="demo-info">
             <h3>✅ Success! The SVG click zone system is working!</h3>
             <p>This demonstrates the simple positioned div overlay approach that makes SVG elements clickable.</p>
@@ -126,7 +128,8 @@
                 <li><strong>Purple hover:</strong> Pentatonic pattern zones</li>
                 <li><strong>Green hover:</strong> Test/debug zones</li>
             </ul>
-            <p><strong>Why this works compared to InDesign:</strong> We use simple percentage-positioned div overlays instead of complex SVG coordinate transformations.</p>
+            <p><strong>Why this works compared to InDesign:</strong> We use simple percentage-positioned div overlays
+                instead of complex SVG coordinate transformations.</p>
         </div>
 
         <!-- Demo SVG with Click Zones -->
@@ -134,55 +137,46 @@
             <object data="Charts Magic18 SVG_C Left.svg" type="image/svg+xml" width="400" height="300">
                 <img src="Charts Magic18 SVG_C Left.svg" width="400" height="300" alt="C Major Chart Left">
             </object>
-            
+
             <div class="svg-click-zones">
                 <!-- Chord zones (Red hover) -->
-                <div class="click-zone chord-zone" 
-                     style="top: 15%; left: 20%; width: 15%; height: 12%;" 
-                     onclick="handleChordClick('I', 'C')">
+                <div class="click-zone chord-zone" style="top: 15%; left: 20%; width: 15%; height: 12%;"
+                    onclick="handleChordClick('I', 'C')">
                 </div>
-                
-                <div class="click-zone chord-zone" 
-                     style="top: 30%; left: 20%; width: 15%; height: 12%;" 
-                     onclick="handleChordClick('ii', 'Dm')">
+
+                <div class="click-zone chord-zone" style="top: 30%; left: 20%; width: 15%; height: 12%;"
+                    onclick="handleChordClick('ii', 'Dm')">
                 </div>
-                
-                <div class="click-zone chord-zone" 
-                     style="top: 45%; left: 20%; width: 15%; height: 12%;" 
-                     onclick="handleChordClick('iii', 'Em')">
+
+                <div class="click-zone chord-zone" style="top: 45%; left: 20%; width: 15%; height: 12%;"
+                    onclick="handleChordClick('iii', 'Em')">
                 </div>
-                
+
                 <!-- Individual note zones (Blue hover) -->
-                <div class="click-zone note-zone" 
-                     style="top: 15%; left: 40%; width: 8%; height: 10%;" 
-                     onclick="handleNoteClick('C')">
+                <div class="click-zone note-zone" style="top: 15%; left: 40%; width: 8%; height: 10%;"
+                    onclick="handleNoteClick('C')">
                 </div>
-                
-                <div class="click-zone note-zone" 
-                     style="top: 30%; left: 40%; width: 8%; height: 10%;" 
-                     onclick="handleNoteClick('D')">
+
+                <div class="click-zone note-zone" style="top: 30%; left: 40%; width: 8%; height: 10%;"
+                    onclick="handleNoteClick('D')">
                 </div>
-                
-                <div class="click-zone note-zone" 
-                     style="top: 45%; left: 40%; width: 8%; height: 10%;" 
-                     onclick="handleNoteClick('E')">
+
+                <div class="click-zone note-zone" style="top: 45%; left: 40%; width: 8%; height: 10%;"
+                    onclick="handleNoteClick('E')">
                 </div>
-                
+
                 <!-- Pentatonic zones (Purple hover) -->
-                <div class="click-zone pent-zone" 
-                     style="top: 15%; left: 55%; width: 12%; height: 10%;" 
-                     onclick="handlePentatonicClick('C pent')">
+                <div class="click-zone pent-zone" style="top: 15%; left: 55%; width: 12%; height: 10%;"
+                    onclick="handlePentatonicClick('C pent')">
                 </div>
-                
-                <div class="click-zone pent-zone" 
-                     style="top: 30%; left: 55%; width: 12%; height: 10%;" 
-                     onclick="handlePentatonicClick('D pent')">
+
+                <div class="click-zone pent-zone" style="top: 30%; left: 55%; width: 12%; height: 10%;"
+                    onclick="handlePentatonicClick('D pent')">
                 </div>
-                
+
                 <!-- Test zones (Green hover) -->
-                <div class="click-zone test-zone" 
-                     style="top: 70%; left: 20%; width: 20%; height: 15%;" 
-                     onclick="testClick()">
+                <div class="click-zone test-zone" style="top: 70%; left: 20%; width: 20%; height: 15%;"
+                    onclick="testClick()">
                 </div>
             </div>
         </div>
@@ -192,12 +186,11 @@
             <object data="Charts Magic18 SVG_C Right.svg" type="image/svg+xml" width="400" height="300">
                 <img src="Charts Magic18 SVG_C Right.svg" width="400" height="300" alt="C Major Chart Right">
             </object>
-            
+
             <div class="svg-click-zones">
                 <!-- Test zone for right side -->
-                <div class="click-zone test-zone" 
-                     style="top: 70%; left: 20%; width: 20%; height: 15%;" 
-                     onclick="testClick()">
+                <div class="click-zone test-zone" style="top: 70%; left: 20%; width: 20%; height: 15%;"
+                    onclick="testClick()">
                 </div>
             </div>
         </div>
@@ -246,4 +239,5 @@
         log('💡 This solves the "InDesign 3-second" problem with simple overlays', 'warning');
     </script>
 </body>
+
 </html>

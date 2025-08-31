@@ -374,14 +374,44 @@ function hasActiveTweenFor(obj) {
 // Camera view toggles
 function setViewAbove() {
     currentStickyView = 'above';
-    animateVector(camera.position, melodyCamPos.clone(), 650);
-    animateVector(controls.target, melodyTarget.clone(), 650);
+    
+    // RESPONSIVE ZOOM: Adjust camera distance based on chord progression length
+    const chordCount = lineup.length;
+    let targetPos = melodyCamPos.clone();
+    let targetLookAt = melodyTarget.clone();
+    
+    if (chordCount > 8) {
+        // Calculate zoom-out factor based on chord count
+        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.15); // Max 3x zoom out
+        targetPos.z *= zoomFactor; // Zoom out by moving camera back
+        targetPos.y *= Math.sqrt(zoomFactor); // Less dramatic height change
+        
+        console.log(`[RESPONSIVE ZOOM] Melody view: ${chordCount} chords - zoomed out ${zoomFactor.toFixed(2)}x`);
+    }
+    
+    animateVector(camera.position, targetPos, 650);
+    animateVector(controls.target, targetLookAt, 650);
     pokeInteraction();
 }
 function setViewBelow() {
     currentStickyView = 'below';
-    animateVector(camera.position, bassCamPos.clone(), 650);
-    animateVector(controls.target, bassTarget.clone(), 650);
+    
+    // RESPONSIVE ZOOM: Adjust bass view based on chord progression length
+    const chordCount = lineup.length;
+    let targetPos = bassCamPos.clone();
+    let targetLookAt = bassTarget.clone();
+    
+    if (chordCount > 8) {
+        // Calculate zoom-out factor based on chord count
+        const zoomFactor = Math.min(3.0, 1.0 + (chordCount - 8) * 0.15); // Max 3x zoom out
+        targetPos.z *= zoomFactor; // Zoom out by moving camera back
+        targetPos.y *= Math.sqrt(zoomFactor); // Less dramatic height change (maintaining negative Y)
+        
+        console.log(`[RESPONSIVE ZOOM] Bass view: ${chordCount} chords - zoomed out ${zoomFactor.toFixed(2)}x`);
+    }
+    
+    animateVector(camera.position, targetPos, 650);
+    animateVector(controls.target, targetLookAt, 650);
     pokeInteraction();
 }
 
@@ -827,10 +857,10 @@ function makeShelfTexture() {
     }
     // REST centered at top center of the top circle (anchor ~ -90°)
     drawCurvedWord('REST', top.x, top.y, top.r - 22, -Math.PI / 2, { fill: '#223', spacingDeg: 14 });
-    // MOTION centered around ~2 o'clock on the right circle (anchor ~ 60°)
-    drawCurvedWord('MOTION', right.x, right.y, right.r - 28, Math.PI / 3, { fill: '#222', spacingDeg: 12 });
-    // TENSION centered around ~10 o'clock on the left circle (anchor ~ 120°)
-    drawCurvedWord('TENSION', left.x, left.y, left.r - 28, (2 * Math.PI) / 3, { fill: '#222', spacingDeg: 12 });
+    // MOTION centered at 2 o'clock on the right circle (60° = π/3 radians)
+    drawCurvedWord('MOTION', right.x, right.y, right.r - 24, Math.PI / 3, { fill: '#000', spacingDeg: 10 });
+    // TENSION centered at 10 o'clock on the left circle (120° = 2π/3 radians) 
+    drawCurvedWord('TENSION', left.x, left.y, left.r - 24, (2 * Math.PI) / 3, { fill: '#000', spacingDeg: 10 });
     const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; return tex;
 }
 
@@ -855,11 +885,11 @@ function makeTitleTexture(lines, opts = {}) {
     const c = document.createElement('canvas'); c.width = w; c.height = h;
     const ctx = c.getContext('2d');
     ctx.clearRect(0, 0, w, h);
-    
+
     // Use professional font settings if available
     const fontTarget = opts.fontTarget || 'chord-face';
     const fontSettings = currentFontSettings?.[fontTarget] || currentFontSettings?.['chord-face'];
-    
+
     const family = opts.family || fontSettings?.family || 'Arial';
     const weight = opts.weight || fontSettings?.weight || 900;
     const size = opts.size || fontSettings?.size || 220;
@@ -871,11 +901,11 @@ function makeTitleTexture(lines, opts = {}) {
     // Build font string with professional settings
     const fontStyle = italic ? 'italic' : 'normal';
     const fontFamily = `${fontStyle} ${weight} ${size}px ${family}`;
-    
+
     ctx.fillStyle = opts.fill || '#ffffff';
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.globalAlpha = opacity;
-    
+
     // Professional shadow/glow
     if (shadow) {
         ctx.shadowColor = 'rgba(0,0,0,0.6)';
@@ -1255,6 +1285,17 @@ function reflowLineup() {
     });
     try { bridge.emit('lineupChanged', { lineup: lineup.map(c => c.userData?.roman), key: currentKey }); } catch (_) { }
     try { setState({ lineup: lineup.map(c => c.userData?.roman) }); } catch (_) { }
+    
+    // AUTO RESPONSIVE ZOOM: Update camera view if progression is getting long
+    if (lineup.length > 8) {
+        console.log(`[AUTO ZOOM] ${lineup.length} chords detected - updating camera view`);
+        // Smoothly update current view to accommodate new chord count
+        if (currentStickyView === 'above') {
+            setViewAbove(); // This will now auto-zoom based on lineup.length
+        } else if (currentStickyView === 'below') {
+            setViewBelow(); // This will now auto-zoom based on lineup.length
+        }
+    }
 }
 
 function previewMakeWay(insertIndex) {
@@ -2077,16 +2118,16 @@ function onPointerUp(e) {
                 if (adjustMode) {
                     // ADJUST MODE: Just play the chord, don't duplicate
                     console.log(`[ADJUST MODE] Playing shelf chord ${targetObj.userData.roman} without duplication`);
-                    
+
                     // BULLETPROOF MODIFIER DETECTION for shelf clicks in adjust mode
                     const isModifierClick = globalModifierState.altPressed || globalModifierState.shiftPressed || globalModifierState.ctrlPressed || globalModifierState.metaPressed;
                     const shouldUse7th = withSeventh || isModifierClick;
-                    
+
                     if (isModifierClick) {
                         console.log(`[ADJUST MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                         updateChordFaceWith7th(targetObj);
                     }
-                    
+
                     playChordForObjectWith7th(targetObj, shouldUse7th);
                     pendingObj = null; return;
                 } else {
@@ -2118,8 +2159,13 @@ function onPointerUp(e) {
                     updateChordFaceWith7th(targetObj);
                 }
 
-                // Play chord with 7th if global setting OR ANY modifier
-                playChordForObjectWith7th(targetObj, shouldUse7th);
+                // IMPROV MODE: Queue chord for next downbeat if drums are playing
+                if (improvMode && window.drumMachine && window.drumMachine.isPlaying) {
+                    queueChordForDownbeat(targetObj, shouldUse7th);
+                } else {
+                    // Play chord with 7th if global setting OR ANY modifier
+                    playChordForObjectWith7th(targetObj, shouldUse7th);
+                }
 
                 pendingObj = null; return;
             }
@@ -2446,6 +2492,12 @@ let lastBassMidi = null, lastMelodyMidi = null;
 let voiceLeadingMode = 'vl2'; // 'vl1' nearest-octave, 'vl2' tonal.js assisted - DEFAULT TO VL2
 let lockedMelody = null; // [{ roman, midi, color } ...]
 let lockedBass = null;   // [{ roman, midi, color } ...]
+
+// IMPROV MODE - Chord queueing system
+let improvMode = false;
+let queuedChord = null;
+let lastDownbeatTime = 0;
+let nextDownbeatTime = 0;
 let melodyLaneGroup = null, bassLaneGroup = null;
 let melodyGiantGroup = null; // large ground-visible duplicates for melody
 let bassGiantGroup = null;   // large duplicates for bass
@@ -2616,46 +2668,46 @@ chordInstEl?.addEventListener('change', async () => {
     const newInstrument = chordInstEl.value;
     console.log(`[ORCHESTRAL] 🎼 Switching chord instrument to: ${newInstrument}`);
     currentChordInstrument = newInstrument;
-    
+
     // Create new Tone.js synth based on instrument type
     let newChordSynth;
-    switch(newInstrument) {
+    switch (newInstrument) {
         case 'strings':
             newChordSynth = new window.Tone.PolySynth(window.Tone.Synth, {
                 oscillator: { type: 'sawtooth' },
                 envelope: { attack: 0.3, decay: 0.2, sustain: 0.7, release: 1.5 },
                 filter: { frequency: 1200, rolloff: -12 }
-            }).toDestination();
+            }).connect(chordBus);
             break;
         case 'brass':
             newChordSynth = new window.Tone.PolySynth(window.Tone.Synth, {
                 oscillator: { type: 'square' },
                 envelope: { attack: 0.1, decay: 0.3, sustain: 0.8, release: 0.8 },
                 filter: { frequency: 800, rolloff: -24 }
-            }).toDestination();
+            }).connect(chordBus);
             break;
         case 'piano':
             newChordSynth = new window.Tone.PolySynth(window.Tone.Synth, {
                 oscillator: { type: 'triangle' },
                 envelope: { attack: 0.02, decay: 0.3, sustain: 0.1, release: 1.2 }
-            }).toDestination();
+            }).connect(chordBus);
             break;
         case 'pad':
             newChordSynth = new window.Tone.PolySynth(window.Tone.Synth, {
                 oscillator: { type: 'sine' },
                 envelope: { attack: 1.0, decay: 0.5, sustain: 0.9, release: 2.0 },
                 filter: { frequency: 600, rolloff: -12 }
-            }).toDestination();
+            }).connect(chordBus);
             break;
         default:
-            newChordSynth = new window.Tone.PolySynth().toDestination();
+            newChordSynth = new window.Tone.PolySynth().connect(chordBus);
     }
-    
+
     // Replace the old instrument
     if (sfChord?.synth) sfChord.synth.dispose();
     sfChord = makeTonePlayable(newChordSynth);
     chordInst = sfChord;
-    
+
     console.log(`[ORCHESTRAL] ✅ Chord instrument switched to ${newInstrument}`);
 });
 
@@ -2663,46 +2715,46 @@ bassInstEl?.addEventListener('change', async () => {
     const newInstrument = bassInstEl.value;
     console.log(`[ORCHESTRAL] 🎼 Switching bass instrument to: ${newInstrument}`);
     currentBassInstrument = newInstrument;
-    
+
     // Create new bass synth
     let newBassSynth;
-    switch(newInstrument) {
+    switch (newInstrument) {
         case 'contrabass':
             newBassSynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'sawtooth' },
                 envelope: { attack: 0.1, decay: 0.3, sustain: 0.7, release: 1.0 },
                 filter: { frequency: 400, rolloff: -24 }
-            }).toDestination();
+            }).connect(bassBus);
             break;
         case 'cello':
             newBassSynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'sawtooth' },
                 envelope: { attack: 0.2, decay: 0.4, sustain: 0.8, release: 1.2 },
                 filter: { frequency: 600, rolloff: -12 }
-            }).toDestination();
+            }).connect(bassBus);
             break;
         case 'tuba':
             newBassSynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'square' },
                 envelope: { attack: 0.05, decay: 0.2, sustain: 0.9, release: 0.8 },
                 filter: { frequency: 200, rolloff: -24 }
-            }).toDestination();
+            }).connect(bassBus);
             break;
         case 'electric':
             newBassSynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'square' },
                 envelope: { attack: 0.02, decay: 0.1, sustain: 0.6, release: 0.5 }
-            }).toDestination();
+            }).connect(bassBus);
             break;
         default:
-            newBassSynth = new window.Tone.MonoSynth().toDestination();
+            newBassSynth = new window.Tone.MonoSynth().connect(bassBus);
     }
-    
+
     // Replace the old instrument
     if (sfBass?.synth) sfBass.synth.dispose();
     sfBass = makeTonePlayable(newBassSynth);
     bassInst = sfBass;
-    
+
     console.log(`[ORCHESTRAL] ✅ Bass instrument switched to ${newInstrument}`);
 });
 
@@ -2710,47 +2762,47 @@ melodyInstEl?.addEventListener('change', async () => {
     const newInstrument = melodyInstEl.value;
     console.log(`[ORCHESTRAL] 🎼 Switching melody instrument to: ${newInstrument}`);
     currentMelodyInstrument = newInstrument;
-    
+
     // Create new melody synth
     let newMelodySynth;
-    switch(newInstrument) {
+    switch (newInstrument) {
         case 'violin':
             newMelodySynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'sawtooth' },
                 envelope: { attack: 0.1, decay: 0.2, sustain: 0.8, release: 1.0 },
                 filter: { frequency: 2000, rolloff: -12 }
-            }).toDestination();
+            }).connect(melodyBus);
             break;
         case 'flute':
             newMelodySynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'sine' },
                 envelope: { attack: 0.05, decay: 0.1, sustain: 0.9, release: 0.8 },
                 filter: { frequency: 3000, rolloff: -12 }
-            }).toDestination();
+            }).connect(melodyBus);
             break;
         case 'trumpet':
             newMelodySynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'square' },
                 envelope: { attack: 0.05, decay: 0.2, sustain: 0.7, release: 0.6 },
                 filter: { frequency: 1500, rolloff: -24 }
-            }).toDestination();
+            }).connect(melodyBus);
             break;
         case 'oboe':
             newMelodySynth = new window.Tone.MonoSynth({
                 oscillator: { type: 'triangle' },
                 envelope: { attack: 0.08, decay: 0.15, sustain: 0.85, release: 0.9 },
                 filter: { frequency: 2500, rolloff: -12 }
-            }).toDestination();
+            }).connect(melodyBus);
             break;
         default:
-            newMelodySynth = new window.Tone.MonoSynth().toDestination();
+            newMelodySynth = new window.Tone.MonoSynth().connect(melodyBus);
     }
-    
+
     // Replace the old instrument
     if (sfMelody?.synth) sfMelody.synth.dispose();
     sfMelody = makeTonePlayable(newMelodySynth);
     melodyInst = sfMelody;
-    
+
     console.log(`[ORCHESTRAL] ✅ Melody instrument switched to ${newInstrument}`);
 });
 const playProgBtn = document.getElementById('play-progression');
@@ -4430,7 +4482,7 @@ function initializeFontControlSystem() {
     const fontModalClose = document.getElementById('font-modal-close');
     const fontTargetSelect = document.getElementById('font-target-select');
     const fontPreview = document.getElementById('font-preview');
-    
+
     // Modal controls
     fontControlBtn?.addEventListener('click', () => {
         console.log('[FONT CONTROL] Opening professional font controls');
@@ -4438,28 +4490,28 @@ function initializeFontControlSystem() {
         loadFontSettings(fontTargetSelect.value);
         updatePreview();
     });
-    
+
     fontModalClose?.addEventListener('click', () => {
         fontModal.style.display = 'none';
     });
-    
+
     fontModal?.addEventListener('click', (e) => {
         if (e.target === fontModal) fontModal.style.display = 'none';
     });
-    
+
     // Font target selection
     fontTargetSelect?.addEventListener('change', () => {
         loadFontSettings(fontTargetSelect.value);
         updatePreview();
     });
-    
+
     // Real-time controls
     setupFontControlListeners();
-    
+
     function loadFontSettings(target) {
         const settings = currentFontSettings[target];
         if (!settings) return;
-        
+
         document.getElementById('font-family-select').value = settings.family;
         document.getElementById('font-weight-select').value = settings.weight;
         document.getElementById('font-size-slider').value = settings.size;
@@ -4469,45 +4521,45 @@ function initializeFontControlSystem() {
         document.getElementById('font-italic').checked = settings.italic;
         document.getElementById('font-underline').checked = settings.underline;
         document.getElementById('font-shadow').checked = settings.shadow;
-        
+
         updateSliderValues();
     }
-    
+
     function updateSliderValues() {
         document.getElementById('font-size-value').textContent = document.getElementById('font-size-slider').value + 'px';
         document.getElementById('letter-spacing-value').textContent = document.getElementById('letter-spacing-slider').value + 'px';
         document.getElementById('line-height-value').textContent = document.getElementById('line-height-slider').value;
         document.getElementById('opacity-value').textContent = Math.round(document.getElementById('opacity-slider').value * 100) + '%';
     }
-    
+
     function setupFontControlListeners() {
         // Sliders
         document.getElementById('font-size-slider')?.addEventListener('input', () => {
             updateSliderValues();
             updatePreview();
         });
-        
+
         document.getElementById('letter-spacing-slider')?.addEventListener('input', () => {
             updateSliderValues();
             updatePreview();
         });
-        
+
         document.getElementById('line-height-slider')?.addEventListener('input', () => {
             updateSliderValues();
             updatePreview();
         });
-        
+
         document.getElementById('opacity-slider')?.addEventListener('input', () => {
             updateSliderValues();
             updatePreview();
         });
-        
+
         // Selects and checkboxes
         ['font-family-select', 'font-weight-select', 'font-italic', 'font-underline', 'font-shadow'].forEach(id => {
             document.getElementById(id)?.addEventListener('change', updatePreview);
         });
     }
-    
+
     function updatePreview() {
         const target = fontTargetSelect.value;
         const family = document.getElementById('font-family-select').value;
@@ -4519,7 +4571,7 @@ function initializeFontControlSystem() {
         const italic = document.getElementById('font-italic').checked;
         const underline = document.getElementById('font-underline').checked;
         const shadow = document.getElementById('font-shadow').checked;
-        
+
         // Update preview
         const previewSize = Math.min(48, size / 8); // Scale down for preview
         fontPreview.style.fontFamily = family;
@@ -4531,40 +4583,66 @@ function initializeFontControlSystem() {
         fontPreview.style.fontStyle = italic ? 'italic' : 'normal';
         fontPreview.style.textDecoration = underline ? 'underline' : 'none';
         fontPreview.style.textShadow = shadow ? '2px 2px 4px rgba(0,0,0,0.5)' : 'none';
-        
+
         // Update preview text based on target
-        switch(target) {
+        switch (target) {
             case 'chord-face':
-                fontPreview.textContent = 'I7';
+                // Use actual chord face texture generation for EXACT preview
+                try {
+                    const previewTexture = makeTitleTexture(['V(7)(b9)'], { 
+                        width: 512, height: 512, size: Math.min(180, size / 2),
+                        fontTarget: 'chord-face',
+                        family: family,
+                        weight: weight,
+                        lineHeight: lineHeight,
+                        letterSpacing: letterSpacing,
+                        opacity: opacity,
+                        italic: italic,
+                        shadow: shadow
+                    });
+                    fontPreview.style.background = `url(${previewTexture.canvas.toDataURL()}) center/contain no-repeat white`;
+                    fontPreview.textContent = ''; // Clear text, use background image
+                    fontPreview.style.minHeight = '120px';
+                } catch (e) {
+                    fontPreview.textContent = 'V(7)(b9)';
+                    fontPreview.style.background = 'white';
+                    fontPreview.style.minHeight = 'auto';
+                }
                 break;
             case 'diamond-font':
                 fontPreview.textContent = 'C E G B♭';
+                fontPreview.style.background = 'white';
+                fontPreview.style.minHeight = 'auto';
                 break;
             case 'title-font':
                 fontPreview.textContent = 'MELODY';
+                fontPreview.style.background = 'white';
+                fontPreview.style.minHeight = 'auto';
                 break;
             case 'ui-font':
                 fontPreview.textContent = 'Button Text';
+                fontPreview.style.background = 'white';
+                fontPreview.style.minHeight = 'auto';
                 break;
         }
     }
-    
+
     // Action buttons
     document.getElementById('font-apply-btn')?.addEventListener('click', () => {
         applyFontSettings();
         fontModal.style.display = 'none';
     });
-    
+
     document.getElementById('font-reset-btn')?.addEventListener('click', () => {
         resetFontSettings();
         loadFontSettings(fontTargetSelect.value);
         updatePreview();
     });
-    
+
     document.getElementById('font-cancel-btn')?.addEventListener('click', () => {
         fontModal.style.display = 'none';
     });
-    
+
     function applyFontSettings() {
         const target = fontTargetSelect.value;
         const settings = {
@@ -4578,13 +4656,13 @@ function initializeFontControlSystem() {
             underline: document.getElementById('font-underline').checked,
             shadow: document.getElementById('font-shadow').checked
         };
-        
+
         currentFontSettings[target] = settings;
-        
+
         console.log(`[FONT CONTROL] Applied ${target} settings:`, settings);
-        
+
         // Apply to actual elements based on target
-        switch(target) {
+        switch (target) {
             case 'chord-face':
                 // Update makeTitleTexture function defaults for chord faces
                 console.log('[FONT CONTROL] Chord face font updated - will apply to new textures');
@@ -4602,14 +4680,14 @@ function initializeFontControlSystem() {
                 break;
         }
     }
-    
+
     function resetFontSettings() {
         const target = fontTargetSelect.value;
         // Reset to defaults
-        switch(target) {
+        switch (target) {
             case 'chord-face':
                 currentFontSettings[target] = {
-                    family: 'Arial', weight: '900', size: 420, letterSpacing: 0, 
+                    family: 'Arial', weight: '900', size: 420, letterSpacing: 0,
                     lineHeight: 0.68, opacity: 1.0, italic: false, underline: false, shadow: false
                 };
                 break;
@@ -4634,6 +4712,94 @@ function initializeFontControlSystem() {
         }
         console.log(`[FONT CONTROL] Reset ${target} to defaults`);
     }
+}
+
+// IMPROV MODE FUNCTIONS
+function enableImprovMode() {
+    improvMode = true;
+    console.log('[IMPROV MODE] Enabled - chords will queue for downbeats');
+    
+    // Add visual indicator
+    const improvIndicator = document.createElement('div');
+    improvIndicator.id = 'improv-indicator';
+    improvIndicator.innerHTML = '🎵 IMPROV! 🎵';
+    improvIndicator.style.cssText = `
+        position: fixed; top: 20px; right: 20px; z-index: 1000;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        color: white; padding: 10px 20px; border-radius: 25px;
+        font-weight: bold; font-size: 18px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2); animation: pulse 1.5s infinite;
+    `;
+    document.body.appendChild(improvIndicator);
+    
+    // Add CSS animation
+    if (!document.getElementById('improv-styles')) {
+        const style = document.createElement('style');
+        style.id = 'improv-styles';
+        style.textContent = `
+            @keyframes pulse {
+                0%, 100% { transform: scale(1); opacity: 1; }
+                50% { transform: scale(1.05); opacity: 0.8; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    // Track downbeats
+    scheduleDownbeatTracking();
+}
+
+function disableImprovMode() {
+    improvMode = false;
+    queuedChord = null;
+    console.log('[IMPROV MODE] Disabled - returning to immediate playback');
+    
+    // Remove visual indicator
+    const indicator = document.getElementById('improv-indicator');
+    if (indicator) indicator.remove();
+}
+
+function queueChordForDownbeat(chordObj, use7th) {
+    queuedChord = { chord: chordObj, use7th: use7th, queueTime: window.Tone.now() };
+    console.log(`[IMPROV QUEUE] ${chordObj.userData.roman} queued for next downbeat (use7th: ${use7th})`);
+    
+    // Visual feedback for queued chord
+    highlightChordEffect(chordObj, 300);
+    chordObj.material.emissive.setHex(0x444400); // Yellow glow for queued
+    setTimeout(() => {
+        chordObj.material.emissive.setHex(0x000000);
+    }, 300);
+}
+
+function scheduleDownbeatTracking() {
+    if (!window.Tone || !window.Tone.Transport) return;
+    
+    // Schedule a repeating callback every measure to track downbeats
+    const downbeatTracker = new window.Tone.Sequence((time) => {
+        lastDownbeatTime = time;
+        nextDownbeatTime = time + window.Tone.Transport.toSeconds('1m');
+        
+        // Play queued chord on downbeat
+        if (queuedChord && improvMode) {
+            const { chord, use7th } = queuedChord;
+            console.log(`[IMPROV DOWNBEAT] Playing queued chord: ${chord.userData.roman}`);
+            
+            window.Tone.Draw.schedule(() => {
+                playChordForObjectWith7th(chord, use7th);
+                // Strong visual feedback for downbeat chord
+                highlightChordEffect(chord, 1000);
+                chord.material.emissive.setHex(0x004400); // Green flash for played
+                setTimeout(() => {
+                    chord.material.emissive.setHex(0x000000);
+                }, 1000);
+            }, time);
+            
+            queuedChord = null; // Clear queue
+        }
+    }, [0], '1m');
+    
+    downbeatTracker.start(0);
+    window.improvDownbeatTracker = downbeatTracker;
 }
 
 async function playLockSound() {

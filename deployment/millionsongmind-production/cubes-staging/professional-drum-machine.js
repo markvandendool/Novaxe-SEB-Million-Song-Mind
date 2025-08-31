@@ -328,6 +328,11 @@ class ProfessionalDrumMachine {
                 drumToggle.classList.add('playing');
             }
             if (statusLight) statusLight.classList.add('active');
+            
+            // Enable IMPROV MODE when drums start playing solo
+            if (window.enableImprovMode && typeof window.enableImprovMode === 'function') {
+                window.enableImprovMode();
+            }
 
             const transportStatus = document.getElementById('transport-status');
             if (transportStatus) transportStatus.textContent = 'Playing';
@@ -347,6 +352,11 @@ class ProfessionalDrumMachine {
                 drumToggle.classList.remove('playing');
             }
             if (statusLight) statusLight.classList.remove('active');
+            
+            // Disable IMPROV MODE when drums stop
+            if (window.disableImprovMode && typeof window.disableImprovMode === 'function') {
+                window.disableImprovMode();
+            }
 
             const transportStatus = document.getElementById('transport-status');
             if (transportStatus) transportStatus.textContent = 'Stopped';

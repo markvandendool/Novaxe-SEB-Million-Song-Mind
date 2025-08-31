@@ -72,6 +72,7 @@ export const degreeSets = {
     'V(7)(b9)': ['5', '7', '2', 'b2'],  // Root, 3rd, 5th, b9th (b2 = b9th)
     'viiº7': ['7', '2', '4', 'b6'],
     '#iiº': ['#2', '#4', '6', '1'],  // Bass: #2, Melody: #1 3 5 b7
+    '#iº': ['#1', '3', '5', 'b7'],   // Bass: #1, Melody: #1 3 5 b7
 };
 
 export const noteSetsC = {
