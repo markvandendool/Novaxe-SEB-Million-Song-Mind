@@ -4312,14 +4312,20 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
     }
     if (bassEnabled) {
         const bassMidi = getBassMidiForObject(obj);
-        if (sfBass && sfBass.play) {
-            sfBass.play(bassMidi, now, { duration: sustainSeconds, gain: 0.34 });
+        // NEW AUDIO ENGINE: Use real bass instruments
+        if (window.audioEngine && window.audioEngine.playBass) {
+            const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
+            console.log('[SUSTAIN] 🎵 Playing bass sustain:', bassNote);
+            window.audioEngine.playBass(bassNote, sustainSeconds, 0.34);
         }
     }
     if (melodyEnabled) {
         const melMidi = getMelodyMidiForObject(obj);
-        if (sfMelody && sfMelody.play) {
-            sfMelody.play(melMidi, now, { duration: sustainSeconds, gain: 0.3 });
+        // NEW AUDIO ENGINE: Use real melody instruments
+        if (window.audioEngine && window.audioEngine.playMelody) {
+            const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
+            console.log('[SUSTAIN] 🎵 Playing melody sustain:', melodyNote);
+            window.audioEngine.playMelody([melodyNote], [sustainSeconds], 0.3);
         }
     }
 }
@@ -4371,6 +4377,7 @@ function playChordForObjectWith7th(obj, use7th = false) {
             melMidi = lockedMelody[idx].midi;
         }
         const melodyNoteName = midiToNoteName(melMidi);
+        console.log('[LOCKED MELODY] 🎵 Playing locked melody note:', melodyNoteName, 'from midi:', melMidi);
         window.audioEngine.playMelody([melodyNoteName], [duration], 0.4);
     }
 
@@ -5318,17 +5325,21 @@ function startSoloProgression(soloType) {
                 let melMidi = lockedMelody[index % lineup.length]?.midi ?? getMelodyMidiForObject(c);
                 while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
                 melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
-                if (sfMelody && sfMelody.play) {
-                    sfMelody.play(melMidi, time, { duration: chordDurationSeconds, gain: 0.4 });
+
+                // NEW AUDIO ENGINE: Use real melody instruments
+                Tone.Draw.schedule(() => {
+                    const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
+                    console.log('[MELODY SOLO] 🎵 Playing locked melody:', melodyNote, 'from midi:', melMidi);
+                    window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.4);
                     lastMelodyMidi = melMidi;
-                }
+                }, time);
             } else {
                 // Use face-derived melody
                 Tone.Draw.schedule(() => {
                     const melMidi = getMelodyMidiForObject(c);
-                    if (sfMelody && sfMelody.play) {
-                        sfMelody.play(melMidi, Tone.now(), { duration: chordDurationSeconds, gain: 0.4 });
-                    }
+                    const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
+                    console.log('[MELODY SOLO] 🎵 Playing face-derived melody:', melodyNote);
+                    window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.4);
                 }, time);
             }
         } else if (soloType === 'bass') {
@@ -5336,17 +5347,21 @@ function startSoloProgression(soloType) {
                 let bassMidi = lockedBass[index % lineup.length]?.midi ?? getBassMidiForObject(c);
                 while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
                 bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
-                if (sfBass && sfBass.play) {
-                    sfBass.play(bassMidi, time, { duration: chordDurationSeconds, gain: 0.5 });
+
+                // NEW AUDIO ENGINE: Use real bass instruments
+                Tone.Draw.schedule(() => {
+                    const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
+                    console.log('[BASS SOLO] 🎵 Playing locked bass:', bassNote, 'from midi:', bassMidi);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5);
                     lastBassMidi = bassMidi;
-                }
+                }, time);
             } else {
                 // Use face-derived bass
                 Tone.Draw.schedule(() => {
                     const bassMidi = getBassMidiForObject(c);
-                    if (sfBass && sfBass.play) {
-                        sfBass.play(bassMidi, Tone.now(), { duration: chordDurationSeconds, gain: 0.5 });
-                    }
+                    const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
+                    console.log('[BASS SOLO] 🎵 Playing face-derived bass:', bassNote);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5);
                 }, time);
             }
         }
@@ -5857,21 +5872,23 @@ async function playFrontRowProgression() {
                     // Play with NEW AUDIO ENGINE using FULL DURATION
                     window.audioEngine.playChord(chordNotes, chordDurationSeconds, 0.7);
 
-                    // Play bass if enabled
-                    if (bassEnabled) {
+                    // Play bass if enabled - SKIP if locked bass exists (will be played below)
+                    if (bassEnabled && !lockedBass) {
                         let bassMidi = getBassMidiForObject(c);
                         while (bassMidi > 55) bassMidi -= 12;
                         while (bassMidi < 36) bassMidi += 12;
                         const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
+                        console.log('[PLAY PROGRESSION] 🎵 Playing face-derived bass:', bassNote);
                         window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8);
                     }
 
-                    // Play melody if enabled  
-                    if (melodyEnabled) {
+                    // Play melody if enabled - SKIP if locked melody exists (will be played below)
+                    if (melodyEnabled && !lockedMelody) {
                         let melMidi = getMelodyMidiForObject(c);
                         while (melMidi > 84) melMidi -= 12;
                         while (melMidi < 60) melMidi += 12;
                         const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
+                        console.log('[PLAY PROGRESSION] 🎵 Playing face-derived melody:', melodyNote);
                         window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.5);
                     }
                 } else {
@@ -5882,36 +5899,37 @@ async function playFrontRowProgression() {
             }
         }, time);
 
-        // LEGACY FALLBACK (remove this once new engine is confirmed working)
-        if (lockedMelody || lockedBass) {
-            const roman = c.userData.roman;
-            const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
-            if (sfChord && sfChord.play) {
-                chordMidis.forEach(m => sfChord.play(m, time, { duration: chordDurationSeconds, gain: 0.18 }));
-            }
-            if (bassEnabled) {
-                let bassMidi = lockedBass?.[index % lineup.length]?.midi ?? getBassMidiForObject(c);
-                while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+        // LOCKED BASS/MELODY - Only play if locks exist and enabled
+        if (lockedBass && bassEnabled) {
+            let bassMidi = lockedBass[index % lineup.length]?.midi;
+            if (bassMidi) {
+                while (bassMidi > 55) bassMidi -= 12; 
+                while (bassMidi < 36) bassMidi += 12;
                 bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
-                if (sfBass && sfBass.play) {
-                    sfBass.play(bassMidi, time, { duration: chordDurationSeconds, gain: 0.34 });
+
+                Tone.Draw.schedule(() => {
+                    const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
+                    console.log('[PROGRESSION] 🎵 Playing LOCKED bass:', bassNote, 'index:', index);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8);
                     lastBassMidi = bassMidi;
-                }
+                }, time);
             }
-            if (melodyEnabled) {
-                let melMidi = lockedMelody?.[index % lineup.length]?.midi ?? getMelodyMidiForObject(c);
-                while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+        }
+        
+        if (lockedMelody && melodyEnabled) {
+            let melMidi = lockedMelody[index % lineup.length]?.midi;
+            if (melMidi) {
+                while (melMidi > 84) melMidi -= 12; 
+                while (melMidi < 60) melMidi += 12;
                 melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
-                if (sfMelody && sfMelody.play) {
-                    sfMelody.play(melMidi, time, { duration: chordDurationSeconds, gain: 0.3 });
+
+                Tone.Draw.schedule(() => {
+                    const melodyNote = Tone.Frequency(melMidi, "midi").toNote();
+                    console.log('[PROGRESSION] 🎵 Playing LOCKED melody:', melodyNote, 'index:', index);
+                    window.audioEngine.playMelody([melodyNote], [chordDurationSeconds], 0.5);
                     lastMelodyMidi = melMidi;
-                }
+                }, time);
             }
-        } else {
-            // Schedule chord playback with proper sustain using Tone.Draw
-            Tone.Draw.schedule(() => {
-                playChordForObjectWithSustain(c, chordDurationSeconds);
-            }, time);
         }
 
     }, Array.from({ length: totalChords + 1 }, (_, i) => i), "1m"); // 1 measure per chord
