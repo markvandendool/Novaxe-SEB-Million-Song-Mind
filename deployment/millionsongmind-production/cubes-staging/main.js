@@ -309,6 +309,22 @@ function maybeEnterStageMode() {
     if (lineup.length && lockedMelody && lockedBass && lockedMelody.length === lineup.length && lockedBass.length === lineup.length) enterStageMode();
 }
 
+// GLOBAL PLAYBACK SHELF BLACKOUT for staves legibility
+function setPlaybackShelfBlackout(enable) {
+    if (shelfPlane && shelfPlane.material) {
+        shelfPlane.material.transparent = true;
+        if (enable) {
+            // DIM SHELF to 15% opacity during ANY playback for staves legibility
+            shelfPlane.material.opacity = 0.15;
+            console.log('[PLAYBACK BLACKOUT] 🌑 Shelf dimmed to 15% for staves legibility');
+        } else {
+            // RESTORE shelf to full opacity when playback ends
+            shelfPlane.material.opacity = 1.0;
+            console.log('[PLAYBACK BLACKOUT] ✨ Shelf restored to full opacity');
+        }
+    }
+}
+
 // Grid and legibility darkening plane
 const grid = new THREE.GridHelper(40, 40, 0x444444, 0x333333);
 grid.position.y = -2.2;
@@ -1643,6 +1659,22 @@ let currentMouseZone = 'camera'; // 'cube' or 'camera'
 let zoneCheckEnabled = true;
 let dragStartZone = null; // Track zone where drag started
 let isDraggingCamera = false; // Track camera drag state
+
+// EMERGENCY ZONE RESET FUNCTION
+function emergencyZoneReset() {
+    console.log('[EMERGENCY] 🚨 Resetting zone system');
+    zoneCheckEnabled = true;
+    isDraggingCamera = false;
+    currentMouseZone = 'camera';
+    controls.enabled = true;
+    renderer.domElement.style.cursor = 'grab';
+    console.log('[EMERGENCY] ✅ Zone system reset - camera controls restored');
+}
+
+// Expose to window for emergency use
+if (typeof window !== 'undefined') {
+    window.emergencyZoneReset = emergencyZoneReset;
+}
 
 // Calculate if mouse cursor is within cube interaction zone
 function isInCubeZone(clientX, clientY) {
@@ -4413,7 +4445,7 @@ class OrchestralAudioEngine {
     // SIMPLE AUDIO CUTOFF for Free Play Mode
     cutoffCurrentChord() {
         console.log('[AUDIO ENGINE] 🔇 Cutting off current chord for smooth transition');
-        
+
         // For Tone.js Sampler instruments, release all current notes
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (instrument && instrument.sampler && !instrument.fallback) {
@@ -4425,7 +4457,7 @@ class OrchestralAudioEngine {
                 }
             }
         }
-        
+
         // For WebAudioFont, we can't easily stop individual notes, 
         // but the overlapping is minimized by using shorter durations in free play
         // Future enhancement: Track individual note timers for WebAudioFont cutoff
@@ -7320,6 +7352,17 @@ function lockInMelody() {
     if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
     // Re-verify each cube's current orientation → rotationIndex from quaternion
     for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
+
+    // 🎼 STAVES INTEGRATION: Auto-create staves and draw measures when melody is locked
+    if (window.musicalStaves3D) {
+        if (!window.musicalStaves3D.isVisible) {
+            console.log('[LOCK MELODY] 🎼 Auto-creating staves for melody lock');
+            window.musicalStaves3D.createStaves();
+        }
+        console.log('[LOCK MELODY] 🎼 Drawing measures for progression');
+        window.musicalStaves3D.drawMeasures(lineup.length);
+    }
+
     // Capture current melody using the freshly verified rotationIndex
     const snapshot = [];
     for (let i = 0; i < lineup.length; i++) {
@@ -7337,6 +7380,14 @@ function lockInMelody() {
         snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
     }
     lockedMelody = snapshot;
+
+    // 🎼 STAVES INTEGRATION: Add melody notes to treble clef using voice leading 3 algorithm
+    if (window.musicalStaves3D && window.musicalStaves3D.isVisible) {
+        console.log('[LOCK MELODY] 🎵 Adding melody notes to staves');
+        console.log('[LOCK MELODY] 🎵 Melody data format:', lockedMelody);
+        window.musicalStaves3D.addMelodyNotation(lockedMelody);
+    }
+
     renderMelodyLane();
     ultraFlash(0x66ccff, 540);
     pulseLockIcons('melody');
@@ -7393,6 +7444,17 @@ function lockInMelody() {
 
 function lockInBass() {
     if (lineup.length === 0) return;
+
+    // 🎼 STAVES INTEGRATION: Auto-create staves and draw measures when bass is locked
+    if (window.musicalStaves3D) {
+        if (!window.musicalStaves3D.isVisible) {
+            console.log('[LOCK BASS] 🎼 Auto-creating staves for bass lock');
+            window.musicalStaves3D.createStaves();
+        }
+        console.log('[LOCK BASS] 🎼 Drawing measures for progression');
+        window.musicalStaves3D.drawMeasures(lineup.length);
+    }
+
     lockedBass = [];
     for (let i = 0; i < lineup.length; i++) {
         const cube = lineup[i];
@@ -7400,6 +7462,14 @@ function lockInBass() {
         while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
         lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
     }
+
+    // 🎼 STAVES INTEGRATION: Add bass notes to bass clef using voice leading algorithm
+    if (window.musicalStaves3D && window.musicalStaves3D.isVisible) {
+        console.log('[LOCK BASS] 🎵 Adding bass notes to staves');
+        console.log('[LOCK BASS] 🎵 Bass data format:', lockedBass);
+        window.musicalStaves3D.addBassNotation(lockedBass);
+    }
+
     renderBassLane();
     ultraFlash(0xffcc66, 540);
     pulseLockIcons('bass');
@@ -7462,6 +7532,9 @@ function playMelodyOnly() {
         return;
     }
 
+    // ENABLE SHELF BLACKOUT for staves legibility during solo playback
+    setPlaybackShelfBlackout(true);
+
     console.log('[MELODY SOLO] Starting melody-only progression');
     startSoloProgression('melody');
 }
@@ -7471,6 +7544,9 @@ function playBassOnly() {
         console.log('[BASS SOLO] No chords in lineup');
         return;
     }
+
+    // ENABLE SHELF BLACKOUT for staves legibility during solo playback
+    setPlaybackShelfBlackout(true);
 
     console.log('[BASS SOLO] Starting bass-only progression');
     startSoloProgression('bass');
@@ -7519,6 +7595,10 @@ function startSoloProgression(soloType) {
                 frontSpotR.intensity = 0.0;
                 stageSpot.intensity = 0.0;
                 stageMode = false;
+
+                // RESTORE SHELF after solo playback ends
+                setPlaybackShelfBlackout(false);
+
                 console.log(`[${soloType.toUpperCase()} SOLO] Auto-reset complete`);
             }, 1000);
 
@@ -8287,6 +8367,9 @@ async function playLockSound() {
 async function playFrontRowProgression() {
     if (lineup.length === 0) return;
 
+    // ENABLE SHELF BLACKOUT for staves legibility during ALL playback
+    setPlaybackShelfBlackout(true);
+
     // INTEGRATE WITH PROFESSIONAL DRUM MACHINE TRANSPORT
     console.log('[PLAY PROGRESSION] Starting with drum machine integration');
 
@@ -8339,6 +8422,10 @@ async function playFrontRowProgression() {
                 frontSpotR.intensity = 0.0;
                 stageSpot.intensity = 0.0;
                 stageMode = false;
+
+                // RESTORE SHELF after playback ends
+                setPlaybackShelfBlackout(false);
+
                 console.log('[TRANSPORT] ✅ Auto-reset complete');
             }, 1000);
 

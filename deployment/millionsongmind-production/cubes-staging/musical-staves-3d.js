@@ -440,6 +440,220 @@ class MusicalStaves3D {
             }
         });
     }
+
+    /**
+     * 🎼 LOCK BASS/MELODY → DRAW MEASURES
+     * Instantly draws measures on staves (1 measure per chord in progression)
+     */
+    drawMeasures(chordCount) {
+        if (!this.isVisible || chordCount === 0) return;
+
+        console.log(`[MUSICAL STAVES 3D] 🎼 Drawing ${chordCount} measures for chord progression`);
+
+        // Update both treble and bass staves with measure lines
+        Object.entries(this.staves).forEach(([clef, staff]) => {
+            if (staff.canvas && staff.context) {
+                // Clear existing content
+                staff.context.clearRect(0, 0, staff.canvas.width, staff.canvas.height);
+
+                // Redraw stave with measure lines
+                this.redrawStaffWithMeasures(staff, chordCount);
+
+                // Update texture
+                if (staff.mesh && staff.mesh.material && staff.mesh.material.map) {
+                    staff.mesh.material.map.needsUpdate = true;
+                }
+
+                console.log(`[MUSICAL STAVES 3D] ✅ ${clef} clef updated with ${chordCount} measures`);
+            }
+        });
+    }
+
+    /**
+     * Redraw a staff with measure lines for the progression
+     */
+    redrawStaffWithMeasures(staff, measureCount) {
+        const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
+        if (!VF || !staff.context || !staff.stave) return;
+
+        try {
+            // Create renderer with black background for high contrast
+            staff.context.fillStyle = '#000000';
+            staff.context.fillRect(0, 0, staff.canvas.width, staff.canvas.height);
+
+            // VexFlow renderer
+            const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
+            const context = renderer.getContext();
+            context.setFont('Arial', 24); // Large font for 3D visibility
+
+            // Calculate measure width
+            const totalWidth = 1900; // Our massive canvas width for measures
+            const measureWidth = Math.max(120, totalWidth / Math.max(measureCount, 1));
+
+            // Draw multiple measures
+            for (let i = 0; i < measureCount; i++) {
+                const xPos = 20 + (i * measureWidth);
+                const stave = new VF.Stave(xPos, 100, measureWidth);
+
+                // Only add clef, key, and time signature to first measure
+                if (i === 0) {
+                    stave.addClef(staff.clef);
+                    stave.addTimeSignature('4/4');
+                    stave.addKeySignature('C');
+                }
+
+                stave.setContext(context).draw();
+            }
+
+            // Add title showing measure count
+            context.setFont('Arial', 32);
+            context.fillStyle = '#FFFFFF';
+            context.textAlign = 'center';
+            context.fillText(
+                `${staff.title} - ${measureCount} Measures Ready`,
+                staff.canvas.width / 2,
+                50
+            );
+
+            console.log(`[MUSICAL STAVES 3D] 🎼 Drew ${measureCount} measures for ${staff.title}`);
+
+        } catch (error) {
+            console.error('[MUSICAL STAVES 3D] ❌ Error drawing measures:', error);
+        }
+    }
+
+    /**
+     * 🎼 LOCK MELODY → ADD NOTES TO TREBLE CLEF  
+     * Prints melody notes from above cubes using voice leading 3 algorithm
+     */
+    addMelodyNotation(melodyNotes) {
+        if (!this.isVisible || !melodyNotes || melodyNotes.length === 0) return;
+
+        console.log(`[MUSICAL STAVES 3D] 🎵 Adding melody notation: ${melodyNotes.length} notes`);
+        console.log(`[MUSICAL STAVES 3D] 🎵 Melody notes:`, melodyNotes);
+
+        const trebleStaff = this.staves.treble;
+        if (trebleStaff) {
+            this.addNotesToStaff(trebleStaff, melodyNotes, 'melody');
+        }
+    }
+
+    /**
+     * 🎼 LOCK BASS → ADD NOTES TO BASS CLEF
+     * Prints bass notes using voice leading algorithm  
+     */
+    addBassNotation(bassNotes) {
+        if (!this.isVisible || !bassNotes || bassNotes.length === 0) return;
+
+        console.log(`[MUSICAL STAVES 3D] 🎵 Adding bass notation: ${bassNotes.length} notes`);
+        console.log(`[MUSICAL STAVES 3D] 🎵 Bass notes:`, bassNotes);
+
+        const bassStaff = this.staves.bass;
+        if (bassStaff) {
+            this.addNotesToStaff(bassStaff, bassNotes, 'bass');
+        }
+    }
+
+    /**
+     * Add notes to a specific staff (treble or bass)
+     */
+    addNotesToStaff(staff, notes, voiceType) {
+        const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
+        if (!VF || !staff.context || !notes.length) return;
+
+        try {
+            console.log(`[MUSICAL STAVES 3D] 🎼 Rendering ${voiceType} notes:`, notes);
+            
+            // Clear canvas
+            staff.context.clearRect(0, 0, staff.canvas.width, staff.canvas.height);
+            
+            // Create VexFlow renderer
+            const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
+            const context = renderer.getContext();
+            context.setFont('Arial', 10).setBackgroundFillStyle('#FFFFFF');
+
+            // Create stave
+            const stave = new VF.Stave(20, 40, staff.canvas.width - 40);
+            const clef = voiceType === 'melody' ? 'treble' : 'bass';
+            stave.addClef(clef).addTimeSignature('4/4');
+            stave.setContext(context).draw();
+
+            // Convert notes to VexFlow format
+            const vfNotes = [];
+            for (let i = 0; i < Math.min(notes.length, 8); i++) { // Limit to 8 notes for now
+                const noteData = notes[i];
+                let pitch = 'C/4'; // Default
+
+                // Extract pitch from different possible formats
+                if (typeof noteData === 'string') {
+                    pitch = this.convertToVexFlowPitch(noteData);
+                } else if (noteData && noteData.note) {
+                    pitch = this.convertToVexFlowPitch(noteData.note);
+                } else if (noteData && noteData.midi) {
+                    pitch = this.midiNumberToVexFlow(noteData.midi);
+                } else if (noteData && noteData.pitch) {
+                    pitch = this.convertToVexFlowPitch(noteData.pitch);
+                }
+
+                // Create whole note
+                const note = new VF.StaveNote({
+                    clef: clef,
+                    keys: [pitch],
+                    duration: 'w' // Whole note
+                });
+
+                vfNotes.push(note);
+            }
+
+            if (vfNotes.length > 0) {
+                // Create voice and add notes
+                const voice = new VF.Voice({ num_beats: 4 * vfNotes.length, beat_value: 4 });
+                voice.addTickables(vfNotes);
+
+                // Format and draw
+                const formatter = new VF.Formatter().joinVoices([voice]).format([voice], staff.canvas.width - 80);
+                voice.draw(context, stave);
+
+                console.log(`[MUSICAL STAVES 3D] ✅ Rendered ${vfNotes.length} ${voiceType} notes on stave`);
+            }
+
+            // Add title
+            context.setFont('Arial', 14);
+            context.fillStyle = '#000';
+            context.fillText(`${staff.title} - ${notes.length} ${voiceType.toUpperCase()} NOTES`, 20, 20);
+
+            // Update texture
+            if (staff.mesh && staff.mesh.material && staff.mesh.material.map) {
+                staff.mesh.material.map.needsUpdate = true;
+            }
+
+        } catch (error) {
+            console.error(`[MUSICAL STAVES 3D] ❌ Error rendering ${voiceType} notes:`, error);
+            
+            // Fallback: Show error message
+            const context = staff.context;
+            context.fillStyle = '#FF0000';
+            context.fillText(`Error rendering ${voiceType} notes: ${error.message}`, 20, 100);
+        }
+    }
+
+    /**
+     * Convert various pitch formats to VexFlow format
+     */
+    convertToVexFlowPitch(pitchString) {
+        if (!pitchString) return 'C/4';
+        
+        // If already in VexFlow format (e.g., "C/4"), return as-is
+        if (pitchString.includes('/')) return pitchString;
+        
+        // Convert from formats like "C4", "D#3", etc.
+        const match = pitchString.match(/([A-G][#b]?)(\d+)/);
+        if (match) {
+            return `${match[1]}/${match[2]}`;
+        }
+        
+        return 'C/4'; // Fallback
+    }
 }
 
 // Export for global use
