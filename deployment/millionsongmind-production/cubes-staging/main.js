@@ -1794,7 +1794,7 @@ let melodyVolume = 0.5;
 let lastProgressionBassMidi = null;
 let lastProgressionMelodyMidi = null;
 
-// FREE PLAY MODE: Track current chord for smooth 150ms cutoff
+    // FREE PLAY MODE: Track current chord for immediate cutoff (no overlap)
 let currentFreePlayChord = null;
 let freePlayCutoffTimer = null;
 
@@ -6402,9 +6402,9 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         !window.chordCubesTransport?.drumsOn;
 
     if (inFreePlayMode) {
-        // FREE PLAY: Use longer base duration for smooth playing, will be cut by next chord
-        duration = 3.0; // 3 seconds base - will be cut 150ms after next chord
-        console.log(`[FREE PLAY] Playing ${chordKey} with 3s base duration - will cutoff smoothly on next chord`);
+        // FREE PLAY: Use longer base duration for smooth playing, will be cut IMMEDIATELY by next chord
+        duration = 3.0; // 3 seconds base - will be cut IMMEDIATELY when next chord is clicked
+        console.log(`[FREE PLAY] Playing ${chordKey} with 3s base duration - will cutoff IMMEDIATELY on next chord`);
 
         // Clear any existing cutoff timer
         if (freePlayCutoffTimer) {
@@ -6412,16 +6412,14 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
             freePlayCutoffTimer = null;
         }
 
-        // If there's a current chord playing, schedule its cutoff in 150ms
+        // If there's a current chord playing, cut it off IMMEDIATELY (no delay)
         if (currentFreePlayChord) {
-            freePlayCutoffTimer = setTimeout(() => {
-                if (window.audioEngine && currentFreePlayChord) {
-                    console.log('[FREE PLAY] 🔇 Cutting off previous chord after 150ms for smooth transition');
-                    // ACTUALLY IMPLEMENT CUTOFF using our new audio engine method
-                    window.audioEngine.cutoffCurrentChord();
-                }
-                currentFreePlayChord = null;
-            }, 150);
+            if (window.audioEngine) {
+                console.log('[FREE PLAY] 🔇 Cutting off previous chord IMMEDIATELY for no overlap');
+                // IMMEDIATE CUTOFF - no setTimeout delay
+                window.audioEngine.cutoffCurrentChord();
+            }
+            currentFreePlayChord = null;
         }
 
         // Track this chord as the current one
