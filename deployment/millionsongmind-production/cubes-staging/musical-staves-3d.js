@@ -562,9 +562,9 @@ class MusicalStaves3D {
         try {
             console.log(`[MUSICAL STAVES 3D] 🎼 Rendering ${voiceType} notes:`, notes);
 
-                        // Clear canvas for transparent background
+            // Clear canvas for transparent background
             staff.context.clearRect(0, 0, staff.canvas.width, staff.canvas.height);
-            
+
             // Create VexFlow renderer with NO background
             const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
             const context = renderer.getContext();
