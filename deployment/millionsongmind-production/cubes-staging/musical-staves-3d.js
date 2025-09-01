@@ -13,14 +13,14 @@ class MusicalStaves3D {
 
         // ACCESSIBLE piano staff positioning - at eye level with cubes  
         this.positions = {
-            treble: { x: 0, y: 2, z: 2 },    // Treble clef staff - EYE LEVEL above cubes
-            bass: { x: 0, y: 0.5, z: 2 }     // Bass clef staff - SLIGHTLY above ground level
+            treble: { x: 0, y: 3, z: -5 },    // Treble clef staff - FURTHER BACK, higher up  
+            bass: { x: 0, y: 1, z: -5 }       // Bass clef staff - FURTHER BACK, above ground
         };
 
-        // MASSIVE scale to match Million Song Mind title system
+        // REASONABLE scale - not massive screen-filling
         this.staveScale = {
-            width: 20,    // Even bigger than melody titles (16)
-            height: 6     // Nice readable height
+            width: 8,     // Readable but not overwhelming
+            height: 2     // Proportional height
         };
 
         // ChordCubes Voice Architecture (NO COLORS - user has sophisticated system)
@@ -99,10 +99,10 @@ class MusicalStaves3D {
     createSingleStaff(position, clef, title) {
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: createSingleStaff called for', clef, 'at position', position);
 
-        // MASSIVE canvas for crisp quality at huge scale
+        // REASONABLE canvas for good quality without being massive
         const canvas = document.createElement('canvas');
-        canvas.width = 2048;  // Much bigger for crisp rendering
-        canvas.height = 512;  // Proportional height
+        canvas.width = 1024;  // Good quality without being excessive
+        canvas.height = 256;  // Proportional height
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Canvas created:', canvas.width + 'x' + canvas.height);
 
         const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
@@ -477,8 +477,8 @@ class MusicalStaves3D {
         if (!VF || !staff.context || !staff.stave) return;
 
         try {
-            // Create renderer with black background for high contrast
-            staff.context.fillStyle = '#000000';
+            // Create renderer with WHITE background for readability (not black screen-filling!)
+            staff.context.fillStyle = '#FFFFFF';
             staff.context.fillRect(0, 0, staff.canvas.width, staff.canvas.height);
 
             // VexFlow renderer
