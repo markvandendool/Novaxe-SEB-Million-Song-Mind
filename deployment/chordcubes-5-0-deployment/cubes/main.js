@@ -46,8 +46,16 @@ import { ChordCubesMonitor } from './monitor.js';
 // Import unified audio context manager SECOND
 import { UnifiedAudioContextManager, unifiedAudioManager } from './unified-audio-manager.js';
 
-// Import transport bridge THIRD (it will expose globally and use unified audio)
+// Import resource manager THIRD (memory leak prevention)
+import { ThreeJSResourceManager, VexFlowCleanupManager, threeJSResourceManager, vexFlowCleanupManager } from './resource-manager.js';
+
+// Import performance optimizer FOURTH (60fps with 200+ cubes)
+import { SpatialHashGrid, PerformanceMonitor, OptimizedCollisionDetector, AdaptiveQualitySystem, spatialHashGrid, performanceMonitor, optimizedCollisionDetector, adaptiveQualitySystem } from './performance-optimizer.js';
+
+// Import transport bridge FIFTH (it will expose globally and use unified audio)
 import { chordCubesTransport } from './transport-bridge.js';
+// Import performance validation SIXTH (testing and validation)
+import { PerformanceValidationSuite } from './test-performance-validation.js';
 
 // IMMEDIATE DEBUG: Check if import worked
 console.log('[MAIN] Transport import result:', chordCubesTransport);
@@ -161,6 +169,58 @@ if (window.unifiedAudioManager) {
     });
 } else {
     console.error('[MAIN] ❌ UnifiedAudioContextManager not found - audio may not work correctly');
+}
+
+// ==========================================
+// INITIALIZE RESOURCE MANAGERS
+// ==========================================
+console.log('[MAIN] 🗑️ Initializing Resource Managers...');
+
+// Ensure ThreeJS Resource Manager is ready
+if (window.threeJSResourceManager) {
+    console.log('[MAIN] ✅ ThreeJSResourceManager ready for memory leak prevention');
+} else {
+    console.error('[MAIN] ❌ ThreeJSResourceManager not found - memory leaks may occur');
+}
+
+// Ensure VexFlow Cleanup Manager is ready  
+if (window.vexFlowCleanupManager) {
+    console.log('[MAIN] ✅ VexFlowCleanupManager ready for SVG element cleanup');
+} else {
+    console.error('[MAIN] ❌ VexFlowCleanupManager not found - SVG elements may accumulate');
+}
+
+// ==========================================
+// INITIALIZE PERFORMANCE OPTIMIZATION SYSTEM
+// ==========================================
+console.log('[MAIN] ⚡ Initializing Performance Optimization System...');
+
+// Ensure Performance Optimizer is ready
+if (window.optimizedCollisionDetector) {
+    console.log('[MAIN] ✅ OptimizedCollisionDetector ready for high-performance collision detection');
+} else {
+    console.error('[MAIN] ❌ OptimizedCollisionDetector not found - collision detection may be slow');
+}
+
+// Ensure Spatial Hash Grid is ready
+if (window.spatialHashGrid) {
+    console.log('[MAIN] ✅ SpatialHashGrid ready for efficient spatial queries');
+} else {
+    console.error('[MAIN] ❌ SpatialHashGrid not found - spatial queries may be inefficient');
+}
+
+// Ensure Performance Monitor is ready
+if (window.performanceMonitor) {
+    console.log('[MAIN] ✅ PerformanceMonitor ready for real-time FPS tracking');
+} else {
+    console.error('[MAIN] ❌ PerformanceMonitor not found - performance monitoring disabled');
+}
+
+// Ensure Adaptive Quality System is ready
+if (window.adaptiveQualitySystem) {
+    console.log('[MAIN] ✅ AdaptiveQualitySystem ready for automatic performance optimization');
+} else {
+    console.error('[MAIN] ❌ AdaptiveQualitySystem not found - quality will not auto-adjust');
 }
 
 // Your other imports come AFTER
@@ -378,9 +438,17 @@ darkPlane.position.set(0, 0.001, 0);
 darkPlane.renderOrder = 0; // keep under text
 scene.add(darkPlane);
 
-// Shared geometry
+// Register with resource manager for memory tracking
+if (window.threeJSResourceManager) {
+    window.threeJSResourceManager.registerMesh(darkPlane, 'darkPlane');
+}
+
+// Shared geometry - TRACKED BY RESOURCE MANAGER
 const cubeSize = 1.2;
 const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+
+// The BoxGeometry is already tracked by our resource manager hooks
+console.log('[MAIN] 📦 Shared cube geometry created and tracked by ResourceManager');
 const FRONT_ROW_SCALE = 1.0; // uniform active size
 const FRONT_ROW_FORWARD_Z = 1.2; // allow pulling slightly toward the camera beyond the front plane
 
@@ -1231,6 +1299,12 @@ function addBorder(mesh, colorHex) {
     const edges = new THREE.EdgesGeometry(mesh.geometry);
     const mat = new THREE.LineBasicMaterial({ color: colorHex ?? borderColorForRoman(mesh.userData?.roman || '') });
     const line = new THREE.LineSegments(edges, mat);
+    // Register border for resource tracking
+    if (window.resourceManager) {
+        window.resourceManager.registerGeometry(edges, `border_${mesh.userData?.roman || Date.now()}_geo`);
+        window.resourceManager.registerMaterial(mat, `border_${mesh.userData?.roman || Date.now()}_mat`);
+        window.resourceManager.registerMesh(line, `border_${mesh.userData?.roman || Date.now()}`);
+    }
     mesh.add(line);
 }
 
@@ -1283,7 +1357,16 @@ let shelfPlane = null;
 function createShelfPlane() {
     if (shelfPlane) return;
     const tex = makeShelfTexture();
-    shelfPlane = new THREE.Mesh(new THREE.PlaneGeometry(9, 6.75), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+    const shelfGeo = new THREE.PlaneGeometry(9, 6.75);
+    const shelfMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true });
+    shelfPlane = new THREE.Mesh(shelfGeo, shelfMat);
+    // Register shelf plane for resource tracking
+    if (window.resourceManager) {
+        window.resourceManager.registerGeometry(shelfGeo, 'shelfPlane_geo');
+        window.resourceManager.registerMaterial(shelfMat, 'shelfPlane_mat');
+        window.resourceManager.registerTexture(tex, 'shelfPlane_tex');
+        window.resourceManager.registerMesh(shelfPlane, 'shelfPlane');
+    }
     shelfPlane.position.set(0, shelfY, shelfZ - 0.01);
     // Make the syntax Venn diagram ~1/3 larger relative to cubes
     shelfPlane.scale.setScalar(1.3333);
@@ -2104,6 +2187,10 @@ async function createShelfCube(roman) {
         || chordSetsC.applied.find(x => x.roman === roman)) || { roman, letter: roman };
     const materials = await makeMaterials(item[labelMode], item.roman);
     const m = new THREE.Mesh(geometry.clone(), materials);
+    // Register shelf cube for resource tracking
+    if (window.resourceManager) {
+        window.resourceManager.registerMesh(m, `shelfCube_${roman}`);
+    }
     const s = scaleByRoman[roman] ?? 0.7;
     m.scale.setScalar(s);
     const pos = (shelfSlots[roman] || new THREE.Vector3(0, 0, shelfZ)).clone();
@@ -2120,6 +2207,12 @@ async function createShelfCube(roman) {
         const proxyGeo = new THREE.PlaneGeometry(cubeSize * sclr * 1.08, cubeSize * sclr * 1.08);
         const proxyMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.0, depthWrite: false, side: THREE.DoubleSide });
         const proxy = new THREE.Mesh(proxyGeo, proxyMat);
+        // Register proxy for resource tracking
+        if (window.resourceManager) {
+            window.resourceManager.registerGeometry(proxyGeo, `shelfProxy_${roman}_geo`);
+            window.resourceManager.registerMaterial(proxyMat, `shelfProxy_${roman}_mat`);
+            window.resourceManager.registerMesh(proxy, `shelfProxy_${roman}`);
+        }
         proxy.position.set(m.position.x, m.position.y, m.position.z + 0.001);
         proxy.userData = { isShelfProxy: true, parent: m };
         proxy.layers.set(2);
@@ -3202,13 +3295,23 @@ function animateYZToFrontRow(obj, duration = 350) {
 }
 
 function resolveFrontRowCollisions(draggingCube) {
+    // Use high-performance optimized collision detection
+    if (window.optimizedCollisionDetector) {
+        window.optimizedCollisionDetector.resolveFrontRowCollisions(draggingCube, lineup);
+        return;
+    }
+    
+    // Fallback to original algorithm if optimizer not available
+    console.warn('[PERF] ⚠️ Using fallback collision detection - performance may be reduced');
+    
     // Build a set of active cubes near the front row (including the dragging cube)
     const zoneZ = FRONT_ROW_FORWARD_Z + 0.5;
     const nodes = [...lineup];
     if (!nodes.includes(draggingCube)) nodes.push(draggingCube);
     const active = nodes.filter(c => Math.abs(c.position.z) <= zoneZ + 0.001);
     if (active.length <= 1) return;
-    // 2D soft-body style resolve along (x,z)
+    
+    // 2D soft-body style resolve along (x,z) - ORIGINAL O(n²) ALGORITHM
     const minDist = gridSize * 0.95; // slightly less than slot spacing
     for (let i = 0; i < active.length; i++) {
         for (let j = i + 1; j < active.length; j++) {
@@ -5118,6 +5221,11 @@ function init3DFontPreview() {
 
     fontPreviewCube = new THREE.Mesh(geometry, materials);
     fontPreviewScene.add(fontPreviewCube);
+    
+    // Register with resource manager for memory tracking
+    if (window.threeJSResourceManager) {
+        window.threeJSResourceManager.registerMesh(fontPreviewCube, 'fontPreviewCube');
+    }
 
     // Add lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -5798,11 +5906,20 @@ function animate() {
     // Camera height compensation - DISABLED as it interferes with existing zoom
     // adjustCameraHeightForDistance();
 
+    // PERFORMANCE OPTIMIZATION: Track animation timing
+    const animationStartTime = window.performanceMonitor ? performance.now() : 0;
+
     // drive tweens
     const now = performance.now();
     for (let i = activeTweens.length - 1; i >= 0; i--) {
         const done = activeTweens[i].tick(now);
         if (done) activeTweens.splice(i, 1);
+    }
+    
+    // Record animation performance
+    if (window.performanceMonitor) {
+        const animationTime = performance.now() - animationStartTime;
+        window.performanceMonitor.recordBottleneck('animation', animationTime);
     }
     // Live bottom/top indices per cube (derived from rotationIndex via compass)
     try {
@@ -5971,13 +6088,25 @@ function animate() {
         darkPlane.material.opacity = 0.20 * darkT;
     }
     // Subtle shimmer for background title (non-intrusive)
+    // Background title material animation
     if (bgTitleMesh && bgTitleMesh.material) {
         const m = bgTitleMesh.material;
         const t = now * 0.00015; // very slow
         const pulse = 0.28 + 0.05 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2));
         m.opacity = pulse; // oscillate around ~30%
     }
+
+    // PERFORMANCE OPTIMIZATION: Track render timing
+    const renderStartTime = window.performanceMonitor ? performance.now() : 0;
+    
     renderer.render(scene, camera);
+    
+    // Record rendering performance
+    if (window.performanceMonitor) {
+        const renderTime = performance.now() - renderStartTime;
+        window.performanceMonitor.recordBottleneck('rendering', renderTime);
+    }
+    
     requestAnimationFrame(animate);
 }
 animate();
@@ -6863,6 +6992,16 @@ async function processShelfQueue() {
 async function animateShelfClickAdd(shelf) {
     try {
         const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
+        // Register flying cube for resource tracking
+        if (window.resourceManager) {
+            window.resourceManager.registerGeometry(shelf.geometry.clone(), `flyingCube_${shelf.userData.roman}_geo`);
+            shelf.material.forEach((mat, idx) => {
+                if (mat.clone) {
+                    window.resourceManager.registerMaterial(mat.clone(), `flyingCube_${shelf.userData.roman}_mat${idx}`);
+                }
+            });
+            window.resourceManager.registerMesh(clone, `flyingCube_${shelf.userData.roman}`);
+        }
         clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0, desiredRotationDelta: (shelf.userData?.desiredRotationDelta || 0) };
         // Start exactly at shelf origin
         clone.position.copy(shelf.position);
@@ -7360,6 +7499,12 @@ function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
         const ringGeo = new THREE.RingGeometry(0.2, 0.22, 48);
         const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
         const ring = new THREE.Mesh(ringGeo, ringMat);
+        // Register ultraFlash ring for resource tracking
+        if (window.resourceManager) {
+            window.resourceManager.registerGeometry(ringGeo, 'ultraFlashRing_geo');
+            window.resourceManager.registerMaterial(ringMat, 'ultraFlashRing_mat');
+            window.resourceManager.registerMesh(ring, 'ultraFlashRing');
+        }
         ring.position.set(0, 0.01, 0);
         ring.rotation.x = -Math.PI / 2;
         scene.add(ring);
@@ -7371,7 +7516,15 @@ function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
 
         // Confetti sprinkles
         for (let i = 0; i < 24; i++) {
-            const c = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.02), new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+            const confettiGeo = new THREE.PlaneGeometry(0.08, 0.02);
+            const confettiMat = new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false });
+            const c = new THREE.Mesh(confettiGeo, confettiMat);
+            // Register confetti for resource tracking
+            if (window.resourceManager) {
+                window.resourceManager.registerGeometry(confettiGeo, `confetti_${i}_geo`);
+                window.resourceManager.registerMaterial(confettiMat, `confetti_${i}_mat`);
+                window.resourceManager.registerMesh(c, `confetti_${i}`);
+            }
             c.position.set((Math.random() - 0.5) * 0.8, 0.02, (Math.random() - 0.5) * 0.8);
             c.rotation.x = -Math.PI / 2; c.rotation.z = Math.random() * Math.PI;
             scene.add(c);
@@ -7401,13 +7554,27 @@ function makeLaneDiamond(colorHex = 0xffffff) {
     const g = new THREE.CircleGeometry(0.08, 4);
     const m = new THREE.MeshBasicMaterial({ color: colorHex });
     const mesh = new THREE.Mesh(g, m);
+    // Register lane diamond for resource tracking
+    if (window.resourceManager) {
+        window.resourceManager.registerGeometry(g, `laneDiamond_${Date.now()}_geo`);
+        window.resourceManager.registerMaterial(m, `laneDiamond_${Date.now()}_mat`);
+        window.resourceManager.registerMesh(mesh, `laneDiamond_${Date.now()}`);
+    }
     mesh.rotation.z = Math.PI / 4; // diamond look
     return mesh;
 }
 
 function makeLaneNode(roman, colorHex) {
     const group = new THREE.Group();
-    const circle = new THREE.Mesh(new THREE.CircleGeometry(0.11, 24), new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 }));
+    const circleGeo = new THREE.CircleGeometry(0.11, 24);
+    const circleMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 });
+    const circle = new THREE.Mesh(circleGeo, circleMat);
+    // Register lane circle for resource tracking
+    if (window.resourceManager) {
+        window.resourceManager.registerGeometry(circleGeo, `laneCircle_${roman}_geo`);
+        window.resourceManager.registerMaterial(circleMat, `laneCircle_${roman}_mat`);
+        window.resourceManager.registerMesh(circle, `laneCircle_${roman}`);
+    }
     const diamond = makeLaneDiamond(0xffffff);
     group.add(circle); group.add(diamond);
     group.userData = { roman };
@@ -7616,7 +7783,14 @@ function lockInMelody() {
             const symbol = degs[topIdx];
             const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
             try { faceMat.side = THREE.DoubleSide; } catch (_) { }
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
+            const faceGeo = new THREE.PlaneGeometry(cubeSize, cubeSize);
+            const plane = new THREE.Mesh(faceGeo, faceMat);
+            // Register melody face plane for resource tracking
+            if (window.resourceManager) {
+                window.resourceManager.registerGeometry(faceGeo, `melodyFace_${i}_geo`);
+                window.resourceManager.registerMaterial(faceMat, `melodyFace_${i}_mat`);
+                window.resourceManager.registerMesh(plane, `melodyFace_${i}`);
+            }
             // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
             const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
             const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
@@ -7706,7 +7880,14 @@ function lockInBass() {
             // Match cube face orientation exactly for bass giants
             const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true);
             try { mat.side = THREE.DoubleSide; } catch (_) { }
-            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), mat);
+            const bassGeo = new THREE.PlaneGeometry(cubeSize, cubeSize);
+            const mesh = new THREE.Mesh(bassGeo, mat);
+            // Register bass face mesh for resource tracking
+            if (window.resourceManager) {
+                window.resourceManager.registerGeometry(bassGeo, `bassFace_${i}_geo`);
+                window.resourceManager.registerMaterial(mat, `bassFace_${i}_mat`);
+                window.resourceManager.registerMesh(mesh, `bassFace_${i}`);
+            }
             // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
             const extraFlipB = (bottomIdx === 1 || bottomIdx === 3) ? Math.PI : 0;
             const bassUpright = (-(ROT_DEGS[bottomIdx] || 0) * (Math.PI / 180)) + extraFlipB;
@@ -8923,6 +9104,43 @@ window.forceShowUI = function () {
 };
 
 // Volume controls already initialized via setTimeout above
+
+// ============================================
+// PERFORMANCE TESTING INTERFACE
+// ============================================
+
+// Global performance testing interface
+window.runPerformanceTest = async function() {
+    console.log('🚀 Starting ChordCubes 5.0 Performance Validation...');
+    
+    try {
+        const testSuite = new PerformanceValidationSuite();
+        const report = await testSuite.runPerformanceTests();
+        
+        console.log('🏆 Performance test completed!');
+        console.log('Report available at:', 'window.performanceValidationReport');
+        
+        return report;
+    } catch (error) {
+        console.error('❌ Performance test failed:', error);
+        return { error: error.message };
+    }
+};
+
+// Quick performance status check
+window.checkPerformanceStatus = function() {
+    const status = {
+        spatialHash: !!window.spatialHashGrid,
+        performanceMonitor: !!window.performanceMonitor,
+        collisionDetector: !!window.optimizedCollisionDetector,
+        adaptiveQuality: !!window.adaptiveQualitySystem,
+        currentFPS: window.performanceMonitor ? window.performanceMonitor.getReport().currentFPS : 'N/A',
+        cubeCount: window.lineup ? window.lineup.length : 'N/A'
+    };
+    
+    console.log('📊 ChordCubes 5.0 Performance Status:', status);
+    return status;
+};
 
 // Add camera height compensation to existing animate loop
 // (This will be called from the existing animate function)
