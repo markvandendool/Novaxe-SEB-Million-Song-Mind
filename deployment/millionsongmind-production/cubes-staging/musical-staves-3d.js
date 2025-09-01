@@ -11,10 +11,16 @@ class MusicalStaves3D {
         this.notation = [];
         this.isVisible = false;
 
-        // Piano staff positioning in 3D space
+        // MASSIVE piano staff positioning - same scale as MELODY/BASSLINE titles (16x8)
         this.positions = {
-            treble: { x: 0, y: 6.5, z: 8 },  // Treble clef staff
-            bass: { x: 0, y: 3.5, z: 8 }     // Bass clef staff  
+            treble: { x: 0, y: 8, z: 4 },    // Treble clef staff - FLOATING ABOVE melody area
+            bass: { x: 0, y: 4, z: 4 }       // Bass clef staff - FLOATING ABOVE bass area
+        };
+        
+        // MASSIVE scale to match Million Song Mind title system
+        this.staveScale = {
+            width: 20,    // Even bigger than melody titles (16)
+            height: 6     // Nice readable height
         };
 
         // ChordCubes Voice Architecture (NO COLORS - user has sophisticated system)
@@ -67,40 +73,45 @@ class MusicalStaves3D {
      * Create a single staff at specified 3D position
      */
     createSingleStaff(position, clef, title) {
+        // MASSIVE canvas for crisp quality at huge scale
         const canvas = document.createElement('canvas');
-        canvas.width = 800;
-        canvas.height = 200;
+        canvas.width = 2048;  // Much bigger for crisp rendering
+        canvas.height = 512;  // Proportional height
 
         const renderer = new VF.Renderer(canvas, VF.Renderer.Backends.CANVAS);
         const context = renderer.getContext();
         context.setFont('Arial', 12);
 
-        // Create stave with clef and time signature
-        const stave = new VF.Stave(10, 40, 750);
+        // Create MASSIVE stave with clef and time signature (scaled for 2048px canvas)
+        const stave = new VF.Stave(20, 100, 1900);  // Much wider stave for the massive canvas
         stave.addClef(clef);
         stave.addTimeSignature('4/4');
         stave.addKeySignature('C'); // C Major for now
         stave.setContext(context).draw();
 
-        // Add title
+        // Add title with bigger font
         context.fillStyle = '#000';
-        context.fillText(title, 10, 20);
+        context.font = '24px Arial';  // Bigger font for massive scale
+        context.fillText(title, 20, 50);
 
         // Convert canvas to texture and create 3D mesh
         const texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
 
-        const geometry = new THREE.PlaneGeometry(6, 1.5);
+        // MASSIVE geometry to match MELODY/BASSLINE titles (16x8) - even bigger!
+        const geometry = new THREE.PlaneGeometry(this.staveScale.width, this.staveScale.height);
         const material = new THREE.MeshBasicMaterial({
             map: texture,
             transparent: true,
-            alphaTest: 0.1
+            alphaTest: 0.1,
+            side: THREE.DoubleSide  // Visible from both sides
         });
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(position.x, position.y, position.z);
-        mesh.lookAt(this.camera.position); // Always face camera
+        // Don't look at camera - keep them horizontal like the MELODY/BASS titles
+        mesh.rotation.x = -Math.PI / 4; // Slight angle for better visibility
 
         this.scene.add(mesh);
 

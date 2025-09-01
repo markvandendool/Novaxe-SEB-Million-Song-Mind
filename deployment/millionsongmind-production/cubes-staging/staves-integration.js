@@ -26,12 +26,12 @@ function initializeStavesIntegration() {
 
     console.log('[STAVES INTEGRATION] Initializing...');
 
-        // Wait for dependencies
+    // Wait for dependencies
     if (!window.scene || !window.camera || !window.VF) {
         console.log('[STAVES INTEGRATION] Missing dependencies - will NOT retry automatically to prevent infinite loop');
         console.log('[STAVES INTEGRATION] Dependencies status:', {
             scene: !!window.scene,
-            camera: !!window.camera, 
+            camera: !!window.camera,
             VF: !!window.VF
         });
         return;
@@ -221,7 +221,7 @@ if (typeof window !== 'undefined') {
     window.initializeStavesIntegration = initializeStavesIntegration;
     window.updateStavesBillboard = updateStavesBillboard;
     window.testThreeVoiceProgression = testThreeVoiceProgression;
-    
+
     // Initialize safely after a delay when everything is loaded
     setTimeout(() => {
         if (!window.STAVES_INTEGRATION_PROTECTED) {
