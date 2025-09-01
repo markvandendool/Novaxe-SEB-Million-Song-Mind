@@ -4749,6 +4749,20 @@ function setupVolumeControls() {
         melodyVolumeEl.value = '1.15';
         console.log('[MELODY] Boosted to 115%');
     });
+
+    // PLAY BUTTONS - Connect to existing 3D button functions
+    const playBassBtn = document.getElementById('play-bass');
+    const playMelodyBtn = document.getElementById('play-melody');
+
+    playBassBtn?.addEventListener('click', () => {
+        console.log('[UI PLAY BASS] Playing bass only progression');
+        playBassOnly();
+    });
+
+    playMelodyBtn?.addEventListener('click', () => {
+        console.log('[UI PLAY MELODY] Playing melody only progression');
+        playMelodyOnly();
+    });
 }
 
 // Initialize volume controls
