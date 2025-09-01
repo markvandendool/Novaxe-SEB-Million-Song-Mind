@@ -43,7 +43,10 @@
 // Import critical monitoring system FIRST
 import { ChordCubesMonitor } from './monitor.js';
 
-// Import transport bridge SECOND (it will expose globally)
+// Import unified audio context manager SECOND
+import { UnifiedAudioContextManager, unifiedAudioManager } from './unified-audio-manager.js';
+
+// Import transport bridge THIRD (it will expose globally and use unified audio)
 import { chordCubesTransport } from './transport-bridge.js';
 
 // IMMEDIATE DEBUG: Check if import worked
@@ -68,17 +71,31 @@ if (window.chordCubesTransport) {
     const transport = window.chordCubesTransport;
 
     if (!transport.ensureAudioContext) {
-        console.log('[FIX] Adding missing ensureAudioContext method');
+        console.log('[FIX] Adding missing ensureAudioContext method - UPGRADED WITH UNIFIED MANAGER');
         transport.ensureAudioContext = async function () {
-            try {
-                if (window.Tone && window.Tone.context.state !== 'running') {
-                    await window.Tone.start();
-                    console.log('[FIX] Tone.js context started');
-                }
+            console.log('[TRANSPORT] 🔗 Using UnifiedAudioContextManager for audio initialization');
+            const result = await window.unifiedAudioManager.ensureAudioContext();
+            if (result.success) {
+                console.log('[TRANSPORT] ✅ Unified audio initialization successful');
                 return true;
-            } catch (error) {
-                console.error('[FIX] Audio context failed:', error);
+            } else {
+                console.error('[TRANSPORT] ❌ Unified audio initialization failed:', result.error);
                 return false;
+            }
+        };
+    } else {
+        // Upgrade existing ensureAudioContext to use unified manager
+        console.log('[TRANSPORT] 🔄 Upgrading existing ensureAudioContext to use UnifiedAudioContextManager');
+        const originalEnsureAudio = transport.ensureAudioContext;
+        transport.ensureAudioContext = async function () {
+            console.log('[TRANSPORT] 🔗 Using UnifiedAudioContextManager (upgraded)');
+            const result = await window.unifiedAudioManager.ensureAudioContext();
+            if (result.success) {
+                console.log('[TRANSPORT] ✅ Unified audio initialization successful');
+                return true;
+            } else {
+                console.warn('[TRANSPORT] ⚠️ Unified audio failed, trying fallback...');
+                return originalEnsureAudio.call(this);
             }
         };
     }
@@ -126,6 +143,24 @@ if (!chordCubesTransport && !window.chordCubesTransport) {
         start: async () => { console.log('[FALLBACK] Start'); return false; },
         stop: () => { console.log('[FALLBACK] Stop'); }
     };
+}
+
+// ==========================================
+// INITIALIZE UNIFIED AUDIO MANAGER
+// ==========================================
+console.log('[MAIN] 🎵 Initializing UnifiedAudioContextManager singleton...');
+
+// Ensure the manager is ready for use by other systems
+if (window.unifiedAudioManager) {
+    console.log('[MAIN] ✅ UnifiedAudioContextManager ready');
+    
+    // Pre-warm the manager (doesn't start audio, just prepares it)
+    window.addEventListener('DOMContentLoaded', () => {
+        console.log('[MAIN] 📱 DOM loaded, pre-warming audio manager...');
+        // The manager will auto-start audio on first user interaction
+    });
+} else {
+    console.error('[MAIN] ❌ UnifiedAudioContextManager not found - audio may not work correctly');
 }
 
 // Your other imports come AFTER
@@ -3448,7 +3483,17 @@ function initializeWebAudioFont() {
 class OrchestralAudioEngine {
     constructor() {
         this.player = new WebAudioFontPlayer();
-        this.audioContext = Tone.context._context || Tone.context;
+        // Use unified audio context manager instead of direct Tone.js reference
+        this.audioContext = window.unifiedAudioManager.getAudioContext();
+        
+        // Fallback if unified manager not ready yet
+        if (!this.audioContext) {
+            console.warn('[ORCHESTRAL] ⚠️ Unified manager not ready, using Tone.js fallback');
+            this.audioContext = Tone.context._context || Tone.context;
+        } else {
+            console.log('[ORCHESTRAL] ✅ Using UnifiedAudioContextManager audioContext');
+        }
+        
         this.instruments = {};
         this.currentInstruments = {
             chord: null,
@@ -3645,14 +3690,19 @@ class OrchestralAudioEngine {
         });
 
         // AUDIO CONTEXT: Handle separately, don't let it break initialization
-        setTimeout(() => {
-            console.log('[AUDIO ENGINE] Step 4: Attempting audio context start (non-blocking)...');
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    console.log('[AUDIO ENGINE] ✅ Audio context started after user gesture');
-                }).catch(() => {
+        setTimeout(async () => {
+            console.log('[AUDIO ENGINE] Step 4: Using UnifiedAudioContextManager for initialization...');
+            try {
+                const result = await window.unifiedAudioManager.ensureAudioContext();
+                if (result.success) {
+                    console.log('[AUDIO ENGINE] ✅ UnifiedAudioContextManager started successfully');
+                    // Update our audioContext reference
+                    this.audioContext = window.unifiedAudioManager.getAudioContext();
+                } else {
                     console.log('[AUDIO ENGINE] ⚠️ Audio context will start on first user interaction');
-                });
+                }
+            } catch (error) {
+                console.warn('[AUDIO ENGINE] ⚠️ Audio initialization deferred to user interaction');
             }
         }, 100);
 
@@ -5279,9 +5329,12 @@ function clearExtensionFeedback(extension) {
 function initAudioOnFirstClick() {
     const startAudio = async () => {
         try {
-            if (Tone.context.state !== 'running') {
-                await Tone.start();
-                console.log('[AUDIO] AudioContext started successfully');
+            console.log('[AUDIO] Starting audio with UnifiedAudioContextManager...');
+            const result = await window.unifiedAudioManager.ensureAudioContext();
+            if (result.success) {
+                console.log('[AUDIO] UnifiedAudioContextManager started successfully');
+            } else {
+                console.warn('[AUDIO] Unified audio start failed:', result.error);
             }
         } catch (e) {
             console.warn('[AUDIO] AudioContext start failed:', e);
@@ -8505,7 +8558,14 @@ function updateQueueStatusUI(message) {
 async function playLockSound() {
     try {
         if (!window.Tone) return;
-        await window.Tone.start();
+        
+        // Use unified audio manager for initialization
+        const result = await window.unifiedAudioManager.ensureAudioContext();
+        if (!result.success) {
+            console.warn('[LOCK SOUND] Audio not available');
+            return;
+        }
+        
         const t = window.Tone.now();
         const synth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.25, sustain: 0.0, release: 0.05 } }).toDestination();
         synth.triggerAttackRelease('C2', 0.12, t, 0.9);
