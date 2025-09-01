@@ -21,7 +21,7 @@ class ProductionMonitoringDashboard {
         this.dashboardElement = null;
         this.updateInterval = null;
         this.isVisible = false;
-        
+
         this.thresholds = {
             fps: { critical: 15, warning: 30, target: 60 },
             memory: { critical: 1000, warning: 500, target: 200 }, // MB
@@ -29,7 +29,7 @@ class ProductionMonitoringDashboard {
             latency: { critical: 1000, warning: 500, target: 100 }, // ms
             userExperience: { critical: 0.3, warning: 0.6, target: 0.8 } // 0-1 score
         };
-        
+
         this.initializeDashboard();
         this.startMonitoring();
     }
@@ -42,16 +42,16 @@ class ProductionMonitoringDashboard {
         this.dashboardElement = document.createElement('div');
         this.dashboardElement.id = 'production-monitoring-dashboard';
         this.dashboardElement.innerHTML = this.getDashboardHTML();
-        
+
         // Add CSS styles
         this.addDashboardStyles();
-        
+
         // Append to body (hidden by default)
         document.body.appendChild(this.dashboardElement);
-        
+
         // Setup event listeners
         this.setupEventListeners();
-        
+
         console.log('[PRODUCTION_MONITOR] Dashboard initialized');
     }
 
@@ -392,7 +392,7 @@ class ProductionMonitoringDashboard {
                 }
             }
         `;
-        
+
         document.head.appendChild(style);
     }
 
@@ -455,7 +455,7 @@ class ProductionMonitoringDashboard {
             clearInterval(this.updateInterval);
             this.updateInterval = null;
         }
-        
+
         console.log('[PRODUCTION_MONITOR] Monitoring stopped');
     }
 
@@ -477,10 +477,10 @@ class ProductionMonitoringDashboard {
         if (!this.metrics.has('history')) {
             this.metrics.set('history', []);
         }
-        
+
         const history = this.metrics.get('history');
         history.push(metrics);
-        
+
         if (history.length > 1000) {
             history.shift();
         }
@@ -559,17 +559,17 @@ class ProductionMonitoringDashboard {
 
         // UX score based on FPS, responsiveness, and stability
         let uxScore = 0;
-        
+
         if (perf.currentFPS >= 55) uxScore += 0.4;
         else if (perf.currentFPS >= 30) uxScore += 0.2;
-        
+
         if (perf.averageFPS >= 50) uxScore += 0.3;
         else if (perf.averageFPS >= 25) uxScore += 0.15;
-        
+
         const fpsStability = Math.abs(perf.maxFPS - perf.minFPS);
         if (fpsStability < 10) uxScore += 0.2;
         else if (fpsStability < 20) uxScore += 0.1;
-        
+
         if (perf.performance > 0.8) uxScore += 0.1;
 
         return {
@@ -588,19 +588,19 @@ class ProductionMonitoringDashboard {
 
         // Update system health
         this.updateSystemHealth(current);
-        
+
         // Update performance metrics
         this.updatePerformanceDisplay(current.performance);
-        
+
         // Update resource display
         this.updateResourceDisplay(current.resources);
-        
+
         // Update feature flags
         this.updateFeatureFlagsDisplay();
-        
+
         // Update spatial hash stats
         this.updateSpatialHashStats();
-        
+
         // Update charts
         this.updateCharts();
     }
@@ -689,16 +689,16 @@ class ProductionMonitoringDashboard {
         for (const [flag, enabled] of Object.entries(flags)) {
             const item = document.createElement('div');
             item.className = 'feature-flag-item';
-            
+
             const displayName = flag.replace('enable', '').replace(/([A-Z])/g, ' $1').trim();
-            
+
             item.innerHTML = `
                 <span>${displayName}</span>
                 <span class="feature-flag-status ${enabled ? 'enabled' : 'disabled'}">
                     ${enabled ? '✅ ON' : '❌ OFF'}
                 </span>
             `;
-            
+
             container.appendChild(item);
         }
     }
@@ -716,7 +716,7 @@ class ProductionMonitoringDashboard {
         }
 
         const stats = spatialGrid.getStats ? spatialGrid.getStats() : {};
-        
+
         container.innerHTML = `
             <div>Grid Size: ${stats.gridSize || 'N/A'}</div>
             <div>Active Objects: ${stats.objectCount || 0}</div>
@@ -746,11 +746,11 @@ class ProductionMonitoringDashboard {
         if (history.length === 0) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw grid
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 1;
-        
+
         for (let i = 0; i <= 10; i++) {
             const y = (canvas.height / 10) * i;
             ctx.beginPath();
@@ -805,7 +805,7 @@ class ProductionMonitoringDashboard {
         if (history.length === 0) return;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
+
         // Draw memory usage line
         ctx.strokeStyle = '#0088ff';
         ctx.lineWidth = 2;
@@ -859,7 +859,7 @@ class ProductionMonitoringDashboard {
 
         // Clean old alerts (older than 24 hours)
         this.alerts = this.alerts.filter(alert => (now - alert.timestamp) < 24 * 60 * 60 * 1000);
-        
+
         // Update alert count
         document.getElementById('alert-count').textContent = this.alerts.length;
     }
@@ -884,7 +884,7 @@ class ProductionMonitoringDashboard {
      */
     updateAlertsDisplay() {
         const container = document.getElementById('alerts-container');
-        
+
         if (this.alerts.length === 0) {
             container.innerHTML = '<div class="no-alerts">No alerts in the last 24 hours ✅</div>';
             return;
@@ -907,7 +907,7 @@ class ProductionMonitoringDashboard {
     toggleVisibility() {
         this.isVisible = !this.isVisible;
         this.dashboardElement.classList.toggle('visible', this.isVisible);
-        
+
         if (this.isVisible) {
             this.updateDashboard();
         }
@@ -961,7 +961,7 @@ class ProductionMonitoringDashboard {
         this.metrics.clear();
         this.alerts = [];
         this.updateDashboard();
-        
+
         console.log('[PRODUCTION_MONITOR] Data reset');
     }
 
@@ -1010,12 +1010,12 @@ class ProductionMonitoringDashboard {
 // Global monitoring interface
 const ProductionMonitoring = {
     dashboard: null,
-    
+
     initialize() {
         if (!this.dashboard) {
             this.dashboard = new ProductionMonitoringDashboard();
             console.log('📊 Production Monitoring Dashboard initialized');
-            
+
             // Global shortcuts
             window.showMonitoringDashboard = () => this.dashboard.toggleVisibility();
             window.getMonitoringStatus = () => this.dashboard.getStatus();
@@ -1023,13 +1023,13 @@ const ProductionMonitoring = {
         }
         return this.dashboard;
     },
-    
+
     show() {
         if (this.dashboard) {
             this.dashboard.toggleVisibility();
         }
     },
-    
+
     addAlert(level, title, message) {
         if (this.dashboard) {
             this.dashboard.addAlert(level, title, message);
@@ -1041,13 +1041,13 @@ const ProductionMonitoring = {
 if (typeof window !== 'undefined') {
     const initializeMonitoring = () => {
         ProductionMonitoring.initialize();
-        
+
         // Add global keyboard shortcut info
         console.log('📊 Production Monitoring ready!');
         console.log('Use Ctrl+Shift+M to toggle dashboard');
         console.log('Use window.showMonitoringDashboard() to show/hide');
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeMonitoring);
     } else {

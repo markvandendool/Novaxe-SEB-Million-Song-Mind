@@ -74,7 +74,7 @@ class CanaryDeploymentManager {
         this.metrics = new Map();
         this.abTestResults = new Map();
         this.rollbackHistory = [];
-        
+
         this.initializeCanaryDeployment();
         this.startMonitoring();
     }
@@ -86,23 +86,23 @@ class CanaryDeploymentManager {
         console.log('[CANARY] Initializing Canary Deployment System');
         console.log(`[CANARY] Current Phase: ${this.currentPhase}`);
         console.log(`[CANARY] User Group: ${this.userGroup}`);
-        
+
         // Determine which features this user should get
         this.activeFeatures = this.determineActiveFeatures();
-        
+
         // Configure feature flags based on canary assignment
         this.configureFeatureFlags();
-        
+
         // Initialize A/B tests
         this.initializeABTests();
-        
+
         // Setup event listeners
         this.setupEventListeners();
-        
+
         // Expose global interface
         window.canaryDeploymentManager = this;
         window.getCanaryStatus = () => this.getStatus();
-        
+
         this.logInitialization();
     }
 
@@ -135,7 +135,7 @@ class CanaryDeploymentManager {
     determineUserGroup() {
         // Get consistent user ID from feature flag manager
         let userId = window.featureFlagManager?.userId;
-        
+
         if (!userId) {
             // Create our own if not available
             userId = localStorage.getItem('chordcubes_user_id') || Math.random().toString(36);
@@ -152,7 +152,7 @@ class CanaryDeploymentManager {
 
         const userPercentile = Math.abs(hash) % 100;
         const currentPhaseConfig = CANARY_CONFIG.phases[this.currentPhase];
-        
+
         if (userPercentile < currentPhaseConfig.percentage) {
             return 'canary';
         } else {
@@ -222,7 +222,7 @@ class CanaryDeploymentManager {
     initializeABTests() {
         for (const [testName, config] of Object.entries(CANARY_CONFIG.abTests)) {
             const variant = this.assignABTestVariant(testName, config);
-            
+
             this.abTestResults.set(testName, {
                 variant,
                 config,
@@ -239,7 +239,7 @@ class CanaryDeploymentManager {
      */
     assignABTestVariant(testName, config) {
         const userId = window.featureFlagManager?.userId || 'default';
-        
+
         // Create hash specific to this test
         const testKey = testName + userId;
         let hash = 0;
@@ -250,14 +250,14 @@ class CanaryDeploymentManager {
 
         const percentage = Math.abs(hash) % 100;
         let cumulativePercentage = 0;
-        
+
         for (let i = 0; i < config.variants.length; i++) {
             cumulativePercentage += config.trafficSplit[i];
             if (percentage < cumulativePercentage) {
                 return config.variants[i];
             }
         }
-        
+
         return config.variants[0]; // Fallback
     }
 
@@ -286,16 +286,16 @@ class CanaryDeploymentManager {
      */
     collectCanaryMetrics() {
         const timestamp = Date.now();
-        
+
         // Performance metrics
         const performanceMetrics = window.performanceMonitor?.getReport();
-        
+
         // Error metrics
         const errorMetrics = window.monitor?.getStats();
-        
+
         // Resource metrics
         const resourceMetrics = window.resourceManager?.getResourceStats();
-        
+
         // User experience metrics (from feature flag manager)
         const userExperienceMetrics = this.calculateUserExperienceScore();
 
@@ -317,7 +317,7 @@ class CanaryDeploymentManager {
 
         const history = this.metrics.get('canary_history');
         history.push(metrics);
-        
+
         if (history.length > 1000) {
             history.shift();
         }
@@ -333,7 +333,7 @@ class CanaryDeploymentManager {
         if (!performance) return 0.5;
 
         let score = 0;
-        
+
         // FPS contribution (40% weight)
         if (performance.currentFPS >= 55) score += 0.4;
         else if (performance.currentFPS >= 45) score += 0.3;
@@ -379,7 +379,7 @@ class CanaryDeploymentManager {
         };
 
         console.log('[CANARY] Progression criteria check:', checks);
-        
+
         // All criteria must pass
         return Object.values(checks).every(Boolean);
     }
@@ -443,7 +443,7 @@ class CanaryDeploymentManager {
         if (!current) return;
 
         const triggers = CANARY_CONFIG.rollbackTriggers;
-        
+
         // Critical error rate
         if (this.calculateErrorRate() > triggers.criticalErrorRate) {
             this.initiateRollback('CRITICAL_ERROR_RATE', `Error rate: ${(this.calculateErrorRate() * 100).toFixed(2)}%`);
@@ -490,16 +490,16 @@ class CanaryDeploymentManager {
      */
     parseDuration(duration) {
         if (duration === 'permanent') return Infinity;
-        
+
         const match = duration.match(/(\d+)([hm])/);
         if (!match) return 0;
-        
+
         const value = parseInt(match[1]);
         const unit = match[2];
-        
+
         if (unit === 'h') return value * 60 * 60 * 1000;
         if (unit === 'm') return value * 60 * 1000;
-        
+
         return 0;
     }
 
@@ -509,20 +509,20 @@ class CanaryDeploymentManager {
     progressToNextPhase() {
         const phases = Object.keys(CANARY_CONFIG.phases);
         const currentIndex = phases.indexOf(this.currentPhase);
-        
+
         if (currentIndex < phases.length - 1) {
             const nextPhase = phases[currentIndex + 1];
-            
+
             console.log(`[CANARY] Progressing from ${this.currentPhase} to ${nextPhase}`);
-            
+
             this.currentPhase = nextPhase;
             localStorage.setItem('chordcubes_canary_phase', nextPhase);
-            
+
             // Recalculate user group and features
             this.userGroup = this.determineUserGroup();
             this.activeFeatures = this.determineActiveFeatures();
             this.configureFeatureFlags();
-            
+
             // Log progression
             if (window.monitor) {
                 window.monitor.logEvent('canary_progression', {
@@ -532,7 +532,7 @@ class CanaryDeploymentManager {
                     timestamp: new Date().toISOString()
                 });
             }
-            
+
             console.log(`[CANARY] ✅ Progressed to ${nextPhase}. User group: ${this.userGroup}`);
         }
     }
@@ -542,7 +542,7 @@ class CanaryDeploymentManager {
      */
     initiateRollback(reason, details) {
         console.error(`[CANARY] 🚨 INITIATING ROLLBACK: ${reason} - ${details}`);
-        
+
         const rollbackEvent = {
             timestamp: new Date().toISOString(),
             reason,
@@ -550,28 +550,28 @@ class CanaryDeploymentManager {
             phase: this.currentPhase,
             metrics: this.metrics.get('current')
         };
-        
+
         this.rollbackHistory.push(rollbackEvent);
-        
+
         // Disable all canary features immediately
         Object.keys(this.activeFeatures).forEach(feature => {
             this.activeFeatures[feature] = false;
         });
-        
+
         this.configureFeatureFlags();
-        
+
         // Notify monitoring system
         if (window.monitor) {
             window.monitor.logEvent('canary_rollback', rollbackEvent);
         }
-        
+
         // Alert production monitoring
         if (window.ProductionMonitoring) {
             window.ProductionMonitoring.addAlert('critical', 'Canary Rollback', `${reason}: ${details}`);
         }
-        
+
         console.error('[CANARY] 🚨 ROLLBACK COMPLETE - All canary features disabled');
-        
+
         // In production, this might also trigger infrastructure rollback
         this.notifyOpsTeam(rollbackEvent);
     }
@@ -581,7 +581,7 @@ class CanaryDeploymentManager {
      */
     notifyOpsTeam(rollbackEvent) {
         console.log('[CANARY] Notifying operations team of rollback:', rollbackEvent);
-        
+
         // In production, this would send alerts via:
         // - Slack/Teams notifications
         // - Email alerts
@@ -660,7 +660,7 @@ class CanaryDeploymentManager {
         }
 
         // Find best performing variant
-        const bestVariant = variants.reduce((best, current) => 
+        const bestVariant = variants.reduce((best, current) =>
             means[current] > means[best] ? current : best
         );
 
@@ -724,14 +724,14 @@ class CanaryDeploymentManager {
     overridePhase(targetPhase, reason = 'Manual override') {
         if (CANARY_CONFIG.phases[targetPhase]) {
             console.log(`[CANARY] Manual phase override to ${targetPhase}: ${reason}`);
-            
+
             this.currentPhase = targetPhase;
             localStorage.setItem('chordcubes_canary_phase', targetPhase);
-            
+
             this.userGroup = this.determineUserGroup();
             this.activeFeatures = this.determineActiveFeatures();
             this.configureFeatureFlags();
-            
+
             if (window.monitor) {
                 window.monitor.logEvent('canary_manual_override', {
                     targetPhase,
@@ -772,11 +772,11 @@ class CanaryDeploymentManager {
         if (this.monitoringInterval) {
             clearInterval(this.monitoringInterval);
         }
-        
+
         if (this.evaluationInterval) {
             clearInterval(this.evaluationInterval);
         }
-        
+
         console.log('[CANARY] Canary deployment manager destroyed');
     }
 }
@@ -784,30 +784,30 @@ class CanaryDeploymentManager {
 // Global canary deployment utilities
 const CanaryDeployment = {
     manager: null,
-    
+
     initialize() {
         if (!this.manager) {
             this.manager = new CanaryDeploymentManager();
-            
+
             // Global utilities
             window.getCanaryPhase = () => this.manager.currentPhase;
             window.getCanaryUserGroup = () => this.manager.userGroup;
             window.forceCanaryRollback = (reason) => this.manager.forceRollback(reason);
             window.overrideCanaryPhase = (phase, reason) => this.manager.overridePhase(phase, reason);
-            
+
             console.log('🎯 Canary Deployment System ready!');
         }
         return this.manager;
     },
-    
+
     getPhase() {
         return this.manager?.currentPhase || 'unknown';
     },
-    
+
     getUserGroup() {
         return this.manager?.userGroup || 'unknown';
     },
-    
+
     isCanaryUser() {
         return this.getUserGroup() === 'canary';
     }
@@ -823,7 +823,7 @@ if (typeof window !== 'undefined') {
             setTimeout(initializeCanaryDeployment, 1000);
         }
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeCanaryDeployment);
     } else {

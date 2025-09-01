@@ -26,7 +26,7 @@ const ROLLBACK_CONFIG = {
             crashRate: 0.02,           // 2% crash rate
             userComplaintRate: 0.1     // 10% user complaints
         },
-        
+
         // Warning levels - prepare for rollback
         warning: {
             errorRate: 0.03,           // 3% error rate
@@ -65,14 +65,14 @@ const ROLLBACK_CONFIG = {
             rollbackTime: 0,
             features: ['disable_all_features', 'notify_ops', 'save_metrics']
         },
-        
+
         graceful: {
             name: 'Graceful Rollback',
             description: 'Gradual rollback with user notification',
             rollbackTime: 30000, // 30 seconds
             features: ['notify_users', 'gradual_disable', 'save_state']
         },
-        
+
         targeted: {
             name: 'Targeted Feature Rollback',
             description: 'Roll back specific problematic features only',
@@ -94,7 +94,7 @@ class AutomaticRollbackSystem {
         this.metrics = new Map();
         this.alertingCallbacks = [];
         this.recoveryAttempts = 0;
-        
+
         this.initializeRollbackSystem();
         this.startMonitoring();
         this.setupCircuitBreakers();
@@ -105,24 +105,24 @@ class AutomaticRollbackSystem {
      */
     initializeRollbackSystem() {
         console.log('[ROLLBACK] Initializing Automatic Rollback System');
-        
+
         // Initialize metrics storage
         this.metrics.set('failures', []);
         this.metrics.set('rollbacks', []);
         this.metrics.set('recoveries', []);
         this.metrics.set('health_history', []);
-        
+
         // Setup event listeners
         this.setupEventListeners();
-        
+
         // Initialize health checks
         this.initializeHealthChecks();
-        
+
         // Expose global interface
         window.automaticRollbackSystem = this;
         window.forceRollback = (reason, strategy) => this.forceRollback(reason, strategy);
         window.getRollbackStatus = () => this.getStatus();
-        
+
         this.logInitialization();
     }
 
@@ -252,7 +252,7 @@ class AutomaticRollbackSystem {
         // Store health history
         const healthHistory = this.metrics.get('health_history');
         healthHistory.push(healthReport);
-        
+
         // Keep last 1000 health checks
         if (healthHistory.length > 1000) {
             healthHistory.shift();
@@ -277,8 +277,8 @@ class AutomaticRollbackSystem {
         const currentFPS = report.currentFPS || 0;
         const avgFPS = report.averageFPS || 0;
 
-        const healthy = currentFPS > ROLLBACK_CONFIG.thresholds.warning.fpsDrops && 
-                        avgFPS > ROLLBACK_CONFIG.thresholds.warning.fpsDrops;
+        const healthy = currentFPS > ROLLBACK_CONFIG.thresholds.warning.fpsDrops &&
+            avgFPS > ROLLBACK_CONFIG.thresholds.warning.fpsDrops;
 
         return {
             healthy,
@@ -339,7 +339,7 @@ class AutomaticRollbackSystem {
         // Count enabled features and check for any that might be problematic
         const enabledFeatures = Object.entries(featureFlags).filter(([_, enabled]) => enabled);
         const totalFeatures = Object.keys(featureFlags).length;
-        
+
         // If too many features are disabled, it might indicate problems
         const healthy = enabledFeatures.length / totalFeatures > 0.5;
 
@@ -376,7 +376,7 @@ class AutomaticRollbackSystem {
         // Check if Three.js renderer is working
         const scene = window.scene;
         const renderer = window.renderer;
-        
+
         if (!scene || !renderer) {
             return { healthy: false, reason: 'Rendering components not available' };
         }
@@ -591,8 +591,8 @@ class AutomaticRollbackSystem {
     getRecentFailures(windowMs) {
         const now = Date.now();
         const failures = this.metrics.get('failures');
-        
-        return failures.filter(failure => 
+
+        return failures.filter(failure =>
             now - failure.timestamp <= windowMs && !failure.resolved
         );
     }
@@ -603,7 +603,7 @@ class AutomaticRollbackSystem {
     getConsecutiveFailures() {
         const failures = this.metrics.get('failures');
         let consecutive = 0;
-        
+
         // Count from the end until we find a resolved failure or success
         for (let i = failures.length - 1; i >= 0; i--) {
             if (failures[i].resolved) {
@@ -611,7 +611,7 @@ class AutomaticRollbackSystem {
             }
             consecutive++;
         }
-        
+
         return consecutive;
     }
 
@@ -649,7 +649,7 @@ class AutomaticRollbackSystem {
 
         } catch (error) {
             console.error(`[ROLLBACK] ❌ Rollback failed: ${error.message}`);
-            
+
             rollbackEvent.status = 'failed';
             rollbackEvent.error = error.message;
             rollbackEvent.failedAt = Date.now();
@@ -764,7 +764,7 @@ class AutomaticRollbackSystem {
         // Disable only the problematic features
         for (const feature of problematicFeatures) {
             console.log(`[ROLLBACK] Disabling problematic feature: ${feature}`);
-            
+
             if (window.featureFlagManager) {
                 window.featureFlagManager.setFeatureFlag(feature, false);
             }
@@ -866,7 +866,7 @@ class AutomaticRollbackSystem {
         if (success) {
             breaker.lastSuccess = now;
             breaker.successCount++;
-            
+
             if (breaker.state === 'half-open') {
                 if (breaker.successCount >= ROLLBACK_CONFIG.circuitBreaker.successThreshold) {
                     breaker.state = 'closed';
@@ -877,7 +877,7 @@ class AutomaticRollbackSystem {
         } else {
             breaker.lastFailure = now;
             breaker.failures++;
-            
+
             if (breaker.failures >= ROLLBACK_CONFIG.circuitBreaker.failureThreshold) {
                 breaker.state = 'open';
                 console.log(`[ROLLBACK] Circuit breaker opened for ${component}`);
@@ -1079,21 +1079,21 @@ class AutomaticRollbackSystem {
 // Global rollback utilities
 const AutomaticRollback = {
     system: null,
-    
+
     initialize() {
         if (!this.system) {
             this.system = new AutomaticRollbackSystem();
-            
+
             // Global utilities
             window.triggerRollback = (reason, strategy) => this.system.forceRollback(reason, strategy);
             window.getRollbackHistory = () => this.system.rollbackHistory;
             window.getSystemHealth = () => this.system.performHealthCheck();
-            
+
             console.log('🛡️ Automatic Rollback System ready!');
         }
         return this.system;
     },
-    
+
     isActive() {
         return this.system?.isActive || false;
     }
@@ -1109,7 +1109,7 @@ if (typeof window !== 'undefined') {
             setTimeout(initializeRollbackSystem, 2000);
         }
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeRollbackSystem);
     } else {

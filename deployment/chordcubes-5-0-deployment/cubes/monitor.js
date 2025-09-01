@@ -16,7 +16,7 @@ class ChordCubesMonitor {
             fpsBelow: 30,                  // Alert if FPS drops below 30
             textureCacheSize: 50           // Alert if texture cache exceeds 50 textures
         };
-        
+
         this.currentMetrics = {
             audioContexts: [],
             audioContextCount: 0,
@@ -35,7 +35,7 @@ class ChordCubesMonitor {
         this.frameCount = 0;
         this.lastFrameTime = performance.now();
         this.fpsCalculationInterval = 1000; // Calculate FPS every second
-        
+
         console.log('[MONITOR] 🔍 ChordCubes Critical System Monitor initialized');
     }
 
@@ -49,35 +49,35 @@ class ChordCubesMonitor {
         }
 
         console.log('[MONITOR] 🚨 Starting emergency monitoring systems...');
-        
+
         // Hook into global error handling
         this.setupGlobalErrorHandling();
-        
+
         // Hook into Tone.js context tracking
         this.setupAudioContextTracking();
-        
+
         // Hook into Three.js context tracking
         this.setupWebGLContextTracking();
-        
+
         // Hook into WebMIDI tracking
         this.setupMIDITracking();
-        
+
         // Hook into performance tracking
         this.setupPerformanceTracking();
-        
+
         // Start monitoring loop
         this.isRunning = true;
         this.monitoringInterval = setInterval(() => {
             this.runMonitoringCycle();
         }, 1000); // Monitor every second
-        
+
         console.log('[MONITOR] ✅ All monitoring systems active');
         return true;
     }
 
     stop() {
         if (!this.isRunning) return;
-        
+
         this.isRunning = false;
         if (this.monitoringInterval) {
             clearInterval(this.monitoringInterval);
@@ -93,9 +93,9 @@ class ChordCubesMonitor {
         // Track all AudioContext instances
         const originalAudioContext = window.AudioContext || window.webkitAudioContext;
         const contextInstances = [];
-        
+
         if (originalAudioContext) {
-            window.AudioContext = function(...args) {
+            window.AudioContext = function (...args) {
                 const instance = new originalAudioContext(...args);
                 contextInstances.push({
                     instance,
@@ -105,11 +105,11 @@ class ChordCubesMonitor {
                 console.log(`[MONITOR] 🎵 AudioContext #${contextInstances.length} created`);
                 return instance;
             };
-            
+
             // Copy static methods
             Object.setPrototypeOf(window.AudioContext, originalAudioContext);
         }
-        
+
         this.audioContextInstances = contextInstances;
     }
 
@@ -118,10 +118,10 @@ class ChordCubesMonitor {
         const canvas = HTMLCanvasElement.prototype;
         const originalGetContext = canvas.getContext;
         const webglContexts = [];
-        
-        canvas.getContext = function(contextType, ...args) {
+
+        canvas.getContext = function (contextType, ...args) {
             const context = originalGetContext.call(this, contextType, ...args);
-            
+
             if (contextType.includes('webgl')) {
                 webglContexts.push({
                     context,
@@ -131,10 +131,10 @@ class ChordCubesMonitor {
                 });
                 console.log(`[MONITOR] 🎨 WebGL Context #${webglContexts.length} created`);
             }
-            
+
             return context;
         };
-        
+
         this.webglContextInstances = webglContexts;
     }
 
@@ -143,8 +143,8 @@ class ChordCubesMonitor {
         if (navigator.requestMIDIAccess) {
             const originalRequestMIDI = navigator.requestMIDIAccess;
             const midiPorts = [];
-            
-            navigator.requestMIDIAccess = function(...args) {
+
+            navigator.requestMIDIAccess = function (...args) {
                 return originalRequestMIDI.apply(this, args).then(access => {
                     // Track inputs and outputs
                     for (let input of access.inputs.values()) {
@@ -157,7 +157,7 @@ class ChordCubesMonitor {
                     return access;
                 });
             };
-            
+
             this.midiPortInstances = midiPorts;
         }
     }
@@ -167,7 +167,7 @@ class ChordCubesMonitor {
         const trackFPS = () => {
             this.frameCount++;
             const now = performance.now();
-            
+
             if (now - this.lastFrameTime >= this.fpsCalculationInterval) {
                 this.currentMetrics.currentFPS = Math.round(
                     (this.frameCount * 1000) / (now - this.lastFrameTime)
@@ -175,12 +175,12 @@ class ChordCubesMonitor {
                 this.frameCount = 0;
                 this.lastFrameTime = now;
             }
-            
+
             if (this.isRunning) {
                 requestAnimationFrame(trackFPS);
             }
         };
-        
+
         requestAnimationFrame(trackFPS);
     }
 
@@ -188,21 +188,21 @@ class ChordCubesMonitor {
         // Track critical errors
         const originalConsoleError = console.error;
         const originalConsoleWarn = console.warn;
-        
+
         console.error = (...args) => {
             this.logCriticalError('ERROR', args);
             return originalConsoleError.apply(console, args);
         };
-        
+
         console.warn = (...args) => {
             this.logCriticalError('WARN', args);
             return originalConsoleWarn.apply(console, args);
         };
-        
+
         window.addEventListener('error', (event) => {
             this.logCriticalError('GLOBAL_ERROR', [event.error]);
         });
-        
+
         window.addEventListener('unhandledrejection', (event) => {
             this.logCriticalError('UNHANDLED_PROMISE', [event.reason]);
         });
@@ -215,14 +215,14 @@ class ChordCubesMonitor {
             timestamp: Date.now(),
             stack: new Error().stack
         };
-        
+
         // Check for critical audio/memory/webgl errors
         const msg = error.message.toLowerCase();
-        if (msg.includes('audiocontext') || 
-            msg.includes('webgl') || 
-            msg.includes('memory') || 
+        if (msg.includes('audiocontext') ||
+            msg.includes('webgl') ||
+            msg.includes('memory') ||
             msg.includes('midi')) {
-            
+
             this.currentMetrics.emergencyAlerts.push(error);
             console.log(`[MONITOR] 🚨 CRITICAL SYSTEM ERROR: ${error.message}`);
         }
@@ -275,7 +275,7 @@ class ChordCubesMonitor {
 
     checkThresholds() {
         this.currentMetrics.warnings = [];
-        
+
         // Check AudioContext count
         if (this.currentMetrics.audioContextCount > this.alertThresholds.audioContextCount) {
             this.addWarning(`CRITICAL: ${this.currentMetrics.audioContextCount} AudioContexts detected (should be 1)`);
@@ -355,13 +355,13 @@ class ChordCubesMonitor {
     // Emergency shutdown if critical thresholds exceeded
     emergencyShutdown(reason) {
         console.error(`[MONITOR] 🚨 EMERGENCY SHUTDOWN: ${reason}`);
-        
+
         // Stop all audio
         if (window.Tone && window.Tone.Transport) {
             window.Tone.Transport.stop();
             window.Tone.Transport.cancel();
         }
-        
+
         // Stop all animations
         if (window.cancelAnimationFrame) {
             // Cancel all pending animation frames (brute force approach)
@@ -369,10 +369,10 @@ class ChordCubesMonitor {
                 window.cancelAnimationFrame(i);
             }
         }
-        
+
         // Stop monitoring
         this.stop();
-        
+
         // Alert user
         alert(`🚨 EMERGENCY SYSTEM SHUTDOWN\n\nReason: ${reason}\n\nThe system has been stopped to prevent damage. Please refresh the page.`);
     }
@@ -387,7 +387,7 @@ window.ChordCubesMonitor = ChordCubesMonitor;
 if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
     console.log('[MONITOR] 🚀 Production mode detected - auto-starting monitor');
     window.chordCubesMonitor = new ChordCubesMonitor();
-    
+
     // Start monitoring after page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', () => {

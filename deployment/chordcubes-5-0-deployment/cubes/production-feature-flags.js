@@ -26,7 +26,7 @@ const PRODUCTION_FEATURE_CONFIG = {
         enableDebugLogging: true,
         enableExperimentalFeatures: true
     },
-    
+
     staging: {
         enablePerformanceOptimization: true,
         enableSpatialHashing: true,
@@ -37,7 +37,7 @@ const PRODUCTION_FEATURE_CONFIG = {
         enableDebugLogging: false,
         enableExperimentalFeatures: false
     },
-    
+
     production: {
         enablePerformanceOptimization: false, // Start with false for gradual rollout
         enableSpatialHashing: false,          // Gradually enable based on traffic %
@@ -63,7 +63,7 @@ const ROLLOUT_PERCENTAGES = {
         week5: 85,   // 85% of users
         week6: 100   // Full rollout
     },
-    
+
     spatialHashing: {
         week1: 2,    // 2% of users (high-risk feature)
         week2: 8,    // 8% of users
@@ -72,7 +72,7 @@ const ROLLOUT_PERCENTAGES = {
         week5: 70,   // 70% of users
         week6: 100   // Full rollout
     },
-    
+
     collisionOptimization: {
         week1: 1,    // 1% of users (highest-risk feature)
         week2: 5,    // 5% of users
@@ -95,7 +95,7 @@ class ProductionFeatureFlagManager {
         this.overrides = this.loadOverrides();
         this.emergencyKillSwitches = new Set();
         this.performanceMetrics = new Map();
-        
+
         this.initializeFeatureFlags();
         this.setupPerformanceMonitoring();
         this.logInitialization();
@@ -107,7 +107,7 @@ class ProductionFeatureFlagManager {
     detectEnvironment() {
         // Check URL patterns
         const hostname = window.location?.hostname || '';
-        
+
         if (hostname.includes('localhost') || hostname.includes('127.0.0.1') || hostname === '') {
             return 'development';
         } else if (hostname.includes('staging') || hostname.includes('dev.') || hostname.includes('-staging')) {
@@ -122,7 +122,7 @@ class ProductionFeatureFlagManager {
      */
     generateUserId() {
         let userId = localStorage.getItem('chordcubes_user_id');
-        
+
         if (!userId) {
             // Create deterministic user ID based on browser fingerprint
             const canvas = document.createElement('canvas');
@@ -130,12 +130,12 @@ class ProductionFeatureFlagManager {
             ctx.textBaseline = 'top';
             ctx.font = '14px Arial';
             ctx.fillText('ChordCubes 5.0 fingerprint', 2, 2);
-            
-            const fingerprint = canvas.toDataURL() + 
-                               navigator.userAgent + 
-                               navigator.language + 
-                               screen.width + 'x' + screen.height;
-            
+
+            const fingerprint = canvas.toDataURL() +
+                navigator.userAgent +
+                navigator.language +
+                screen.width + 'x' + screen.height;
+
             // Convert to hash
             let hash = 0;
             for (let i = 0; i < fingerprint.length; i++) {
@@ -143,11 +143,11 @@ class ProductionFeatureFlagManager {
                 hash = ((hash << 5) - hash) + char;
                 hash = hash & hash; // Convert to 32bit integer
             }
-            
+
             userId = Math.abs(hash).toString();
             localStorage.setItem('chordcubes_user_id', userId);
         }
-        
+
         return userId;
     }
 
@@ -161,7 +161,7 @@ class ProductionFeatureFlagManager {
         const now = new Date();
         const daysSinceDeployment = Math.floor((now - deploymentStart) / (1000 * 60 * 60 * 24));
         const weeksSinceDeployment = Math.floor(daysSinceDeployment / 7) + 1;
-        
+
         return Math.min(weeksSinceDeployment, 6); // Max 6 weeks for full rollout
     }
 
@@ -170,7 +170,7 @@ class ProductionFeatureFlagManager {
      */
     loadOverrides() {
         const overrides = {};
-        
+
         // URL parameter overrides (for testing)
         const urlParams = new URLSearchParams(window.location.search);
         for (const [key, value] of urlParams.entries()) {
@@ -179,7 +179,7 @@ class ProductionFeatureFlagManager {
                 overrides[featureName] = value === 'true' || value === '1';
             }
         }
-        
+
         // localStorage overrides (for development)
         try {
             const localOverrides = JSON.parse(localStorage.getItem('chordcubes_feature_flags') || '{}');
@@ -187,10 +187,10 @@ class ProductionFeatureFlagManager {
         } catch (e) {
             console.warn('[FEATURE_FLAGS] Invalid localStorage overrides:', e);
         }
-        
+
         // Remote config overrides (would be loaded from server in production)
         // For now, using static configuration
-        
+
         return overrides;
     }
 
@@ -199,18 +199,18 @@ class ProductionFeatureFlagManager {
      */
     initializeFeatureFlags() {
         this.flags = { ...this.baseConfig };
-        
+
         // Apply rollout percentages in production
         if (this.environment === 'production') {
             this.applyRolloutLogic();
         }
-        
+
         // Apply manual overrides
         Object.assign(this.flags, this.overrides);
-        
+
         // Apply emergency kill switches
         this.applyEmergencyKillSwitches();
-        
+
         // Expose globally for easy access
         window.featureFlags = this.flags;
         window.featureFlagManager = this;
@@ -221,11 +221,11 @@ class ProductionFeatureFlagManager {
      */
     applyRolloutLogic() {
         const userHash = parseInt(this.userId) % 100; // 0-99
-        
+
         // Check each rollout configuration
         for (const [featureName, schedule] of Object.entries(ROLLOUT_PERCENTAGES)) {
             const currentPercentage = schedule[`week${this.rolloutWeek}`] || 0;
-            
+
             if (userHash < currentPercentage) {
                 // User is in rollout group
                 switch (featureName) {
@@ -249,7 +249,7 @@ class ProductionFeatureFlagManager {
     applyEmergencyKillSwitches() {
         // Check for emergency kill switches (would be loaded from server)
         const killSwitches = this.loadEmergencyKillSwitches();
-        
+
         for (const feature of killSwitches) {
             if (this.flags.hasOwnProperty(feature)) {
                 this.flags[feature] = false;
@@ -292,13 +292,13 @@ class ProductionFeatureFlagManager {
      */
     recordPerformanceMetrics(report) {
         const timestamp = Date.now();
-        
+
         for (const [feature, enabled] of Object.entries(this.flags)) {
             if (enabled && feature.startsWith('enable')) {
                 if (!this.performanceMetrics.has(feature)) {
                     this.performanceMetrics.set(feature, []);
                 }
-                
+
                 const metrics = this.performanceMetrics.get(feature);
                 metrics.push({
                     timestamp,
@@ -306,7 +306,7 @@ class ProductionFeatureFlagManager {
                     averageFPS: report.averageFPS,
                     performance: report.performance
                 });
-                
+
                 // Keep only last 100 data points
                 if (metrics.length > 100) {
                     metrics.shift();
@@ -321,16 +321,16 @@ class ProductionFeatureFlagManager {
     checkPerformanceThresholds(report) {
         const MIN_FPS_THRESHOLD = 30;
         const PERFORMANCE_THRESHOLD = 0.5; // 50% performance
-        
+
         if (report.currentFPS < MIN_FPS_THRESHOLD || report.performance < PERFORMANCE_THRESHOLD) {
             console.warn('[FEATURE_FLAGS] Performance below threshold, checking for auto-disable...');
-            
+
             // Auto-disable high-impact features if performance is poor
             if (this.flags.enableCollisionOptimization && report.currentFPS < 20) {
                 console.warn('[FEATURE_FLAGS] Auto-disabling collision optimization due to poor performance');
                 this.disableFeature('enableCollisionOptimization', 'PERFORMANCE_AUTO_DISABLE');
             }
-            
+
             if (this.flags.enableSpatialHashing && report.currentFPS < 15) {
                 console.warn('[FEATURE_FLAGS] Auto-disabling spatial hashing due to critical performance');
                 this.disableFeature('enableSpatialHashing', 'PERFORMANCE_AUTO_DISABLE');
@@ -345,9 +345,9 @@ class ProductionFeatureFlagManager {
         if (this.flags[featureName]) {
             this.flags[featureName] = false;
             window.featureFlags = this.flags;
-            
+
             console.warn(`[FEATURE_FLAGS] Feature disabled: ${featureName} (Reason: ${reason})`);
-            
+
             // Notify monitoring system
             if (window.monitor) {
                 window.monitor.logEvent('feature_disabled', {
@@ -358,7 +358,7 @@ class ProductionFeatureFlagManager {
                     userId: this.userId
                 });
             }
-            
+
             // Trigger system reconfiguration if needed
             this.reconfigureSystem();
         }
@@ -371,9 +371,9 @@ class ProductionFeatureFlagManager {
         if (this.flags.hasOwnProperty(featureName) && !this.emergencyKillSwitches.has(featureName)) {
             this.flags[featureName] = true;
             window.featureFlags = this.flags;
-            
+
             console.log(`[FEATURE_FLAGS] Feature enabled: ${featureName} (Reason: ${reason})`);
-            
+
             // Notify monitoring system
             if (window.monitor) {
                 window.monitor.logEvent('feature_enabled', {
@@ -384,7 +384,7 @@ class ProductionFeatureFlagManager {
                     userId: this.userId
                 });
             }
-            
+
             // Trigger system reconfiguration
             this.reconfigureSystem();
         } else {
@@ -400,19 +400,19 @@ class ProductionFeatureFlagManager {
         if (window.spatialHashGrid) {
             window.spatialHashGrid.setEnabled(this.flags.enableSpatialHashing);
         }
-        
+
         if (window.optimizedCollisionDetector) {
             window.optimizedCollisionDetector.setEnabled(this.flags.enableCollisionOptimization);
         }
-        
+
         if (window.adaptiveQualitySystem) {
             window.adaptiveQualitySystem.setEnabled(this.flags.enableAdaptiveQuality);
         }
-        
+
         if (window.performanceMonitor) {
             window.performanceMonitor.setEnabled(this.flags.enablePerformanceMonitoring);
         }
-        
+
         // Dispatch custom event for other systems to listen
         window.dispatchEvent(new CustomEvent('featureFlagsChanged', {
             detail: { flags: this.flags, manager: this }
@@ -443,11 +443,11 @@ class ProductionFeatureFlagManager {
         console.log(`[FEATURE_FLAGS] User ID: ${this.userId}`);
         console.log(`[FEATURE_FLAGS] Rollout Week: ${this.rolloutWeek}`);
         console.log('[FEATURE_FLAGS] Active Features:', this.flags);
-        
+
         if (Object.keys(this.overrides).length > 0) {
             console.log('[FEATURE_FLAGS] Manual Overrides:', this.overrides);
         }
-        
+
         if (this.emergencyKillSwitches.size > 0) {
             console.warn('[FEATURE_FLAGS] Emergency Kill Switches:', Array.from(this.emergencyKillSwitches));
         }
@@ -460,14 +460,14 @@ class ProductionFeatureFlagManager {
         if (this.flags.hasOwnProperty(featureName)) {
             this.flags[featureName] = enabled;
             window.featureFlags = this.flags;
-            
+
             if (permanent) {
                 this.overrides[featureName] = enabled;
                 localStorage.setItem('chordcubes_feature_flags', JSON.stringify(this.overrides));
             }
-            
+
             this.reconfigureSystem();
-            
+
             console.log(`[FEATURE_FLAGS] Manual override: ${featureName} = ${enabled} (Permanent: ${permanent})`);
         } else {
             console.error(`[FEATURE_FLAGS] Invalid feature name: ${featureName}`);
@@ -479,14 +479,14 @@ class ProductionFeatureFlagManager {
      */
     activateEmergencyKillSwitch(featureName) {
         console.error(`[FEATURE_FLAGS] EMERGENCY KILL SWITCH ACTIVATED: ${featureName}`);
-        
+
         this.emergencyKillSwitches.add(featureName);
         this.disableFeature(featureName, 'EMERGENCY_KILL_SWITCH');
-        
+
         // Store in localStorage for persistence
         const killSwitches = Array.from(this.emergencyKillSwitches);
         localStorage.setItem('chordcubes_kill_switches', JSON.stringify(killSwitches));
-        
+
         // Immediate system reconfiguration
         this.reconfigureSystem();
     }
@@ -499,9 +499,9 @@ class ProductionFeatureFlagManager {
         this.emergencyKillSwitches.clear();
         localStorage.removeItem('chordcubes_feature_flags');
         localStorage.removeItem('chordcubes_kill_switches');
-        
+
         this.initializeFeatureFlags();
-        
+
         console.log('[FEATURE_FLAGS] Reset to default configuration');
     }
 }
@@ -512,14 +512,14 @@ const FeatureFlags = {
     isEnabled: (featureName) => {
         return window.featureFlags?.[featureName] || false;
     },
-    
+
     // Performance optimization checks
     usePerformanceOptimization: () => FeatureFlags.isEnabled('enablePerformanceOptimization'),
     useSpatialHashing: () => FeatureFlags.isEnabled('enableSpatialHashing'),
     useAdaptiveQuality: () => FeatureFlags.isEnabled('enableAdaptiveQuality'),
     usePerformanceMonitoring: () => FeatureFlags.isEnabled('enablePerformanceMonitoring'),
     useCollisionOptimization: () => FeatureFlags.isEnabled('enableCollisionOptimization'),
-    
+
     // Development/testing checks
     useDebugLogging: () => FeatureFlags.isEnabled('enableDebugLogging'),
     useExperimentalFeatures: () => FeatureFlags.isEnabled('enableExperimentalFeatures'),
@@ -531,12 +531,12 @@ if (typeof window !== 'undefined') {
     const initializeFeatureFlags = () => {
         window.productionFeatureFlagManager = new ProductionFeatureFlagManager();
         window.FeatureFlags = FeatureFlags;
-        
+
         console.log('🎛️ Production Feature Flag System ready!');
         console.log('Use window.featureFlagManager for management');
         console.log('Use FeatureFlags.isEnabled("featureName") for checks');
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeFeatureFlags);
     } else {

@@ -1,6 +1,25 @@
 // ============================================
-// 🎼 CHORDCUBES 5.0 - REVOLUTIONARY AUDIO CUTOFF SYSTEM
+// 🎼 CHORDCUBES 5.0 PHOENIX ULTRA - REVOLUTIONARY AUDIO CUTOFF SYSTEM
 // ============================================
+// 🎯 OFFICIAL STAGING VERSION - PHASE 6 PRODUCTION COMPLETE 🎯
+// Build Date: 2025-09-01 | Branch: chord-cubes-phoenix-ultra-5.0
+// ============================================
+
+// UNMISTAKABLE VERSION BANNER
+console.log(`
+╔═══════════════════════════════════════════════════════════════╗
+║                    🎼 CHORDCUBES 5.0 PHOENIX ULTRA 🎼          ║
+║                                                               ║
+║  🎯 OFFICIAL STAGING VERSION - PHASE 6 PRODUCTION COMPLETE 🎯  ║
+║                                                               ║
+║  Build: 2025-09-01 | Branch: chord-cubes-phoenix-ultra-5.0   ║
+║  Systems: 7 Production Systems | Lines: 6,978 deployment     ║
+║  Status: REVOLUTIONARY AUDIO CUTOFF SYSTEM ACTIVE            ║
+║                                                               ║
+║  ⚠️  DO NOT LOAD OLD VERSIONS - THIS IS THE STAGING BUILD ⚠️   ║
+╚═══════════════════════════════════════════════════════════════╝
+`);
+
 // CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
 // ============================================
 (function () {
@@ -161,7 +180,7 @@ console.log('[MAIN] 🎵 Initializing UnifiedAudioContextManager singleton...');
 // Ensure the manager is ready for use by other systems
 if (window.unifiedAudioManager) {
     console.log('[MAIN] ✅ UnifiedAudioContextManager ready');
-    
+
     // Pre-warm the manager (doesn't start audio, just prepares it)
     window.addEventListener('DOMContentLoaded', () => {
         console.log('[MAIN] 📱 DOM loaded, pre-warming audio manager...');
@@ -3300,17 +3319,17 @@ function resolveFrontRowCollisions(draggingCube) {
         window.optimizedCollisionDetector.resolveFrontRowCollisions(draggingCube, lineup);
         return;
     }
-    
+
     // Fallback to original algorithm if optimizer not available
     console.warn('[PERF] ⚠️ Using fallback collision detection - performance may be reduced');
-    
+
     // Build a set of active cubes near the front row (including the dragging cube)
     const zoneZ = FRONT_ROW_FORWARD_Z + 0.5;
     const nodes = [...lineup];
     if (!nodes.includes(draggingCube)) nodes.push(draggingCube);
     const active = nodes.filter(c => Math.abs(c.position.z) <= zoneZ + 0.001);
     if (active.length <= 1) return;
-    
+
     // 2D soft-body style resolve along (x,z) - ORIGINAL O(n²) ALGORITHM
     const minDist = gridSize * 0.95; // slightly less than slot spacing
     for (let i = 0; i < active.length; i++) {
@@ -3588,7 +3607,7 @@ class OrchestralAudioEngine {
         this.player = new WebAudioFontPlayer();
         // Use unified audio context manager instead of direct Tone.js reference
         this.audioContext = window.unifiedAudioManager.getAudioContext();
-        
+
         // Fallback if unified manager not ready yet
         if (!this.audioContext) {
             console.warn('[ORCHESTRAL] ⚠️ Unified manager not ready, using Tone.js fallback');
@@ -3596,7 +3615,7 @@ class OrchestralAudioEngine {
         } else {
             console.log('[ORCHESTRAL] ✅ Using UnifiedAudioContextManager audioContext');
         }
-        
+
         this.instruments = {};
         this.currentInstruments = {
             chord: null,
@@ -5221,7 +5240,7 @@ function init3DFontPreview() {
 
     fontPreviewCube = new THREE.Mesh(geometry, materials);
     fontPreviewScene.add(fontPreviewCube);
-    
+
     // Register with resource manager for memory tracking
     if (window.threeJSResourceManager) {
         window.threeJSResourceManager.registerMesh(fontPreviewCube, 'fontPreviewCube');
@@ -5915,7 +5934,7 @@ function animate() {
         const done = activeTweens[i].tick(now);
         if (done) activeTweens.splice(i, 1);
     }
-    
+
     // Record animation performance
     if (window.performanceMonitor) {
         const animationTime = performance.now() - animationStartTime;
@@ -6098,15 +6117,15 @@ function animate() {
 
     // PERFORMANCE OPTIMIZATION: Track render timing
     const renderStartTime = window.performanceMonitor ? performance.now() : 0;
-    
+
     renderer.render(scene, camera);
-    
+
     // Record rendering performance
     if (window.performanceMonitor) {
         const renderTime = performance.now() - renderStartTime;
         window.performanceMonitor.recordBottleneck('rendering', renderTime);
     }
-    
+
     requestAnimationFrame(animate);
 }
 animate();
@@ -8739,14 +8758,14 @@ function updateQueueStatusUI(message) {
 async function playLockSound() {
     try {
         if (!window.Tone) return;
-        
+
         // Use unified audio manager for initialization
         const result = await window.unifiedAudioManager.ensureAudioContext();
         if (!result.success) {
             console.warn('[LOCK SOUND] Audio not available');
             return;
         }
-        
+
         const t = window.Tone.now();
         const synth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.25, sustain: 0.0, release: 0.05 } }).toDestination();
         synth.triggerAttackRelease('C2', 0.12, t, 0.9);
@@ -9110,16 +9129,16 @@ window.forceShowUI = function () {
 // ============================================
 
 // Global performance testing interface
-window.runPerformanceTest = async function() {
+window.runPerformanceTest = async function () {
     console.log('🚀 Starting ChordCubes 5.0 Performance Validation...');
-    
+
     try {
         const testSuite = new PerformanceValidationSuite();
         const report = await testSuite.runPerformanceTests();
-        
+
         console.log('🏆 Performance test completed!');
         console.log('Report available at:', 'window.performanceValidationReport');
-        
+
         return report;
     } catch (error) {
         console.error('❌ Performance test failed:', error);
@@ -9128,7 +9147,7 @@ window.runPerformanceTest = async function() {
 };
 
 // Quick performance status check
-window.checkPerformanceStatus = function() {
+window.checkPerformanceStatus = function () {
     const status = {
         spatialHash: !!window.spatialHashGrid,
         performanceMonitor: !!window.performanceMonitor,
@@ -9137,7 +9156,7 @@ window.checkPerformanceStatus = function() {
         currentFPS: window.performanceMonitor ? window.performanceMonitor.getReport().currentFPS : 'N/A',
         cubeCount: window.lineup ? window.lineup.length : 'N/A'
     };
-    
+
     console.log('📊 ChordCubes 5.0 Performance Status:', status);
     return status;
 };

@@ -30,7 +30,7 @@ const PRODUCTION_VALIDATION_CONFIG = {
                 'concurrent_users'
             ]
         },
-        
+
         security: {
             name: 'Security Audit',
             weight: 20,
@@ -43,7 +43,7 @@ const PRODUCTION_VALIDATION_CONFIG = {
                 'data_exposure'
             ]
         },
-        
+
         monitoring: {
             name: 'Monitoring Verification',
             weight: 15,
@@ -56,7 +56,7 @@ const PRODUCTION_VALIDATION_CONFIG = {
                 'performance_tracking'
             ]
         },
-        
+
         deployment: {
             name: 'Deployment Pipeline',
             weight: 15,
@@ -69,7 +69,7 @@ const PRODUCTION_VALIDATION_CONFIG = {
                 'asset_optimization'
             ]
         },
-        
+
         integration: {
             name: 'System Integration',
             weight: 15,
@@ -82,7 +82,7 @@ const PRODUCTION_VALIDATION_CONFIG = {
                 'state_management'
             ]
         },
-        
+
         reliability: {
             name: 'Reliability & Stability',
             weight: 10,
@@ -106,14 +106,14 @@ const PRODUCTION_VALIDATION_CONFIG = {
             response_time_p95: { max: 200, weight: 15 }, // ms
             resource_load_time: { max: 2000, weight: 10 } // ms
         },
-        
+
         security: {
             csp_violations: { max: 0, weight: 40 },
             xss_vulnerabilities: { max: 0, weight: 30 },
             input_validation_failures: { max: 0, weight: 20 },
             error_information_leakage: { max: 0, weight: 10 }
         },
-        
+
         reliability: {
             error_rate_under_load: { max: 0.01, weight: 40 }, // 1%
             memory_leak_rate: { max: 10, weight: 30 }, // MB/hour
@@ -157,7 +157,7 @@ class ProductionValidationSuite {
         this.criticalFailures = [];
         this.warnings = [];
         this.isValidationComplete = false;
-        
+
         this.initializeValidation();
     }
 
@@ -166,19 +166,19 @@ class ProductionValidationSuite {
      */
     initializeValidation() {
         console.log('[PROD_VALIDATION] Initializing Production Validation Suite');
-        
+
         // Setup validation environment
         this.setupValidationEnvironment();
-        
+
         // Initialize test runners
         this.initializeTestRunners();
-        
+
         // Setup validation dashboard
         this.setupValidationDashboard();
-        
+
         // Expose global interface
         this.exposeGlobalInterface();
-        
+
         this.logInitialization();
     }
 
@@ -198,11 +198,11 @@ class ProductionValidationSuite {
         ];
 
         this.systemAvailability = new Map();
-        
+
         for (const system of this.requiredSystems) {
             const available = !!window[system];
             this.systemAvailability.set(system, available);
-            
+
             if (!available) {
                 console.warn(`[PROD_VALIDATION] System not available: ${system}`);
             }
@@ -232,11 +232,11 @@ class ProductionValidationSuite {
         }
 
         console.log('[PROD_VALIDATION] 🚀 Starting Full Production Validation');
-        
+
         this.currentValidation = 'full';
         this.validationStartTime = Date.now();
         this.isValidationComplete = false;
-        
+
         // Reset results
         this.validationResults.clear();
         this.categoryScores.clear();
@@ -246,46 +246,46 @@ class ProductionValidationSuite {
         try {
             // Run pre-validation checks
             await this.runPreValidationChecks();
-            
+
             // Run validation by category
             const categories = Object.keys(PRODUCTION_VALIDATION_CONFIG.categories);
-            
+
             for (const category of categories) {
                 console.log(`[PROD_VALIDATION] Running ${category} validation...`);
-                
+
                 const categoryResult = await this.runCategoryValidation(category);
                 this.validationResults.set(category, categoryResult);
-                
+
                 // Calculate category score
                 const score = this.calculateCategoryScore(categoryResult);
                 this.categoryScores.set(category, score);
-                
+
                 console.log(`[PROD_VALIDATION] ${category} completed: ${score}%`);
             }
-            
+
             // Calculate overall score
             this.calculateOverallScore();
-            
+
             // Generate validation report
             const report = this.generateValidationReport();
-            
+
             // Determine production readiness
             const isReady = this.determineProductionReadiness(report);
-            
+
             report.productionReady = isReady;
             report.completionTime = Date.now();
             report.duration = report.completionTime - this.validationStartTime;
-            
+
             console.log(`[PROD_VALIDATION] ✅ Full validation completed in ${report.duration}ms`);
             console.log(`[PROD_VALIDATION] Overall Score: ${this.overallScore}%`);
             console.log(`[PROD_VALIDATION] Production Ready: ${isReady ? 'YES' : 'NO'}`);
-            
+
             this.isValidationComplete = true;
             return report;
-            
+
         } catch (error) {
             console.error('[PROD_VALIDATION] ❌ Validation failed:', error);
-            
+
             return {
                 status: 'failed',
                 error: error.message,
@@ -303,7 +303,7 @@ class ProductionValidationSuite {
      */
     async runPreValidationChecks() {
         console.log('[PROD_VALIDATION] Running pre-validation checks...');
-        
+
         // Check system availability
         const unavailableSystems = [];
         for (const [system, available] of this.systemAvailability) {
@@ -311,21 +311,21 @@ class ProductionValidationSuite {
                 unavailableSystems.push(system);
             }
         }
-        
+
         if (unavailableSystems.length > 0) {
             throw new Error(`Required systems not available: ${unavailableSystems.join(', ')}`);
         }
-        
+
         // Verify Phase 5 systems are operational
         if (window.lineup?.length === 0) {
             console.warn('[PROD_VALIDATION] No cubes in lineup - creating test cubes');
             // Create some test cubes for validation
             await this.createTestEnvironment();
         }
-        
+
         // Wait for system stabilization
         await new Promise(resolve => setTimeout(resolve, 3000));
-        
+
         console.log('[PROD_VALIDATION] Pre-validation checks passed');
     }
 
@@ -336,13 +336,13 @@ class ProductionValidationSuite {
         // This would create cubes for testing
         // For now, simulate the environment setup
         console.log('[PROD_VALIDATION] Setting up test environment...');
-        
+
         // Simulate cube creation
         for (let i = 0; i < 10; i++) {
             // This would call actual cube creation
             await new Promise(resolve => setTimeout(resolve, 50));
         }
-        
+
         console.log('[PROD_VALIDATION] Test environment ready');
     }
 
@@ -352,11 +352,11 @@ class ProductionValidationSuite {
     async runCategoryValidation(category) {
         const config = PRODUCTION_VALIDATION_CONFIG.categories[category];
         const runner = this.testRunners[category];
-        
+
         if (!runner) {
             throw new Error(`No test runner for category: ${category}`);
         }
-        
+
         const results = {
             category,
             startTime: Date.now(),
@@ -366,20 +366,20 @@ class ProductionValidationSuite {
             failed: 0,
             warnings: 0
         };
-        
+
         // Run tests for this category
         for (const testName of config.tests) {
             console.log(`[PROD_VALIDATION] Running test: ${testName}`);
-            
+
             try {
                 const testResult = await runner.runTest(testName);
                 results.tests.set(testName, testResult);
-                
+
                 if (testResult.status === 'passed') {
                     results.passed++;
                 } else if (testResult.status === 'failed') {
                     results.failed++;
-                    
+
                     if (testResult.critical) {
                         this.criticalFailures.push({
                             category,
@@ -395,16 +395,16 @@ class ProductionValidationSuite {
                         message: testResult.message
                     });
                 }
-                
+
             } catch (error) {
                 console.error(`[PROD_VALIDATION] Test ${testName} failed:`, error);
-                
+
                 results.tests.set(testName, {
                     status: 'failed',
                     reason: error.message,
                     critical: true
                 });
-                
+
                 results.failed++;
                 this.criticalFailures.push({
                     category,
@@ -413,10 +413,10 @@ class ProductionValidationSuite {
                 });
             }
         }
-        
+
         results.endTime = Date.now();
         results.duration = results.endTime - results.startTime;
-        
+
         return results;
     }
 
@@ -426,9 +426,9 @@ class ProductionValidationSuite {
     calculateCategoryScore(categoryResult) {
         const total = categoryResult.tests.size;
         if (total === 0) return 0;
-        
+
         let score = 0;
-        
+
         for (const [testName, testResult] of categoryResult.tests) {
             if (testResult.status === 'passed') {
                 score += testResult.score || 100;
@@ -438,7 +438,7 @@ class ProductionValidationSuite {
                 score += 0;
             }
         }
-        
+
         return Math.round(score / total);
     }
 
@@ -448,15 +448,15 @@ class ProductionValidationSuite {
     calculateOverallScore() {
         let weightedScore = 0;
         let totalWeight = 0;
-        
+
         for (const [category, score] of this.categoryScores) {
             const config = PRODUCTION_VALIDATION_CONFIG.categories[category];
             const weight = config.weight;
-            
+
             weightedScore += score * weight;
             totalWeight += weight;
         }
-        
+
         this.overallScore = totalWeight > 0 ? Math.round(weightedScore / totalWeight) : 0;
     }
 
@@ -465,13 +465,13 @@ class ProductionValidationSuite {
      */
     determineProductionReadiness(report) {
         const criteria = PRODUCTION_VALIDATION_CONFIG.readinessCriteria;
-        
+
         // Check overall score
         if (this.overallScore < criteria.overallScoreRequired) {
             console.warn(`[PROD_VALIDATION] Overall score too low: ${this.overallScore}% < ${criteria.overallScoreRequired}%`);
             return false;
         }
-        
+
         // Check category minimums
         for (const [category, minScore] of Object.entries(criteria.categoryMinimums)) {
             const categoryScore = this.categoryScores.get(category) || 0;
@@ -480,7 +480,7 @@ class ProductionValidationSuite {
                 return false;
             }
         }
-        
+
         // Check critical tests
         for (const criticalTest of criteria.criticalTestsRequired) {
             let found = false;
@@ -500,13 +500,13 @@ class ProductionValidationSuite {
                 return false;
             }
         }
-        
+
         // Check for critical failures
         if (this.criticalFailures.length > 0) {
             console.warn(`[PROD_VALIDATION] Critical failures detected: ${this.criticalFailures.length}`);
             return false;
         }
-        
+
         return true;
     }
 
@@ -530,7 +530,7 @@ class ProductionValidationSuite {
                 recommendations: []
             }
         };
-        
+
         // Add detailed category results
         for (const [category, results] of this.validationResults) {
             report.categories[category] = {
@@ -542,10 +542,10 @@ class ProductionValidationSuite {
                 tests: Object.fromEntries(results.tests)
             };
         }
-        
+
         // Generate recommendations
         report.recommendations = this.generateRecommendations();
-        
+
         return report;
     }
 
@@ -554,7 +554,7 @@ class ProductionValidationSuite {
      */
     generateRecommendations() {
         const recommendations = [];
-        
+
         // Performance recommendations
         const perfScore = this.categoryScores.get('performance') || 0;
         if (perfScore < 90) {
@@ -569,7 +569,7 @@ class ProductionValidationSuite {
                 ]
             });
         }
-        
+
         // Security recommendations
         const securityScore = this.categoryScores.get('security') || 0;
         if (securityScore < 95) {
@@ -584,7 +584,7 @@ class ProductionValidationSuite {
                 ]
             });
         }
-        
+
         // Add recommendations based on critical failures
         if (this.criticalFailures.length > 0) {
             recommendations.push({
@@ -594,7 +594,7 @@ class ProductionValidationSuite {
                 actions: this.criticalFailures.map(f => `Fix ${f.test} in ${f.category}: ${f.reason}`)
             });
         }
-        
+
         return recommendations;
     }
 
@@ -604,7 +604,7 @@ class ProductionValidationSuite {
     setupValidationDashboard() {
         // Create validation dashboard UI
         this.createValidationDashboard();
-        
+
         // Setup keyboard shortcuts
         document.addEventListener('keydown', (event) => {
             if (event.ctrlKey && event.shiftKey && event.key === 'V') {
@@ -636,10 +636,10 @@ class ProductionValidationSuite {
             overflow-y: auto;
             display: none;
         `;
-        
+
         document.body.appendChild(dashboard);
         this.dashboard = dashboard;
-        
+
         this.updateDashboard();
     }
 
@@ -648,7 +648,7 @@ class ProductionValidationSuite {
      */
     updateDashboard() {
         if (!this.dashboard) return;
-        
+
         const html = `
             <h3 style="color: #4CAF50; margin-top: 0;">🚀 Production Validation</h3>
             
@@ -713,7 +713,7 @@ class ProductionValidationSuite {
                 Ctrl+Shift+V to toggle dashboard
             </div>
         `;
-        
+
         this.dashboard.innerHTML = html;
     }
 
@@ -724,7 +724,7 @@ class ProductionValidationSuite {
         if (this.dashboard) {
             const isVisible = this.dashboard.style.display !== 'none';
             this.dashboard.style.display = isVisible ? 'none' : 'block';
-            
+
             if (!isVisible) {
                 this.updateDashboard();
             }
@@ -749,17 +749,17 @@ class ProductionValidationSuite {
         console.log('[PROD_VALIDATION] =====================================');
         console.log('[PROD_VALIDATION] 🚀 Production Validation Suite Ready');
         console.log('[PROD_VALIDATION] Available test categories:');
-        
+
         Object.entries(PRODUCTION_VALIDATION_CONFIG.categories).forEach(([name, config]) => {
             console.log(`[PROD_VALIDATION]   - ${config.name} (${config.weight}% weight, ${config.tests.length} tests)`);
         });
-        
+
         console.log('[PROD_VALIDATION] Production readiness criteria:');
         console.log(`[PROD_VALIDATION]   - Overall score: ≥${PRODUCTION_VALIDATION_CONFIG.readinessCriteria.overallScoreRequired}%`);
         console.log('[PROD_VALIDATION]   - All category minimums met');
         console.log('[PROD_VALIDATION]   - No critical test failures');
         console.log('[PROD_VALIDATION] =====================================');
-        
+
         // Update dashboard initially
         setTimeout(() => this.updateDashboard(), 1000);
     }
@@ -771,10 +771,10 @@ class ProductionValidationSuite {
         if (this.dashboard) {
             this.dashboard.remove();
         }
-        
+
         this.validationResults.clear();
         this.categoryScores.clear();
-        
+
         console.log('[PROD_VALIDATION] Production validation suite destroyed');
     }
 }
@@ -802,13 +802,13 @@ class PerformanceValidationRunner {
 
     async testFPSUnderLoad() {
         console.log('[PERF_TEST] Testing FPS under load...');
-        
+
         // Run stress test to check FPS with high cube count
         if (window.loadTestingSuite) {
             const stressTest = await window.loadTestingSuite.runLoadTest('stress');
             const avgFPS = stressTest.analysis?.performance?.averageFPS || 0;
             const minFPS = stressTest.analysis?.performance?.minimumFPS || 0;
-            
+
             if (avgFPS >= 60 && minFPS >= 45) {
                 return {
                     status: 'passed',
@@ -833,7 +833,7 @@ class PerformanceValidationRunner {
         } else {
             // Fallback performance check
             const fps = window.performanceMonitor?.getReport()?.currentFPS || 0;
-            return fps >= 60 ? 
+            return fps >= 60 ?
                 { status: 'passed', score: 100, metrics: { fps } } :
                 { status: 'failed', critical: true, reason: `FPS too low: ${fps}` };
         }
@@ -841,7 +841,7 @@ class PerformanceValidationRunner {
 
     async testMemoryStability() {
         console.log('[PERF_TEST] Testing memory stability...');
-        
+
         // Monitor memory over time
         const memoryReadings = [];
         for (let i = 0; i < 10; i++) {
@@ -850,7 +850,7 @@ class PerformanceValidationRunner {
             }
             await new Promise(resolve => setTimeout(resolve, 1000));
         }
-        
+
         if (memoryReadings.length === 0) {
             return {
                 status: 'warning',
@@ -858,10 +858,10 @@ class PerformanceValidationRunner {
                 message: 'Memory API not available for detailed analysis'
             };
         }
-        
+
         const avgMemory = memoryReadings.reduce((a, b) => a + b, 0) / memoryReadings.length;
         const memoryMB = avgMemory / (1024 * 1024);
-        
+
         if (memoryMB <= 600) {
             return {
                 status: 'passed',
@@ -880,25 +880,25 @@ class PerformanceValidationRunner {
 
     async testResponseTime() {
         console.log('[PERF_TEST] Testing response time...');
-        
+
         // Measure response times for various operations
         const responseTimes = [];
-        
+
         for (let i = 0; i < 5; i++) {
             const startTime = performance.now();
-            
+
             // Simulate user interaction
             const event = new MouseEvent('click', { bubbles: true });
             document.dispatchEvent(event);
-            
+
             await new Promise(resolve => setTimeout(resolve, 10));
-            
+
             const endTime = performance.now();
             responseTimes.push(endTime - startTime);
         }
-        
+
         const avgResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length;
-        
+
         if (avgResponseTime <= 200) {
             return {
                 status: 'passed',
@@ -931,17 +931,17 @@ class PerformanceValidationRunner {
         // Test concurrent user simulation
         if (window.loadTestingSuite) {
             const baselineTest = await window.loadTestingSuite.runLoadTest('baseline');
-            const score = baselineTest.analysis?.grade === 'excellent' ? 100 : 
-                         baselineTest.analysis?.grade === 'good' ? 85 :
-                         baselineTest.analysis?.grade === 'acceptable' ? 70 : 50;
-            
+            const score = baselineTest.analysis?.grade === 'excellent' ? 100 :
+                baselineTest.analysis?.grade === 'good' ? 85 :
+                    baselineTest.analysis?.grade === 'acceptable' ? 70 : 50;
+
             return {
                 status: score >= 70 ? 'passed' : 'failed',
                 score,
                 message: `Concurrent user handling: ${baselineTest.analysis?.grade || 'unknown'}`
             };
         }
-        
+
         return { status: 'passed', score: 100, message: 'Concurrent user test completed' };
     }
 }
@@ -969,17 +969,17 @@ class SecurityValidationRunner {
 
     async testCSPValidation() {
         console.log('[SECURITY_TEST] Testing CSP validation...');
-        
+
         // Check if CSP is properly configured
         const cspMeta = document.querySelector('meta[http-equiv="Content-Security-Policy"]');
-        
+
         if (cspMeta && cspMeta.content) {
             const csp = cspMeta.content;
-            
+
             // Check for required directives
             const requiredDirectives = ['default-src', 'script-src', 'style-src'];
             const hasRequired = requiredDirectives.every(directive => csp.includes(directive));
-            
+
             if (hasRequired) {
                 return {
                     status: 'passed',
@@ -1004,7 +1004,7 @@ class SecurityValidationRunner {
 
     async testXSSProtection() {
         console.log('[SECURITY_TEST] Testing XSS protection...');
-        
+
         // Test input sanitization
         const testInputs = [
             '<script>alert("xss")</script>',
@@ -1012,22 +1012,22 @@ class SecurityValidationRunner {
             '<img src="x" onerror="alert(1)">',
             'data:text/html,<script>alert(1)</script>'
         ];
-        
+
         let vulnerabilities = 0;
-        
+
         for (const maliciousInput of testInputs) {
             try {
                 // Test if input validation catches malicious content
                 const event = new CustomEvent('input', {
                     detail: { value: maliciousInput }
                 });
-                
+
                 const testInput = document.createElement('input');
                 testInput.value = maliciousInput;
-                
+
                 const inputEvent = new Event('input', { bubbles: true });
                 testInput.dispatchEvent(inputEvent);
-                
+
                 // Check if the malicious content was sanitized
                 if (testInput.value === maliciousInput) {
                     vulnerabilities++;
@@ -1036,7 +1036,7 @@ class SecurityValidationRunner {
                 // Error handling prevents XSS - good
             }
         }
-        
+
         if (vulnerabilities === 0) {
             return {
                 status: 'passed',
@@ -1106,24 +1106,24 @@ class ReliabilityValidationRunner {
 // Global production validation utilities
 const ProductionValidation = {
     suite: null,
-    
+
     initialize() {
         if (!this.suite) {
             this.suite = new ProductionValidationSuite();
-            
+
             // Global utilities
             window.runProductionValidation = () => this.suite.runFullValidation();
             window.getProductionReadiness = () => this.suite.determineProductionReadiness();
             window.showValidationDashboard = () => this.suite.toggleValidationDashboard();
-            
+
             console.log('🚀 Production Validation Suite ready!');
         }
         return this.suite;
     },
-    
+
     async validateProductionReadiness() {
         const report = await this.suite.runFullValidation();
-        
+
         if (report.productionReady) {
             console.log('🎉 PRODUCTION DEPLOYMENT APPROVED!');
             console.log(`Overall Score: ${report.overallScore}%`);
@@ -1132,7 +1132,7 @@ const ProductionValidation = {
             console.warn('❌ Production deployment blocked');
             console.warn('Validation failures must be resolved before deployment');
         }
-        
+
         return report;
     }
 };
@@ -1143,14 +1143,14 @@ if (typeof window !== 'undefined') {
         // Wait for prerequisite systems
         const requiredSystems = ['performanceMonitor', 'productionEnvironment'];
         const allReady = requiredSystems.every(system => window[system]);
-        
+
         if (allReady) {
             ProductionValidation.initialize();
         } else {
             setTimeout(initializeProductionValidation, 5000);
         }
     };
-    
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initializeProductionValidation);
     } else {

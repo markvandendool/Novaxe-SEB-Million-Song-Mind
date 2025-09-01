@@ -2,7 +2,8 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import path from 'path';
 import fs from 'fs';
-import { componentTagger } from 'lovable-tagger';
+// Temporarily disable lovable-tagger to fix ESM import issue
+// import { componentTagger } from 'lovable-tagger';
 
 // Dev-only logging middleware: POST /__log → append JSONL to .logs/app.log
 function loggingMiddleware() {
@@ -62,7 +63,7 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     loggingMiddleware(),
-    mode === 'development' && componentTagger(),
+    // Temporarily disabled: mode === 'development' && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
