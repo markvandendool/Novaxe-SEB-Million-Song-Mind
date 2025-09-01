@@ -43,10 +43,20 @@ class MusicalStaves3D {
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow available:', !!window.VF);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Scene available:', !!this.scene);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Camera available:', !!this.camera);
-        
-        if (!window.VF) {
-            console.error('[MUSICAL STAVES 3D] ❌ VexFlow not loaded');
+
+        // Check for VexFlow - 4.x exposes as window.Vex.Flow
+        const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
+        if (!VF) {
+            console.error('[MUSICAL STAVES 3D] ❌ VexFlow not loaded. Checked window.VF and window.Vex.Flow');
+            console.error('[MUSICAL STAVES 3D] ❌ Available:', { VF: !!window.VF, Vex: !!window.Vex });
             return;
+        }
+        
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow available:', { VF: !!VF, source: window.VF ? 'window.VF' : 'window.Vex.Flow' });
+        
+        // Ensure VF is available globally
+        if (!window.VF && VF) {
+            window.VF = VF;
         }
 
         // Clear existing staves
@@ -87,13 +97,14 @@ class MusicalStaves3D {
      */
     createSingleStaff(position, clef, title) {
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: createSingleStaff called for', clef, 'at position', position);
-        
+
         // MASSIVE canvas for crisp quality at huge scale
         const canvas = document.createElement('canvas');
         canvas.width = 2048;  // Much bigger for crisp rendering
         canvas.height = 512;  // Proportional height
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Canvas created:', canvas.width + 'x' + canvas.height);
 
+        const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
         const renderer = new VF.Renderer(canvas, VF.Renderer.Backends.CANVAS);
         const context = renderer.getContext();
         context.setFont('Arial', 12);

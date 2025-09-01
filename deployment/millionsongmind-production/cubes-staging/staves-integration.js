@@ -26,15 +26,23 @@ function initializeStavesIntegration() {
 
     console.log('[STAVES INTEGRATION] Initializing...');
 
-    // Wait for dependencies
-    if (!window.scene || !window.camera || !window.VF) {
+        // Wait for dependencies - VexFlow 4.x exposes as window.Vex, not window.VF
+    const VF = window.Vex ? window.Vex.Flow : null;
+    if (!window.scene || !window.camera || !VF) {
         console.log('[STAVES INTEGRATION] Missing dependencies - will NOT retry automatically to prevent infinite loop');
         console.log('[STAVES INTEGRATION] Dependencies status:', {
             scene: !!window.scene,
-            camera: !!window.camera,
-            VF: !!window.VF
+            camera: !!window.camera, 
+            VF: !!VF,
+            Vex: !!window.Vex
         });
         return;
+    }
+    
+    // Expose VF globally for compatibility
+    if (!window.VF && VF) {
+        window.VF = VF;
+        console.log('[STAVES INTEGRATION] 🎼 VERBOSE: VexFlow exposed as window.VF for compatibility');
     }
 
     try {
@@ -62,7 +70,7 @@ function initializeStavesIntegration() {
  */
 function setupStavesControls() {
     console.log('[STAVES INTEGRATION] 🎼 VERBOSE: setupStavesControls called');
-    
+
     const showBtn = document.getElementById('show-staves');
     const hideBtn = document.getElementById('hide-staves');
     const testBtn = document.getElementById('test-progression');
@@ -109,7 +117,7 @@ function setupStavesControls() {
         });
         console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Test button listener attached');
     }
-    
+
     console.log('[STAVES INTEGRATION] 🎼 VERBOSE: setupStavesControls completed');
 }
 
