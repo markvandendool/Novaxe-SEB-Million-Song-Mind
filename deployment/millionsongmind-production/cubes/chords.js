@@ -13,6 +13,7 @@ export const chordSetsC = {
     ],
     applied: [
         { roman: 'I7', letter: 'C7' },
+        { roman: 'i7', letter: 'Cm7' },
         { roman: 'iiiø', letter: 'Eø' },
         { roman: 'II(7)', letter: 'D(7)' },
         { roman: 'II', letter: 'D' },
@@ -69,8 +70,10 @@ export const degreeSets = {
     'v': ['5', 'b7', '2', '4'],
     'bVI': ['b6', '1', 'b3', '5'],
     'bVII': ['b7', '2', '4', 'b6'],
-    'V(7)(b9)': ['5', '7', '2', '4'],
+    'V(7)(b9)': ['5', '7', '2', 'b2'],  // Root, 3rd, 5th, b9th (b2 = b9th)
     'viiº7': ['7', '2', '4', 'b6'],
+    '#iiº': ['#2', '#4', '6', '1'],  // Bass: #2, Melody: #1 3 5 b7
+    '#iº': ['#1', '3', '5', 'b7'],   // Bass: #1, Melody: #1 3 5 b7
 };
 
 export const noteSetsC = {
@@ -94,13 +97,14 @@ export const noteSetsC = {
     '#iiº': ['D#', 'F#', 'A', 'C'],
     'VII': ['B', 'D#', 'F#', 'A#'],
     'i': ['C', 'Eb', 'G', 'Bb'],
+    'i7': ['C', 'Eb', 'G', 'Bb'],
     'iiø': ['D', 'F', 'Ab', 'C'],
     'bIII': ['Eb', 'G', 'Bb', 'D'],
     'iv': ['F', 'Ab', 'C', 'Eb'],
     'v': ['G', 'Bb', 'D', 'F'],
     'bVI': ['Ab', 'C', 'Eb', 'G'],
     'bVII': ['Bb', 'D', 'F', 'Ab'],
-    'V(7)(b9)': ['G', 'B', 'D', 'F'],
+    'V(7)(b9)': ['G', 'B', 'D', 'Ab'],  // Root, 3rd, 5th, b9th (b9th is the distinctive tone)
     'viiº7': ['B', 'D', 'F', 'Ab'],
 };
 

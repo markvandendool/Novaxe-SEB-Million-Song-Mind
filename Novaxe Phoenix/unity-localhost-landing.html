@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unity Landing Page - Local Development</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #667eea 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .header {
+            margin-bottom: 60px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f8f8ff, #e6e6fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .app-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .app-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .app-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .app-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .launch-button {
+            background: linear-gradient(135deg, #00b894, #00a085);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .launch-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 184, 148, 0.4);
+        }
+
+        .status {
+            margin-top: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .status-item {
+            margin: 10px 0;
+            padding: 5px 0;
+        }
+
+        .online {
+            color: #00b894;
+        }
+
+        .starting {
+            color: #fdcb6e;
+        }
+
+        .offline {
+            color: #e17055;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 3rem;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .app-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="logo">🎵 Unity Landing Page</h1>
+            <p class="subtitle">Local Development Environment</p>
+            <p class="tagline">Launch All Applications</p>
+        </div>
+
+        <div class="apps-grid">
+            <div class="app-card">
+                <div class="app-icon">🎹</div>
+                <h2 class="app-title">ObsidianNVX</h2>
+                <p class="app-description">
+                    Angular 20.1.4 musical workstation with advanced composition tools and sophisticated analysis.
+                </p>
+                <button class="launch-button" onclick="launchObsidian()">
+                    🚀 Launch ObsidianNVX
+                </button>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon">🎯</div>
+                <h2 class="app-title">ChordCubes1.0</h2>
+                <p class="app-description">
+                    Three.js interactive chord visualization with real-time 3D rendering and musical analysis.
+                </p>
+                <button class="launch-button" onclick="launchChordCubes()">
+                    🎲 Launch ChordCubes
+                </button>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon">📊</div>
+                <h2 class="app-title">MSM Analytics</h2>
+                <p class="app-description">
+                    Musical intelligence analytics dashboard with comprehensive data visualization.
+                </p>
+                <button class="launch-button" onclick="launchAnalytics()">
+                    📈 Launch Analytics
+                </button>
+            </div>
+
+            <div class="app-card">
+                <div class="app-icon">🎵</div>
+                <h2 class="app-title">MusicViz</h2>
+                <p class="app-description">
+                    Modern React musical interface for composition, chord analysis, and exploration.
+                </p>
+                <button class="launch-button" onclick="launchMusicViz()">
+                    🎼 Launch MusicViz
+                </button>
+            </div>
+        </div>
+
+        <div class="status">
+            <h3>🔥 Application Status</h3>
+            <div class="status-item">
+                <span id="obsidian-status" class="offline">● ObsidianNVX: Offline</span>
+            </div>
+            <div class="status-item">
+                <span id="cubes-status" class="offline">● ChordCubes 2.0: Offline</span>
+            </div>
+            <div class="status-item">
+                <span id="analytics-status" class="offline">● MSM Analytics: Offline</span>
+            </div>
+            <div class="status-item">
+                <span id="musicviz-status" class="offline">● MusicViz: Offline</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function launchObsidian() {
+            updateStatus('obsidian-status', 'starting', 'ObsidianNVX: Starting...');
+            window.open('http://localhost:4200', '_blank');
+            setTimeout(() => {
+                updateStatus('obsidian-status', 'online', 'ObsidianNVX: Online (localhost:4200)');
+            }, 3000);
+        }
+
+        function launchChordCubes() {
+            updateStatus('cubes-status', 'starting', 'ChordCubes 2.0: Starting...');
+            window.open('http://localhost:8080', '_blank');
+            setTimeout(() => {
+                updateStatus('cubes-status', 'online', 'ChordCubes 2.0: Online (localhost:8080)');
+            }, 2000);
+        }
+
+        function launchAnalytics() {
+            updateStatus('analytics-status', 'starting', 'MSM Analytics: Starting...');
+            window.open('http://localhost:8091', '_blank');
+            setTimeout(() => {
+                updateStatus('analytics-status', 'online', 'MSM Analytics: Online (localhost:8091)');
+            }, 2000);
+        }
+
+        function launchMusicViz() {
+            updateStatus('musicviz-status', 'starting', 'MusicViz: Starting...');
+            window.open('http://localhost:8091', '_blank');
+            setTimeout(() => {
+                updateStatus('musicviz-status', 'online', 'MusicViz: Online (localhost:8091)');
+            }, 3000);
+        }
+
+        function updateStatus(elementId, className, text) {
+            const element = document.getElementById(elementId);
+            element.className = className;
+            element.textContent = '● ' + text;
+        }
+
+        // Check if applications are running
+        function checkApplications() {
+            // This would normally make actual HTTP requests to check if apps are running
+            // For now, we'll just show offline status
+            console.log('Checking application status...');
+        }
+
+        // Run status check on load
+        checkApplications();
+    </script>
+</body>
+
+</html>
