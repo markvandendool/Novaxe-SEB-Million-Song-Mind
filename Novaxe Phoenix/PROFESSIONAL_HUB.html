@@ -161,15 +161,26 @@
             font-size: 1rem;
         }
 
-        .live { color: #2ecc71; font-weight: 600; }
-        .deployed { color: #3498db; font-weight: 600; }
-        .pending { color: #f39c12; }
+        .live {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+
+        .deployed {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .pending {
+            color: #f39c12;
+        }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -177,17 +188,28 @@
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         @media (max-width: 768px) {
-            .logo { font-size: 3rem; }
+            .logo {
+                font-size: 3rem;
+            }
+
             .apps-grid {
                 grid-template-columns: 1fr;
                 gap: 25px;
             }
-            .app-card { padding: 25px; }
+
+            .app-card {
+                padding: 25px;
+            }
         }
     </style>
 </head>
@@ -295,7 +317,7 @@
         function launchNovaxe() {
             alert('🎹 Launching Novaxe Angular 20 Production...
 
-Professional-grade music theory platform.');
+Professional - grade music theory platform.');
             window.open('http://localhost:4200', '_blank');
         }
 
@@ -323,14 +345,14 @@ Interactive chord chart system.');
         function launchSalesFunnel() {
             alert('💰 Launching Sales Funnel Production...
 
-Lovable-built marketing automation.');
+Lovable - built marketing automation.');
             window.open('https://sound-sale-forge.com', '_blank');
         }
 
         function launchUltimate() {
             alert('� Launching Ultimate Mobile Production...
 
-Cross-platform music ecosystem.');
+Cross - platform music ecosystem.');
             window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
         }
     </script>

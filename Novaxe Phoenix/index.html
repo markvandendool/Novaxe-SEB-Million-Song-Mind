@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🔥 NOVAXE PHOENIX - Hub Selection</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #2c3e50 100%);
@@ -130,28 +135,46 @@
         }
 
         @keyframes fadeInUp {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         @media (max-width: 768px) {
-            .logo { font-size: 4rem; }
-            .hub-selection { grid-template-columns: 1fr; gap: 30px; }
-            .hub-card { padding: 30px; }
+            .logo {
+                font-size: 4rem;
+            }
+
+            .hub-selection {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .hub-card {
+                padding: 30px;
+            }
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1 class="logo">🔥 NOVAXE PHOENIX</h1>
         <p class="subtitle">Choose Your Access Hub</p>
-        
+
         <div class="hub-selection">
             <div class="hub-card staging">
                 <div class="hub-icon">🔵</div>
                 <h2 class="hub-title">STAGING HUB</h2>
                 <p class="hub-description">
-                    Fast access to all development versions, staging environments, and testing platforms. Perfect for development work and quick iteration.
+                    Fast access to all development versions, staging environments, and testing platforms. Perfect for
+                    development work and quick iteration.
                 </p>
                 <a href="STAGING_HUB.html" class="hub-button staging">
                     🚧 Enter Staging Environment
@@ -162,7 +185,8 @@
                 <div class="hub-icon">🟣</div>
                 <h2 class="hub-title">PROFESSIONAL HUB</h2>
                 <p class="hub-description">
-                    Clean access to deployed production versions and live applications. Professional interface for client demonstrations and production use.
+                    Clean access to deployed production versions and live applications. Professional interface for
+                    client demonstrations and production use.
                 </p>
                 <a href="PROFESSIONAL_HUB.html" class="hub-button professional">
                     ✨ Enter Professional Environment
@@ -171,4 +195,5 @@
         </div>
     </div>
 </body>
+
 </html>

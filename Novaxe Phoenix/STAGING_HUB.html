@@ -10,11 +10,14 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-        function launchUltimate() {
-            alert('🚀 Launching Ultimate Mobile App Staging...\n\nCross-platform music ecosystem prototype with iOS/Android/macOS/Windows roadmap.');
-            window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
+
+            function launchUltimate() {
+                alert('🚀 Launching Ultimate Mobile App Staging...\n\nCross-platform music ecosystem prototype with iOS/Android/macOS/Windows roadmap.');
+                window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
+            }
+
+            </script>
         }
-    </script>  }
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -157,15 +160,24 @@
             padding: 5px 0;
         }
 
-        .staging { color: #3498db; }
-        .developing { color: #f39c12; }
-        .broken { color: #e74c3c; }
+        .staging {
+            color: #3498db;
+        }
+
+        .developing {
+            color: #f39c12;
+        }
+
+        .broken {
+            color: #e74c3c;
+        }
 
         @keyframes fadeInUp {
             from {
                 opacity: 0;
                 transform: translateY(30px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -173,17 +185,28 @@
         }
 
         @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
         }
 
         @media (max-width: 768px) {
-            .logo { font-size: 3rem; }
+            .logo {
+                font-size: 3rem;
+            }
+
             .apps-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
             }
-            .app-card { padding: 20px; }
+
+            .app-card {
+                padding: 20px;
+            }
         }
     </style>
 </head>
