@@ -1671,9 +1671,11 @@ function emergencyZoneReset() {
     console.log('[EMERGENCY] ✅ Zone system reset - camera controls restored');
 }
 
-// ZONE SYSTEM DISABLED - Force enable camera controls
+// ZONE SYSTEM COMPLETELY DISABLED - Force enable ALL interactions
 controls.enabled = true;
-console.log('[ZONE BYPASS] 🎯 Camera controls force-enabled - zone system disabled');
+zoneCheckEnabled = false;  // Disable all zone checking
+currentMouseZone = 'cube'; // Force cube interaction mode
+console.log('[ZONE BYPASS] 🎯 ALL INTERACTIONS ENABLED - zone system completely disabled');
 
 // Expose to window for emergency use
 if (typeof window !== 'undefined') {
@@ -2450,7 +2452,8 @@ function onPointerDown(e) {
     dragStartZone = currentMouseZone;
 
     // ZONE-BASED CONTROL: Only process cube interactions if starting in cube zone
-    if (dragStartZone !== 'cube') {
+    // DISABLED - Allow all clicks regardless of zone
+    if (false && dragStartZone !== 'cube') {
         console.log('[ZONE] 🚫 Ignoring click - started in camera zone');
         isDraggingCamera = true; // Enable camera drag continuity
         return; // Let camera controls handle this
@@ -2515,7 +2518,8 @@ function onPointerDown(e) {
 
 function onPointerMove(e) {
     // ZONE-BASED CONTROL: Only process cube dragging if in cube zone
-    if (currentMouseZone !== 'cube' && (pendingObj || dragging)) {
+    // DISABLED - Allow all interactions regardless of zone
+    if (false && currentMouseZone !== 'cube' && (pendingObj || dragging)) {
         console.log('[ZONE] 🚫 Canceling drag - moved to camera zone');
         // Cancel any ongoing drag when leaving cube zone
         dragging = null;
