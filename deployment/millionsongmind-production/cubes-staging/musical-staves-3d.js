@@ -16,12 +16,13 @@ class MusicalStaves3D {
             treble: { x: 0, y: 6.5, z: 8 },  // Treble clef staff
             bass: { x: 0, y: 3.5, z: 8 }     // Bass clef staff  
         };
-        
-        // Voice visual cues
-        this.voiceColors = {
-            voice1: '#FF6B6B',  // Red for first instrument/voice
-            voice2: '#4ECDC4',  // Teal for middle harmonies  
-            voice3: '#45B7D1'   // Blue for bass voice
+
+        // ChordCubes Voice Architecture (NO COLORS - user has sophisticated system)
+        this.voiceStructure = {
+            bass: 1,        // Single bass voice
+            melody: 1,      // Single melody voice (soprano)  
+            middle: 3,      // Minimum 3 middle voices for complete chords
+            minimum: 5      // Total minimum voices when locked
         };
 
         console.log('[MUSICAL STAVES 3D] Initialized');
@@ -154,7 +155,7 @@ class MusicalStaves3D {
 
             if (midiNotes && midiNotes.length > 0) {
                 console.log(`[MUSICAL STAVES 3D] Processing ${midiNotes.length}-note harmony for chord ${index + 1}`);
-                
+
                 // Sort notes by pitch for proper voice leading
                 const sortedNotes = midiNotes.sort((a, b) => a.midi - b.midi);
                 const middleC = 60; // MIDI note 60 is middle C4
@@ -186,7 +187,7 @@ class MusicalStaves3D {
         console.log('[MUSICAL STAVES 3D] Piano staves distribution:', pianoStaves);
         return pianoStaves;
     }
-    
+
     /**
      * Get voice color for visual distinction in piano staves
      */

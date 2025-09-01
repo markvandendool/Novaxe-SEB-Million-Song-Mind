@@ -1259,7 +1259,7 @@ function addEpicTitles() {
         scene.add(bgTitleMesh);
     }
     if (!melodyMesh) {
-        const tex = makeTitleTexture(['MELODY'], { width: 4096, height: 1024, size: 420, weight: 1000 });
+        const tex = makeTitleTexture(['TNXGOD 1.0 MELODY'], { width: 4096, height: 1024, size: 420, weight: 1000 });
         melodyMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
         const geo = new THREE.PlaneGeometry(16, 8);
         melodyMesh = new THREE.Mesh(geo, melodyMat);
@@ -1306,7 +1306,7 @@ function addEpicTitles() {
         uiPickables.push(melodyLockLeft, melodyLockRight);
     }
     if (!bassMesh) {
-        const tex = makeTitleTexture(['BASSLINE'], { width: 4096, height: 1024, size: 420, weight: 1000 });
+        const tex = makeTitleTexture(['TNXGOD 1.0 BASSLINE'], { width: 4096, height: 1024, size: 420, weight: 1000 });
         bassMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
         const geo = new THREE.PlaneGeometry(16, 8);
         bassMesh = new THREE.Mesh(geo, bassMat);
@@ -7693,7 +7693,7 @@ function initializeFontControlSystem() {
                 fontPreview.style.minHeight = 'auto';
                 break;
             case 'title-font':
-                fontPreview.textContent = 'MELODY';
+                fontPreview.textContent = 'TNXGOD 1.0 MELODY';
                 fontPreview.style.background = 'white';
                 fontPreview.style.minHeight = 'auto';
                 break;
