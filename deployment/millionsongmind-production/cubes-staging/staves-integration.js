@@ -20,25 +20,20 @@ function initializeStavesIntegration() {
     if (stavesIntegrationInitialized || window.STAVES_INTEGRATION_PROTECTED) {
         return;
     }
-    
+
     // Set protection immediately
     window.STAVES_INTEGRATION_PROTECTED = true;
 
     console.log('[STAVES INTEGRATION] Initializing...');
 
-    // Wait for dependencies
+        // Wait for dependencies
     if (!window.scene || !window.camera || !window.VF) {
-        // Reset protection since we need to retry
-        window.STAVES_INTEGRATION_PROTECTED = false;
-        
-        // Don't keep retrying if we're already trying to initialize
-        if (!window.stavesInitRetryScheduled) {
-            window.stavesInitRetryScheduled = true;
-            setTimeout(() => {
-                window.stavesInitRetryScheduled = false;
-                initializeStavesIntegration();
-            }, 500);
-        }
+        console.log('[STAVES INTEGRATION] Missing dependencies - will NOT retry automatically to prevent infinite loop');
+        console.log('[STAVES INTEGRATION] Dependencies status:', {
+            scene: !!window.scene,
+            camera: !!window.camera, 
+            VF: !!window.VF
+        });
         return;
     }
 
@@ -218,16 +213,20 @@ function getCurrentProgression() {
     return [];
 }
 
-// Initialize when DOM is ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeStavesIntegration);
-} else {
-    initializeStavesIntegration();
-}
+// SAFE INITIALIZATION: Only initialize once when called manually
+// NO automatic initialization to prevent infinite loops
 
 // Export for global use
 if (typeof window !== 'undefined') {
     window.initializeStavesIntegration = initializeStavesIntegration;
     window.updateStavesBillboard = updateStavesBillboard;
     window.testThreeVoiceProgression = testThreeVoiceProgression;
+    
+    // Initialize safely after a delay when everything is loaded
+    setTimeout(() => {
+        if (!window.STAVES_INTEGRATION_PROTECTED) {
+            console.log('[STAVES INTEGRATION] Safe delayed initialization...');
+            initializeStavesIntegration();
+        }
+    }, 2000);
 }
