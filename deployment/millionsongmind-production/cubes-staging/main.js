@@ -1671,6 +1671,10 @@ function emergencyZoneReset() {
     console.log('[EMERGENCY] ✅ Zone system reset - camera controls restored');
 }
 
+// ZONE SYSTEM DISABLED - Force enable camera controls
+controls.enabled = true;
+console.log('[ZONE BYPASS] 🎯 Camera controls force-enabled - zone system disabled');
+
 // Expose to window for emergency use
 if (typeof window !== 'undefined') {
     window.emergencyZoneReset = emergencyZoneReset;
@@ -1730,7 +1734,7 @@ function updateMouseZone(clientX, clientY) {
 
         if (currentMouseZone === 'cube') {
             // Entering cube zone - disable camera, enable cube interactions
-            controls.enabled = false;
+            // DISABLED: controls.enabled = false;
             renderer.domElement.style.cursor = 'pointer';
             console.log('[ZONE] 🎯 Cube interaction zone - camera locked');
         } else {
@@ -3232,9 +3236,10 @@ renderer.domElement.addEventListener('pointerdown', pokeInteraction);
 renderer.domElement.addEventListener('wheel', pokeInteraction, { passive: true });
 
 // ZONE-BASED MOUSE CONTROL - Track cursor position for camera/cube mode switching
-renderer.domElement.addEventListener('mousemove', (e) => {
-    updateMouseZone(e.clientX, e.clientY);
-});
+// TEMPORARILY DISABLED - Zone system interfering with clicks
+// renderer.domElement.addEventListener('mousemove', (e) => {
+//     updateMouseZone(e.clientX, e.clientY);
+// });
 // Right-click toggles between Melody (above) and Bassline (below) views
 renderer.domElement.addEventListener('contextmenu', (e) => {
     e.preventDefault();

@@ -563,10 +563,10 @@ class MusicalStaves3D {
 
         try {
             console.log(`[MUSICAL STAVES 3D] 🎼 Rendering ${voiceType} notes:`, notes);
-            
+
             // Clear canvas
             staff.context.clearRect(0, 0, staff.canvas.width, staff.canvas.height);
-            
+
             // Create VexFlow renderer
             const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
             const context = renderer.getContext();
@@ -629,7 +629,7 @@ class MusicalStaves3D {
 
         } catch (error) {
             console.error(`[MUSICAL STAVES 3D] ❌ Error rendering ${voiceType} notes:`, error);
-            
+
             // Fallback: Show error message
             const context = staff.context;
             context.fillStyle = '#FF0000';
@@ -642,16 +642,16 @@ class MusicalStaves3D {
      */
     convertToVexFlowPitch(pitchString) {
         if (!pitchString) return 'C/4';
-        
+
         // If already in VexFlow format (e.g., "C/4"), return as-is
         if (pitchString.includes('/')) return pitchString;
-        
+
         // Convert from formats like "C4", "D#3", etc.
         const match = pitchString.match(/([A-G][#b]?)(\d+)/);
         if (match) {
             return `${match[1]}/${match[2]}`;
         }
-        
+
         return 'C/4'; // Fallback
     }
 }
