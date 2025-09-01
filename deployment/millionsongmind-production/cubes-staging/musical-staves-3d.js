@@ -11,10 +11,10 @@ class MusicalStaves3D {
         this.notation = [];
         this.isVisible = false;
 
-        // MASSIVE piano staff positioning - same scale as MELODY/BASSLINE titles (16x8)
+        // ACCESSIBLE piano staff positioning - at eye level with cubes  
         this.positions = {
-            treble: { x: 0, y: 8, z: 4 },    // Treble clef staff - FLOATING ABOVE melody area
-            bass: { x: 0, y: 4, z: 4 }       // Bass clef staff - FLOATING ABOVE bass area
+            treble: { x: 0, y: 2, z: 2 },    // Treble clef staff - EYE LEVEL above cubes
+            bass: { x: 0, y: 0.5, z: 2 }     // Bass clef staff - SLIGHTLY above ground level
         };
 
         // MASSIVE scale to match Million Song Mind title system
@@ -111,9 +111,12 @@ class MusicalStaves3D {
         context.setFont('Arial', 12);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow renderer and context created');
 
+        // Declare stave outside try block for proper scope
+        let stave = null;
+
         try {
             // Create MASSIVE stave with clef and time signature (scaled for 2048px canvas)
-            const stave = new VF.Stave(20, 100, 1900);  // Much wider stave for the massive canvas
+            stave = new VF.Stave(20, 100, 1900);  // Much wider stave for the massive canvas
             stave.addClef(clef);
             stave.addTimeSignature('4/4');
             stave.addKeySignature('C'); // C Major for now
@@ -149,8 +152,8 @@ class MusicalStaves3D {
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(position.x, position.y, position.z);
-        // Don't look at camera - keep them horizontal like the MELODY/BASS titles
-        mesh.rotation.x = -Math.PI / 4; // Slight angle for better visibility
+        // Don't look at camera - keep them horizontal like the MELODY/BASS titles  
+        mesh.rotation.x = -Math.PI / 8; // Gentle angle for better visibility (22.5 degrees)
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Mesh created and positioned at:', mesh.position);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Mesh rotation:', mesh.rotation);
 
