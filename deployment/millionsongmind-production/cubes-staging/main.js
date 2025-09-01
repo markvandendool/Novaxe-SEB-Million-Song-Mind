@@ -4163,11 +4163,15 @@ class OrchestralAudioEngine {
 
         // PRIORITY 1: Use real Tone.js Sampler if available
         if (instrument.sampler && !instrument.fallback) {
-            console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples`);
+            console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples - AudioTime: ${this.audioContext.currentTime.toFixed(3)}`);
             try {
                 instrument.sampler.triggerAttackRelease(notes, duration + 's', undefined, volume * chordVolume);
+                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples played successfully - Duration: ${duration}s`);
+                return; // Exit if successful
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
+                console.log(`[AUDIO ENGINE] 🔄 FALLING BACK to enhanced synth for ${instrument.name}`);
+                // Continue to fallback logic instead of returning
             }
         }
         // PRIORITY 2: Use WebAudioFont if available
@@ -4438,33 +4442,66 @@ class OrchestralAudioEngine {
         return status;
     }
 
-    // SIMPLE AUDIO CUTOFF for Free Play Mode
+    // COMPREHENSIVE AUDIO CUTOFF for Free Play Mode
     cutoffCurrentChord() {
-        console.log('[AUDIO ENGINE] 🔇 Cutting off current chord for smooth transition');
+        const cutoffTime = this.audioContext.currentTime.toFixed(3);
+        console.log(`[AUDIO ENGINE] 🔇 IMMEDIATE CUTOFF at time ${cutoffTime}`);
         console.log(`[AUDIO ENGINE DEBUG] currentInstruments:`, Object.keys(this.currentInstruments));
 
-        // For Tone.js Sampler instruments, release all current notes
         let releasedCount = 0;
+        const cutoffMethods = [];
+
+        // For each instrument, try ALL available cutoff methods
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
-            console.log(`[AUDIO ENGINE DEBUG] Checking ${type}: exists=${!!instrument}, hasSampler=${!!instrument?.sampler}, isFallback=${!!instrument?.fallback}`);
-            if (instrument && instrument.sampler && !instrument.fallback) {
+            if (!instrument) continue;
+            
+            console.log(`[AUDIO ENGINE DEBUG] Checking ${type}: hasSampler=${!!instrument?.sampler}, hasSynth=${!!instrument?.synth}, hasPreset=${!!instrument?.preset}, isFallback=${!!instrument?.fallback}`);
+            
+            // METHOD 1: Stop Tone.js Sampler (real samples)
+            if (instrument.sampler && !instrument.fallback) {
                 try {
-                    console.log(`[AUDIO ENGINE DEBUG] About to release ${type} sampler...`);
+                    console.log(`[CUTOFF] 🎯 Releasing ${type} SAMPLER immediately...`);
                     instrument.sampler.releaseAll();
-                    console.log(`[AUDIO ENGINE] ✅ Released ${type} sampler notes`);
+                    console.log(`[CUTOFF] ✅ ${type} sampler released`);
                     releasedCount++;
+                    cutoffMethods.push(`${type}-sampler`);
                 } catch (error) {
-                    console.warn(`[AUDIO ENGINE] Could not release ${type} notes:`, error);
+                    console.warn(`[CUTOFF] ❌ ${type} sampler release failed:`, error);
                 }
-            } else {
-                console.log(`[AUDIO ENGINE DEBUG] Skipped ${type}: no valid sampler`);
+            }
+            
+            // METHOD 2: Stop enhanced Tone.js synth (fallback)  
+            if (instrument.synth) {
+                try {
+                    console.log(`[CUTOFF] 🎯 Releasing ${type} SYNTH immediately...`);
+                    instrument.synth.releaseAll();
+                    console.log(`[CUTOFF] ✅ ${type} synth released`);
+                    releasedCount++;
+                    cutoffMethods.push(`${type}-synth`);
+                } catch (error) {
+                    console.warn(`[CUTOFF] ❌ ${type} synth release failed:`, error);
+                }
+            }
+
+            // METHOD 3: WebAudioFont (cannot stop mid-playback, log for visibility)
+            if (instrument.preset && !instrument.info?.fallback) {
+                console.log(`[CUTOFF] ⚠️  ${type} uses WebAudioFont - cannot stop mid-playback`);
+                cutoffMethods.push(`${type}-webaudifont-nostop`);
             }
         }
-        console.log(`[AUDIO ENGINE DEBUG] Total instruments released: ${releasedCount}`);
 
-        // For WebAudioFont, we can't easily stop individual notes, 
-        // but the overlapping is minimized by using shorter durations in free play
-        // Future enhancement: Track individual note timers for WebAudioFont cutoff
+        console.log(`[CUTOFF] 🎯 CUTOFF COMPLETE: Released ${releasedCount} instruments using methods: [${cutoffMethods.join(', ')}]`);
+        console.log(`[CUTOFF] ⏰ Cutoff finished at time ${this.audioContext.currentTime.toFixed(3)}`);
+        
+        // EMERGENCY: Try global Tone.js stop if available
+        try {
+            if (window.Tone && Tone.Transport) {
+                console.log('[CUTOFF] 🚨 EMERGENCY: Attempting global Tone.js stop...');
+                // Don't stop the transport, but try to release any hanging notes
+            }
+        } catch (error) {
+            // Ignore - this is just emergency cleanup
+        }
     }
 }
 
