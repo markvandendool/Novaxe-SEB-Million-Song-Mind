@@ -2451,13 +2451,6 @@ function onPointerDown(e) {
     // Track where drag started for continuity
     dragStartZone = currentMouseZone;
 
-    // ZONE-BASED CONTROL: Only process cube interactions if starting in cube zone
-    // DISABLED - Allow all clicks regardless of zone
-    if (false && dragStartZone !== 'cube') {
-        console.log('[ZONE] 🚫 Ignoring click - started in camera zone');
-        isDraggingCamera = true; // Enable camera drag continuity
-        return; // Let camera controls handle this
-    }
 
     // Only honor left-click for selections/drags
     if (typeof e.button === 'number' && e.button !== 0) return;
@@ -2517,15 +2510,6 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
-    // ZONE-BASED CONTROL: Only process cube dragging if in cube zone
-    // DISABLED - Allow all interactions regardless of zone
-    if (false && currentMouseZone !== 'cube' && (pendingObj || dragging)) {
-        console.log('[ZONE] 🚫 Canceling drag - moved to camera zone');
-        // Cancel any ongoing drag when leaving cube zone
-        dragging = null;
-        pendingObj = null;
-        return;
-    }
 
     if (!pendingObj && !dragging) return;
     const rect = renderer.domElement.getBoundingClientRect();
@@ -7355,14 +7339,23 @@ function updateLanePositions() {
 }
 
 function lockInMelody() {
-    if (lineup.length === 0) return;
+    console.log('[LOCK MELODY] 🔍 Function called, lineup length:', lineup.length);
+    if (lineup.length === 0) {
+        console.log('[LOCK MELODY] ❌ No chords in lineup - cannot lock melody');
+        return;
+    }
     // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
     const rotating = lineup.some(c => hasActiveTweenFor(c));
-    if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
+    if (rotating) { 
+        console.log('[LOCK MELODY] ⏳ Waiting for cube rotations to finish...');
+        setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); 
+        return; 
+    }
     // Re-verify each cube's current orientation → rotationIndex from quaternion
     for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
 
     // 🎼 STAVES INTEGRATION: Auto-create staves and draw measures when melody is locked
+    console.log('[LOCK MELODY] 🎼 Starting staves integration...');
     if (window.musicalStaves3D) {
         if (!window.musicalStaves3D.isVisible) {
             console.log('[LOCK MELODY] 🎼 Auto-creating staves for melody lock');
@@ -7370,6 +7363,8 @@ function lockInMelody() {
         }
         console.log('[LOCK MELODY] 🎼 Drawing measures for progression');
         window.musicalStaves3D.drawMeasures(lineup.length);
+    } else {
+        console.log('[LOCK MELODY] ❌ window.musicalStaves3D not available');
     }
 
     // Capture current melody using the freshly verified rotationIndex
@@ -7452,9 +7447,14 @@ function lockInMelody() {
 }
 
 function lockInBass() {
-    if (lineup.length === 0) return;
+    console.log('[LOCK BASS] 🔍 Function called, lineup length:', lineup.length);
+    if (lineup.length === 0) {
+        console.log('[LOCK BASS] ❌ No chords in lineup - cannot lock bass');
+        return;
+    }
 
     // 🎼 STAVES INTEGRATION: Auto-create staves and draw measures when bass is locked
+    console.log('[LOCK BASS] 🎼 Starting staves integration...');
     if (window.musicalStaves3D) {
         if (!window.musicalStaves3D.isVisible) {
             console.log('[LOCK BASS] 🎼 Auto-creating staves for bass lock');
@@ -7462,6 +7462,8 @@ function lockInBass() {
         }
         console.log('[LOCK BASS] 🎼 Drawing measures for progression');
         window.musicalStaves3D.drawMeasures(lineup.length);
+    } else {
+        console.log('[LOCK BASS] ❌ window.musicalStaves3D not available');
     }
 
     lockedBass = [];
