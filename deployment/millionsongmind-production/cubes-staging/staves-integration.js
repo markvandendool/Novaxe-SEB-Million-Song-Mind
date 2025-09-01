@@ -5,11 +5,17 @@
 
 // Global staves instance
 let musicalStaves3D = null;
+let stavesIntegrationInitialized = false;
 
 /**
  * Initialize musical staves integration
  */
 function initializeStavesIntegration() {
+    // Prevent multiple initializations
+    if (stavesIntegrationInitialized) {
+        return;
+    }
+
     console.log('[STAVES INTEGRATION] Initializing...');
 
     // Wait for dependencies
@@ -27,6 +33,9 @@ function initializeStavesIntegration() {
 
         // Hook into chord progression updates
         hookProgressionUpdates();
+
+        // Mark as initialized to prevent multiple runs
+        stavesIntegrationInitialized = true;
 
         console.log('[STAVES INTEGRATION] ✅ Initialized successfully');
 
