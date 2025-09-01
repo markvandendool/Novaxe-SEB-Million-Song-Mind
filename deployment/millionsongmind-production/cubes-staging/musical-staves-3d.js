@@ -13,8 +13,8 @@ class MusicalStaves3D {
 
         // ACCESSIBLE piano staff positioning - at eye level with cubes  
         this.positions = {
-            treble: { x: 0, y: 3, z: -5 },    // Treble clef staff - FURTHER BACK, higher up  
-            bass: { x: 0, y: 1, z: -5 }       // Bass clef staff - FURTHER BACK, above ground
+            treble: { x: 0, y: 3, z: 4 },     // Treble clef staff - IN FRONT of cubes, higher up  
+            bass: { x: 0, y: 1, z: 4 }        // Bass clef staff - IN FRONT of cubes, above ground
         };
 
         // REASONABLE scale - not massive screen-filling
@@ -477,9 +477,7 @@ class MusicalStaves3D {
         if (!VF || !staff.context || !staff.stave) return;
 
         try {
-            // Create renderer with WHITE background for readability (not black screen-filling!)
-            staff.context.fillStyle = '#FFFFFF';
-            staff.context.fillRect(0, 0, staff.canvas.width, staff.canvas.height);
+            // NO BACKGROUND - transparent staves for clean overlay
 
             // VexFlow renderer
             const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
@@ -564,13 +562,13 @@ class MusicalStaves3D {
         try {
             console.log(`[MUSICAL STAVES 3D] 🎼 Rendering ${voiceType} notes:`, notes);
 
-            // Clear canvas
+                        // Clear canvas for transparent background
             staff.context.clearRect(0, 0, staff.canvas.width, staff.canvas.height);
-
-            // Create VexFlow renderer
+            
+            // Create VexFlow renderer with NO background
             const renderer = new VF.Renderer(staff.canvas, VF.Renderer.Backends.CANVAS);
             const context = renderer.getContext();
-            context.setFont('Arial', 10).setBackgroundFillStyle('#FFFFFF');
+            context.setFont('Arial', 10); // No background fill style
 
             // Create stave
             const stave = new VF.Stave(20, 40, staff.canvas.width - 40);
