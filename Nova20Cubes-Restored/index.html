@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>ChordCubes 2.0 - Million Song Mind</title>
+	<title>ChordCubes 2.0 - Million Song Mind - PHASE 1 ACTIVE</title>
 	<link rel="stylesheet" href="./styles.css" />
 	<style>
 		@font-face {
@@ -31,7 +31,7 @@
 			font-family: 'NVXDiamond', Arial, sans-serif;
 			font-size: 2.5rem;
 			font-weight: bold;
-			color: #ffffff;
+			color: #ffff00;
 			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
 			margin: 0;
 			position: relative;
@@ -56,8 +56,8 @@
 <body>
 	<!-- GIANT 2.0 VERSION HEADER -->
 	<div class="version-header">
-		<h1 class="main-title">
-			Million Song Mind
+		<h1 class="main-title" style="color: #ffff00 !important;">
+			Million Song Mind - PHASE 1 🎼
 			<span class="version-badge">2.0</span>
 		</h1>
 	</div>
@@ -180,6 +180,13 @@
 	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
 	<!-- Tonal for voice-leading utilities (mode 2) -->
 	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
+	<!-- PHASE 1: VexFlow for music notation -->
+	<script src="https://unpkg.com/vexflow@4.2.2/build/cjs/vexflow.js"></script>
+	<!-- PHASE 1: MusicXML Core Foundation -->
+	<script src="./musicxml-core.js"></script>
+	<script src="./vexflow-3d.js"></script>
+	<script src="./phase1-demo.js"></script>
+	<script src="./staves-test.js"></script>
 	<script type="module" src="./chords.js?v=1"></script>
 	<script type="module" src="./main.js?v=1"></script>
 </body>

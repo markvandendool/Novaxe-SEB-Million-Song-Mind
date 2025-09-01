@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Drum Machine - Chord Cubes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+
+        #three-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* BULLETPROOF UI CONTAINER */
+        #drum-control-panel {
+            position: fixed !important;
+            top: 20px !important;
+            right: 20px !important;
+            width: 400px !important;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.9)) !important;
+            backdrop-filter: blur(10px);
+            border: 2px solid #00ff00 !important;
+            border-radius: 20px !important;
+            padding: 30px !important;
+            z-index: 2147483647 !important;
+            box-shadow:
+                0 0 50px rgba(0, 255, 0, 0.5),
+                0 10px 40px rgba(0, 0, 0, 0.8),
+                inset 0 0 30px rgba(0, 255, 0, 0.1) !important;
+            transform: translateZ(9999px) !important;
+            pointer-events: auto !important;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), 0 10px 40px rgba(0, 0, 0, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 50px rgba(0, 255, 0, 0.8), 0 10px 40px rgba(0, 0, 0, 0.8);
+            }
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+        }
+
+        .panel-title {
+            color: #00ff00;
+            font-size: 28px;
+            font-weight: bold;
+            margin: 0;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+            flex: 1;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ff0000;
+            box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            animation: pulse-red 2s infinite;
+        }
+
+        .status-indicator.active {
+            background: #00ff00;
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-red {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+            }
+        }
+
+        @keyframes pulse-green {
+
+            0%,
+            100% {
+                box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+            }
+
+            50% {
+                box-shadow: 0 0 20px rgba(0, 255, 0, 1);
+            }
+        }
+
+        /* BPM CONTROL */
+        .control-group {
+            margin-bottom: 25px;
+        }
+
+        .control-label {
+            color: #00ff00;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            display: block;
+            opacity: 0.9;
+        }
+
+        .bpm-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .bpm-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #00ff00 0%, #00ff00 50%, rgba(0, 255, 0, 0.2) 50%);
+            outline: none;
+        }
+
+        .bpm-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #00ff00;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+            transition: all 0.3s;
+        }
+
+        .bpm-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 25px rgba(0, 255, 0, 1);
+        }
+
+        .bpm-display {
+            min-width: 60px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+        }
+
+        /* GENRE SELECTOR */
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .genre-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(0, 100, 0, 0.3), rgba(0, 50, 0, 0.2));
+            border: 1px solid rgba(0, 255, 0, 0.3);
+            border-radius: 10px;
+            color: rgba(0, 255, 0, 0.7);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .genre-btn:hover {
+            background: linear-gradient(135deg, rgba(0, 150, 0, 0.4), rgba(0, 100, 0, 0.3));
+            border-color: rgba(0, 255, 0, 0.6);
+            color: #00ff00;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+        }
+
+        .genre-btn.active {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            border-color: #00ff00;
+            color: #000;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        /* MAIN CONTROLS */
+        .main-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .control-btn {
+            flex: 1;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border: 2px solid;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, #ff0000, #cc0000);
+            border-color: #ff6666;
+            color: white;
+        }
+
+        .play-btn.playing {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            border-color: #66ff66;
+            color: #000;
+            animation: pulse-play 1s infinite;
+        }
+
+        @keyframes pulse-play {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .metronome-btn {
+            background: linear-gradient(135deg, #0066ff, #0044cc);
+            border-color: #6699ff;
+            color: white;
+        }
+
+        .metronome-btn.active {
+            background: linear-gradient(135deg, #ff6600, #cc4400);
+            border-color: #ff9966;
+        }
+
+        /* PATTERN SEQUENCER */
+        .sequencer {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sequencer-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 8px;
+        }
+
+        .sequencer-label {
+            width: 60px;
+            color: rgba(0, 255, 0, 0.7);
+            font-size: 12px;
+            text-align: right;
+            padding-right: 10px;
+            line-height: 30px;
+        }
+
+        .sequencer-steps {
+            display: flex;
+            gap: 4px;
+            flex: 1;
+        }
+
+        .step {
+            flex: 1;
+            height: 30px;
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .step:hover {
+            background: rgba(0, 255, 0, 0.2);
+            border-color: rgba(0, 255, 0, 0.4);
+        }
+
+        .step.active {
+            background: #00ff00;
+            border-color: #00ff00;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+        }
+
+        .step.playing {
+            background: #ffff00 !important;
+            border-color: #ffff00 !important;
+            box-shadow: 0 0 15px rgba(255, 255, 0, 0.8) !important;
+        }
+
+        /* STATUS DISPLAY */
+        .status-display {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid rgba(0, 255, 0, 0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 11px;
+            color: rgba(0, 255, 0, 0.8);
+            font-family: 'Courier New', monospace;
+            line-height: 1.4;
+        }
+
+        .status-line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .status-label {
+            opacity: 0.7;
+        }
+
+        .status-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Three.js Canvas Container -->
+    <div id="three-container"></div>
+
+    <!-- Professional Drum Control Panel -->
+    <div id="drum-control-panel">
+        <div class="panel-header">
+            <h2 class="panel-title">🎵 DRUM MACHINE</h2>
+            <div class="status-indicator" id="status-light"></div>
+        </div>
+
+        <!-- BPM Control -->
+        <div class="control-group">
+            <label class="control-label">Tempo Control</label>
+            <div class="bpm-control">
+                <input type="range" class="bpm-slider" id="bpm-slider" min="60" max="200" value="120">
+                <div class="bpm-display" id="bpm-display">120</div>
+            </div>
+        </div>
+
+        <!-- Genre Selector -->
+        <div class="control-group">
+            <label class="control-label">Music Style</label>
+            <div class="genre-grid">
+                <button class="genre-btn active" data-genre="rock">Rock</button>
+                <button class="genre-btn" data-genre="hiphop">Hip-Hop</button>
+                <button class="genre-btn" data-genre="electronic">Electronic</button>
+                <button class="genre-btn" data-genre="jazz">Jazz</button>
+                <button class="genre-btn" data-genre="latin">Latin</button>
+                <button class="genre-btn" data-genre="funk">Funk</button>
+                <button class="genre-btn" data-genre="country">Country</button>
+                <button class="genre-btn" data-genre="orchestral">Orchestra</button>
+                <button class="genre-btn" data-genre="trap">Trap</button>
+            </div>
+        </div>
+
+        <!-- Main Controls -->
+        <div class="main-controls">
+            <button class="control-btn play-btn" id="drum-toggle">▶ DRUMS OFF</button>
+            <button class="control-btn metronome-btn" id="metronome-toggle">🔔 CLICK OFF</button>
+        </div>
+
+        <!-- Pattern Sequencer -->
+        <div class="sequencer" id="sequencer">
+            <div class="sequencer-row">
+                <div class="sequencer-label">KICK</div>
+                <div class="sequencer-steps" id="kick-steps"></div>
+            </div>
+            <div class="sequencer-row">
+                <div class="sequencer-label">SNARE</div>
+                <div class="sequencer-steps" id="snare-steps"></div>
+            </div>
+            <div class="sequencer-row">
+                <div class="sequencer-label">HI-HAT</div>
+                <div class="sequencer-steps" id="hihat-steps"></div>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="status-display">
+            <div class="status-line">
+                <span class="status-label">Audio:</span>
+                <span class="status-value" id="audio-status">Initializing...</span>
+            </div>
+            <div class="status-line">
+                <span class="status-label">Transport:</span>
+                <span class="status-value" id="transport-status">Ready</span>
+            </div>
+            <div class="status-line">
+                <span class="status-label">Kit Loaded:</span>
+                <span class="status-value" id="kit-status">Rock</span>
+            </div>
+            <div class="status-line">
+                <span class="status-label">CPU:</span>
+                <span class="status-value" id="cpu-status">0%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Tone.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.min.js"></script>
+
+    <script>
+        // Professional Drum Machine Implementation
+        class ProfessionalDrumMachine {
+            constructor() {
+                this.isPlaying = false;
+                this.bpm = 120;
+                this.currentGenre = 'rock';
+                this.currentStep = 0;
+                this.sequence = null;
+                this.metronomeOn = false;
+
+                // Drum patterns for different genres
+                this.patterns = {
+                    rock: {
+                        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+                    },
+                    hiphop: {
+                        kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+                    },
+                    electronic: {
+                        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0]
+                    },
+                    jazz: {
+                        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0],
+                        hihat: [1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]
+                    },
+                    latin: {
+                        kick: [1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0],
+                        hihat: [1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1]
+                    },
+                    funk: {
+                        kick: [1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1]
+                    },
+                    country: {
+                        kick: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+                        snare: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0],
+                        hihat: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0]
+                    },
+                    orchestral: {
+                        kick: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                        snare: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                        hihat: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+                    },
+                    trap: {
+                        kick: [1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0],
+                        snare: [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+                        hihat: [1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1]
+                    }
+                };
+
+                this.init();
+            }
+
+            async init() {
+                console.log('[DRUM MACHINE] Initializing...');
+
+                // Create drum sounds using Tone.js synthesis
+                this.kick = new Tone.MembraneSynth({
+                    pitchDecay: 0.05,
+                    octaves: 10,
+                    oscillator: { type: "triangle" },
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.4,
+                        sustain: 0.01,
+                        release: 1.4
+                    }
+                }).toDestination();
+
+                this.snare = new Tone.NoiseSynth({
+                    noise: { type: "white" },
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.2,
+                        sustain: 0
+                    }
+                }).toDestination();
+
+                this.hihat = new Tone.MetalSynth({
+                    frequency: 250,
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.1,
+                        release: 0.01
+                    },
+                    harmonicity: 3.1,
+                    modulationIndex: 16,
+                    octaves: 0.5,
+                    resonance: 4000
+                }).toDestination();
+
+                // Metronome click
+                this.click = new Tone.Synth({
+                    oscillator: { type: "sine" },
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.1,
+                        sustain: 0,
+                        release: 0.1
+                    }
+                }).toDestination();
+
+                // Set initial BPM
+                Tone.Transport.bpm.value = this.bpm;
+
+                // Setup UI
+                this.setupUI();
+                this.createSequencerSteps();
+                this.loadPattern(this.currentGenre);
+
+                // Update status
+                document.getElementById('audio-status').textContent = 'Ready';
+                document.getElementById('transport-status').textContent = 'Stopped';
+
+                console.log('[DRUM MACHINE] Initialized successfully');
+            }
+
+            setupUI() {
+                // BPM Slider
+                const bpmSlider = document.getElementById('bpm-slider');
+                const bpmDisplay = document.getElementById('bpm-display');
+
+                bpmSlider.addEventListener('input', (e) => {
+                    this.bpm = parseInt(e.target.value);
+                    bpmDisplay.textContent = this.bpm;
+                    Tone.Transport.bpm.value = this.bpm;
+
+                    // Update slider gradient
+                    const percent = ((this.bpm - 60) / 140) * 100;
+                    bpmSlider.style.background = `linear-gradient(to right, #00ff00 0%, #00ff00 ${percent}%, rgba(0,255,0,0.2) ${percent}%)`;
+                });
+
+                // Genre Buttons
+                document.querySelectorAll('.genre-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const genre = e.target.dataset.genre;
+                        this.changeGenre(genre);
+                    });
+                });
+
+                // Drum Toggle
+                const drumToggle = document.getElementById('drum-toggle');
+                drumToggle.addEventListener('click', async () => {
+                    await this.toggleDrums();
+                });
+
+                // Metronome Toggle
+                const metronomeToggle = document.getElementById('metronome-toggle');
+                metronomeToggle.addEventListener('click', () => {
+                    this.toggleMetronome();
+                });
+            }
+
+            createSequencerSteps() {
+                const createSteps = (containerId, instrument) => {
+                    const container = document.getElementById(containerId);
+                    for (let i = 0; i < 16; i++) {
+                        const step = document.createElement('div');
+                        step.className = 'step';
+                        step.dataset.step = i;
+                        step.dataset.instrument = instrument;
+
+                        step.addEventListener('click', () => {
+                            this.toggleStep(instrument, i);
+                        });
+
+                        container.appendChild(step);
+                    }
+                };
+
+                createSteps('kick-steps', 'kick');
+                createSteps('snare-steps', 'snare');
+                createSteps('hihat-steps', 'hihat');
+            }
+
+            toggleStep(instrument, stepIndex) {
+                const pattern = this.patterns[this.currentGenre];
+                pattern[instrument][stepIndex] = pattern[instrument][stepIndex] ? 0 : 1;
+                this.updateSequencerUI();
+            }
+
+            changeGenre(genre) {
+                this.currentGenre = genre;
+
+                // Update UI
+                document.querySelectorAll('.genre-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.genre === genre);
+                });
+
+                // Load pattern
+                this.loadPattern(genre);
+
+                // Update status
+                document.getElementById('kit-status').textContent = genre.charAt(0).toUpperCase() + genre.slice(1);
+            }
+
+            loadPattern(genre) {
+                const pattern = this.patterns[genre];
+                this.updateSequencerUI();
+            }
+
+            updateSequencerUI() {
+                const pattern = this.patterns[this.currentGenre];
+
+                ['kick', 'snare', 'hihat'].forEach(instrument => {
+                    const steps = document.querySelectorAll(`[data-instrument="${instrument}"]`);
+                    steps.forEach((step, i) => {
+                        step.classList.toggle('active', pattern[instrument][i] === 1);
+                    });
+                });
+            }
+
+            async toggleDrums() {
+                const drumToggle = document.getElementById('drum-toggle');
+                const statusLight = document.getElementById('status-light');
+
+                if (!this.isPlaying) {
+                    // Start audio context
+                    if (Tone.context.state !== 'running') {
+                        await Tone.start();
+                        console.log('[DRUM MACHINE] Audio context started');
+                    }
+
+                    // Create sequence
+                    this.sequence = new Tone.Sequence((time, step) => {
+                        const pattern = this.patterns[this.currentGenre];
+
+                        // Play sounds
+                        if (pattern.kick[step]) {
+                            this.kick.triggerAttackRelease("C1", "8n", time);
+                        }
+                        if (pattern.snare[step]) {
+                            this.snare.triggerAttackRelease("4n", time);
+                        }
+                        if (pattern.hihat[step]) {
+                            this.hihat.triggerAttackRelease("32n", time, 0.3);
+                        }
+
+                        // Update UI on next tick
+                        Tone.Draw.schedule(() => {
+                            this.updatePlayhead(step);
+                        }, time);
+
+                    }, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], "16n");
+
+                    this.sequence.start(0);
+                    Tone.Transport.start();
+
+                    this.isPlaying = true;
+                    drumToggle.textContent = '⏸ DRUMS ON';
+                    drumToggle.classList.add('playing');
+                    statusLight.classList.add('active');
+                    document.getElementById('transport-status').textContent = 'Playing';
+
+                } else {
+                    // Stop
+                    if (this.sequence) {
+                        this.sequence.stop();
+                        this.sequence.dispose();
+                        this.sequence = null;
+                    }
+                    Tone.Transport.stop();
+
+                    this.isPlaying = false;
+                    drumToggle.textContent = '▶ DRUMS OFF';
+                    drumToggle.classList.remove('playing');
+                    statusLight.classList.remove('active');
+                    document.getElementById('transport-status').textContent = 'Stopped';
+
+                    // Clear playhead
+                    document.querySelectorAll('.step').forEach(step => {
+                        step.classList.remove('playing');
+                    });
+                }
+            }
+
+            toggleMetronome() {
+                const metronomeToggle = document.getElementById('metronome-toggle');
+
+                this.metronomeOn = !this.metronomeOn;
+
+                if (this.metronomeOn) {
+                    // Add metronome to sequence
+                    this.metronomeSequence = new Tone.Loop((time) => {
+                        this.click.triggerAttackRelease("G5", "32n", time, 0.5);
+                    }, "4n").start(0);
+
+                    metronomeToggle.textContent = '🔔 CLICK ON';
+                    metronomeToggle.classList.add('active');
+                } else {
+                    if (this.metronomeSequence) {
+                        this.metronomeSequence.stop();
+                        this.metronomeSequence.dispose();
+                    }
+
+                    metronomeToggle.textContent = '🔔 CLICK OFF';
+                    metronomeToggle.classList.remove('active');
+                }
+            }
+
+            updatePlayhead(step) {
+                // Clear previous playhead
+                document.querySelectorAll('.step').forEach(s => {
+                    s.classList.remove('playing');
+                });
+
+                // Set current playhead
+                document.querySelectorAll(`[data-step="${step}"]`).forEach(s => {
+                    s.classList.add('playing');
+                });
+            }
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('[APP] Starting Professional Drum Machine...');
+            window.drumMachine = new ProfessionalDrumMachine();
+
+            // Fake CPU monitor
+            setInterval(() => {
+                const cpu = Math.random() * 15 + 5;
+                document.getElementById('cpu-status').textContent = cpu.toFixed(1) + '%';
+            }, 2000);
+        });
+
+        // Handle visibility
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && window.drumMachine?.isPlaying) {
+                Tone.Transport.pause();
+            } else if (!document.hidden && window.drumMachine?.isPlaying) {
+                Tone.Transport.start();
+            }
+        });
+    </script>
+</body>
+
+</html>

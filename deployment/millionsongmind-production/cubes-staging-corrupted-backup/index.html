@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ChordCubes 2.0 - Million Song Mind</title>
+	<link rel="stylesheet" href="./styles.css" />
+	<style>
+		@font-face {
+			font-family: 'NVXDiamond';
+			src:
+				url('./fonts/NVX Diamond Font.otf') format('opentype'),
+				url('./fonts/NVX%20Diamond%20Font.otf') format('opentype');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+
+		/* GIANT 2.0 Version Display */
+		.version-header {
+			position: absolute;
+			top: 10px;
+			left: 50%;
+			transform: translateX(-50%);
+			z-index: 1000;
+			text-align: center;
+		}
+
+		.main-title {
+			font-family: 'NVXDiamond', Arial, sans-serif;
+			font-size: 2.5rem;
+			font-weight: bold;
+			color: #ffffff;
+			text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+			margin: 0;
+			position: relative;
+		}
+
+		.version-badge {
+			font-family: 'NVXDiamond', Arial, sans-serif;
+			font-size: 4rem;
+			font-weight: 900;
+			color: #00d4ff;
+			text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.9);
+			position: absolute;
+			top: -10px;
+			right: -120px;
+			transform: rotate(-15deg);
+			opacity: 0.9;
+		}
+
+		/* PROFESSIONAL DRUM MACHINE STYLES */
+		#drum-control-panel {
+			position: fixed !important;
+			top: 20px !important;
+			right: 20px !important;
+			width: 400px !important;
+			background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(20, 20, 20, 0.9)) !important;
+			backdrop-filter: blur(10px);
+			border: 2px solid #00ff00 !important;
+			border-radius: 20px !important;
+			padding: 30px !important;
+			z-index: 2147483647 !important;
+			box-shadow:
+				0 0 50px rgba(0, 255, 0, 0.5),
+				0 10px 40px rgba(0, 0, 0, 0.8),
+				inset 0 0 30px rgba(0, 255, 0, 0.1) !important;
+			transform: translateZ(9999px) !important;
+			pointer-events: auto !important;
+			animation: glow 3s ease-in-out infinite;
+		}
+
+		@keyframes glow {
+
+			0%,
+			100% {
+				box-shadow: 0 0 30px rgba(0, 255, 0, 0.5), 0 10px 40px rgba(0, 0, 0, 0.8);
+			}
+
+			50% {
+				box-shadow: 0 0 50px rgba(0, 255, 0, 0.8), 0 10px 40px rgba(0, 0, 0, 0.8);
+			}
+		}
+
+		.panel-header {
+			display: flex;
+			align-items: center;
+			margin-bottom: 25px;
+			padding-bottom: 20px;
+			border-bottom: 2px solid rgba(0, 255, 0, 0.3);
+		}
+
+		.panel-title {
+			color: #00ff00;
+			font-size: 28px;
+			font-weight: bold;
+			margin: 0;
+			text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+			flex: 1;
+		}
+
+		.status-indicator {
+			width: 12px;
+			height: 12px;
+			border-radius: 50%;
+			background: #ff0000;
+			box-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+			animation: pulse-red 2s infinite;
+		}
+
+		.status-indicator.active {
+			background: #00ff00;
+			animation: pulse-green 2s infinite;
+		}
+
+		@keyframes pulse-red {
+
+			0%,
+			100% {
+				box-shadow: 0 0 5px rgba(255, 0, 0, 0.8);
+			}
+
+			50% {
+				box-shadow: 0 0 20px rgba(255, 0, 0, 1);
+			}
+		}
+
+		@keyframes pulse-green {
+
+			0%,
+			100% {
+				box-shadow: 0 0 5px rgba(0, 255, 0, 0.8);
+			}
+
+			50% {
+				box-shadow: 0 0 20px rgba(0, 255, 0, 1);
+			}
+		}
+
+		/* BPM CONTROL */
+		.control-group {
+			margin-bottom: 25px;
+		}
+
+		.control-label {
+			color: #00ff00;
+			font-size: 14px;
+			text-transform: uppercase;
+			letter-spacing: 2px;
+			margin-bottom: 10px;
+			display: block;
+			opacity: 0.9;
+		}
+
+		.bpm-control {
+			display: flex;
+			align-items: center;
+			gap: 15px;
+		}
+
+		.bpm-slider {
+			flex: 1;
+			-webkit-appearance: none;
+			height: 8px;
+			border-radius: 5px;
+			background: linear-gradient(to right, #00ff00 0%, #00ff00 50%, rgba(0, 255, 0, 0.2) 50%);
+			outline: none;
+		}
+
+		.bpm-slider::-webkit-slider-thumb {
+			-webkit-appearance: none;
+			appearance: none;
+			width: 24px;
+			height: 24px;
+			border-radius: 50%;
+			background: #00ff00;
+			cursor: pointer;
+			box-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+			transition: all 0.3s;
+		}
+
+		.bpm-slider::-webkit-slider-thumb:hover {
+			transform: scale(1.2);
+			box-shadow: 0 0 25px rgba(0, 255, 0, 1);
+		}
+
+		.bpm-display {
+			min-width: 60px;
+			text-align: center;
+			font-size: 24px;
+			font-weight: bold;
+			color: #00ff00;
+			text-shadow: 0 0 10px rgba(0, 255, 0, 0.8);
+		}
+
+		/* GENRE SELECTOR */
+		.genre-grid {
+			display: grid;
+			grid-template-columns: repeat(3, 1fr);
+			gap: 10px;
+			margin-bottom: 25px;
+		}
+
+		.genre-btn {
+			padding: 12px;
+			background: linear-gradient(135deg, rgba(0, 100, 0, 0.3), rgba(0, 50, 0, 0.2));
+			border: 1px solid rgba(0, 255, 0, 0.3);
+			border-radius: 10px;
+			color: rgba(0, 255, 0, 0.7);
+			font-size: 12px;
+			cursor: pointer;
+			transition: all 0.3s;
+			text-transform: uppercase;
+			font-weight: bold;
+			letter-spacing: 1px;
+		}
+
+		.genre-btn:hover {
+			background: linear-gradient(135deg, rgba(0, 150, 0, 0.4), rgba(0, 100, 0, 0.3));
+			border-color: rgba(0, 255, 0, 0.6);
+			color: #00ff00;
+			transform: translateY(-2px);
+			box-shadow: 0 5px 15px rgba(0, 255, 0, 0.3);
+		}
+
+		.genre-btn.active {
+			background: linear-gradient(135deg, #00ff00, #00cc00);
+			border-color: #00ff00;
+			color: #000;
+			box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+		}
+
+		/* MAIN CONTROLS */
+		.main-controls {
+			display: flex;
+			gap: 15px;
+			margin-bottom: 25px;
+		}
+
+		.control-btn {
+			flex: 1;
+			padding: 20px;
+			font-size: 18px;
+			font-weight: bold;
+			text-transform: uppercase;
+			border: 2px solid;
+			border-radius: 12px;
+			cursor: pointer;
+			transition: all 0.3s;
+			letter-spacing: 2px;
+		}
+
+		.play-btn {
+			background: linear-gradient(135deg, #ff0000, #cc0000);
+			border-color: #ff6666;
+			color: white;
+		}
+
+		.play-btn.playing {
+			background: linear-gradient(135deg, #00ff00, #00cc00);
+			border-color: #66ff66;
+			color: #000;
+			animation: pulse-play 1s infinite;
+		}
+
+		@keyframes pulse-play {
+
+			0%,
+			100% {
+				transform: scale(1);
+			}
+
+			50% {
+				transform: scale(1.05);
+			}
+		}
+
+		.metronome-btn {
+			background: linear-gradient(135deg, #0066ff, #0044cc);
+			border-color: #6699ff;
+			color: white;
+		}
+
+		.metronome-btn.active {
+			background: linear-gradient(135deg, #ff6600, #cc4400);
+			border-color: #ff9966;
+		}
+
+		/* PATTERN SEQUENCER */
+		.sequencer {
+			background: rgba(0, 0, 0, 0.5);
+			border-radius: 10px;
+			padding: 15px;
+			margin-bottom: 20px;
+		}
+
+		.sequencer-row {
+			display: flex;
+			gap: 5px;
+			margin-bottom: 8px;
+		}
+
+		.sequencer-label {
+			width: 60px;
+			color: rgba(0, 255, 0, 0.7);
+			font-size: 12px;
+			text-align: right;
+			padding-right: 10px;
+			line-height: 30px;
+		}
+
+		.sequencer-steps {
+			display: flex;
+			gap: 4px;
+			flex: 1;
+		}
+
+		.step {
+			flex: 1;
+			height: 30px;
+			background: rgba(0, 255, 0, 0.1);
+			border: 1px solid rgba(0, 255, 0, 0.2);
+			border-radius: 4px;
+			cursor: pointer;
+			transition: all 0.2s;
+		}
+
+		.step:hover {
+			background: rgba(0, 255, 0, 0.2);
+			border-color: rgba(0, 255, 0, 0.4);
+		}
+
+		.step.active {
+			background: #00ff00;
+			border-color: #00ff00;
+			box-shadow: 0 0 10px rgba(0, 255, 0, 0.6);
+		}
+
+		.step.playing {
+			background: #ffff00 !important;
+			border-color: #ffff00 !important;
+			box-shadow: 0 0 15px rgba(255, 255, 0, 0.8) !important;
+		}
+
+		/* STATUS DISPLAY */
+		.status-display {
+			background: rgba(0, 0, 0, 0.7);
+			border: 1px solid rgba(0, 255, 0, 0.2);
+			border-radius: 8px;
+			padding: 12px;
+			font-size: 11px;
+			color: rgba(0, 255, 0, 0.8);
+			font-family: 'Courier New', monospace;
+			line-height: 1.4;
+		}
+
+		.status-line {
+			display: flex;
+			justify-content: space-between;
+			margin-bottom: 4px;
+		}
+
+		.status-label {
+			opacity: 0.7;
+		}
+
+		.status-value {
+			color: #00ff00;
+			font-weight: bold;
+		}
+	</style>
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+</head>
+
+<body>
+
+
+	<div id="ui">
+		<div class="row">
+			<label>Key</label>
+			<select id="key-select">
+				<option value="C" selected>C</option>
+				<option value="Db">Db</option>
+				<option value="D">D</option>
+				<option value="Eb">Eb</option>
+				<option value="E">E</option>
+				<option value="F">F</option>
+				<option value="F#">F#</option>
+				<option value="G">G</option>
+				<option value="Ab">Ab</option>
+				<option value="A">A</option>
+				<option value="Bb">Bb</option>
+				<option value="B">B</option>
+			</select>
+			<label>Set</label>
+			<select id="set-select">
+				<option value="all" selected>All</option>
+				<option value="major">Major</option>
+				<option value="applied">Applied</option>
+				<option value="minor">Minor</option>
+			</select>
+			<label>Label</label>
+			<select id="label-mode">
+				<option value="roman" selected>Roman</option>
+				<option value="letter">Letter</option>
+			</select>
+			<button id="arrange-btn">Arrange</button>
+			<button id="reset-btn">Reset</button>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="adjust-toggle" /> Adjust shelf
+			</label>
+			<button id="save-map-btn" title="Download shelf_map.json">Save Map</button>
+			<label class="file-btn">
+				Load Map
+				<input type="file" id="load-map-input" accept="application/json" hidden />
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="with-7th" /> With 7th
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="bass-enabled" checked /> Bass
+			</label>
+			<label style="margin-left:8px;">
+				<input type="checkbox" id="melody-enabled" /> Melody
+			</label>
+			<label style="margin-left:12px;">Chord Inst</label>
+			<select id="chord-inst">
+				<option value="string_ensemble_1" selected>Strings (Ensemble)</option>
+				<option value="acoustic_grand_piano">Piano</option>
+				<option value="choir_aahs">Choir</option>
+				<option value="string_ensemble_2">Strings 2</option>
+			</select>
+			<label style="margin-left:12px;">Bass Inst</label>
+			<select id="bass-inst">
+				<option value="contrabass" selected>Contrabass</option>
+				<option value="acoustic_bass">Acoustic Bass</option>
+				<option value="electric_bass_finger">Electric Bass</option>
+				<option value="cello">Cello</option>
+				<option value="synth_bass_1">Synth Bass</option>
+			</select>
+			<label style="margin-left:12px;">Melody Inst</label>
+			<select id="melody-inst">
+				<option value="violin" selected>Violin</option>
+				<option value="flute">Flute</option>
+				<option value="clarinet">Clarinet</option>
+				<option value="trumpet">Trumpet</option>
+				<option value="cello">Cello</option>
+			</select>
+			<label style="margin-left:12px;">Voice Leading</label>
+			<select id="voice-leading-mode">
+				<option value="vl1">Voice leading 1</option>
+				<option value="vl2" selected>Voice leading 2</option>
+			</select>
+			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
+			<label style="margin-left:8px;">Loops:</label>
+			<input type="number" id="progression-loops" min="1" max="99" value="1" style="width:50px; margin-left:4px;">
+			<button id="font-control-btn"
+				style="margin-left:12px; background:#4CAF50; color:white; border:none; padding:5px 10px; border-radius:3px;">Font
+				Controls</button>
+		</div>
+		<div class="row small">
+			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
+		</div>
+		<div class="row small" id="color-cal">
+			<label style="margin-right:6px;">Colors</label>
+			<label>Tonic <input type="color" id="color-tonic" value="#62d1e6"></label>
+			<label style="margin-left:8px;">Subdom <input type="color" id="color-sub" value="#6b46c1"></label>
+			<label style="margin-left:8px;">Dominant <input type="color" id="color-dom" value="#ff7a45"></label>
+			<label style="margin-left:8px;">Neutral <input type="color" id="color-neu" value="#bfbfbf"></label>
+		</div>
+		<div class="row small" id="giant-toggles">
+			<label>Giant Melody <input type="checkbox" id="show-giant-melody" checked /></label>
+			<label style="margin-left:8px;">Giant Bass <input type="checkbox" id="show-giant-bass" checked /></label>
+			<button id="menu-lock-melody" style="margin-left:12px;">Lock Melody</button>
+			<button id="menu-unlock-melody">Unlock Melody</button>
+			<button id="menu-lock-bass" style="margin-left:12px;">Lock Bass</button>
+			<button id="menu-unlock-bass">Unlock Bass</button>
+		</div>
+	</div>
+	<canvas id="scene"></canvas>
+	<!-- legacy lane-controls removed; lock icons integrated into camera-ui -->
+	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
+
+	<div id="camera-ui">
+		<button id="view-down" title="Melody View">Melody View</button>
+		<button id="view-up" title="Bass View">Bass View</button>
+		<button id="view-back" title="Back View">Back View</button>
+	</div>
+
+	<!-- Professional Drum Control Panel -->
+	<div id="drum-control-panel">
+		<div class="panel-header">
+			<h2 class="panel-title">🎵 DRUM MACHINE</h2>
+			<div class="status-indicator" id="status-light"></div>
+		</div>
+
+		<!-- BPM Control -->
+		<div class="control-group">
+			<label class="control-label">Tempo Control</label>
+			<div class="bpm-control">
+				<input type="range" class="bpm-slider" id="bpm-slider" min="60" max="200" value="120">
+				<div class="bpm-display" id="bpm-display">120</div>
+			</div>
+		</div>
+
+		<!-- Genre Selector -->
+		<div class="control-group">
+			<label class="control-label">Music Style</label>
+			<div class="genre-grid">
+				<button class="genre-btn active" data-genre="rock">Rock</button>
+				<button class="genre-btn" data-genre="hiphop">Hip-Hop</button>
+				<button class="genre-btn" data-genre="electronic">Electronic</button>
+				<button class="genre-btn" data-genre="jazz">Jazz</button>
+				<button class="genre-btn" data-genre="latin">Latin</button>
+				<button class="genre-btn" data-genre="funk">Funk</button>
+				<button class="genre-btn" data-genre="country">Country</button>
+				<button class="genre-btn" data-genre="orchestral">Orchestra</button>
+				<button class="genre-btn" data-genre="trap">Trap</button>
+			</div>
+		</div>
+
+		<!-- Main Controls -->
+		<div class="main-controls">
+			<button class="control-btn play-btn" id="drum-toggle">▶ DRUMS OFF</button>
+			<button class="control-btn metronome-btn" id="metronome-toggle">🔔 CLICK OFF</button>
+		</div>
+
+		<!-- Pattern Sequencer -->
+		<div class="sequencer" id="sequencer">
+			<div class="sequencer-row">
+				<div class="sequencer-label">KICK</div>
+				<div class="sequencer-steps" id="kick-steps"></div>
+			</div>
+			<div class="sequencer-row">
+				<div class="sequencer-label">SNARE</div>
+				<div class="sequencer-steps" id="snare-steps"></div>
+			</div>
+			<div class="sequencer-row">
+				<div class="sequencer-label">HI-HAT</div>
+				<div class="sequencer-steps" id="hihat-steps"></div>
+			</div>
+		</div>
+
+		<!-- Status Display -->
+		<div class="status-display">
+			<div class="status-line">
+				<span class="status-label">Audio:</span>
+				<span class="status-value" id="audio-status">Initializing...</span>
+			</div>
+			<div class="status-line">
+				<span class="status-label">Transport:</span>
+				<span class="status-value" id="transport-status">Ready</span>
+			</div>
+			<div class="status-line">
+				<span class="status-label">Kit Loaded:</span>
+				<span class="status-value" id="kit-status">Rock</span>
+			</div>
+			<div class="status-line">
+				<span class="status-label">CPU:</span>
+				<span class="status-value" id="cpu-status">0%</span>
+			</div>
+		</div>
+	</div>
+
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+		}
+	}
+	</script>
+	<!-- Tone.js for audio engine aligned with Novaxe stack -->
+	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"></script>
+	<!-- WebAudioFont for realistic orchestral samples -->
+	<script src='https://surikov.github.io/webaudiofont/npm/dist/WebAudioFontPlayer.js'></script>
+	<!-- Tonal for voice-leading utilities (mode 2) -->
+	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"></script>
+	<script type="module" src="./chords.js?v=2"></script>
+	<script type="module" src="./main.js?v=43"></script>
+	<script src="./professional-drum-machine.js?v=6"></script>
+
+	<!-- PROFESSIONAL FONT CONTROL MODAL -->
+	<div id="font-control-modal"
+		style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; overflow-y:auto;">
+		<div
+			style="background:white; margin:50px auto; padding:30px; width:80%; max-width:800px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.3);">
+			<div
+				style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #eee; padding-bottom:15px;">
+				<h2 style="margin:0; color:#333; font-family:Arial,sans-serif;">🎨 Professional Font Controls</h2>
+				<button id="font-modal-close"
+					style="background:#f44336; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-size:16px;">✕</button>
+			</div>
+
+			<!-- Font Target Selection -->
+			<div style="margin-bottom:25px;">
+				<label style="display:block; margin-bottom:10px; font-weight:bold; color:#333;">Select Font
+					Target:</label>
+				<select id="font-target-select"
+					style="width:100%; padding:10px; font-size:16px; border:2px solid #ddd; border-radius:5px;">
+					<option value="chord-face">Chord Face Font (Roman Numerals)</option>
+					<option value="diamond-font">Diamond Font (Note Names)</option>
+					<option value="title-font">Title Font (MELODY/BASSLINE)</option>
+					<option value="ui-font">UI Font (Buttons/Labels)</option>
+				</select>
+			</div>
+
+			<!-- InDesign-Level Controls -->
+			<div id="font-controls-container">
+
+				<!-- Font Family -->
+				<div style="display:flex; gap:20px; margin-bottom:20px;">
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Font Family:</label>
+						<select id="font-family-select"
+							style="width:100%; padding:8px; border:1px solid #ccc; border-radius:3px;">
+							<option value="Arial">Arial</option>
+							<option value="Times New Roman">Times New Roman</option>
+							<option value="Helvetica">Helvetica</option>
+							<option value="Georgia">Georgia</option>
+							<option value="Verdana">Verdana</option>
+							<option value="Trebuchet MS">Trebuchet MS</option>
+							<option value="Impact">Impact</option>
+							<option value="Courier New">Courier New</option>
+							<option value="Comic Sans MS">Comic Sans MS</option>
+							<option value="Palatino">Palatino</option>
+						</select>
+					</div>
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Font Weight:</label>
+						<select id="font-weight-select"
+							style="width:100%; padding:8px; border:1px solid #ccc; border-radius:3px;">
+							<option value="100">Thin (100)</option>
+							<option value="200">Extra Light (200)</option>
+							<option value="300">Light (300)</option>
+							<option value="400">Normal (400)</option>
+							<option value="500">Medium (500)</option>
+							<option value="600">Semi Bold (600)</option>
+							<option value="700">Bold (700)</option>
+							<option value="800">Extra Bold (800)</option>
+							<option value="900" selected>Black (900)</option>
+						</select>
+					</div>
+				</div>
+
+				<!-- Font Size and Spacing -->
+				<div style="display:flex; gap:20px; margin-bottom:20px;">
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Font Size:</label>
+						<input type="range" id="font-size-slider" min="50" max="800" value="420" style="width:100%;">
+						<span id="font-size-value"
+							style="display:block; text-align:center; margin-top:5px; font-weight:bold;">420px</span>
+					</div>
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Letter Spacing:</label>
+						<input type="range" id="letter-spacing-slider" min="-20" max="50" value="0" style="width:100%;">
+						<span id="letter-spacing-value"
+							style="display:block; text-align:center; margin-top:5px; font-weight:bold;">0px</span>
+					</div>
+				</div>
+
+				<!-- Line Height and Opacity -->
+				<div style="display:flex; gap:20px; margin-bottom:20px;">
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Line Height:</label>
+						<input type="range" id="line-height-slider" min="0.5" max="2.0" step="0.05" value="0.68"
+							style="width:100%;">
+						<span id="line-height-value"
+							style="display:block; text-align:center; margin-top:5px; font-weight:bold;">0.68</span>
+					</div>
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:5px; font-weight:bold;">Opacity:</label>
+						<input type="range" id="opacity-slider" min="0" max="1" step="0.05" value="1.0"
+							style="width:100%;">
+						<span id="opacity-value"
+							style="display:block; text-align:center; margin-top:5px; font-weight:bold;">100%</span>
+					</div>
+				</div>
+
+				<!-- Text Effects -->
+				<div style="display:flex; gap:20px; margin-bottom:20px;">
+					<div style="flex:1;">
+						<label style="display:block; margin-bottom:10px; font-weight:bold;">Text Effects:</label>
+						<div style="display:flex; gap:10px; flex-wrap:wrap;">
+							<label style="display:flex; align-items:center; gap:5px;">
+								<input type="checkbox" id="font-italic"> Italic
+							</label>
+							<label style="display:flex; align-items:center; gap:5px;">
+								<input type="checkbox" id="font-underline"> Underline
+							</label>
+							<label style="display:flex; align-items:center; gap:5px;">
+								<input type="checkbox" id="font-shadow"> Drop Shadow
+							</label>
+						</div>
+					</div>
+				</div>
+
+				<!-- Preview -->
+				<div
+					style="margin-bottom:20px; padding:20px; background:#f9f9f9; border-radius:5px; border:2px solid #eee;">
+					<label style="display:block; margin-bottom:10px; font-weight:bold;">Live Preview:</label>
+					<div id="font-preview"
+						style="font-size:48px; text-align:center; padding:20px; background:white; border-radius:3px; font-family:Arial; font-weight:900;">
+						I7</div>
+				</div>
+
+				<!-- Action Buttons -->
+				<div style="display:flex; gap:15px; justify-content:center;">
+					<button id="font-apply-btn"
+						style="background:#4CAF50; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer; font-size:16px; font-weight:bold;">Apply
+						Changes</button>
+					<button id="font-reset-btn"
+						style="background:#ff9800; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer; font-size:16px; font-weight:bold;">Reset
+						to Default</button>
+					<button id="font-cancel-btn"
+						style="background:#757575; color:white; border:none; padding:12px 25px; border-radius:5px; cursor:pointer; font-size:16px; font-weight:bold;">Cancel</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>

@@ -2119,8 +2119,8 @@ async function loadInstruments() {
     }
 }
 
-// UI wiring
-const setSelect = document.getElementById('set-select');
+// UI wiring - moved to DOMContentLoaded to avoid null reference errors
+// const setSelect = document.getElementById('set-select');
 const labelSelect = document.getElementById('label-mode');
 const keySelect = document.getElementById('key-select');
 const with7th = document.getElementById('with-7th');
@@ -2213,1158 +2213,1169 @@ resetBtn?.addEventListener('click', () => {
 
 // Lock icon events handled above via melodyLockIcon/bassLockIcon
 
-setSelect.addEventListener('change', () => {
-    // Toggle shelf visibility only; default shows all
-    const val = setSelect.value;
-    currentSet = val;
-    const show = new Set();
-    if (val === 'major') chordSetsC.major.forEach(c => show.add(c.roman));
-    else if (val === 'minor') chordSetsC.minor.forEach(c => show.add(c.roman));
-    else if (val === 'applied') chordSetsC.applied.forEach(c => show.add(c.roman));
-    else {
-        [...chordSetsC.major, ...chordSetsC.minor, ...chordSetsC.applied].forEach(c => show.add(c.roman));
+// Wait for DOM to be ready before accessing elements
+document.addEventListener('DOMContentLoaded', function () {
+    // Initialize DOM-dependent elements
+    const setSelect = document.getElementById('set-select');
+    if (!setSelect) {
+        console.error('[CHORD CUBES] set-select element not found');
+        return;
     }
-    for (const s of shelfCubes) { s.visible = show.has(s.userData.roman); }
-});
 
-labelSelect.addEventListener('change', () => {
-    labelMode = labelSelect.value;
-    updateLabels();
-});
-keySelect?.addEventListener('change', () => {
-    currentKey = keySelect.value;
-    updateLabels();
-    try { setState({ key: currentKey }); bridge.emit('settingsChanged', { key: currentKey }); } catch (_) { }
-});
-
-// Adjust mode UI
-const adjustToggle = document.getElementById('adjust-toggle');
-const saveMapBtn = document.getElementById('save-map-btn');
-const loadMapInput = document.getElementById('load-map-input');
-let adjustMode = false;
-adjustToggle?.addEventListener('change', () => {
-    adjustMode = !!adjustToggle.checked;
-    document.body.classList.toggle('adjust-on', adjustMode);
-});
-saveMapBtn?.addEventListener('click', () => {
-    saveShelfMapToLocalStorage();
-    exportShelfMap();
-});
-loadMapInput?.addEventListener('change', (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-        try {
-            const json = JSON.parse(String(reader.result));
-            applyShelfMap(json);
-            saveShelfMapToLocalStorage();
-            // Rebuild shelf with new anchors/scales
-            loadSet(currentSet);
-        } catch (err) {
-            console.error('Invalid map JSON', err);
+    setSelect.addEventListener('change', () => {
+        // Toggle shelf visibility only; default shows all
+        const val = setSelect.value;
+        currentSet = val;
+        const show = new Set();
+        if (val === 'major') chordSetsC.major.forEach(c => show.add(c.roman));
+        else if (val === 'minor') chordSetsC.minor.forEach(c => show.add(c.roman));
+        else if (val === 'applied') chordSetsC.applied.forEach(c => show.add(c.roman));
+        else {
+            [...chordSetsC.major, ...chordSetsC.minor, ...chordSetsC.applied].forEach(c => show.add(c.roman));
         }
-    };
-    reader.readAsText(file);
-});
+        for (const s of shelfCubes) { s.visible = show.has(s.userData.roman); }
+    });
 
-function onResize() {
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-}
-window.addEventListener('resize', onResize);
+    labelSelect.addEventListener('change', () => {
+        labelMode = labelSelect.value;
+        updateLabels();
+    });
+    keySelect?.addEventListener('change', () => {
+        currentKey = keySelect.value;
+        updateLabels();
+        try { setState({ key: currentKey }); bridge.emit('settingsChanged', { key: currentKey }); } catch (_) { }
+    });
 
-// Initial: start immediately with canvas-rendered labels (no PNG manifest)
-textureManifest = null;
-(async () => {
-    await ensureFontsLoaded();
-    readFlagsFromUrl();
-    currentSet = 'all';
-    await loadSet(currentSet);
-    // Ensure shelf is visible by default
-    for (const s of shelfCubes) s.visible = true;
-    // Re-enable camera layers after load
-    try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
-    await updateLabels();
-    await loadInstruments();
-    setViewAbove();
-    createPlayButton();
-    createDebugOverlay();
-    // Color calibrators
-    const tonicEl = document.getElementById('color-tonic');
-    const subEl = document.getElementById('color-sub');
-    const domEl = document.getElementById('color-dom');
-    const neuEl = document.getElementById('color-neu');
-    const applyColors = async () => {
-        const hexToInt = (hex) => parseInt(hex.replace('#', ''), 16);
-        if (tonicEl?.value) COLOR_TONIC = hexToInt(tonicEl.value);
-        if (subEl?.value) COLOR_SUBDOMINANT = hexToInt(subEl.value);
-        if (domEl?.value) COLOR_DOMINANT = hexToInt(domEl.value);
-        if (neuEl?.value) COLOR_NEUTRAL = hexToInt(neuEl.value);
-        await updateLabels();
-    };
-    tonicEl?.addEventListener('change', applyColors);
-    subEl?.addEventListener('change', applyColors);
-    domEl?.addEventListener('change', applyColors);
-    neuEl?.addEventListener('change', applyColors);
-})();
-
-// Animation loop
-function animate() {
-    controls.update();
-    // drive tweens
-    const now = performance.now();
-    for (let i = activeTweens.length - 1; i >= 0; i--) {
-        const done = activeTweens[i].tick(now);
-        if (done) activeTweens.splice(i, 1);
-    }
-    // Live bottom/top indices per cube (derived from rotationIndex via compass)
-    try {
-        const hudLines = ['BOTTOM/TOP (live):'];
-        for (let i = 0; i < lineup.length; i++) {
-            const cube = lineup[i];
-            // Ensure rotationIndex is synced to quaternion orientation
-            syncRotationIndexFromQuaternion(cube);
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const bottomIdx = r;
-            const topIdx = (r + 2) % 4;
-            cube.userData.bottomToneIdxLive = bottomIdx;
-            cube.userData.topToneIdxLive = topIdx;
-            const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
-            const names = transposeNotes(tones, currentKey);
-            hudLines.push(`${i}:${cube.userData.roman} B=${names[bottomIdx]}(${bottomIdx}) T=${names[topIdx]}(${topIdx})`);
-        }
-        if (debugEnabled) { ensureDebugOverlayPosition(); updateDebugOverlay(`Key=${currentKey}\n` + hudLines.join('\n')); }
-    } catch (_) { }
-    diag.update && diag.update();
-    // Harmonized drag smoothing
-    tickDragSmoothing();
-    // Enforce two rest zones for all non-dragging cubes
-    enforceRestZones();
-    // Keep locked lanes following cubes as lineup reflows
-    updateLanePositions();
-    // Normalize giants orientation permanently to stored uprightZ
-    try {
-        const enforce = (root) => {
-            root.traverse(o => {
-                if (!(o && o.isMesh && o.geometry && o.material)) return;
-                if (typeof o.userData?.uprightZ !== 'number') return;
-                o.rotation.z = o.userData.uprightZ;
-            });
+    // Adjust mode UI
+    const adjustToggle = document.getElementById('adjust-toggle');
+    const saveMapBtn = document.getElementById('save-map-btn');
+    const loadMapInput = document.getElementById('load-map-input');
+    let adjustMode = false;
+    adjustToggle?.addEventListener('change', () => {
+        adjustMode = !!adjustToggle.checked;
+        document.body.classList.toggle('adjust-on', adjustMode);
+    });
+    saveMapBtn?.addEventListener('click', () => {
+        saveShelfMapToLocalStorage();
+        exportShelfMap();
+    });
+    loadMapInput?.addEventListener('change', (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            try {
+                const json = JSON.parse(String(reader.result));
+                applyShelfMap(json);
+                saveShelfMapToLocalStorage();
+                // Rebuild shelf with new anchors/scales
+                loadSet(currentSet);
+            } catch (err) {
+                console.error('Invalid map JSON', err);
+            }
         };
-        if (melodyGiantGroup) enforce(melodyGiantGroup);
-        if (bassGiantGroup) enforce(bassGiantGroup);
-    } catch (_) { }
-    // Show only appropriate locks per camera (melody above, bass below)
-    try {
-        const toTarget = camera.position.clone().sub(controls.target);
-        const horiz = Math.hypot(toTarget.x, toTarget.z);
-        const angle = Math.atan2(toTarget.y, horiz); // >0 above, <0 below
-        const above = angle > 0.1;
-        const showMel = above; const showBass = !above;
-        [melodyLockLeft, melodyLockRight].forEach(o => { if (o) o.visible = showMel; });
-        [bassLockLeft, bassLockRight].forEach(o => { if (o) o.visible = showBass; });
-        // When camera is below plane (bass view), darken the scene like performance mode
-        const below = !above;
-        // Fade a darkening plane and adjust lights for bass view
-        if (below) {
-            try { darkPlane.material.opacity = 0.55; } catch (_) { }
-            if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
-            stageSpot.intensity = 2.2;
-            dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
-        } else {
-            try { darkPlane.material.opacity = 0.0; } catch (_) { }
-            stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
-            dir.intensity = 0.7; frontFill.intensity = 0.45; frontKey.intensity = 0.85;
-        }
-    } catch (_) { }
-    // TEMP DEBUG: log one pivot angle occasionally
-    try {
-        if (melodyLaneGroup && melodyLaneGroup.children.length) {
-            const a = melodyLaneGroup.children[0].rotation.x;
-            if ((Math.floor(now / 300) % 10) === 0) { /* throttle */ }
-        }
-    } catch (_) { }
-    // Update ground title opacities based on camera angle relative to plane y=0
-    let belowAlpha = 0;
-    if (melodyMat && bassMat) {
-        const toTarget = camera.position.clone().sub(controls.target);
-        const horiz = Math.hypot(toTarget.x, toTarget.z);
-        const angle = Math.atan2(toTarget.y, horiz); // signed radians (positive above, negative below)
-        const absDeg = Math.abs(angle) * (180 / Math.PI);
-        const t = Math.min(1, absDeg / 30);
-        const alpha = 0.4 * t;
-        if (toTarget.y >= 0) { // above plane
-            melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
-        } else { // below plane
-            melodyMat.opacity = 0; bassMat.opacity = alpha; belowAlpha = alpha;
-        }
-    }
-    // Link shelf plane opacity to camera being below the plane for legibility
-    if (shelfPlane && shelfPlane.material && typeof belowAlpha === 'number') {
-        shelfPlane.material.transparent = true;
-        shelfPlane.material.opacity = Math.max(shelfPlane.material.opacity ?? 0, belowAlpha);
-        // When above plane, keep the original texture fully visible (no forced fade)
-        if (belowAlpha === 0) shelfPlane.material.opacity = 1.0;
-    }
-    // Darkening plane: smoothly increase up to 0.20 opacity at -25° and below
-    if (darkPlane && darkPlane.material) {
-        const toTarget = camera.position.clone().sub(controls.target);
-        const horiz = Math.hypot(toTarget.x, toTarget.z);
-        const angle = Math.atan2(toTarget.y, horiz); // signed
-        let darkT = 0;
-        if (angle < 0) {
-            const deg = Math.abs(angle) * (180 / Math.PI);
-            darkT = Math.min(1, deg / 25);
-        }
-        darkPlane.material.opacity = 0.20 * darkT;
-    }
-    // Subtle shimmer for background title (non-intrusive)
-    if (bgTitleMesh && bgTitleMesh.material) {
-        const m = bgTitleMesh.material;
-        const t = now * 0.00015; // very slow
-        const pulse = 0.28 + 0.05 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2));
-        m.opacity = pulse; // oscillate around ~30%
-    }
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
-}
-animate();
+        reader.readAsText(file);
+    });
 
-function physicsRepelNearFront(draggingCube) {
-    const zoneZ = FRONT_ROW_FORWARD_Z + 0.6;
-    const nodes = [...lineup];
-    if (!nodes.includes(draggingCube)) nodes.push(draggingCube);
-    const active = nodes.filter(c => Math.abs(c.position.z) <= zoneZ + 0.001);
-    if (active.length <= 1) return;
-    // Prep velocities
-    for (const c of active) {
-        if (!c.userData.vel) c.userData.vel = { x: 0, z: 0 };
+    function onResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
     }
-    // Pairwise repulsion (Coulomb-like), do not push the dragging cube directly
-    const k = 0.08; // force constant
-    const minDist = gridSize * 0.9;
-    for (let i = 0; i < active.length; i++) {
-        for (let j = i + 1; j < active.length; j++) {
-            const a = active[i], b = active[j];
-            const dx = b.position.x - a.position.x;
-            const dz = b.position.z - a.position.z;
-            let dist = Math.hypot(dx, dz);
-            if (dist < 1e-6) dist = 1e-6;
-            const nx = dx / dist, nz = dz / dist;
-            // Apply only when inside an influence radius
-            const influence = Math.max(0, (minDist - dist) / minDist);
-            if (influence <= 0) continue;
-            const f = k * influence * influence; // smooth non-linear falloff
-            const fx = nx * f, fz = nz * f;
-            if (a !== draggingCube) { a.userData.vel.x -= fx; a.userData.vel.z -= fz; }
-            if (b !== draggingCube) { b.userData.vel.x += fx; b.userData.vel.z += fz; }
-        }
-    }
-    // Integrate velocities with damping
-    const damping = 0.85;
-    for (const c of active) {
-        if (c === draggingCube) continue;
-        const v = c.userData.vel;
-        const nextX = THREE.MathUtils.clamp(c.position.x + v.x, -8, 8);
-        const nextZ = THREE.MathUtils.clamp(c.position.z + v.z, shelfZ, FRONT_ROW_FORWARD_Z);
-        c.position.x = THREE.MathUtils.lerp(c.position.x, nextX, 0.5);
-        c.position.z = THREE.MathUtils.lerp(c.position.z, nextZ, 0.5);
-        v.x *= damping; v.z *= damping;
-        // Keep on front plane for y/scale
-        c.position.y = THREE.MathUtils.lerp(c.position.y, 0, 0.4);
-    }
-}
+    window.addEventListener('resize', onResize);
 
-function enforceRestZones() {
-    // Clamp all non-dragging cubes to valid rest zones only
-    const all = [...cubes, ...shelfCubes];
-    for (const c of all) {
-        if (c === dragging) continue;
-        if (lineup.includes(c)) {
-            // Front row exact plane
-            c.position.y = 0;
-            c.position.z = 0;
-            // Only snap rotation when not animating and already near a quadrant
-            if (!hasActiveTweenFor(c)) {
-                const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
-                const z = e.z;
-                const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
-                if (Math.abs(snappedZ - z) < 0.02) {
-                    const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
-                    c.quaternion.copy(q);
-                }
+    // Initial: start immediately with canvas-rendered labels (no PNG manifest)
+    textureManifest = null;
+    (async () => {
+        await ensureFontsLoaded();
+        readFlagsFromUrl();
+        currentSet = 'all';
+        await loadSet(currentSet);
+        // Ensure shelf is visible by default
+        for (const s of shelfCubes) s.visible = true;
+        // Re-enable camera layers after load
+        try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
+        await updateLabels();
+        await loadInstruments();
+        setViewAbove();
+        createPlayButton();
+        createDebugOverlay();
+        // Color calibrators
+        const tonicEl = document.getElementById('color-tonic');
+        const subEl = document.getElementById('color-sub');
+        const domEl = document.getElementById('color-dom');
+        const neuEl = document.getElementById('color-neu');
+        const applyColors = async () => {
+            const hexToInt = (hex) => parseInt(hex.replace('#', ''), 16);
+            if (tonicEl?.value) COLOR_TONIC = hexToInt(tonicEl.value);
+            if (subEl?.value) COLOR_SUBDOMINANT = hexToInt(subEl.value);
+            if (domEl?.value) COLOR_DOMINANT = hexToInt(domEl.value);
+            if (neuEl?.value) COLOR_NEUTRAL = hexToInt(neuEl.value);
+            await updateLabels();
+        };
+        tonicEl?.addEventListener('change', applyColors);
+        subEl?.addEventListener('change', applyColors);
+        domEl?.addEventListener('change', applyColors);
+        neuEl?.addEventListener('change', applyColors);
+    })();
+
+    // Animation loop
+    function animate() {
+        controls.update();
+        // drive tweens
+        const now = performance.now();
+        for (let i = activeTweens.length - 1; i >= 0; i--) {
+            const done = activeTweens[i].tick(now);
+            if (done) activeTweens.splice(i, 1);
+        }
+        // Live bottom/top indices per cube (derived from rotationIndex via compass)
+        try {
+            const hudLines = ['BOTTOM/TOP (live):'];
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i];
+                // Ensure rotationIndex is synced to quaternion orientation
+                syncRotationIndexFromQuaternion(cube);
+                const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+                const bottomIdx = r;
+                const topIdx = (r + 2) % 4;
+                cube.userData.bottomToneIdxLive = bottomIdx;
+                cube.userData.topToneIdxLive = topIdx;
+                const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+                const names = transposeNotes(tones, currentKey);
+                hudLines.push(`${i}:${cube.userData.roman} B=${names[bottomIdx]}(${bottomIdx}) T=${names[topIdx]}(${topIdx})`);
             }
-        } else if (c.userData?.isShelf) {
-            if (adjustMode) continue; // allow free placement while editing the shelf map
-            // Exact shelf origin if available
-            const r = c.userData.roman;
-            const origin = shelfOriginByRoman[r];
-            if (origin?.position) {
-                c.position.copy(origin.position);
-                c.scale.setScalar(origin.scale ?? c.scale.x);
-                // Ensure shelf rotation restored
-                if (origin.quaternion) c.quaternion.copy(origin.quaternion);
+            if (debugEnabled) { ensureDebugOverlayPosition(); updateDebugOverlay(`Key=${currentKey}\n` + hudLines.join('\n')); }
+        } catch (_) { }
+        diag.update && diag.update();
+        // Harmonized drag smoothing
+        tickDragSmoothing();
+        // Enforce two rest zones for all non-dragging cubes
+        enforceRestZones();
+        // Keep locked lanes following cubes as lineup reflows
+        updateLanePositions();
+        // Normalize giants orientation permanently to stored uprightZ
+        try {
+            const enforce = (root) => {
+                root.traverse(o => {
+                    if (!(o && o.isMesh && o.geometry && o.material)) return;
+                    if (typeof o.userData?.uprightZ !== 'number') return;
+                    o.rotation.z = o.userData.uprightZ;
+                });
+            };
+            if (melodyGiantGroup) enforce(melodyGiantGroup);
+            if (bassGiantGroup) enforce(bassGiantGroup);
+        } catch (_) { }
+        // Show only appropriate locks per camera (melody above, bass below)
+        try {
+            const toTarget = camera.position.clone().sub(controls.target);
+            const horiz = Math.hypot(toTarget.x, toTarget.z);
+            const angle = Math.atan2(toTarget.y, horiz); // >0 above, <0 below
+            const above = angle > 0.1;
+            const showMel = above; const showBass = !above;
+            [melodyLockLeft, melodyLockRight].forEach(o => { if (o) o.visible = showMel; });
+            [bassLockLeft, bassLockRight].forEach(o => { if (o) o.visible = showBass; });
+            // When camera is below plane (bass view), darken the scene like performance mode
+            const below = !above;
+            // Fade a darkening plane and adjust lights for bass view
+            if (below) {
+                try { darkPlane.material.opacity = 0.55; } catch (_) { }
+                if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
+                stageSpot.intensity = 2.2;
+                dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
             } else {
-                c.position.z = shelfZ;
+                try { darkPlane.material.opacity = 0.0; } catch (_) { }
+                stageSpot.userData.wasOn = false; stageSpot.intensity = 0.0;
+                dir.intensity = 0.7; frontFill.intensity = 0.45; frontKey.intensity = 0.85;
             }
-        }
-    }
-}
-
-// Simple WebAudio chord playback
-function ensureAudio() {
-    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    return audioCtx;
-}
-const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
-function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
-function parseNoteName(name) {
-    // e.g., C, C#, Db, Bb; infer octave around 4
-    const n = name.replace(/[^A-G#b]/g, '');
-    const idx = NOTE_INDEX[n] ?? 0; return { idx, octave: 4 };
-}
-// Pitch-class helpers
-function pcOf(name) { return parseNoteName(name).idx; }
-function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
-function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
-
-// Snap a target MIDI note to the octave closest to a reference MIDI
-function nearestOctave(targetMidi, referenceMidi) {
-    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
-    const k = Math.round((referenceMidi - targetMidi) / 12);
-    return targetMidi + 12 * k;
-}
-
-// Voice leading 2 (tonal-assisted): prefer interval steps up to a 3rd/4th; fallback to nearest octave
-function voiceLeadMidi(targetMidi, referenceMidi) {
-    if (voiceLeadingMode !== 'vl2') return nearestOctave(targetMidi, referenceMidi);
-    if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
-    // Evaluate target in a window of +/- 2 octaves and pick minimal absolute semitone distance
-    let best = targetMidi, bestDist = Infinity;
-    for (let o = -2; o <= 2; o++) {
-        const cand = targetMidi + o * 12;
-        const d = Math.abs(cand - referenceMidi);
-        if (d < bestDist) { bestDist = d; best = cand; }
-    }
-    return best;
-}
-
-// Chord bed: lock voices into C4..C5 regardless of chord
-function buildLockedChordBedMidis(roman, includeSeventh) {
-    const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
-    const use = includeSeventh ? names.slice(0, 4) : names.slice(0, 3);
-    const baseC4 = 60; // MIDI C4
-    const midis = use.map(n => baseC4 + pcOf(n));
-    midis.sort((a, b) => a - b);
-    // Ensure within [60, 71]
-    return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
-}
-
-// Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
-function getBassMidiForObject(obj) {
-    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    const rootPc = pcOf(names[0]);
-    const bottomPc = pcOf(names[r]);
-    const baseC2 = 36; // low register
-    const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
-    const diff = (bottomPc - rootPc + 12) % 12;
-    return rootBaseMidi + diff; // within one octave above root
-}
-
-// Melody: map top-face tone into a higher octave anchored to the chord root
-function getMelodyMidiForObject(obj) {
-    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    const rootPc = pcOf(names[0]);
-    const topPc = pcOf(names[(r + 2) % 4]);
-    const baseC5 = 72; // higher register
-    const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
-    const diff = (topPc - rootPc + 12) % 12;
-    return rootBaseMidi + diff;
-}
-
-function makeNumberPlane(text, width = 0.9) {
-    const size = 512;
-    const c = document.createElement('canvas'); c.width = size; c.height = size;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, size, size);
-    ctx.fillStyle = '#111';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '900 360px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
-    ctx.strokeStyle = '#111'; ctx.lineWidth = 8; ctx.strokeText(text, size / 2, size / 2 + 20);
-    ctx.fillText(text, size / 2, size / 2 + 20);
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
-    const aspect = 1.0;
-    const h = width / aspect;
-    const geo = new THREE.PlaneGeometry(width, h);
-    const mesh = new THREE.Mesh(geo, mat);
-    mesh.position.z = 0.002;
-    return mesh;
-}
-
-// Helper: get transposed top-face note name for a cube in current key
-function getTopNoteNameForObject(obj) {
-    const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    return names[(r + 2) % 4];
-}
-
-function getTopDegreeForObject(obj) {
-    const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
-    const roman = obj.userData.roman;
-    const degs = degreeSets[roman] || ['1', '3', '5', '7'];
-    return degs[(r + 2) % 4];
-}
-
-// Render a large NVX Diamond Font string as a billboard in 3D space
-function showNVXDebugText(text) {
-    try { if (nvxDebugTextMesh) { scene.remove(nvxDebugTextMesh); nvxDebugTextMesh.material?.map?.dispose?.(); nvxDebugTextMesh.material?.dispose?.(); nvxDebugTextMesh.geometry?.dispose?.(); nvxDebugTextMesh = null; } } catch (_) { }
-    const w = 2048, h = 512;
-    const c = document.createElement('canvas'); c.width = w; c.height = h;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0, 0, w, h);
-    ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, w, h);
-    ctx.fillStyle = '#000000';
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.font = '900 300px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
-    ctx.fillText(text, w / 2, h / 2);
-    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
-    const aspect = w / h; const width = 10; const height = width / aspect;
-    const geo = new THREE.PlaneGeometry(width, height);
-    nvxDebugTextMesh = new THREE.Mesh(geo, mat);
-    nvxDebugTextMesh.position.set(0, 1.8, 0.6);
-    nvxDebugTextMesh.renderOrder = 6;
-    scene.add(nvxDebugTextMesh);
-    // Expose a helper for manual updates
-    try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
-}
-function playChordForObject(obj) {
-    const ctx = ensureAudio();
-    const now = ctx.currentTime;
-    const duration = 1.1;
-
-    if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
-
-    // Master
-    const master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
-
-    // Layers
-    const chordBus = ctx.createGain(); chordBus.gain.value = 0.18; chordBus.connect(master);
-    const bassBus = ctx.createGain(); bassBus.gain.value = 0.3; bassBus.connect(master);
-    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.26; melodyBus.connect(master);
-
-    // Envelope helper
-    const env = (g, t0, d) => {
-        g.gain.setValueAtTime(0.0, t0);
-        g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01);
-        g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03);
-        g.gain.linearRampToValueAtTime(0.0, t0 + d);
-    };
-
-    // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
-    const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
-    const idxForObj = lineup.indexOf(obj);
-    const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
-    if (sfChord && sfChord.play) {
-        bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
-    } else {
-        console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
-    }
-
-    // Bass: if locked, use locked line; else use cube bottom face
-    if (bassEnabled) {
-        let bassMidi = getBassMidiForObject(obj);
-        const idx = lineup.indexOf(obj);
-        if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') bassMidi = lockedBass[idx].midi;
-        if (sfBass && sfBass.play) {
-            sfBass.play(bassMidi, now, { duration, gain: 0.34 });
-        } else {
-            console.error('[obs-cubes] Bass instrument missing; skipping bass note.');
-        }
-    }
-
-    // Melody: if locked, use locked line; else use cube top face
-    if (melodyEnabled) {
-        let melMidi = getMelodyMidiForObject(obj);
-        const idx = lineup.indexOf(obj);
-        if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') melMidi = lockedMelody[idx].midi;
-        if (sfMelody && sfMelody.play) {
-            sfMelody.play(melMidi, now, { duration, gain: 0.3 });
-        } else {
-            console.error('[obs-cubes] Melody instrument missing; skipping melody note.');
-        }
-    }
-    try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
-}
-
-// Shelf-click sequencing
-const shelfClickQueue = [];
-let processingShelfQueue = false;
-async function enqueueShelfAdd(shelfMesh) {
-    shelfClickQueue.push(shelfMesh);
-    if (!processingShelfQueue) processShelfQueue();
-}
-async function processShelfQueue() {
-    processingShelfQueue = true;
-    while (shelfClickQueue.length) {
-        const shelf = shelfClickQueue.shift();
-        await animateShelfClickAdd(shelf);
-    }
-    processingShelfQueue = false;
-}
-async function animateShelfClickAdd(shelf) {
-    try {
-        const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
-        clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0, desiredRotationDelta: (shelf.userData?.desiredRotationDelta || 0) };
-        // Start exactly at shelf origin
-        clone.position.copy(shelf.position);
-        clone.scale.copy(shelf.scale);
-        // CRITICAL: front-row layer for clones
-        try { setCubeLayerRecursive(clone, 1); } catch (_) { }
-        addQuadrantOverlay(clone);
-        scene.add(clone);
-        cubes.push(clone);
-        // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
-        const xs = computeSlotPositions(lineup.length + 1);
-        const targetX = xs[lineup.length];
-        // Animate from shelf Y/Z to front row smoothly with scale normalization
-        clone.userData.animatingIn = true;
-        const s0 = clone.scale.x;
-        // Smooth position/scale; apply desiredRotationDelta once if provided
-        const startQuat = clone.quaternion.clone();
-        // Copy delta chosen on the shelf object (support zero)
-        let deltaSteps = (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta') ? (shelf.userData.desiredRotationDelta || 0) : 0);
-        deltaSteps = ((deltaSteps % 4) + 4) % 4;
-        const targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
-        tweenObject({
-            duration: 520, owner: clone, onUpdate: (v) => {
-                // Position ease
-                clone.position.x = THREE.MathUtils.lerp(clone.position.x, targetX, v);
-                clone.position.y = THREE.MathUtils.lerp(clone.position.y, 0, v);
-                clone.position.z = THREE.MathUtils.lerp(clone.position.z, 0, v);
-                // Scale ease toward front-row normalized size
-                const s = THREE.MathUtils.lerp(s0, FRONT_ROW_SCALE, v);
-                clone.scale.setScalar(s);
-                // Rotation ease (none)
-                clone.quaternion.slerpQuaternions(startQuat, targetQuat, v);
-            }
-        });
-        // After animation completes, add to lineup and reflow
-        setTimeout(() => {
-            if (!lineup.includes(clone)) lineup.push(clone);
-            clone.userData.animatingIn = false;
-            // Apply rotation index delta exactly once
-            if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
-            reflowLineup();
-        }, 470);
-        // Play with intended inversion immediately
-        if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
-        playChordForObject(clone);
-        addProgressionPointFromCube(shelf); // record from shelf origin too
-        await new Promise(r => setTimeout(r, 180));
-    } catch (_) { }
-}
-
-let progressionEnabled = false;
-let progressionArrows = [];
-let progressionPoints = [];
-let progressionBpm = 120; // default metronome BPM
-let beatsPerChord = 4;    // 4 beats per chord default
-let playButtonMesh = null;
-// legacy var removed (we now compute via bpm & beatsPerChord)
-// Smooth camera follow of active chord
-let cameraFocusTween = null;
-function focusCameraOnCube(cube, durationMs = 700) {
-    try {
-        const p = new THREE.Vector3(); cube.getWorldPosition(p);
-        const camFrom = camera.position.clone();
-        const tgtFrom = controls.target.clone();
-        // Dolly with the active chord: slide horizontally and push in closer on Z
-        const targetTo = new THREE.Vector3(p.x, 0.6, 0);
-        const cameraTo = new THREE.Vector3(p.x, 0.85, 7.6);
-        if (cameraFocusTween) cameraFocusTween.cancelled = true;
-        cameraFocusTween = tweenObject({
-            duration: durationMs, owner: camera, onUpdate: (v) => {
-                camera.position.lerpVectors(camFrom, cameraTo, v);
-                controls.target.lerpVectors(tgtFrom, targetTo, v);
-            }
-        });
-    } catch (_) { }
-}
-// Metronome/tempo UI + engine
-let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
-let metroOn = false; let metroSynth = null; let metroLoop = null;
-
-function readFlagsFromUrl() {
-    try {
-        const url = new URL(window.location.href);
-        const arrows = url.searchParams.get('arrows');
-        const bpm = url.searchParams.get('bpm');
-        const sf = url.searchParams.get('sf');
-        if (arrows === '1') progressionEnabled = true;
-        if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
-        if (sf) { try { setSfBase(sf); } catch (_) { } }
-    } catch (_) { /* ignore */ }
-}
-
-// Tempo/Metronome UI
-function ensureTempoUi() {
-    if (tempoUi) return;
-    const box = document.createElement('div');
-    box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
-    const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
-    const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
-    const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
-    slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
-    const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
-    btn.onclick = async () => {
-        try { if (window.Tone) await window.Tone.start(); } catch (_) { }
-        if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
-        if (!metroLoop && window.Tone) {
-            metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
-        }
-        if (!metroOn) {
-            try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
-            btn.textContent = 'Metronome: On'; metroOn = true;
-        } else {
-            try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
-            btn.textContent = 'Metronome: Off'; metroOn = false;
-        }
-    };
-    box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
-    document.body.appendChild(box);
-    tempoUi = box; tempoSlider = slider; metroBtn = btn;
-}
-
-function createPlayButton() {
-    if (playButtonMesh) return;
-    // Flat 2D button on the ground near the bottom center
-    const size = 1.6;
-    const c = document.createElement('canvas'); c.width = 256; c.height = 256;
-    const ctx = c.getContext('2d');
-    ctx.clearRect(0, 0, 256, 256);
-    // background circle
-    ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI * 2); ctx.fill();
-    // play triangle
-    ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(108, 84); ctx.lineTo(108, 172); ctx.lineTo(180, 128); ctx.closePath(); ctx.fill();
-    const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
-    const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
-    const geo = new THREE.PlaneGeometry(size, size);
-    playButtonMesh = new THREE.Mesh(geo, mat);
-    playButtonMesh.rotation.x = -Math.PI / 2; // flat to ground
-    playButtonMesh.position.set(0, 0.001, -6.2); // below titles nearer bottom
-    playButtonMesh.userData.isPlayButton = true;
-    playButtonMesh.renderOrder = 5;
-    scene.add(playButtonMesh);
-}
-
-function clearProgressionArrows() {
-    for (const a of progressionArrows) scene.remove(a);
-    progressionArrows = [];
-    progressionPoints = [];
-}
-
-function drawArrow(from, to) {
-    const dir = new THREE.Vector3().subVectors(to, from); const len = dir.length(); if (len < 0.01) return;
-    const arrow = new THREE.ArrowHelper(dir.clone().normalize(), from, len, 0xffe066, 0.25, 0.15);
-    arrow.cone.material.transparent = true; arrow.line.material.transparent = true;
-    arrow.cone.material.opacity = 0.85; arrow.line.material.opacity = 0.85;
-    // Simple shimmer by oscillating opacity in animate()
-    arrow.userData.shimmer = { base: 0.75, amp: 0.15, phase: Math.random() * Math.PI * 2 };
-    progressionArrows.push(arrow);
-    scene.add(arrow);
-}
-
-function addProgressionPointFromCube(cube) {
-    if (!progressionEnabled || !cube) return;
-    const p = new THREE.Vector3(); cube.getWorldPosition(p); p.y = p.y + 0.6;
-    if (progressionPoints.length > 0) {
-        const prev = progressionPoints[progressionPoints.length - 1];
-        drawArrow(prev.clone(), p.clone());
-    }
-    progressionPoints.push(p);
-    if (progressionPoints.length > 200) progressionPoints.shift();
-}
-
-function updateProgressionArrows() {
-    clearProgressionArrows();
-    if (!progressionEnabled) return;
-    // Recreate arrows from stored points
-    for (let i = 0; i < progressionPoints.length - 1; i++) drawArrow(progressionPoints[i], progressionPoints[i + 1]);
-}
-
-// Active chord highlight effects
-const activeHighlights = [];
-function highlightChordEffect(cube, durationMs = 800) {
-    try {
-        const p = new THREE.Vector3(); cube.getWorldPosition(p);
-        const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
-        const ringGeo = new THREE.RingGeometry(0.62, 0.82, 48);
-        const mat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
-        const ring = new THREE.Mesh(ringGeo, mat);
-        ring.position.set(p.x, p.y, p.z + half + 0.01);
-        ring.rotation.set(0, 0, 0);
-        ring.renderOrder = 6;
-        scene.add(ring);
-        activeHighlights.push(ring);
-        // Animate scale/opacity out
-        const fromScale = 0.1; const toScale = 1.4;
-        ring.scale.set(fromScale, fromScale, fromScale);
-        tweenObject({ duration: durationMs, owner: ring, onUpdate: (v) => { try { const sc = fromScale + (toScale - fromScale) * v; ring.scale.set(sc, sc, sc); mat.opacity = 0.95 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); mat.dispose(); } catch (_) { } } });
-        // Spark burst
-        for (let i = 0; i < 12; i++) {
-            const d = Math.random() * 0.45 + 0.35; const dir = (Math.PI * 2 * i) / 12 + Math.random() * 0.2;
-            const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, p.z + half + 0.012), new THREE.Vector3(p.x + Math.cos(dir) * d, p.y + Math.sin(dir) * d, p.z + half + 0.012)]);
-            const lineMat = new THREE.LineBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
-            const line = new THREE.Line(lineGeo, lineMat); line.renderOrder = 7; scene.add(line); activeHighlights.push(line);
-            tweenObject({ duration: durationMs * 0.9, owner: line, onUpdate: (v) => { try { lineMat.opacity = 0.9 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(line); line.geometry.dispose(); lineMat.dispose(); } catch (_) { } } });
-        }
-    } catch (_) { }
-}
-
-function pulseGiantAt(index, durationMs = 600) {
-    try {
-        const pulse = (group) => { const node = group?.children?.[index]; const mesh = node?.children?.[0]; const mat = mesh?.material; if (!mat) return; const base = mat.opacity ?? 1; tweenObject({ duration: durationMs, owner: mat, onUpdate: (v) => { try { mat.transparent = true; mat.opacity = base * (0.6 + 0.4 * Math.sin(v * Math.PI)); } catch (_) { } }, onComplete: () => { try { mat.opacity = base; } catch (_) { } } }); };
-        if (melodyGiantGroup) pulse(melodyGiantGroup); if (bassGiantGroup) pulse(bassGiantGroup);
-    } catch (_) { }
-}
-
-function shimmerMaterial(mat) {
-    if (!mat) return;
-    const hadTransparent = !!mat.transparent;
-    const origOpacity = typeof mat.opacity === 'number' ? mat.opacity : 1;
-    try { mat.transparent = true; mat.opacity = Math.max(0, Math.min(1, origOpacity * 0.6)); } catch (_) { }
-    setTimeout(() => { try { mat.opacity = origOpacity; mat.transparent = hadTransparent; } catch (_) { } }, 160);
-}
-
-function shimmerMelodyTopFaces() {
-    for (const cube of lineup) {
-        try {
-            const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
-            const topMat = mats[2] || mats[0];
-            shimmerMaterial(topMat);
         } catch (_) { }
-    }
-}
-
-function shimmerBassBottomFaces() {
-    for (const cube of lineup) {
+        // TEMP DEBUG: log one pivot angle occasionally
         try {
-            const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
-            const bottomMat = mats[3] || mats[0];
-            shimmerMaterial(bottomMat);
+            if (melodyLaneGroup && melodyLaneGroup.children.length) {
+                const a = melodyLaneGroup.children[0].rotation.x;
+                if ((Math.floor(now / 300) % 10) === 0) { /* throttle */ }
+            }
         } catch (_) { }
-    }
-}
-
-function shimmerMelodyLane() {
-    if (!melodyLaneGroup) return;
-    try {
-        melodyLaneGroup.children.forEach(node => {
-            // child[1] is the diamond mesh in makeLaneNode
-            const diamond = node.children?.[1];
-            if (diamond && diamond.material) shimmerMaterial(diamond.material);
-        });
-    } catch (_) { }
-}
-
-// Ultra flash: big radial ring + confetti pulse at center of lineup
-function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
-    try {
-        const ringGeo = new THREE.RingGeometry(0.2, 0.22, 48);
-        const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
-        const ring = new THREE.Mesh(ringGeo, ringMat);
-        ring.position.set(0, 0.01, 0);
-        ring.rotation.x = -Math.PI / 2;
-        scene.add(ring);
-        tweenObject({
-            duration: durationMs, owner: ring, onUpdate: (v) => {
-                try { ring.scale.setScalar(1 + v * 6); ringMat.opacity = 0.8 * (1 - v); } catch (_) { }
-            }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); ring.material.dispose(); } catch (_) { } }
-        });
-
-        // Confetti sprinkles
-        for (let i = 0; i < 24; i++) {
-            const c = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.02), new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
-            c.position.set((Math.random() - 0.5) * 0.8, 0.02, (Math.random() - 0.5) * 0.8);
-            c.rotation.x = -Math.PI / 2; c.rotation.z = Math.random() * Math.PI;
-            scene.add(c);
-            const dx = (Math.random() - 0.5) * 3.5; const dz = (Math.random() - 0.5) * 3.5;
-            const start = c.position.clone(); const end = start.clone().add(new THREE.Vector3(dx, 0, dz));
-            tweenObject({
-                duration: 620 + Math.random() * 260, owner: c, onUpdate: (v) => {
-                    try { c.position.lerpVectors(start, end, v); c.material.opacity = 0.9 * (1 - v); c.rotation.z += 0.4; } catch (_) { }
-                }, onComplete: () => { try { scene.remove(c); c.geometry.dispose(); c.material.dispose(); } catch (_) { } }
-            });
+        // Update ground title opacities based on camera angle relative to plane y=0
+        let belowAlpha = 0;
+        if (melodyMat && bassMat) {
+            const toTarget = camera.position.clone().sub(controls.target);
+            const horiz = Math.hypot(toTarget.x, toTarget.z);
+            const angle = Math.atan2(toTarget.y, horiz); // signed radians (positive above, negative below)
+            const absDeg = Math.abs(angle) * (180 / Math.PI);
+            const t = Math.min(1, absDeg / 30);
+            const alpha = 0.4 * t;
+            if (toTarget.y >= 0) { // above plane
+                melodyMat.opacity = alpha; bassMat.opacity = 0; belowAlpha = 0;
+            } else { // below plane
+                melodyMat.opacity = 0; bassMat.opacity = alpha; belowAlpha = alpha;
+            }
         }
-    } catch (_) { }
-}
-
-function pulseLockIcons(kind, durationMs = 400) {
-    try {
-        const targets = kind === 'melody' ? [melodyLockLeft, melodyLockRight] : [bassLockLeft, bassLockRight];
-        targets.forEach(node => {
-            if (!node) return;
-            const s0 = node.scale.x;
-            tweenObject({ duration: durationMs, owner: node, onUpdate: (v) => { try { const s = s0 * (1 + 0.3 * Math.sin(v * Math.PI)); node.scale.setScalar(s); } catch (_) { } }, onComplete: () => { try { node.scale.setScalar(s0); } catch (_) { } } });
-        });
-    } catch (_) { }
-}
-
-function makeLaneDiamond(colorHex = 0xffffff) {
-    const g = new THREE.CircleGeometry(0.08, 4);
-    const m = new THREE.MeshBasicMaterial({ color: colorHex });
-    const mesh = new THREE.Mesh(g, m);
-    mesh.rotation.z = Math.PI / 4; // diamond look
-    return mesh;
-}
-
-function makeLaneNode(roman, colorHex) {
-    const group = new THREE.Group();
-    const circle = new THREE.Mesh(new THREE.CircleGeometry(0.11, 24), new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 }));
-    const diamond = makeLaneDiamond(0xffffff);
-    group.add(circle); group.add(diamond);
-    group.userData = { roman };
-    return group;
-}
-
-function clearLockedLines() {
-    lockedMelody = null; lockedBass = null;
-    if (melodyLaneGroup) { scene.remove(melodyLaneGroup); melodyLaneGroup = null; }
-    if (bassLaneGroup) { scene.remove(bassLaneGroup); bassLaneGroup = null; }
-    if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
-}
-
-function renderMelodyLane() {
-    if (melodyLaneGroup) {
-        try { melodyLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
-        scene.remove(melodyLaneGroup); melodyLaneGroup = null;
+        // Link shelf plane opacity to camera being below the plane for legibility
+        if (shelfPlane && shelfPlane.material && typeof belowAlpha === 'number') {
+            shelfPlane.material.transparent = true;
+            shelfPlane.material.opacity = Math.max(shelfPlane.material.opacity ?? 0, belowAlpha);
+            // When above plane, keep the original texture fully visible (no forced fade)
+            if (belowAlpha === 0) shelfPlane.material.opacity = 1.0;
+        }
+        // Darkening plane: smoothly increase up to 0.20 opacity at -25° and below
+        if (darkPlane && darkPlane.material) {
+            const toTarget = camera.position.clone().sub(controls.target);
+            const horiz = Math.hypot(toTarget.x, toTarget.z);
+            const angle = Math.atan2(toTarget.y, horiz); // signed
+            let darkT = 0;
+            if (angle < 0) {
+                const deg = Math.abs(angle) * (180 / Math.PI);
+                darkT = Math.min(1, deg / 25);
+            }
+            darkPlane.material.opacity = 0.20 * darkT;
+        }
+        // Subtle shimmer for background title (non-intrusive)
+        if (bgTitleMesh && bgTitleMesh.material) {
+            const m = bgTitleMesh.material;
+            const t = now * 0.00015; // very slow
+            const pulse = 0.28 + 0.05 * (0.5 + 0.5 * Math.sin(t * Math.PI * 2));
+            m.opacity = pulse; // oscillate around ~30%
+        }
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
     }
-    melodyLaneGroup = new THREE.Group();
-    for (let i = 0; i < lineup.length; i++) {
-        const cube = lineup[i];
-        const p = new THREE.Vector3(); cube.getWorldPosition(p);
-        const color = borderColorForRoman(cube.userData.roman);
-        const pivot = new THREE.Group();
-        const node = makeLaneNode(cube.userData.roman, color);
-        node.position.set(0, 0.3, 0); // hinge at bottom tip (feet)
-        node.renderOrder = 3; // draw atop ground
-        node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
-        pivot.add(node);
-        const half = (cubeSize * cube.scale.x) / 2;
-        // Offset a hair away from cube to avoid z-fighting when rotating
-        pivot.position.set(p.x, 0.001, p.z - half - 0.08);
-        // Start flat on ground; animate to stand up (to 0)
-        pivot.rotation.x = -Math.PI / 2;
-        melodyLaneGroup.add(pivot);
-    }
-    scene.add(melodyLaneGroup);
-}
+    animate();
 
-function renderBassLane() {
-    if (bassLaneGroup) {
-        try { bassLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
-        scene.remove(bassLaneGroup); bassLaneGroup = null;
+    function physicsRepelNearFront(draggingCube) {
+        const zoneZ = FRONT_ROW_FORWARD_Z + 0.6;
+        const nodes = [...lineup];
+        if (!nodes.includes(draggingCube)) nodes.push(draggingCube);
+        const active = nodes.filter(c => Math.abs(c.position.z) <= zoneZ + 0.001);
+        if (active.length <= 1) return;
+        // Prep velocities
+        for (const c of active) {
+            if (!c.userData.vel) c.userData.vel = { x: 0, z: 0 };
+        }
+        // Pairwise repulsion (Coulomb-like), do not push the dragging cube directly
+        const k = 0.08; // force constant
+        const minDist = gridSize * 0.9;
+        for (let i = 0; i < active.length; i++) {
+            for (let j = i + 1; j < active.length; j++) {
+                const a = active[i], b = active[j];
+                const dx = b.position.x - a.position.x;
+                const dz = b.position.z - a.position.z;
+                let dist = Math.hypot(dx, dz);
+                if (dist < 1e-6) dist = 1e-6;
+                const nx = dx / dist, nz = dz / dist;
+                // Apply only when inside an influence radius
+                const influence = Math.max(0, (minDist - dist) / minDist);
+                if (influence <= 0) continue;
+                const f = k * influence * influence; // smooth non-linear falloff
+                const fx = nx * f, fz = nz * f;
+                if (a !== draggingCube) { a.userData.vel.x -= fx; a.userData.vel.z -= fz; }
+                if (b !== draggingCube) { b.userData.vel.x += fx; b.userData.vel.z += fz; }
+            }
+        }
+        // Integrate velocities with damping
+        const damping = 0.85;
+        for (const c of active) {
+            if (c === draggingCube) continue;
+            const v = c.userData.vel;
+            const nextX = THREE.MathUtils.clamp(c.position.x + v.x, -8, 8);
+            const nextZ = THREE.MathUtils.clamp(c.position.z + v.z, shelfZ, FRONT_ROW_FORWARD_Z);
+            c.position.x = THREE.MathUtils.lerp(c.position.x, nextX, 0.5);
+            c.position.z = THREE.MathUtils.lerp(c.position.z, nextZ, 0.5);
+            v.x *= damping; v.z *= damping;
+            // Keep on front plane for y/scale
+            c.position.y = THREE.MathUtils.lerp(c.position.y, 0, 0.4);
+        }
     }
-    bassLaneGroup = new THREE.Group();
-    for (let i = 0; i < lineup.length; i++) {
-        const cube = lineup[i];
-        const p = new THREE.Vector3(); cube.getWorldPosition(p);
-        const color = borderColorForRoman(cube.userData.roman);
-        const pivot = new THREE.Group();
-        const node = makeLaneNode(cube.userData.roman, color);
-        node.position.set(0, -0.3, 0); // hinge at top tip (head)
-        node.renderOrder = 3; node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
-        pivot.add(node);
-        const half = (cubeSize * cube.scale.x) / 2;
-        pivot.position.set(p.x, 0.001, p.z + half + 0.02); // front edge
-        // Start flat; animate to +PI/2 when locking bass
-        pivot.rotation.x = Math.PI / 2;
-        bassLaneGroup.add(pivot);
-    }
-    scene.add(bassLaneGroup);
-}
 
-function animateStandUpLanes() {
-    // Animate melody pivots to stand up 90° and bass pivots to stand down 90° from ground
-    if (melodyLaneGroup) {
-        for (const pivot of melodyLaneGroup.children) {
-            const from = pivot.rotation.x;
-            const to = 0; // stand vertical from flat start (-PI/2)
+    function enforceRestZones() {
+        // Clamp all non-dragging cubes to valid rest zones only
+        const all = [...cubes, ...shelfCubes];
+        for (const c of all) {
+            if (c === dragging) continue;
+            if (lineup.includes(c)) {
+                // Front row exact plane
+                c.position.y = 0;
+                c.position.z = 0;
+                // Only snap rotation when not animating and already near a quadrant
+                if (!hasActiveTweenFor(c)) {
+                    const e = new THREE.Euler().setFromQuaternion(c.quaternion, 'XYZ');
+                    const z = e.z;
+                    const snappedZ = Math.round(z / (Math.PI / 2)) * (Math.PI / 2);
+                    if (Math.abs(snappedZ - z) < 0.02) {
+                        const q = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), snappedZ);
+                        c.quaternion.copy(q);
+                    }
+                }
+            } else if (c.userData?.isShelf) {
+                if (adjustMode) continue; // allow free placement while editing the shelf map
+                // Exact shelf origin if available
+                const r = c.userData.roman;
+                const origin = shelfOriginByRoman[r];
+                if (origin?.position) {
+                    c.position.copy(origin.position);
+                    c.scale.setScalar(origin.scale ?? c.scale.x);
+                    // Ensure shelf rotation restored
+                    if (origin.quaternion) c.quaternion.copy(origin.quaternion);
+                } else {
+                    c.position.z = shelfZ;
+                }
+            }
+        }
+    }
+
+    // Simple WebAudio chord playback
+    function ensureAudio() {
+        if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+        return audioCtx;
+    }
+    const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
+    function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
+    function parseNoteName(name) {
+        // e.g., C, C#, Db, Bb; infer octave around 4
+        const n = name.replace(/[^A-G#b]/g, '');
+        const idx = NOTE_INDEX[n] ?? 0; return { idx, octave: 4 };
+    }
+    // Pitch-class helpers
+    function pcOf(name) { return parseNoteName(name).idx; }
+    function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+    function freqToMidi(f) { return Math.round(69 + 12 * Math.log2(f / 440)); }
+
+    // Snap a target MIDI note to the octave closest to a reference MIDI
+    function nearestOctave(targetMidi, referenceMidi) {
+        if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+        const k = Math.round((referenceMidi - targetMidi) / 12);
+        return targetMidi + 12 * k;
+    }
+
+    // Voice leading 2 (tonal-assisted): prefer interval steps up to a 3rd/4th; fallback to nearest octave
+    function voiceLeadMidi(targetMidi, referenceMidi) {
+        if (voiceLeadingMode !== 'vl2') return nearestOctave(targetMidi, referenceMidi);
+        if (referenceMidi == null || !isFinite(referenceMidi)) return targetMidi;
+        // Evaluate target in a window of +/- 2 octaves and pick minimal absolute semitone distance
+        let best = targetMidi, bestDist = Infinity;
+        for (let o = -2; o <= 2; o++) {
+            const cand = targetMidi + o * 12;
+            const d = Math.abs(cand - referenceMidi);
+            if (d < bestDist) { bestDist = d; best = cand; }
+        }
+        return best;
+    }
+
+    // Chord bed: lock voices into C4..C5 regardless of chord
+    function buildLockedChordBedMidis(roman, includeSeventh) {
+        const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const use = includeSeventh ? names.slice(0, 4) : names.slice(0, 3);
+        const baseC4 = 60; // MIDI C4
+        const midis = use.map(n => baseC4 + pcOf(n));
+        midis.sort((a, b) => a - b);
+        // Ensure within [60, 71]
+        return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+    }
+
+    // Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
+    function getBassMidiForObject(obj) {
+        const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+        const rootPc = pcOf(names[0]);
+        const bottomPc = pcOf(names[r]);
+        const baseC2 = 36; // low register
+        const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
+        const diff = (bottomPc - rootPc + 12) % 12;
+        return rootBaseMidi + diff; // within one octave above root
+    }
+
+    // Melody: map top-face tone into a higher octave anchored to the chord root
+    function getMelodyMidiForObject(obj) {
+        const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+        const rootPc = pcOf(names[0]);
+        const topPc = pcOf(names[(r + 2) % 4]);
+        const baseC5 = 72; // higher register
+        const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
+        const diff = (topPc - rootPc + 12) % 12;
+        return rootBaseMidi + diff;
+    }
+
+    function makeNumberPlane(text, width = 0.9) {
+        const size = 512;
+        const c = document.createElement('canvas'); c.width = size; c.height = size;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, size, size);
+        ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = '#111';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '900 360px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.strokeStyle = '#111'; ctx.lineWidth = 8; ctx.strokeText(text, size / 2, size / 2 + 20);
+        ctx.fillText(text, size / 2, size / 2 + 20);
+        const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, side: THREE.DoubleSide });
+        const aspect = 1.0;
+        const h = width / aspect;
+        const geo = new THREE.PlaneGeometry(width, h);
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.z = 0.002;
+        return mesh;
+    }
+
+    // Helper: get transposed top-face note name for a cube in current key
+    function getTopNoteNameForObject(obj) {
+        const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
+        const names = transposeNotes(tones, currentKey);
+        const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+        return names[(r + 2) % 4];
+    }
+
+    function getTopDegreeForObject(obj) {
+        const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
+        const roman = obj.userData.roman;
+        const degs = degreeSets[roman] || ['1', '3', '5', '7'];
+        return degs[(r + 2) % 4];
+    }
+
+    // Render a large NVX Diamond Font string as a billboard in 3D space
+    function showNVXDebugText(text) {
+        try { if (nvxDebugTextMesh) { scene.remove(nvxDebugTextMesh); nvxDebugTextMesh.material?.map?.dispose?.(); nvxDebugTextMesh.material?.dispose?.(); nvxDebugTextMesh.geometry?.dispose?.(); nvxDebugTextMesh = null; } } catch (_) { }
+        const w = 2048, h = 512;
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, w, h);
+        ctx.fillStyle = 'rgba(0,0,0,0)'; ctx.fillRect(0, 0, w, h);
+        ctx.fillStyle = '#000000';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.font = '900 300px NVXDiamond, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial';
+        ctx.fillText(text, w / 2, h / 2);
+        const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.needsUpdate = true;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+        const aspect = w / h; const width = 10; const height = width / aspect;
+        const geo = new THREE.PlaneGeometry(width, height);
+        nvxDebugTextMesh = new THREE.Mesh(geo, mat);
+        nvxDebugTextMesh.position.set(0, 1.8, 0.6);
+        nvxDebugTextMesh.renderOrder = 6;
+        scene.add(nvxDebugTextMesh);
+        // Expose a helper for manual updates
+        try { window.nvxText = (t) => showNVXDebugText(String(t || '')); } catch (_) { }
+    }
+    function playChordForObject(obj) {
+        const ctx = ensureAudio();
+        const now = ctx.currentTime;
+        const duration = 1.1;
+
+        if (!instrumentsReady) { console.log('[obs-cubes] Instruments still loading...'); return; }
+
+        // Master
+        const master = ctx.createGain(); master.gain.value = 0.8; master.connect(ctx.destination);
+
+        // Layers
+        const chordBus = ctx.createGain(); chordBus.gain.value = 0.18; chordBus.connect(master);
+        const bassBus = ctx.createGain(); bassBus.gain.value = 0.3; bassBus.connect(master);
+        const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.26; melodyBus.connect(master);
+
+        // Envelope helper
+        const env = (g, t0, d) => {
+            g.gain.setValueAtTime(0.0, t0);
+            g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01);
+            g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03);
+            g.gain.linearRampToValueAtTime(0.0, t0 + d);
+        };
+
+        // Chord bed: locked octave C4..C5; when melody is locked for this cube, drop the highest voice from the bed to avoid overriding the locked melody
+        const chordMidis = buildLockedChordBedMidis(obj.userData.roman, withSeventh);
+        const idxForObj = lineup.indexOf(obj);
+        const bedMidis = (lockedMelody && idxForObj >= 0 && lockedMelody[idxForObj]) ? chordMidis.slice(0, Math.max(1, chordMidis.length - 1)) : chordMidis;
+        if (sfChord && sfChord.play) {
+            bedMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+        } else {
+            console.error('[obs-cubes] Chord instrument missing; skipping chord bed.');
+        }
+
+        // Bass: if locked, use locked line; else use cube bottom face
+        if (bassEnabled) {
+            let bassMidi = getBassMidiForObject(obj);
+            const idx = lineup.indexOf(obj);
+            if (lockedBass && idx >= 0 && lockedBass[idx] && typeof lockedBass[idx].midi === 'number') bassMidi = lockedBass[idx].midi;
+            if (sfBass && sfBass.play) {
+                sfBass.play(bassMidi, now, { duration, gain: 0.34 });
+            } else {
+                console.error('[obs-cubes] Bass instrument missing; skipping bass note.');
+            }
+        }
+
+        // Melody: if locked, use locked line; else use cube top face
+        if (melodyEnabled) {
+            let melMidi = getMelodyMidiForObject(obj);
+            const idx = lineup.indexOf(obj);
+            if (lockedMelody && idx >= 0 && lockedMelody[idx] && typeof lockedMelody[idx].midi === 'number') melMidi = lockedMelody[idx].midi;
+            if (sfMelody && sfMelody.play) {
+                sfMelody.play(melMidi, now, { duration, gain: 0.3 });
+            } else {
+                console.error('[obs-cubes] Melody instrument missing; skipping melody note.');
+            }
+        }
+        try { bridge.emit('chordPlayed', { roman: obj.userData?.roman, key: currentKey, withSeventh, bassEnabled, melodyEnabled, rotationIndex: obj.userData?.rotationIndex || 0 }); } catch (_) { }
+    }
+
+    // Shelf-click sequencing
+    const shelfClickQueue = [];
+    let processingShelfQueue = false;
+    async function enqueueShelfAdd(shelfMesh) {
+        shelfClickQueue.push(shelfMesh);
+        if (!processingShelfQueue) processShelfQueue();
+    }
+    async function processShelfQueue() {
+        processingShelfQueue = true;
+        while (shelfClickQueue.length) {
+            const shelf = shelfClickQueue.shift();
+            await animateShelfClickAdd(shelf);
+        }
+        processingShelfQueue = false;
+    }
+    async function animateShelfClickAdd(shelf) {
+        try {
+            const clone = new THREE.Mesh(shelf.geometry.clone(), shelf.material.map(m => m.clone ? m.clone() : m));
+            clone.userData = { ...shelf.userData, isShelf: false, rotationIndex: 0, desiredRotationDelta: (shelf.userData?.desiredRotationDelta || 0) };
+            // Start exactly at shelf origin
+            clone.position.copy(shelf.position);
+            clone.scale.copy(shelf.scale);
+            // CRITICAL: front-row layer for clones
+            try { setCubeLayerRecursive(clone, 1); } catch (_) { }
+            addQuadrantOverlay(clone);
+            scene.add(clone);
+            cubes.push(clone);
+            // Compute intended target slot without adding to lineup yet (avoid snap by rest logic)
+            const xs = computeSlotPositions(lineup.length + 1);
+            const targetX = xs[lineup.length];
+            // Animate from shelf Y/Z to front row smoothly with scale normalization
+            clone.userData.animatingIn = true;
+            const s0 = clone.scale.x;
+            // Smooth position/scale; apply desiredRotationDelta once if provided
+            const startQuat = clone.quaternion.clone();
+            // Copy delta chosen on the shelf object (support zero)
+            let deltaSteps = (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta') ? (shelf.userData.desiredRotationDelta || 0) : 0);
+            deltaSteps = ((deltaSteps % 4) + 4) % 4;
+            const targetQuat = startQuat.clone().multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), -deltaSteps * (Math.PI / 2)));
             tweenObject({
-                duration: 800, owner: pivot, onUpdate: (v) => {
-                    pivot.rotation.x = from + (to - from) * v;
-                    // Debug: briefly scale up to confirm animation
-                    const s = 1 + 0.02 * Math.sin(v * Math.PI);
-                    pivot.scale.set(s, s, s);
+                duration: 520, owner: clone, onUpdate: (v) => {
+                    // Position ease
+                    clone.position.x = THREE.MathUtils.lerp(clone.position.x, targetX, v);
+                    clone.position.y = THREE.MathUtils.lerp(clone.position.y, 0, v);
+                    clone.position.z = THREE.MathUtils.lerp(clone.position.z, 0, v);
+                    // Scale ease toward front-row normalized size
+                    const s = THREE.MathUtils.lerp(s0, FRONT_ROW_SCALE, v);
+                    clone.scale.setScalar(s);
+                    // Rotation ease (none)
+                    clone.quaternion.slerpQuaternions(startQuat, targetQuat, v);
                 }
             });
-        }
+            // After animation completes, add to lineup and reflow
+            setTimeout(() => {
+                if (!lineup.includes(clone)) lineup.push(clone);
+                clone.userData.animatingIn = false;
+                // Apply rotation index delta exactly once
+                if (deltaSteps) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+                reflowLineup();
+            }, 470);
+            // Play with intended inversion immediately
+            if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
+            playChordForObject(clone);
+            addProgressionPointFromCube(shelf); // record from shelf origin too
+            await new Promise(r => setTimeout(r, 180));
+        } catch (_) { }
     }
-    if (bassLaneGroup) {
-        for (const pivot of bassLaneGroup.children) {
-            const from = pivot.rotation.x;
-            const to = 0; // stand vertical from +PI/2
-            tweenObject({ duration: 800, owner: pivot, onUpdate: (v) => { pivot.rotation.x = from + (to - from) * v; } });
-        }
-    }
-}
 
-// TEST: spin melody lane pivots for visibility diagnostics
-function spinMelodyLane(durationMs = 10000, rotations = 6) {
-    if (!melodyLaneGroup) return;
-    for (const pivot of melodyLaneGroup.children) {
-        const from = pivot.rotation.x;
-        const to = from + Math.PI * 2 * rotations;
-        cancelTweensFor(pivot);
-        tweenObject({
-            duration: durationMs, owner: pivot, onUpdate: (v) => {
-                pivot.rotation.x = from + (to - from) * v;
-            }
-        });
-    }
-}
-
-function updateLanePositions() {
-    if (melodyLaneGroup && melodyLaneGroup.children.length === lineup.length) {
-        for (let i = 0; i < lineup.length; i++) {
-            const cube = lineup[i]; const pivot = melodyLaneGroup.children[i];
+    let progressionEnabled = false;
+    let progressionArrows = [];
+    let progressionPoints = [];
+    let progressionBpm = 120; // default metronome BPM
+    let beatsPerChord = 4;    // 4 beats per chord default
+    let playButtonMesh = null;
+    // legacy var removed (we now compute via bpm & beatsPerChord)
+    // Smooth camera follow of active chord
+    let cameraFocusTween = null;
+    function focusCameraOnCube(cube, durationMs = 700) {
+        try {
             const p = new THREE.Vector3(); cube.getWorldPosition(p);
-            const half = (cubeSize * cube.scale.x) / 2;
-            pivot.position.set(p.x, 0.001, p.z - half - 0.02);
-        }
+            const camFrom = camera.position.clone();
+            const tgtFrom = controls.target.clone();
+            // Dolly with the active chord: slide horizontally and push in closer on Z
+            const targetTo = new THREE.Vector3(p.x, 0.6, 0);
+            const cameraTo = new THREE.Vector3(p.x, 0.85, 7.6);
+            if (cameraFocusTween) cameraFocusTween.cancelled = true;
+            cameraFocusTween = tweenObject({
+                duration: durationMs, owner: camera, onUpdate: (v) => {
+                    camera.position.lerpVectors(camFrom, cameraTo, v);
+                    controls.target.lerpVectors(tgtFrom, targetTo, v);
+                }
+            });
+        } catch (_) { }
     }
-    if (bassLaneGroup && bassLaneGroup.children.length === lineup.length) {
-        for (let i = 0; i < lineup.length; i++) {
-            const cube = lineup[i]; const pivot = bassLaneGroup.children[i];
-            const p = new THREE.Vector3(); cube.getWorldPosition(p);
-            const half = (cubeSize * cube.scale.x) / 2;
-            pivot.position.set(p.x, 0.001, p.z + half + 0.02);
-        }
-    }
-}
+    // Metronome/tempo UI + engine
+    let tempoUi = null; let tempoLabel = null; let tempoSlider = null; let metroBtn = null;
+    let metroOn = false; let metroSynth = null; let metroLoop = null;
 
-function lockInMelody() {
-    if (lineup.length === 0) return;
-    // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
-    const rotating = lineup.some(c => hasActiveTweenFor(c));
-    if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
-    // Re-verify each cube's current orientation → rotationIndex from quaternion
-    for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
-    // Capture current melody using the freshly verified rotationIndex
-    const snapshot = [];
-    for (let i = 0; i < lineup.length; i++) {
-        const cube = lineup[i];
-        // Use helper that references rotationIndex for top face
-        const midiTop = (() => {
-            const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
-            const names = transposeNotes(tones, currentKey);
-            const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topPc = pcOf(names[(r + 2) % 4]);
-            let m = 72 + ((topPc - 0 + 12) % 12);
-            while (m > 84) m -= 12; while (m < 60) m += 12;
-            return m;
-        })();
-        snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
+    function readFlagsFromUrl() {
+        try {
+            const url = new URL(window.location.href);
+            const arrows = url.searchParams.get('arrows');
+            const bpm = url.searchParams.get('bpm');
+            const sf = url.searchParams.get('sf');
+            if (arrows === '1') progressionEnabled = true;
+            if (bpm && !isNaN(Number(bpm))) progressionBpm = Math.max(10, Math.min(240, Number(bpm)));
+            if (sf) { try { setSfBase(sf); } catch (_) { } }
+        } catch (_) { /* ignore */ }
     }
-    lockedMelody = snapshot;
-    renderMelodyLane();
-    ultraFlash(0x66ccff, 540);
-    pulseLockIcons('melody');
-    melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
-    if (lockedBass && lockedBass.length === lineup.length) {
-        setTimeout(() => {
-            for (const cube of lineup) {
-                cube.userData.rotationIndex = 0;
-                const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
-                animateQuaternion(cube, to, 280);
+
+    // Tempo/Metronome UI
+    function ensureTempoUi() {
+        if (tempoUi) return;
+        const box = document.createElement('div');
+        box.style.cssText = 'position:fixed;top:10px;right:10px;background:rgba(20,20,20,0.85);color:#fff;padding:8px 10px;border-radius:8px;font:12px/1.2 system-ui, -apple-system, Segoe UI, Roboto;z-index:20000;display:flex;gap:8px;align-items:center;';
+        const label = document.createElement('span'); label.textContent = 'Tempo'; tempoLabel = label;
+        const slider = document.createElement('input'); slider.type = 'range'; slider.min = '30'; slider.max = '240'; slider.value = String(progressionBpm); slider.style.width = '120px';
+        const val = document.createElement('span'); val.textContent = `${progressionBpm} BPM`;
+        slider.oninput = () => { progressionBpm = Math.max(30, Math.min(240, Number(slider.value) || 120)); val.textContent = `${progressionBpm} BPM`; };
+        const btn = document.createElement('button'); btn.textContent = 'Metronome: Off'; btn.style.cssText = 'background:#333;color:#fff;border:1px solid #666;border-radius:6px;padding:4px 8px;cursor:pointer;';
+        btn.onclick = async () => {
+            try { if (window.Tone) await window.Tone.start(); } catch (_) { }
+            if (!metroSynth && window.Tone) { metroSynth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.08, sustain: 0, release: 0.05 } }).toDestination(); }
+            if (!metroLoop && window.Tone) {
+                metroLoop = new window.Tone.Loop((time) => { try { metroSynth && metroSynth.triggerAttackRelease('C3', 0.05, time, 0.7); } catch (_) { } }, '4n');
             }
-            maybeEnterStageMode();
-        }, 1000);
+            if (!metroOn) {
+                try { window.Tone.Transport.bpm.value = progressionBpm; metroLoop?.start(0); window.Tone.Transport.start(); } catch (_) { }
+                btn.textContent = 'Metronome: On'; metroOn = true;
+            } else {
+                try { metroLoop?.stop(0); window.Tone.Transport.stop(); } catch (_) { }
+                btn.textContent = 'Metronome: Off'; metroOn = false;
+            }
+        };
+        box.appendChild(label); box.appendChild(slider); box.appendChild(val); box.appendChild(btn);
+        document.body.appendChild(box);
+        tempoUi = box; tempoSlider = slider; metroBtn = btn;
     }
-    try {
-        if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
-        melodyGiantGroup = new THREE.Group();
-        const xs = computeSlotPositions(lineup.length);
-        for (let i = 0; i < lineup.length; i++) {
-            const cube = lineup[i];
-            // Ensure visual index is in sync before deciding topIdx
-            syncRotationIndexFromQuaternion(cube);
-            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const topIdx = (rIdx + 2) % 4;
-            const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
-            const ROT_DEGS = [0, 270, 180, 90];
-            const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
-            const symbol = degs[topIdx];
-            const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
-            try { faceMat.side = THREE.DoubleSide; } catch (_) { }
-            const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
-            // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
-            const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
-            const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
-            plane.rotation.z = melUpright;
-            plane.userData.uprightZ = melUpright;
-            plane.position.z = 0.002;
-            const group = new THREE.Group();
-            group.add(plane);
+
+    function createPlayButton() {
+        if (playButtonMesh) return;
+        // Flat 2D button on the ground near the bottom center
+        const size = 1.6;
+        const c = document.createElement('canvas'); c.width = 256; c.height = 256;
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, 256, 256);
+        // background circle
+        ctx.fillStyle = '#2b2b2b'; ctx.beginPath(); ctx.arc(128, 128, 120, 0, Math.PI * 2); ctx.fill();
+        // play triangle
+        ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.moveTo(108, 84); ctx.lineTo(108, 172); ctx.lineTo(180, 128); ctx.closePath(); ctx.fill();
+        const tex = new THREE.CanvasTexture(c); tex.needsUpdate = true; tex.colorSpace = THREE.SRGBColorSpace;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: false });
+        const geo = new THREE.PlaneGeometry(size, size);
+        playButtonMesh = new THREE.Mesh(geo, mat);
+        playButtonMesh.rotation.x = -Math.PI / 2; // flat to ground
+        playButtonMesh.position.set(0, 0.001, -6.2); // below titles nearer bottom
+        playButtonMesh.userData.isPlayButton = true;
+        playButtonMesh.renderOrder = 5;
+        scene.add(playButtonMesh);
+    }
+
+    function clearProgressionArrows() {
+        for (const a of progressionArrows) scene.remove(a);
+        progressionArrows = [];
+        progressionPoints = [];
+    }
+
+    function drawArrow(from, to) {
+        const dir = new THREE.Vector3().subVectors(to, from); const len = dir.length(); if (len < 0.01) return;
+        const arrow = new THREE.ArrowHelper(dir.clone().normalize(), from, len, 0xffe066, 0.25, 0.15);
+        arrow.cone.material.transparent = true; arrow.line.material.transparent = true;
+        arrow.cone.material.opacity = 0.85; arrow.line.material.opacity = 0.85;
+        // Simple shimmer by oscillating opacity in animate()
+        arrow.userData.shimmer = { base: 0.75, amp: 0.15, phase: Math.random() * Math.PI * 2 };
+        progressionArrows.push(arrow);
+        scene.add(arrow);
+    }
+
+    function addProgressionPointFromCube(cube) {
+        if (!progressionEnabled || !cube) return;
+        const p = new THREE.Vector3(); cube.getWorldPosition(p); p.y = p.y + 0.6;
+        if (progressionPoints.length > 0) {
+            const prev = progressionPoints[progressionPoints.length - 1];
+            drawArrow(prev.clone(), p.clone());
+        }
+        progressionPoints.push(p);
+        if (progressionPoints.length > 200) progressionPoints.shift();
+    }
+
+    function updateProgressionArrows() {
+        clearProgressionArrows();
+        if (!progressionEnabled) return;
+        // Recreate arrows from stored points
+        for (let i = 0; i < progressionPoints.length - 1; i++) drawArrow(progressionPoints[i], progressionPoints[i + 1]);
+    }
+
+    // Active chord highlight effects
+    const activeHighlights = [];
+    function highlightChordEffect(cube, durationMs = 800) {
+        try {
             const p = new THREE.Vector3(); cube.getWorldPosition(p);
             const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
-            const zBack = p.z - half - 0.002;
-            const yTop = p.y + half;
-            const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
-            const centerY = yTop + diamondHalf;
-            group.position.set(p.x, centerY, zBack);
-            group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
-            melodyGiantGroup.add(group);
-        }
-        melodyGiantGroup.visible = !!(showGiantMelodyEl?.checked ?? true);
-        scene.add(melodyGiantGroup);
-    } catch (_) { }
-}
-
-function lockInBass() {
-    if (lineup.length === 0) return;
-    lockedBass = [];
-    for (let i = 0; i < lineup.length; i++) {
-        const cube = lineup[i];
-        let midi = getBassMidiForObject(cube);
-        while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
-        lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
-    }
-    renderBassLane();
-    ultraFlash(0xffcc66, 540);
-    pulseLockIcons('bass');
-    bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
-    // If both voices locked, normalize all cubes to root-down orientation for easy reading
-    if (lockedMelody && lockedMelody.length === lineup.length) {
-        setTimeout(() => {
-            for (const cube of lineup) {
-                cube.userData.rotationIndex = 0;
-                const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
-                animateQuaternion(cube, to, 280);
+            const ringGeo = new THREE.RingGeometry(0.62, 0.82, 48);
+            const mat = new THREE.MeshBasicMaterial({ color: 0xffd34d, transparent: true, opacity: 0.95, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+            const ring = new THREE.Mesh(ringGeo, mat);
+            ring.position.set(p.x, p.y, p.z + half + 0.01);
+            ring.rotation.set(0, 0, 0);
+            ring.renderOrder = 6;
+            scene.add(ring);
+            activeHighlights.push(ring);
+            // Animate scale/opacity out
+            const fromScale = 0.1; const toScale = 1.4;
+            ring.scale.set(fromScale, fromScale, fromScale);
+            tweenObject({ duration: durationMs, owner: ring, onUpdate: (v) => { try { const sc = fromScale + (toScale - fromScale) * v; ring.scale.set(sc, sc, sc); mat.opacity = 0.95 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); mat.dispose(); } catch (_) { } } });
+            // Spark burst
+            for (let i = 0; i < 12; i++) {
+                const d = Math.random() * 0.45 + 0.35; const dir = (Math.PI * 2 * i) / 12 + Math.random() * 0.2;
+                const lineGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x, p.y, p.z + half + 0.012), new THREE.Vector3(p.x + Math.cos(dir) * d, p.y + Math.sin(dir) * d, p.z + half + 0.012)]);
+                const lineMat = new THREE.LineBasicMaterial({ color: 0xfff1a8, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending });
+                const line = new THREE.Line(lineGeo, lineMat); line.renderOrder = 7; scene.add(line); activeHighlights.push(line);
+                tweenObject({ duration: durationMs * 0.9, owner: line, onUpdate: (v) => { try { lineMat.opacity = 0.9 * (1 - v); } catch (_) { } }, onComplete: () => { try { scene.remove(line); line.geometry.dispose(); lineMat.dispose(); } catch (_) { } } });
             }
-            maybeEnterStageMode();
-        }, 1000);
+        } catch (_) { }
     }
-    // Giant duplicates for bass using exact bottom-face renderer
-    try {
-        if (bassGiantGroup) { scene.remove(bassGiantGroup); bassGiantGroup = null; }
-        bassGiantGroup = new THREE.Group();
-        const xs = computeSlotPositions(lineup.length);
+
+    function pulseGiantAt(index, durationMs = 600) {
+        try {
+            const pulse = (group) => { const node = group?.children?.[index]; const mesh = node?.children?.[0]; const mat = mesh?.material; if (!mat) return; const base = mat.opacity ?? 1; tweenObject({ duration: durationMs, owner: mat, onUpdate: (v) => { try { mat.transparent = true; mat.opacity = base * (0.6 + 0.4 * Math.sin(v * Math.PI)); } catch (_) { } }, onComplete: () => { try { mat.opacity = base; } catch (_) { } } }); };
+            if (melodyGiantGroup) pulse(melodyGiantGroup); if (bassGiantGroup) pulse(bassGiantGroup);
+        } catch (_) { }
+    }
+
+    function shimmerMaterial(mat) {
+        if (!mat) return;
+        const hadTransparent = !!mat.transparent;
+        const origOpacity = typeof mat.opacity === 'number' ? mat.opacity : 1;
+        try { mat.transparent = true; mat.opacity = Math.max(0, Math.min(1, origOpacity * 0.6)); } catch (_) { }
+        setTimeout(() => { try { mat.opacity = origOpacity; mat.transparent = hadTransparent; } catch (_) { } }, 160);
+    }
+
+    function shimmerMelodyTopFaces() {
+        for (const cube of lineup) {
+            try {
+                const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
+                const topMat = mats[2] || mats[0];
+                shimmerMaterial(topMat);
+            } catch (_) { }
+        }
+    }
+
+    function shimmerBassBottomFaces() {
+        for (const cube of lineup) {
+            try {
+                const mats = Array.isArray(cube.material) ? cube.material : [cube.material];
+                const bottomMat = mats[3] || mats[0];
+                shimmerMaterial(bottomMat);
+            } catch (_) { }
+        }
+    }
+
+    function shimmerMelodyLane() {
+        if (!melodyLaneGroup) return;
+        try {
+            melodyLaneGroup.children.forEach(node => {
+                // child[1] is the diamond mesh in makeLaneNode
+                const diamond = node.children?.[1];
+                if (diamond && diamond.material) shimmerMaterial(diamond.material);
+            });
+        } catch (_) { }
+    }
+
+    // Ultra flash: big radial ring + confetti pulse at center of lineup
+    function ultraFlash(colorHex = 0xfff04d, durationMs = 520) {
+        try {
+            const ringGeo = new THREE.RingGeometry(0.2, 0.22, 48);
+            const ringMat = new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.0, side: THREE.DoubleSide, depthWrite: false });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.position.set(0, 0.01, 0);
+            ring.rotation.x = -Math.PI / 2;
+            scene.add(ring);
+            tweenObject({
+                duration: durationMs, owner: ring, onUpdate: (v) => {
+                    try { ring.scale.setScalar(1 + v * 6); ringMat.opacity = 0.8 * (1 - v); } catch (_) { }
+                }, onComplete: () => { try { scene.remove(ring); ring.geometry.dispose(); ring.material.dispose(); } catch (_) { } }
+            });
+
+            // Confetti sprinkles
+            for (let i = 0; i < 24; i++) {
+                const c = new THREE.Mesh(new THREE.PlaneGeometry(0.08, 0.02), new THREE.MeshBasicMaterial({ color: (Math.random() * 0xffffff) | 0, transparent: true, opacity: 0.9, side: THREE.DoubleSide, depthWrite: false }));
+                c.position.set((Math.random() - 0.5) * 0.8, 0.02, (Math.random() - 0.5) * 0.8);
+                c.rotation.x = -Math.PI / 2; c.rotation.z = Math.random() * Math.PI;
+                scene.add(c);
+                const dx = (Math.random() - 0.5) * 3.5; const dz = (Math.random() - 0.5) * 3.5;
+                const start = c.position.clone(); const end = start.clone().add(new THREE.Vector3(dx, 0, dz));
+                tweenObject({
+                    duration: 620 + Math.random() * 260, owner: c, onUpdate: (v) => {
+                        try { c.position.lerpVectors(start, end, v); c.material.opacity = 0.9 * (1 - v); c.rotation.z += 0.4; } catch (_) { }
+                    }, onComplete: () => { try { scene.remove(c); c.geometry.dispose(); c.material.dispose(); } catch (_) { } }
+                });
+            }
+        } catch (_) { }
+    }
+
+    function pulseLockIcons(kind, durationMs = 400) {
+        try {
+            const targets = kind === 'melody' ? [melodyLockLeft, melodyLockRight] : [bassLockLeft, bassLockRight];
+            targets.forEach(node => {
+                if (!node) return;
+                const s0 = node.scale.x;
+                tweenObject({ duration: durationMs, owner: node, onUpdate: (v) => { try { const s = s0 * (1 + 0.3 * Math.sin(v * Math.PI)); node.scale.setScalar(s); } catch (_) { } }, onComplete: () => { try { node.scale.setScalar(s0); } catch (_) { } } });
+            });
+        } catch (_) { }
+    }
+
+    function makeLaneDiamond(colorHex = 0xffffff) {
+        const g = new THREE.CircleGeometry(0.08, 4);
+        const m = new THREE.MeshBasicMaterial({ color: colorHex });
+        const mesh = new THREE.Mesh(g, m);
+        mesh.rotation.z = Math.PI / 4; // diamond look
+        return mesh;
+    }
+
+    function makeLaneNode(roman, colorHex) {
+        const group = new THREE.Group();
+        const circle = new THREE.Mesh(new THREE.CircleGeometry(0.11, 24), new THREE.MeshBasicMaterial({ color: colorHex, transparent: true, opacity: 0.9 }));
+        const diamond = makeLaneDiamond(0xffffff);
+        group.add(circle); group.add(diamond);
+        group.userData = { roman };
+        return group;
+    }
+
+    function clearLockedLines() {
+        lockedMelody = null; lockedBass = null;
+        if (melodyLaneGroup) { scene.remove(melodyLaneGroup); melodyLaneGroup = null; }
+        if (bassLaneGroup) { scene.remove(bassLaneGroup); bassLaneGroup = null; }
+        if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
+    }
+
+    function renderMelodyLane() {
+        if (melodyLaneGroup) {
+            try { melodyLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
+            scene.remove(melodyLaneGroup); melodyLaneGroup = null;
+        }
+        melodyLaneGroup = new THREE.Group();
         for (let i = 0; i < lineup.length; i++) {
             const cube = lineup[i];
-            const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
-            const bottomIdx = rIdx; // bottom face degree index
-            const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
-            const symbol = (labelMode === 'roman') ? degs[bottomIdx] : transposeNotes(noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'], currentKey)[bottomIdx];
-            const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
-            const ROT_DEGS = [0, 270, 180, 90];
-            // Match cube face orientation exactly for bass giants
-            const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true);
-            try { mat.side = THREE.DoubleSide; } catch (_) { }
-            const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), mat);
-            // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
-            const extraFlipB = (bottomIdx === 1 || bottomIdx === 3) ? Math.PI : 0;
-            const bassUpright = (-(ROT_DEGS[bottomIdx] || 0) * (Math.PI / 180)) + extraFlipB;
-            mesh.rotation.z = bassUpright;
-            mesh.userData.uprightZ = bassUpright;
-            // Center on cube and place so the diamond top tip touches the cube's front-bottom edge
             const p = new THREE.Vector3(); cube.getWorldPosition(p);
-            const s = cube.scale?.x || cube.scale || 1;
-            const half = (cubeSize * s) / 2;
-            const zFront = p.z + half + 0.002; // just in front of cube face
-            const yBottom = p.y - half; // bottom edge of cube
-            // distance from center of our plane to diamond's top tip; we used d=size*0.64 for the square, so half-diagonal is (d/2)*sqrt(2)
-            const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
-            const centerY = yBottom - diamondHalf;
-            mesh.position.set(p.x, centerY, zFront);
-            mesh.renderOrder = 4; if (mesh.material) mesh.material.depthWrite = false;
-            bassGiantGroup.add(mesh);
+            const color = borderColorForRoman(cube.userData.roman);
+            const pivot = new THREE.Group();
+            const node = makeLaneNode(cube.userData.roman, color);
+            node.position.set(0, 0.3, 0); // hinge at bottom tip (feet)
+            node.renderOrder = 3; // draw atop ground
+            node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
+            pivot.add(node);
+            const half = (cubeSize * cube.scale.x) / 2;
+            // Offset a hair away from cube to avoid z-fighting when rotating
+            pivot.position.set(p.x, 0.001, p.z - half - 0.08);
+            // Start flat on ground; animate to stand up (to 0)
+            pivot.rotation.x = -Math.PI / 2;
+            melodyLaneGroup.add(pivot);
         }
-        bassGiantGroup.visible = !!(showGiantBassEl?.checked ?? true);
-        scene.add(bassGiantGroup);
-    } catch (_) { }
-}
-
-async function playLockSound() {
-    try {
-        if (!window.Tone) return;
-        await window.Tone.start();
-        const t = window.Tone.now();
-        const synth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.25, sustain: 0.0, release: 0.05 } }).toDestination();
-        synth.triggerAttackRelease('C2', 0.12, t, 0.9);
-        const click = new window.Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).toDestination();
-        click.triggerAttackRelease(0.02, t + 0.06);
-        setTimeout(() => synth.dispose(), 400);
-        setTimeout(() => click.dispose(), 200);
-    } catch (_) { }
-}
-
-async function playFrontRowProgression() {
-    if (lineup.length === 0) return;
-    const msPerBeat = Math.round(60000 / progressionBpm);
-    const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
-    for (let i = 0; i < lineup.length; i++) {
-        const c = lineup[i];
-        // Ultra-flashy active chord highlight + camera dolly follow
-        try {
-            highlightChordEffect(c, 900); pulseGiantAt(i, 700);
-            // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
-            const tDur = 700;
-            const fromPos = camera.position.clone();
-            const fromTgt = controls.target.clone();
-            const toTgt = new THREE.Vector3(c.position.x, 0, 0);
-            const toPos = toTgt.clone().add(new THREE.Vector3(0, currentStickyView === 'below' ? -8.9 : 8.9, 7.04));
-            const tStart = performance.now();
-            const tween = {
-                owner: camera, tick: (now) => {
-                    const v = Math.min(1, (now - tStart) / tDur);
-                    camera.position.lerpVectors(fromPos, toPos, v);
-                    controls.target.lerpVectors(fromTgt, toTgt, v);
-                    return v >= 1;
-                }, cancelled: false
-            };
-            activeTweens.push(tween);
-        } catch (_) { }
-        if (lockedMelody || lockedBass) {
-            // Use locked lines if present; fallback to face-derived where missing
-            const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
-            const roman = c.userData.roman;
-            // chord bed stays the same
-            const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
-            if (sfChord && sfChord.play) chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
-            // bass
-            if (bassEnabled) {
-                let bassMidi = lockedBass?.[i]?.midi ?? getBassMidiForObject(c);
-                while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
-                bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
-                if (sfBass && sfBass.play) { sfBass.play(bassMidi, now, { duration, gain: 0.34 }); lastBassMidi = bassMidi; }
-            }
-            // melody
-            if (melodyEnabled) {
-                let melMidi = lockedMelody?.[i]?.midi ?? getMelodyMidiForObject(c);
-                while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
-                melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
-                if (sfMelody && sfMelody.play) { sfMelody.play(melMidi, now, { duration, gain: 0.3 }); lastMelodyMidi = melMidi; }
-            }
-        } else {
-            playChordForObject(c);
-        }
-        addProgressionPointFromCube(c);
-        await new Promise(r => setTimeout(r, perChordMs));
+        scene.add(melodyLaneGroup);
     }
-}
 
-// Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()
+    function renderBassLane() {
+        if (bassLaneGroup) {
+            try { bassLaneGroup.traverse?.(o => { if (o.geometry) o.geometry.dispose?.(); if (o.material) { if (o.material.map) o.material.map.dispose?.(); o.material.dispose?.(); } }); } catch (_) { }
+            scene.remove(bassLaneGroup); bassLaneGroup = null;
+        }
+        bassLaneGroup = new THREE.Group();
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i];
+            const p = new THREE.Vector3(); cube.getWorldPosition(p);
+            const color = borderColorForRoman(cube.userData.roman);
+            const pivot = new THREE.Group();
+            const node = makeLaneNode(cube.userData.roman, color);
+            node.position.set(0, -0.3, 0); // hinge at top tip (head)
+            node.renderOrder = 3; node.traverse?.(o => { o.renderOrder = 3; if (o.material) o.material.depthWrite = false; });
+            pivot.add(node);
+            const half = (cubeSize * cube.scale.x) / 2;
+            pivot.position.set(p.x, 0.001, p.z + half + 0.02); // front edge
+            // Start flat; animate to +PI/2 when locking bass
+            pivot.rotation.x = Math.PI / 2;
+            bassLaneGroup.add(pivot);
+        }
+        scene.add(bassLaneGroup);
+    }
+
+    function animateStandUpLanes() {
+        // Animate melody pivots to stand up 90° and bass pivots to stand down 90° from ground
+        if (melodyLaneGroup) {
+            for (const pivot of melodyLaneGroup.children) {
+                const from = pivot.rotation.x;
+                const to = 0; // stand vertical from flat start (-PI/2)
+                tweenObject({
+                    duration: 800, owner: pivot, onUpdate: (v) => {
+                        pivot.rotation.x = from + (to - from) * v;
+                        // Debug: briefly scale up to confirm animation
+                        const s = 1 + 0.02 * Math.sin(v * Math.PI);
+                        pivot.scale.set(s, s, s);
+                    }
+                });
+            }
+        }
+        if (bassLaneGroup) {
+            for (const pivot of bassLaneGroup.children) {
+                const from = pivot.rotation.x;
+                const to = 0; // stand vertical from +PI/2
+                tweenObject({ duration: 800, owner: pivot, onUpdate: (v) => { pivot.rotation.x = from + (to - from) * v; } });
+            }
+        }
+    }
+
+    // TEST: spin melody lane pivots for visibility diagnostics
+    function spinMelodyLane(durationMs = 10000, rotations = 6) {
+        if (!melodyLaneGroup) return;
+        for (const pivot of melodyLaneGroup.children) {
+            const from = pivot.rotation.x;
+            const to = from + Math.PI * 2 * rotations;
+            cancelTweensFor(pivot);
+            tweenObject({
+                duration: durationMs, owner: pivot, onUpdate: (v) => {
+                    pivot.rotation.x = from + (to - from) * v;
+                }
+            });
+        }
+    }
+
+    function updateLanePositions() {
+        if (melodyLaneGroup && melodyLaneGroup.children.length === lineup.length) {
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i]; const pivot = melodyLaneGroup.children[i];
+                const p = new THREE.Vector3(); cube.getWorldPosition(p);
+                const half = (cubeSize * cube.scale.x) / 2;
+                pivot.position.set(p.x, 0.001, p.z - half - 0.02);
+            }
+        }
+        if (bassLaneGroup && bassLaneGroup.children.length === lineup.length) {
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i]; const pivot = bassLaneGroup.children[i];
+                const p = new THREE.Vector3(); cube.getWorldPosition(p);
+                const half = (cubeSize * cube.scale.x) / 2;
+                pivot.position.set(p.x, 0.001, p.z + half + 0.02);
+            }
+        }
+    }
+
+    function lockInMelody() {
+        if (lineup.length === 0) return;
+        // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
+        const rotating = lineup.some(c => hasActiveTweenFor(c));
+        if (rotating) { setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); return; }
+        // Re-verify each cube's current orientation → rotationIndex from quaternion
+        for (const cube of lineup) syncRotationIndexFromQuaternion(cube);
+        // Capture current melody using the freshly verified rotationIndex
+        const snapshot = [];
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i];
+            // Use helper that references rotationIndex for top face
+            const midiTop = (() => {
+                const tones = noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'];
+                const names = transposeNotes(tones, currentKey);
+                const r = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+                const topPc = pcOf(names[(r + 2) % 4]);
+                let m = 72 + ((topPc - 0 + 12) % 12);
+                while (m > 84) m -= 12; while (m < 60) m += 12;
+                return m;
+            })();
+            snapshot.push({ roman: cube.userData.roman, midi: midiTop, color: borderColorForRoman(cube.userData.roman) });
+        }
+        lockedMelody = snapshot;
+        renderMelodyLane();
+        ultraFlash(0x66ccff, 540);
+        pulseLockIcons('melody');
+        melodyLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
+        if (lockedBass && lockedBass.length === lineup.length) {
+            setTimeout(() => {
+                for (const cube of lineup) {
+                    cube.userData.rotationIndex = 0;
+                    const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
+                    animateQuaternion(cube, to, 280);
+                }
+                maybeEnterStageMode();
+            }, 1000);
+        }
+        try {
+            if (melodyGiantGroup) { scene.remove(melodyGiantGroup); melodyGiantGroup = null; }
+            melodyGiantGroup = new THREE.Group();
+            const xs = computeSlotPositions(lineup.length);
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i];
+                // Ensure visual index is in sync before deciding topIdx
+                syncRotationIndexFromQuaternion(cube);
+                const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+                const topIdx = (rIdx + 2) % 4;
+                const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+                const ROT_DEGS = [0, 270, 180, 90];
+                const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+                const symbol = degs[topIdx];
+                const faceMat = makeCircleDiamondFace(symbol, FACE_COLORS[topIdx], ROT_DEGS[topIdx], true);
+                try { faceMat.side = THREE.DoubleSide; } catch (_) { }
+                const plane = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), faceMat);
+                // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+                const extraFlip = (topIdx === 1 || topIdx === 3) ? Math.PI : 0;
+                const melUpright = (-(ROT_DEGS[topIdx] || 0) * (Math.PI / 180)) + extraFlip;
+                plane.rotation.z = melUpright;
+                plane.userData.uprightZ = melUpright;
+                plane.position.z = 0.002;
+                const group = new THREE.Group();
+                group.add(plane);
+                const p = new THREE.Vector3(); cube.getWorldPosition(p);
+                const s = cube.scale?.x || cube.scale || 1; const half = (cubeSize * s) / 2;
+                const zBack = p.z - half - 0.002;
+                const yTop = p.y + half;
+                const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+                const centerY = yTop + diamondHalf;
+                group.position.set(p.x, centerY, zBack);
+                group.renderOrder = 4; group.traverse?.(o => { o.renderOrder = 4; if (o.material) o.material.depthWrite = false; });
+                melodyGiantGroup.add(group);
+            }
+            melodyGiantGroup.visible = !!(showGiantMelodyEl?.checked ?? true);
+            scene.add(melodyGiantGroup);
+        } catch (_) { }
+    }
+
+    function lockInBass() {
+        if (lineup.length === 0) return;
+        lockedBass = [];
+        for (let i = 0; i < lineup.length; i++) {
+            const cube = lineup[i];
+            let midi = getBassMidiForObject(cube);
+            while (midi > 55) midi -= 12; while (midi < 36) midi += 12;
+            lockedBass.push({ roman: cube.userData.roman, midi, color: borderColorForRoman(cube.userData.roman) });
+        }
+        renderBassLane();
+        ultraFlash(0xffcc66, 540);
+        pulseLockIcons('bass');
+        bassLaneGroup?.children.forEach(n => { const mat = (n.children?.[1])?.material; shimmerMaterial(mat); });
+        // If both voices locked, normalize all cubes to root-down orientation for easy reading
+        if (lockedMelody && lockedMelody.length === lineup.length) {
+            setTimeout(() => {
+                for (const cube of lineup) {
+                    cube.userData.rotationIndex = 0;
+                    const to = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 0);
+                    animateQuaternion(cube, to, 280);
+                }
+                maybeEnterStageMode();
+            }, 1000);
+        }
+        // Giant duplicates for bass using exact bottom-face renderer
+        try {
+            if (bassGiantGroup) { scene.remove(bassGiantGroup); bassGiantGroup = null; }
+            bassGiantGroup = new THREE.Group();
+            const xs = computeSlotPositions(lineup.length);
+            for (let i = 0; i < lineup.length; i++) {
+                const cube = lineup[i];
+                const rIdx = ((cube.userData.rotationIndex || 0) % 4 + 4) % 4;
+                const bottomIdx = rIdx; // bottom face degree index
+                const degs = degreeSets[cube.userData.roman] || ['1', '3', '5', '7'];
+                const symbol = (labelMode === 'roman') ? degs[bottomIdx] : transposeNotes(noteSetsC[cube.userData.roman] || ['C', 'E', 'G', 'B'], currentKey)[bottomIdx];
+                const FACE_COLORS = ['#2ecc71', '#e74c3c', '#3498db', '#bdc3c7'];
+                const ROT_DEGS = [0, 270, 180, 90];
+                // Match cube face orientation exactly for bass giants
+                const mat = makeCircleDiamondFace(symbol, FACE_COLORS[bottomIdx], ROT_DEGS[bottomIdx], true);
+                try { mat.side = THREE.DoubleSide; } catch (_) { }
+                const mesh = new THREE.Mesh(new THREE.PlaneGeometry(cubeSize, cubeSize), mat);
+                // Rotate 3rd (index 1) and 7th (index 3) by +180° for readability
+                const extraFlipB = (bottomIdx === 1 || bottomIdx === 3) ? Math.PI : 0;
+                const bassUpright = (-(ROT_DEGS[bottomIdx] || 0) * (Math.PI / 180)) + extraFlipB;
+                mesh.rotation.z = bassUpright;
+                mesh.userData.uprightZ = bassUpright;
+                // Center on cube and place so the diamond top tip touches the cube's front-bottom edge
+                const p = new THREE.Vector3(); cube.getWorldPosition(p);
+                const s = cube.scale?.x || cube.scale || 1;
+                const half = (cubeSize * s) / 2;
+                const zFront = p.z + half + 0.002; // just in front of cube face
+                const yBottom = p.y - half; // bottom edge of cube
+                // distance from center of our plane to diamond's top tip; we used d=size*0.64 for the square, so half-diagonal is (d/2)*sqrt(2)
+                const diamondHalf = (cubeSize * 0.64) / 2 * Math.SQRT2;
+                const centerY = yBottom - diamondHalf;
+                mesh.position.set(p.x, centerY, zFront);
+                mesh.renderOrder = 4; if (mesh.material) mesh.material.depthWrite = false;
+                bassGiantGroup.add(mesh);
+            }
+            bassGiantGroup.visible = !!(showGiantBassEl?.checked ?? true);
+            scene.add(bassGiantGroup);
+        } catch (_) { }
+    }
+
+    async function playLockSound() {
+        try {
+            if (!window.Tone) return;
+            await window.Tone.start();
+            const t = window.Tone.now();
+            const synth = new window.Tone.MembraneSynth({ envelope: { attack: 0.001, decay: 0.25, sustain: 0.0, release: 0.05 } }).toDestination();
+            synth.triggerAttackRelease('C2', 0.12, t, 0.9);
+            const click = new window.Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.03, sustain: 0 } }).toDestination();
+            click.triggerAttackRelease(0.02, t + 0.06);
+            setTimeout(() => synth.dispose(), 400);
+            setTimeout(() => click.dispose(), 200);
+        } catch (_) { }
+    }
+
+    async function playFrontRowProgression() {
+        if (lineup.length === 0) return;
+        const msPerBeat = Math.round(60000 / progressionBpm);
+        const perChordMs = msPerBeat * beatsPerChord; // tempo-locked chord duration
+        for (let i = 0; i < lineup.length; i++) {
+            const c = lineup[i];
+            // Ultra-flashy active chord highlight + camera dolly follow
+            try {
+                highlightChordEffect(c, 900); pulseGiantAt(i, 700);
+                // Constant-velocity dolly: lerp camera.position and controls.target jointly over fixed duration
+                const tDur = 700;
+                const fromPos = camera.position.clone();
+                const fromTgt = controls.target.clone();
+                const toTgt = new THREE.Vector3(c.position.x, 0, 0);
+                const toPos = toTgt.clone().add(new THREE.Vector3(0, currentStickyView === 'below' ? -8.9 : 8.9, 7.04));
+                const tStart = performance.now();
+                const tween = {
+                    owner: camera, tick: (now) => {
+                        const v = Math.min(1, (now - tStart) / tDur);
+                        camera.position.lerpVectors(fromPos, toPos, v);
+                        controls.target.lerpVectors(fromTgt, toTgt, v);
+                        return v >= 1;
+                    }, cancelled: false
+                };
+                activeTweens.push(tween);
+            } catch (_) { }
+            if (lockedMelody || lockedBass) {
+                // Use locked lines if present; fallback to face-derived where missing
+                const ctx = ensureAudio(); const now = ctx.currentTime; const duration = 1.1;
+                const roman = c.userData.roman;
+                // chord bed stays the same
+                const chordMidis = buildLockedChordBedMidis(roman, withSeventh);
+                if (sfChord && sfChord.play) chordMidis.forEach(m => sfChord.play(m, now, { duration, gain: 0.18 }));
+                // bass
+                if (bassEnabled) {
+                    let bassMidi = lockedBass?.[i]?.midi ?? getBassMidiForObject(c);
+                    while (bassMidi > 55) bassMidi -= 12; while (bassMidi < 36) bassMidi += 12;
+                    bassMidi = voiceLeadMidi(bassMidi, lastBassMidi);
+                    if (sfBass && sfBass.play) { sfBass.play(bassMidi, now, { duration, gain: 0.34 }); lastBassMidi = bassMidi; }
+                }
+                // melody
+                if (melodyEnabled) {
+                    let melMidi = lockedMelody?.[i]?.midi ?? getMelodyMidiForObject(c);
+                    while (melMidi > 84) melMidi -= 12; while (melMidi < 60) melMidi += 12;
+                    melMidi = voiceLeadMidi(melMidi, lastMelodyMidi);
+                    if (sfMelody && sfMelody.play) { sfMelody.play(melMidi, now, { duration, gain: 0.3 }); lastMelodyMidi = melMidi; }
+                }
+            } else {
+                playChordForObject(c);
+            }
+            addProgressionPointFromCube(c);
+            await new Promise(r => setTimeout(r, perChordMs));
+        }
+    }
+
+    // Optional: pin a specific CDN via ?sf= param already supported in readFlagsFromUrl()
+
+}); // End DOMContentLoaded
 
 
