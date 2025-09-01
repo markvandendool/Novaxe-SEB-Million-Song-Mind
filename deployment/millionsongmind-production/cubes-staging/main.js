@@ -7346,10 +7346,10 @@ function lockInMelody() {
     }
     // First, ensure no cube is mid-rotation; if any is, delay capture briefly and retry once
     const rotating = lineup.some(c => hasActiveTweenFor(c));
-    if (rotating) { 
+    if (rotating) {
         console.log('[LOCK MELODY] ⏳ Waiting for cube rotations to finish...');
-        setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120); 
-        return; 
+        setTimeout(() => { try { lockInMelody(); } catch (_) { } }, 120);
+        return;
     }
     // Re-verify each cube's current orientation → rotationIndex from quaternion
     for (const cube of lineup) syncRotationIndexFromQuaternion(cube);

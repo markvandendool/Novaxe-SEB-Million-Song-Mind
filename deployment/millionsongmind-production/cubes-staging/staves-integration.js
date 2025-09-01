@@ -49,6 +49,10 @@ function initializeStavesIntegration() {
     try {
         // Create staves instance
         musicalStaves3D = new MusicalStaves3D(window.scene, window.camera);
+        
+        // CRITICAL: Expose to global window scope for main.js access
+        window.musicalStaves3D = musicalStaves3D;
+        console.log('[STAVES INTEGRATION] ✅ musicalStaves3D exposed to window.musicalStaves3D');
 
         // Set up UI controls
         setupStavesControls();
