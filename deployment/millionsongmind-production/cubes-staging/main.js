@@ -1794,7 +1794,7 @@ let melodyVolume = 0.5;
 let lastProgressionBassMidi = null;
 let lastProgressionMelodyMidi = null;
 
-    // FREE PLAY MODE: Track current chord for immediate cutoff (no overlap)
+// FREE PLAY MODE: Track current chord for immediate cutoff (no overlap)
 let currentFreePlayChord = null;
 let freePlayCutoffTimer = null;
 
@@ -3255,9 +3255,12 @@ renderer.domElement.addEventListener('wheel', (e) => {
     saveShelfMapToLocalStorage();
 }, { passive: false });
 
-document.getElementById('view-down').addEventListener('click', setViewAbove);
-document.getElementById('view-up').addEventListener('click', setViewBelow);
-document.getElementById('view-back').addEventListener('click', setViewBack);
+// View button event listeners moved to DOMContentLoaded - CRITICAL FIX
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('view-down')?.addEventListener('click', setViewAbove);
+    document.getElementById('view-up')?.addEventListener('click', setViewBelow);
+    document.getElementById('view-back')?.addEventListener('click', setViewBack);
+});
 
 // GLOBAL MODIFIER KEY STATE TRACKING
 let globalModifierState = {
@@ -4438,18 +4441,26 @@ class OrchestralAudioEngine {
     // SIMPLE AUDIO CUTOFF for Free Play Mode
     cutoffCurrentChord() {
         console.log('[AUDIO ENGINE] 🔇 Cutting off current chord for smooth transition');
+        console.log(`[AUDIO ENGINE DEBUG] currentInstruments:`, Object.keys(this.currentInstruments));
 
         // For Tone.js Sampler instruments, release all current notes
+        let releasedCount = 0;
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
+            console.log(`[AUDIO ENGINE DEBUG] Checking ${type}: exists=${!!instrument}, hasSampler=${!!instrument?.sampler}, isFallback=${!!instrument?.fallback}`);
             if (instrument && instrument.sampler && !instrument.fallback) {
                 try {
+                    console.log(`[AUDIO ENGINE DEBUG] About to release ${type} sampler...`);
                     instrument.sampler.releaseAll();
                     console.log(`[AUDIO ENGINE] ✅ Released ${type} sampler notes`);
+                    releasedCount++;
                 } catch (error) {
                     console.warn(`[AUDIO ENGINE] Could not release ${type} notes:`, error);
                 }
+            } else {
+                console.log(`[AUDIO ENGINE DEBUG] Skipped ${type}: no valid sampler`);
             }
         }
+        console.log(`[AUDIO ENGINE DEBUG] Total instruments released: ${releasedCount}`);
 
         // For WebAudioFont, we can't easily stop individual notes, 
         // but the overlapping is minimized by using shorter durations in free play
@@ -6401,6 +6412,8 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         !window.chordCubesTransport?.metronomOn &&
         !window.chordCubesTransport?.drumsOn;
 
+    console.log(`[FREE PLAY DEBUG] Mode detection: inFreePlayMode=${inFreePlayMode}, improvMode=${improvMode}, drumMachine.isPlaying=${window.drumMachine?.isPlaying}, metronome=${window.chordCubesTransport?.metronomOn}, drums=${window.chordCubesTransport?.drumsOn}`);
+
     if (inFreePlayMode) {
         // FREE PLAY: Use longer base duration for smooth playing, will be cut IMMEDIATELY by next chord
         duration = 3.0; // 3 seconds base - will be cut IMMEDIATELY when next chord is clicked
@@ -6413,11 +6426,16 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         }
 
         // If there's a current chord playing, cut it off IMMEDIATELY (no delay)
+        console.log(`[FREE PLAY DEBUG] currentFreePlayChord exists: ${!!currentFreePlayChord}`);
         if (currentFreePlayChord) {
+            console.log(`[FREE PLAY DEBUG] Previous chord: ${currentFreePlayChord.chordKey}, window.audioEngine exists: ${!!window.audioEngine}`);
             if (window.audioEngine) {
                 console.log('[FREE PLAY] 🔇 Cutting off previous chord IMMEDIATELY for no overlap');
                 // IMMEDIATE CUTOFF - no setTimeout delay
                 window.audioEngine.cutoffCurrentChord();
+                console.log('[FREE PLAY] ✅ Cutoff function called');
+            } else {
+                console.log('[FREE PLAY] ❌ window.audioEngine not available for cutoff');
             }
             currentFreePlayChord = null;
         }
