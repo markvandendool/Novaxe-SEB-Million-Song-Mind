@@ -43,6 +43,7 @@ class MusicalStaves3D {
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow available:', !!window.VF);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Scene available:', !!this.scene);
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Camera available:', !!this.camera);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: THREE available:', !!window.THREE);
 
         // Check for VexFlow - 4.x exposes as window.Vex.Flow
         const VF = window.VF || (window.Vex ? window.Vex.Flow : null);
@@ -51,9 +52,9 @@ class MusicalStaves3D {
             console.error('[MUSICAL STAVES 3D] ❌ Available:', { VF: !!window.VF, Vex: !!window.Vex });
             return;
         }
-        
+
         console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow available:', { VF: !!VF, source: window.VF ? 'window.VF' : 'window.Vex.Flow' });
-        
+
         // Ensure VF is available globally
         if (!window.VF && VF) {
             window.VF = VF;

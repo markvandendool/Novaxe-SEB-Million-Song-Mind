@@ -28,17 +28,18 @@ function initializeStavesIntegration() {
 
         // Wait for dependencies - VexFlow 4.x exposes as window.Vex, not window.VF
     const VF = window.Vex ? window.Vex.Flow : null;
-    if (!window.scene || !window.camera || !VF) {
+    if (!window.scene || !window.camera || !VF || !window.THREE) {
         console.log('[STAVES INTEGRATION] Missing dependencies - will NOT retry automatically to prevent infinite loop');
         console.log('[STAVES INTEGRATION] Dependencies status:', {
             scene: !!window.scene,
             camera: !!window.camera, 
             VF: !!VF,
-            Vex: !!window.Vex
+            Vex: !!window.Vex,
+            THREE: !!window.THREE
         });
         return;
     }
-    
+
     // Expose VF globally for compatibility
     if (!window.VF && VF) {
         window.VF = VF;

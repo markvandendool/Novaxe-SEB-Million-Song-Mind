@@ -145,10 +145,11 @@ const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x222222);
 const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
 
-// EXPOSE SCENE AND CAMERA FOR 3D MUSICAL STAVES INTEGRATION
+// EXPOSE SCENE, CAMERA, AND THREE FOR 3D MUSICAL STAVES INTEGRATION
 window.scene = scene;
 window.camera = camera;
-console.log('[MAIN] 🎼 Scene and camera exposed for musical staves integration');
+window.THREE = THREE;
+console.log('[MAIN] 🎼 Scene, camera, and THREE.js exposed for musical staves integration');
 let shelfPickCamera = null; // orthographic camera used only for shelf picking
 // CRITICAL: Enable all layers on camera
 try { camera.layers.enable(0); camera.layers.enable(1); camera.layers.enable(2); } catch (_) { }
