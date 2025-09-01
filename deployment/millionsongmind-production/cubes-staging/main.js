@@ -173,28 +173,28 @@ controls.target.copy(melodyTarget);
 renderer.domElement.addEventListener('wheel', (e) => {
     // Skip if in adjust mode (that has its own wheel handler for scaling)
     if (adjustMode) return;
-    
+
     // Always allow zoom regardless of zone - this is user expectation #1
     const wasEnabled = controls.enabled;
     if (!wasEnabled) {
         // Temporarily enable controls just for zoom
         controls.enabled = true;
-        
+
         // Manually handle the zoom (OrbitControls uses wheel event for zoom)
         const zoomSpeed = 0.1;
         const zoomDelta = e.deltaY > 0 ? (1 + zoomSpeed) : (1 - zoomSpeed);
-        
+
         // Apply zoom by moving camera along the look direction
         const direction = new THREE.Vector3();
         direction.subVectors(camera.position, controls.target).normalize();
         const distance = camera.position.distanceTo(controls.target);
         const newDistance = Math.max(1, Math.min(50, distance * zoomDelta)); // Clamp zoom
-        
+
         camera.position.copy(controls.target).add(direction.multiplyScalar(newDistance));
-        
+
         // Restore original enabled state
         controls.enabled = wasEnabled;
-        
+
         console.log(`[ZOOM FIX] Zoom applied in ${currentMouseZone} zone, distance: ${newDistance.toFixed(1)}`);
     }
     // If controls are already enabled, let them handle it normally
@@ -268,10 +268,10 @@ function enterStageMode() {
     const tgtTo = new THREE.Vector3(0, 0.6, 0);
     const ambFrom = ambient.intensity, ambTo = 0.15;
     const dirFrom = dir.intensity, dirTo = 0.25;
-    const spotFrom = frontSpot.intensity, spotTo = 2.9; // +~30%
-    const spotLFrom = frontSpotL.intensity, spotLTo = 1.8;
-    const spotRFrom = frontSpotR.intensity, spotRTo = 1.8;
-    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 4.9; // +40%
+    const spotFrom = frontSpot.intensity, spotTo = 1.45; // REDUCED by factor of 2 for performance/playback
+    const spotLFrom = frontSpotL.intensity, spotLTo = 0.9; // REDUCED by factor of 2
+    const spotRFrom = frontSpotR.intensity, spotRTo = 0.9; // REDUCED by factor of 2
+    const stageSpotFrom = stageSpot.intensity, stageSpotTo = 2.45; // REDUCED by factor of 2
     const melFrom = melodyMesh?.position.clone();
     const bassFrom = bassMesh?.position.clone();
     const melTo = melFrom ? melFrom.clone().setY(melFrom.y + 0.6) : null;
@@ -2835,12 +2835,12 @@ function onPointerUp(e) {
                     // ADJUST MODE: Just play the chord, don't duplicate
                     console.log(`[ADJUST MODE] Playing shelf chord ${targetObj.userData.roman} without duplication`);
 
-                    // BULLETPROOF MODIFIER DETECTION for shelf clicks in adjust mode
-                    const isModifierClick = globalModifierState.altPressed || globalModifierState.shiftPressed || globalModifierState.ctrlPressed || globalModifierState.metaPressed;
-                    const shouldUse7th = withSeventh || isModifierClick;
+                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
+                    const isAltClick = globalModifierState.altPressed;
+                    const shouldUse7th = withSeventh || isAltClick;
 
-                    if (isModifierClick) {
-                        console.log(`[ADJUST MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
+                    if (isAltClick) {
+                        console.log(`[ADJUST ALT+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                         updateChordFaceWith7th(targetObj);
                     }
 
@@ -2866,8 +2866,9 @@ function onPointerUp(e) {
                             console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${targetObj.userData.roman}`);
                         }
 
-                        const isModifierClick = globalModifierState.altPressed || e.altKey || globalModifierState.shiftPressed || e.shiftKey;
-                        const shouldUse7th = withSeventh || isModifierClick;
+                        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
+                        const isAltClick = globalModifierState.altPressed || e.altKey;
+                        const shouldUse7th = withSeventh || isAltClick;
                         queueChordForDownbeat(targetObj, shouldUse7th);
 
                         // CRITICAL: Ensure proper cleanup to prevent mouse sticking
@@ -4408,6 +4409,27 @@ class OrchestralAudioEngine {
 
         return status;
     }
+
+    // SIMPLE AUDIO CUTOFF for Free Play Mode
+    cutoffCurrentChord() {
+        console.log('[AUDIO ENGINE] 🔇 Cutting off current chord for smooth transition');
+        
+        // For Tone.js Sampler instruments, release all current notes
+        for (const [type, instrument] of Object.entries(this.currentInstruments)) {
+            if (instrument && instrument.sampler && !instrument.fallback) {
+                try {
+                    instrument.sampler.releaseAll();
+                    console.log(`[AUDIO ENGINE] ✅ Released ${type} sampler notes`);
+                } catch (error) {
+                    console.warn(`[AUDIO ENGINE] Could not release ${type} notes:`, error);
+                }
+            }
+        }
+        
+        // For WebAudioFont, we can't easily stop individual notes, 
+        // but the overlapping is minimized by using shorter durations in free play
+        // Future enhancement: Track individual note timers for WebAudioFont cutoff
+    }
 }
 
 // INTEGRATION WITH EXISTING CODE - Replace loadInstruments() function
@@ -5189,22 +5211,22 @@ function testExtensionSystem() {
     console.log('\n=== EXTENSION SYSTEM TEST FOR bIII, bVI, bVII ===');
     const problemChords = ['bIII', 'bVI', 'bVII'];
     const testExtension = { name: 'sus2', interval: 2, description: 'suspended 2nd' };
-    
+
     problemChords.forEach(chordKey => {
         console.log(`\n--- Testing ${chordKey} ---`);
-        
+
         // 1. Check if chord exists in noteSetsC
         const notesInC = noteSetsC[chordKey];
         console.log(`Notes in C: ${notesInC ? notesInC.join(', ') : 'NOT FOUND'}`);
-        
+
         // 2. Get root note
         const rootNote = getChordRootNote(chordKey);
         console.log(`Root note: ${rootNote}`);
-        
+
         // 3. Get transposed notes in current key
         const transposedNotes = transposeNotes(notesInC || [], currentKey);
         console.log(`Transposed to key ${currentKey}: ${transposedNotes.join(', ')}`);
-        
+
         // 4. Test extension application
         if (notesInC && notesInC.length > 0) {
             const testSet = new Set([testExtension]);
@@ -5620,16 +5642,16 @@ function animate() {
         if (below) {
             try { darkPlane.material.opacity = 0.55; } catch (_) { }
             if (!stageSpot.userData.wasOn) { stageSpot.userData.wasOn = true; }
-            stageSpot.intensity = 2.2;
+            stageSpot.intensity = 1.1; // REDUCED by factor of 2
             dir.intensity = 0.25; frontFill.intensity = 0.15; frontKey.intensity = 0.6;
 
             // FRONT ROW LIGHTING: Light the bottom of cubes and faces normally for front row only
-            frontSpot.intensity = 1.5; // Bright spotlight on front row from above
-            frontSpotL.intensity = 1.2; // Left front row spotlight
-            frontSpotR.intensity = 1.2; // Right front row spotlight
+            frontSpot.intensity = 0.75; // REDUCED by factor of 2 for performance/playback
+            frontSpotL.intensity = 0.6; // REDUCED by factor of 2 for performance/playback
+            frontSpotR.intensity = 0.6; // REDUCED by factor of 2 for performance/playback
 
             // EXTENDED BASS VIEW LIGHTING: Activate all bass lights for full coverage
-            bassLights.forEach(light => light.intensity = 8.0); // Very bright illumination
+            bassLights.forEach(light => light.intensity = 4.0); // REDUCED by factor of 2 for performance/playback
             bassAmbientBoost.intensity = 0.3; // Additional ambient boost
         } else {
             try { darkPlane.material.opacity = 0.0; } catch (_) { }
@@ -5700,7 +5722,7 @@ function animate() {
             if (dir) dir.intensity = 0.25; // Same as performance mode
             // SPOTLIGHT: Follow camera down to shine up on front row bass
             if (frontKey) {
-                frontKey.intensity = 1.2; // Bright spotlight on front row
+                frontKey.intensity = 0.6; // REDUCED by factor of 2 for performance/playback
                 // Position spotlight below and behind camera, shining up at front row
                 const cameraPos = camera.position.clone();
                 frontKey.position.set(cameraPos.x, cameraPos.y - 1.0, cameraPos.z - 1.5);
@@ -6349,33 +6371,34 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
     let duration = (60 / currentBpm) * beatsPerMeasure; // Full measure duration
 
     // FREE PLAY MODE: Check if we should use smooth cutoff instead of full duration
-    const inFreePlayMode = !improvMode && 
-                          !window.drumMachine?.isPlaying && 
-                          !window.chordCubesTransport?.metronomOn &&
-                          !window.chordCubesTransport?.drumsOn;
+    const inFreePlayMode = !improvMode &&
+        !window.drumMachine?.isPlaying &&
+        !window.chordCubesTransport?.metronomOn &&
+        !window.chordCubesTransport?.drumsOn;
 
     if (inFreePlayMode) {
         // FREE PLAY: Use longer base duration for smooth playing, will be cut by next chord
         duration = 3.0; // 3 seconds base - will be cut 150ms after next chord
         console.log(`[FREE PLAY] Playing ${chordKey} with 3s base duration - will cutoff smoothly on next chord`);
-        
+
         // Clear any existing cutoff timer
         if (freePlayCutoffTimer) {
             clearTimeout(freePlayCutoffTimer);
             freePlayCutoffTimer = null;
         }
-        
+
         // If there's a current chord playing, schedule its cutoff in 150ms
         if (currentFreePlayChord) {
             freePlayCutoffTimer = setTimeout(() => {
                 if (window.audioEngine && currentFreePlayChord) {
                     console.log('[FREE PLAY] 🔇 Cutting off previous chord after 150ms for smooth transition');
-                    // Note: This is a simplified cutoff - real implementation would need audio engine support
+                    // ACTUALLY IMPLEMENT CUTOFF using our new audio engine method
+                    window.audioEngine.cutoffCurrentChord();
                 }
                 currentFreePlayChord = null;
             }, 150);
         }
-        
+
         // Track this chord as the current one
         currentFreePlayChord = { chordKey, startTime: Date.now() };
     } else {
@@ -6667,15 +6690,15 @@ async function animateShelfClickAdd(shelf) {
         // Play with intended inversion immediately - CHECK FOR MODIFIERS
         if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
 
-        // BULLETPROOF MODIFIER DETECTION for shelf clicks too
-        const isModifierClick = globalModifierState.altPressed || globalModifierState.shiftPressed || globalModifierState.ctrlPressed || globalModifierState.metaPressed;
-        const shouldUse7th = withSeventh || isModifierClick;
+        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
+        const isAltClick = globalModifierState.altPressed;
+        const shouldUse7th = withSeventh || isAltClick;
 
-        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isModifierClick: ${isModifierClick}, shouldUse7th: ${shouldUse7th}`);
-        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed}, Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
+        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
+        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only), Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
 
-        if (isModifierClick) {
-            console.log(`[SHELF MODIFIER+CLICK] FORCING 7th for ${clone.userData.roman}`);
+        if (isAltClick) {
+            console.log(`[SHELF ALT+CLICK] FORCING 7th for ${clone.userData.roman}`);
             updateChordFaceWith7th(clone);
         }
 
