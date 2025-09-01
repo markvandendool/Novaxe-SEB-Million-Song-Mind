@@ -3039,7 +3039,7 @@ function onPointerUp(e) {
                         // NEW AUDIO ENGINE: Use the real bass instruments
                         if (window.audioEngine && window.audioEngine.playBass) {
                             const bassNote = Tone.Frequency(midi, "midi").toNote();
-                            window.audioEngine.playBass(bassNote, 0.45, 0.34);
+                            window.audioEngine.playBass(bassNote, 0.45, 0.34, true);
                             lastBassMidi = midi;
                             console.log('[CHORD CLICK] 🎵 Playing bass with VL3:', bassNote, 'from', context.previousChord, '→', context.currentChord);
                         } else {
@@ -4158,7 +4158,7 @@ class OrchestralAudioEngine {
         return synth;
     }
 
-    playChord(notes, duration = 2, volume = 0.5) {
+    playChord(notes, duration = 2, volume = 0.5, useManualControl = false) {
         // CLAUDE'S ENGINE vNEXT: Always ready with immediate fallbacks - no blocking checks!
 
         const instrument = this.currentInstruments.chord;
@@ -4175,33 +4175,39 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples - AudioTime: ${this.audioContext.currentTime.toFixed(3)}`);
             try {
-                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
-                const noteId = ++this.noteIdCounter;
-                console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for manual control`);
+                if (useManualControl) {
+                    // FREE PLAY MODE: Use triggerAttack + manual release for proper cutoff control
+                    const noteId = ++this.noteIdCounter;
+                    console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for FREE PLAY manual control`);
 
-                // Trigger attack (start notes)
-                instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
+                    // Trigger attack (start notes)
+                    instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
 
-                // Schedule release after duration
-                const releaseTimeout = setTimeout(() => {
-                    try {
-                        instrument.sampler.triggerRelease(notes);
-                        console.log(`[AUDIO ENGINE] ⏰ Auto-released chord notes ${noteId} after ${duration}s`);
-                        this.activeNotes.chord.delete(noteId);
-                    } catch (e) {
-                        console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
-                    }
-                }, duration * 1000);
+                    // Schedule release after duration
+                    const releaseTimeout = setTimeout(() => {
+                        try {
+                            instrument.sampler.triggerRelease(notes);
+                            console.log(`[AUDIO ENGINE] ⏰ Auto-released chord notes ${noteId} after ${duration}s`);
+                            this.activeNotes.chord.delete(noteId);
+                        } catch (e) {
+                            console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
+                        }
+                    }, duration * 1000);
 
-                // Track this note for manual cutoff
-                this.activeNotes.chord.set(noteId, {
-                    sampler: instrument.sampler,
-                    notes: notes,
-                    releaseTimeout: releaseTimeout,
-                    startTime: this.audioContext.currentTime
-                });
+                    // Track this note for manual cutoff
+                    this.activeNotes.chord.set(noteId, {
+                        sampler: instrument.sampler,
+                        notes: notes,
+                        releaseTimeout: releaseTimeout,
+                        startTime: this.audioContext.currentTime
+                    });
 
-                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with manual control - Duration: ${duration}s`);
+                    console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with FREE PLAY manual control - Duration: ${duration}s`);
+                } else {
+                    // PROGRESSION MODE: Use standard triggerAttackRelease for full sustain
+                    instrument.sampler.triggerAttackRelease(notes, duration + 's', undefined, volume * chordVolume);
+                    console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples played with PROGRESSION sustain - Duration: ${duration}s`);
+                }
                 return; // Exit if successful
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
@@ -4310,7 +4316,7 @@ class OrchestralAudioEngine {
         }
     }
 
-    playBass(note, duration = 1, volume = 0.6) {
+    playBass(note, duration = 1, volume = 0.6, useManualControl = false) {
         const instrument = this.currentInstruments.bass;
         if (!instrument) {
             console.error('[AUDIO ENGINE] No bass instrument loaded - this should never happen with Engine vNext!');
@@ -4326,33 +4332,37 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples for bass`);
             try {
-                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
-                const noteId = ++this.noteIdCounter;
-                console.log(`[AUDIO ENGINE] 🎯 Starting bass note with ID ${noteId} for manual control`);
+                if (useManualControl) {
+                    // FREE PLAY MODE: Use triggerAttack + manual release for proper cutoff control
+                    const noteId = ++this.noteIdCounter;
+                    console.log(`[AUDIO ENGINE] 🎯 Starting bass note with ID ${noteId} for FREE PLAY manual control`);
 
-                // Trigger attack (start note)
-                instrument.sampler.triggerAttack(note, undefined, volume * bassVolume);
+                    // Trigger attack (start note)
+                    instrument.sampler.triggerAttack(note, undefined, volume * bassVolume);
 
-                // Schedule release after duration
-                const releaseTimeout = setTimeout(() => {
-                    try {
-                        instrument.sampler.triggerRelease(note);
-                        console.log(`[AUDIO ENGINE] ⏰ Auto-released bass note ${noteId} after ${duration}s`);
-                        this.activeNotes.bass.delete(noteId);
-                    } catch (e) {
-                        console.warn(`[AUDIO ENGINE] Auto-release error for bass ${noteId}:`, e);
-                    }
-                }, duration * 1000);
+                    // Schedule release after duration
+                    const releaseTimeout = setTimeout(() => {
+                        try {
+                            instrument.sampler.triggerRelease(note);
+                            console.log(`[AUDIO ENGINE] ⏰ Auto-released bass note ${noteId} after ${duration}s`);
+                            this.activeNotes.bass.delete(noteId);
+                        } catch (e) {
+                            console.warn(`[AUDIO ENGINE] Auto-release error for bass ${noteId}:`, e);
+                        }
+                    }, duration * 1000);
 
-                // Track this note for manual cutoff
-                this.activeNotes.bass.set(noteId, {
-                    sampler: instrument.sampler,
-                    notes: [note], // Make it consistent with chord (array format)
-                    releaseTimeout: releaseTimeout,
-                    startTime: this.audioContext.currentTime
-                });
-
-                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} bass started with manual control - Duration: ${duration}s`);
+                    // Track this note for manual cutoff
+                    this.activeNotes.bass.set(noteId, {
+                        sampler: instrument.sampler,
+                        notes: [note], // Make it consistent with chord (array format)
+                        releaseTimeout: releaseTimeout,
+                        startTime: this.audioContext.currentTime
+                    });
+                } else {
+                    // PROGRESSION MODE: Use standard triggerAttackRelease for full sustain
+                    instrument.sampler.triggerAttackRelease(note, duration + 's', undefined, volume * bassVolume);
+                    console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} bass played with PROGRESSION sustain - Duration: ${duration}s`);
+                }
                 return; // Exit if successful
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler bass error:', error);
@@ -6500,7 +6510,7 @@ function playChordForObjectWithSustain(obj, sustainSeconds) {
         if (window.audioEngine && window.audioEngine.playBass) {
             const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
             console.log('[SUSTAIN] 🎵 Playing bass sustain:', bassNote);
-            window.audioEngine.playBass(bassNote, sustainSeconds, 0.34);
+            window.audioEngine.playBass(bassNote, sustainSeconds, 0.34, false);
         }
     }
     if (isMelodyEnabled()) {
@@ -6640,8 +6650,8 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         }
     }
 
-    // Play chord using orchestral engine
-    window.audioEngine.playChord(noteNames, duration, 0.5);
+    // Play chord using orchestral engine - Use manual control for FREE PLAY instant cutoff
+    window.audioEngine.playChord(noteNames, duration, 0.5, inFreePlayMode);
 
     // Bass: if locked, use locked line; else use cube bottom face - WITH VOICE LEADING 3
     if (isBassEnabled()) {
@@ -6671,7 +6681,7 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
 
         const bassNoteName = midiToNoteName(bassMidi);
         console.log('[CHORD PLAYBACK] 🎵 Playing bass with VL3:', bassNoteName, 'from', bassContext.previousChord, '→', bassContext.currentChord);
-        window.audioEngine.playBass(bassNoteName, duration, 0.6);
+        window.audioEngine.playBass(bassNoteName, duration, 0.6, inFreePlayMode);
     }
 
     // Melody: if locked, use locked line; else use cube top face - WITH VOICE LEADING 3
@@ -7855,7 +7865,7 @@ function startSoloProgression(soloType) {
                 Tone.Draw.schedule(() => {
                     const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
                     console.log('[BASS SOLO] 🎵 Playing locked bass:', bassNote, 'from midi:', bassMidi);
-                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5, false);
                     lastBassMidi = bassMidi;
                 }, time);
             } else {
@@ -7882,7 +7892,7 @@ function startSoloProgression(soloType) {
 
                     const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
                     console.log('[BASS SOLO] 🎵 Playing voice-led face-derived bass:', bassNote);
-                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.5, false);
                     lastBassMidi = bassMidi;
                 }, time);
             }
@@ -8648,8 +8658,8 @@ async function playFrontRowProgression() {
                         console.log(`[TRANSPORT EXT] Extended chord notes: ${chordNotes.join(', ')}`);
                     }
 
-                    // Play with NEW AUDIO ENGINE using FULL DURATION
-                    window.audioEngine.playChord(chordNotes, chordDurationSeconds, 0.7);
+                    // Play with NEW AUDIO ENGINE using FULL DURATION - No manual control for PROGRESSION
+                    window.audioEngine.playChord(chordNotes, chordDurationSeconds, 0.7, false);
 
                     // Play bass if enabled - SKIP if locked bass exists (will be played below)
                     if (bassEnabled && !lockedBass) {
@@ -8687,7 +8697,7 @@ async function playFrontRowProgression() {
 
                         const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
                         console.log('[PLAY PROGRESSION] 🎵 Playing voice-led bass:', bassNote);
-                        window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8);
+                        window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8, false);
                     }
 
                     // Play melody if enabled - SKIP if locked melody exists (will be played below)
@@ -8760,7 +8770,7 @@ async function playFrontRowProgression() {
                 Tone.Draw.schedule(() => {
                     const bassNote = Tone.Frequency(bassMidi, "midi").toNote();
                     console.log('[PROGRESSION] 🎵 Playing LOCKED bass:', bassNote, 'index:', index);
-                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8);
+                    window.audioEngine.playBass(bassNote, chordDurationSeconds, 0.8, false);
                     lastBassMidi = bassMidi;
                 }, time);
             }
