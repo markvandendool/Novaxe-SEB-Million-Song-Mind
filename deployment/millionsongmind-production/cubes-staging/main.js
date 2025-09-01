@@ -3452,7 +3452,7 @@ class OrchestralAudioEngine {
             bass: null,
             melody: null
         };
-        
+
         // NEW: Track active notes for proper cutoff
         this.activeNotes = {
             chord: new Map(), // noteId -> {sampler, notes, releaseCallback}
@@ -4178,10 +4178,10 @@ class OrchestralAudioEngine {
                 // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
                 const noteId = ++this.noteIdCounter;
                 console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for manual control`);
-                
+
                 // Trigger attack (start notes)
                 instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
-                
+
                 // Schedule release after duration
                 const releaseTimeout = setTimeout(() => {
                     try {
@@ -4192,7 +4192,7 @@ class OrchestralAudioEngine {
                         console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
                     }
                 }, duration * 1000);
-                
+
                 // Track this note for manual cutoff
                 this.activeNotes.chord.set(noteId, {
                     sampler: instrument.sampler,
@@ -4200,7 +4200,7 @@ class OrchestralAudioEngine {
                     releaseTimeout: releaseTimeout,
                     startTime: this.audioContext.currentTime
                 });
-                
+
                 console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with manual control - Duration: ${duration}s`);
                 return; // Exit if successful
             } catch (error) {
@@ -4329,10 +4329,10 @@ class OrchestralAudioEngine {
                 // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
                 const noteId = ++this.noteIdCounter;
                 console.log(`[AUDIO ENGINE] 🎯 Starting bass note with ID ${noteId} for manual control`);
-                
+
                 // Trigger attack (start note)
                 instrument.sampler.triggerAttack(note, undefined, volume * bassVolume);
-                
+
                 // Schedule release after duration
                 const releaseTimeout = setTimeout(() => {
                     try {
@@ -4343,7 +4343,7 @@ class OrchestralAudioEngine {
                         console.warn(`[AUDIO ENGINE] Auto-release error for bass ${noteId}:`, e);
                     }
                 }, duration * 1000);
-                
+
                 // Track this note for manual cutoff
                 this.activeNotes.bass.set(noteId, {
                     sampler: instrument.sampler,
@@ -4351,7 +4351,7 @@ class OrchestralAudioEngine {
                     releaseTimeout: releaseTimeout,
                     startTime: this.audioContext.currentTime
                 });
-                
+
                 console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} bass started with manual control - Duration: ${duration}s`);
                 return; // Exit if successful
             } catch (error) {
@@ -4522,9 +4522,9 @@ class OrchestralAudioEngine {
         // NEW METHOD: Stop tracked active notes immediately  
         for (const [type, notesMap] of Object.entries(this.activeNotes)) {
             if (notesMap.size === 0) continue;
-            
+
             console.log(`[CUTOFF] 🎯 Stopping ${notesMap.size} active ${type} notes...`);
-            
+
             for (const [noteId, noteInfo] of notesMap.entries()) {
                 try {
                     // Cancel scheduled auto-release
@@ -4532,7 +4532,7 @@ class OrchestralAudioEngine {
                         clearTimeout(noteInfo.releaseTimeout);
                         console.log(`[CUTOFF] ⏰ Cancelled auto-release for ${type} note ${noteId}`);
                     }
-                    
+
                     // Manually trigger release immediately
                     if (noteInfo.sampler && noteInfo.notes) {
                         if (Array.isArray(noteInfo.notes)) {
@@ -4547,7 +4547,7 @@ class OrchestralAudioEngine {
                     console.warn(`[CUTOFF] ❌ Failed to release ${type} note ${noteId}:`, error);
                 }
             }
-            
+
             // Clear the tracking map
             notesMap.clear();
             cutoffMethods.push(`${type}-tracked-notes`);
@@ -4556,7 +4556,7 @@ class OrchestralAudioEngine {
         // FALLBACK: Try old methods for any untracked notes
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (!instrument) continue;
-            
+
             // Try releaseAll() as fallback
             if (instrument.sampler && !instrument.fallback) {
                 try {
@@ -4567,7 +4567,7 @@ class OrchestralAudioEngine {
                     console.warn(`[CUTOFF] ❌ Fallback releaseAll failed for ${type}:`, error);
                 }
             }
-            
+
             if (instrument.synth) {
                 try {
                     console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} synth...`);

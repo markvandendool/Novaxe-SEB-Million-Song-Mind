@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# OBS Cubes Domain Deployment Script
+# ChordCubes 5.0 Domain Deployment Script  
 # Target: millionsongmind.com/cubes
 
-echo "🚀 DEPLOYING OBS CUBES TO MILLIONSONGMIND.COM/CUBES 🚀"
-echo "======================================================="
+echo "🎼 DEPLOYING CHORDCUBES 5.0 TO MILLIONSONGMIND.COM/CUBES 🎼"
+echo "============================================================="
 
-DEPLOYMENT_PACKAGE="obs-cubes-FINAL-DEPLOYMENT-20250825.tar.gz"
+DEPLOYMENT_PACKAGE="chordcubes-5-0-deployment-20250901.tar.gz"
 TARGET_DOMAIN="millionsongmind.com"
 TARGET_PATH="/cubes"
 
@@ -39,22 +39,30 @@ echo "3. Ensure HTTPS is configured"
 echo "4. Set proper MIME types for .js files"
 echo ""
 
-echo "📋 UPLOAD CHECKLIST:"
-echo "□ main.js (165KB) - Core Three.js engine"
-echo "□ index.html - SEO-optimized entry point"
-echo "□ chords.js - Musical intelligence"
-echo "□ styles.css - Visual styling"
-echo "□ All 23 production files"
+echo "📋 CHORDCUBES 5.0 UPLOAD CHECKLIST:"
+echo "□ main.js (398KB) - Revolutionary Audio Cutoff System"
+echo "□ index.html - ChordCubes 5.0 entry point"  
+echo "□ chords.js - Advanced musical intelligence"
+echo "□ styles.css - Professional styling"
+echo "□ fonts/ - Complete font collection"
+echo "□ All 22 production files"
 echo ""
 
-echo "🌐 After upload, your OBS Cubes will be live at:"
+echo "🌐 After upload, ChordCubes 5.0 will be live at:"
 echo "https://$TARGET_DOMAIN$TARGET_PATH/"
 echo ""
 
 # Create a validation URL for testing
 echo "🔍 TEST URL: https://$TARGET_DOMAIN$TARGET_PATH/"
-echo "Expected: Sophisticated Three.js chord visualization with interactive 3D cubes"
+echo "Expected: ChordCubes 5.0 with instant audio cutoff, clean MELODY/BASSLINE text"
 echo ""
 
-echo "✅ DEPLOYMENT PREPARATION COMPLETE!"
+echo "✨ NEW IN 5.0:"
+echo "• Revolutionary instant audio cutoff system"  
+echo "• Manual note tracking with triggerAttack/triggerRelease"
+echo "• Clean professional branding (removed 'tnxgod')"
+echo "• Enhanced debugging and logging system"
+echo ""
+
+echo "✅ CHORDCUBES 5.0 DEPLOYMENT PREPARATION COMPLETE!"
 echo "Ready for upload to $TARGET_DOMAIN$TARGET_PATH"
