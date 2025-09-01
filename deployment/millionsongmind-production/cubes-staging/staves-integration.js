@@ -3,24 +3,42 @@
  * Wire up UI controls and automatic progression display
  */
 
-// Global staves instance
+// Global staves instance with aggressive protection
 let musicalStaves3D = null;
+
+// Multiple layers of initialization protection
 let stavesIntegrationInitialized = false;
+if (!window.STAVES_INTEGRATION_PROTECTED) {
+    window.STAVES_INTEGRATION_PROTECTED = false;
+}
 
 /**
  * Initialize musical staves integration
  */
 function initializeStavesIntegration() {
-    // Prevent multiple initializations
-    if (stavesIntegrationInitialized) {
+    // AGGRESSIVE protection against multiple initializations
+    if (stavesIntegrationInitialized || window.STAVES_INTEGRATION_PROTECTED) {
         return;
     }
+    
+    // Set protection immediately
+    window.STAVES_INTEGRATION_PROTECTED = true;
 
     console.log('[STAVES INTEGRATION] Initializing...');
 
     // Wait for dependencies
     if (!window.scene || !window.camera || !window.VF) {
-        setTimeout(initializeStavesIntegration, 500);
+        // Reset protection since we need to retry
+        window.STAVES_INTEGRATION_PROTECTED = false;
+        
+        // Don't keep retrying if we're already trying to initialize
+        if (!window.stavesInitRetryScheduled) {
+            window.stavesInitRetryScheduled = true;
+            setTimeout(() => {
+                window.stavesInitRetryScheduled = false;
+                initializeStavesIntegration();
+            }, 500);
+        }
         return;
     }
 
