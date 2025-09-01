@@ -4,354 +4,327 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🟣 NOVAXE PROFESSIONAL HUB - Production Access</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    <title>� NOVAXE PROFESSIONAL HUB - Production Ac <div class="app-card" onclick="launchNovaxe()">
+            <div clas function launchChordCubes() { alert('🎯 Launching ChordCubes 5.0 - Revolutionary Audio Cutoff
+                System...\n\n3D harmonic visualization with instant audio control!');
+                window.open('https://millionsongmind-unity2-izuw36kvx-markvandendools-projects.vercel.app/', '_blank' );
+                }tatus-indicator"></div>
+            <div class="app-icon">🎹</div>
+            <div class="app-title">Novaxe Angular 20</div>
+            <div class="app-description">Complete music theory app with Magic 18 harmonic analysis, interactive
+                instruments, and chord progression tools</div>
+            <button class="launch-btn">Launch Novaxe</button>
+        </div>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #8e44ad 100%);
-            min-height: 100vh;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            text-align: center;
-            animation: fadeInUp 1s ease-out;
-        }
-
-        .header {
-            margin-bottom: 40px;
-        }
-
-        .logo {
-            font-size: 4rem;
-            font-weight: 900;
-            margin-bottom: 20px;
-            background: linear-gradient(45deg, #fff, #f8f8ff, #f0e6ff);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
-        }
-
-        .subtitle {
-            font-size: 1.8rem;
-            color: rgba(255, 255, 255, 0.95);
-            margin-bottom: 10px;
-            font-weight: 700;
-        }
-
-        .tagline {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.9);
-            background: rgba(142, 68, 173, 0.4);
-            padding: 12px 25px;
-            border-radius: 25px;
-            display: inline-block;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .app-card {
-            background: rgba(255, 255, 255, 0.12);
-            backdrop-filter: blur(25px);
-            border: 2px solid rgba(142, 68, 173, 0.4);
-            border-radius: 25px;
-            padding: 30px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .app-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 25px 50px rgba(142, 68, 173, 0.4);
-            border-color: rgba(142, 68, 173, 0.8);
-            background: rgba(255, 255, 255, 0.18);
-        }
-
-        .app-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, transparent, rgba(142, 68, 173, 0.8), transparent);
-            animation: shimmer 4s linear infinite;
-        }
-
-        .app-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .app-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            color: #f8f8ff;
-        }
-
-        .app-description {
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 25px;
-            line-height: 1.5;
-            font-size: 1rem;
-        }
-
-        .launch-button {
-            background: linear-gradient(135deg, #8e44ad, #6c3483);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            padding: 15px 30px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
-            width: 100%;
-            box-shadow: 0 5px 15px rgba(142, 68, 173, 0.3);
-        }
-
-        .launch-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 35px rgba(142, 68, 173, 0.5);
-            background: linear-gradient(135deg, #6c3483, #5b2c6f);
-        }
-
-        .status {
-            margin-top: 40px;
-            padding: 25px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 20px;
-            border: 2px solid rgba(142, 68, 173, 0.4);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .status h3 {
-            color: #f8f8ff;
-            margin-bottom: 20px;
-            font-size: 1.3rem;
-        }
-
-        .status-item {
-            margin: 10px 0;
-            padding: 8px 0;
-            font-size: 1rem;
-        }
-
-        .live {
-            color: #2ecc71;
-            font-weight: 600;
-        }
-
-        .deployed {
-            color: #3498db;
-            font-weight: 600;
-        }
-
-        .pending {
-            color: #f39c12;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
+        <div class="app-card" onclick="launchObsidian()">
+            <div class="status-indicator"></div>
+            <div class="app-icon">🔮</div>
+            <div class="app-title">Obsidian Angular (Latest)</div>
+            <div class="app-description">Modern tab-based interface with advanced Magic 18 system and PS5-style UI
+                components</div>
+            <button class="launch-btn">Launch Obsidian</button>
+        </div>itle>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
 
-            to {
-                opacity: 1;
-                transform: translateY(0);
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                background: linear-gradient(135deg, #1e3c72 0%, #2980b9 50%, #3498db 100%);
+                min-height: 100vh;
+                color: white;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
             }
-        }
 
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
+            .container {
+                max-width: 1200px;
+                text-align: center;
+                animation: fadeInUp 1s ease-out;
             }
 
-            100% {
-                transform: translateX(100%);
+            .header {
+                margin-bottom: 40px;
             }
-        }
 
-        @media (max-width: 768px) {
             .logo {
-                font-size: 3rem;
+                font-size: 4rem;
+                font-weight: 900;
+                margin-bottom: 20px;
+                background: linear-gradient(45deg, #fff, #f8f8ff, #e6f3ff);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+            }
+
+            .tagline {
+                font-size: 1.3rem;
+                opacity: 0.9;
+                margin-bottom: 10px;
+                font-weight: 300;
+            }
+
+            .env-badge {
+                display: inline-block;
+                padding: 8px 16px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 2px solid rgba(255, 255, 255, 0.3);
+                border-radius: 25px;
+                font-weight: 600;
+                font-size: 0.9rem;
+                letter-spacing: 1px;
+                text-transform: uppercase;
             }
 
             .apps-grid {
-                grid-template-columns: 1fr;
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
                 gap: 25px;
+                margin-top: 40px;
             }
 
             .app-card {
+                background: rgba(255, 255, 255, 0.1);
+                border: 2px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px;
                 padding: 25px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                cursor: pointer;
             }
-        }
-    </style>
+
+            .app-card:hover {
+                transform: translateY(-8px);
+                box-shadow: 0 20px 40px rgba(52, 152, 219, 0.4);
+                border-color: rgba(52, 152, 219, 0.8);
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+            .app-card::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12);
+            }
+
+            .app-icon {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                display: block;
+            }
+
+            .app-title {
+                font-size: 1.4rem;
+                font-weight: 700;
+                margin-bottom: 10px;
+                color: #fff;
+            }
+
+            .app-description {
+                font-size: 0.95rem;
+                opacity: 0.85;
+                margin-bottom: 20px;
+                line-height: 1.5;
+            }
+
+            .launch-btn {
+                background: linear-gradient(45deg, #3498db, #2ecc71);
+                border: none;
+                padding: 12px 24px;
+                border-radius: 25px;
+                color: white;
+                font-weight: 600;
+                font-size: 0.95rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                width: 100%;
+            }
+
+            .launch-btn:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+            }
+
+            .status-indicator {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background: #2ecc71;
+                box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
+                animation: pulse 2s infinite;
+            }
+
+            .status-offline {
+                background: #e74c3c;
+                box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+            }
+
+            .footer {
+                margin-top: 40px;
+                padding-top: 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                font-size: 0.85rem;
+                opacity: 0.7;
+            }
+
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(30px);
+                }
+
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+
+                50% {
+                    transform: scale(1.2);
+                    opacity: 0.7;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .logo {
+                    font-size: 2.5rem;
+                }
+
+                .apps-grid {
+                    grid-template-columns: 1fr;
+                    gap: 20px;
+                }
+
+                .container {
+                    padding: 0 10px;
+                }
+            }
+        </style>
 </head>
 
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="logo">🟣 NOVAXE PROFESSIONAL HUB</h1>
-            <p class="subtitle">Production Deployment Center</p>
-            <p class="tagline">✨ Live Production Applications ✨</p>
+            <div class="logo">� NOVAXE PROFESSIONAL</div>
+            <div class="tagline">Production Environment Access Portal</div>
+            <div class="env-badge">🚀 Production Environment</div>
         </div>
 
         <div class="apps-grid">
-            <div class="app-card">
+            <div class="app-card" onclick="launchNovaxe()">
+                <div class="status-indicator"></div>
                 <div class="app-icon">🎹</div>
-                <h2 class="app-title">a) Novaxe Angular 20</h2>
-                <p class="app-description">
-                    Professional DAW-level musical intelligence platform with sophisticated harmonic analysis.
-                </p>
-                <button class="launch-button" onclick="launchNovaxeProd()">
-                    🚀 Launch Novaxe Production
-                </button>
+                <div class="app-title">Novaxe Angular 20</div>
+                <div class="app-description">Complete music theory app with Magic 18 harmonic analysis, interactive
+                    instruments, and chord progression tools</div>
+                <button class="launch-btn">Launch Novaxe App</button>
             </div>
 
-            <div class="app-card">
+            <div class="app-card" onclick="launchMSM()">
+                <div class="status-indicator"></div>
                 <div class="app-icon">📊</div>
-                <h2 class="app-title">b) Million Song Mind</h2>
-                <p class="app-description">
-                    Advanced harmonic profiling and Chordonomicon analysis engine for musical intelligence.
-                </p>
-                <button class="launch-button" onclick="launchMSMProd()">
-                    📈 Launch MSM Production
-                </button>
+                <div class="app-title">Million Song Mind</div>
+                <div class="app-description">React dashboard for harmonic analysis, MusicViz, Data3 processing, and song
+                    structure visualization</div>
+                <button class="launch-btn">Launch MSM React</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">🎯</div>
-                <h2 class="app-title">c) ChordCubes 5.0</h2>
-                <p class="app-description">
-                    Revolutionary 3D interactive chord visualization with professional-grade audio integration.
-                </p>
-                <button class="launch-button" onclick="launchChordCubesProd()">
-                    🎲 Launch ChordCubes Live
-                </button>
+            <div class="app-card" onclick="launchChordCubes()">
+                <div class="status-indicator"></div>
+                <div class="app-icon">🎲</div>
+                <div class="app-title">ChordCubes</div>
+                <div class="app-description">3D harmonic visualization with interactive chord cubes and voice leading
+                    analysis</div>
+                <button class="launch-btn">Launch ChordCubes</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">🎵</div>
-                <h2 class="app-title">d) Magic 18 Widget</h2>
-                <p class="app-description">
-                    Interactive musical chart system with precision SVG mapping and audio integration.
-                </p>
-                <button class="launch-button" onclick="launchMagic18Prod()">
-                    🔮 Launch Magic18 Production
-                </button>
+            <div class="app-card" onclick="launchMagic18()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">✨</div>
+                <div class="app-title">Magic 18 Widget</div>
+                <div class="app-description">Standalone harmonic analysis widget for Magic 18 chord system integration
+                </div>
+                <button class="launch-btn">Launch Magic 18</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">💰</div>
-                <h2 class="app-title">e) Sales Funnel</h2>
-                <p class="app-description">
-                    Professional marketing and conversion system for the Novaxe musical ecosystem.
-                </p>
-                <button class="launch-button" onclick="launchSalesFunnelProd()">
-                    💼 Launch Sales Production
-                </button>
+            <div class="app-card" onclick="launchSalesFunnel()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">💼</div>
+                <div class="app-title">Sales Funnel</div>
+                <div class="app-description">Landing page and conversion system for Novaxe ecosystem products</div>
+                <button class="launch-btn">Launch Sales Funnel</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">📱</div>
-                <h2 class="app-title">f) ULTIMATE Mobile</h2>
-                <p class="app-description">
-                    Cross-platform mobile application unifying all Novaxe components in native form.
-                </p>
-                <button class="launch-button" onclick="launchUltimateProd()">
-                    🌟 Launch Ultimate App
-                </button>
+            <div class="app-card" onclick="launchUltimate()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">🚀</div>
+                <div class="app-title">Ultimate Mobile App</div>
+                <div class="app-description">Cross-platform mobile application unifying all Novaxe ecosystem features
+                </div>
+                <button class="launch-btn">Launch Ultimate App</button>
             </div>
         </div>
 
-        <div class="status">
-            <h3>🌐 Production Application Status</h3>
-            <div class="status-item">
-                <span id="novaxe-prod-status" class="deployed">● Novaxe Angular: Production Deployed</span>
-            </div>
-            <div class="status-item">
-                <span id="msm-prod-status" class="deployed">● Million Song Mind: Production Deployed</span>
-            </div>
-            <div class="status-item">
-                <span id="cubes-prod-status" class="live">● ChordCubes 5.0: Live Production</span>
-            </div>
-            <div class="status-item">
-                <span id="magic18-prod-status" class="pending">● Magic 18 Widget: Production Pending</span>
-            </div>
-            <div class="status-item">
-                <span id="sales-prod-status" class="pending">● Sales Funnel: Production Pending</span>
-            </div>
-            <div class="status-item">
-                <span id="ultimate-prod-status" class="pending">● Ultimate Mobile: Production Pending</span>
-            </div>
+        <div class="footer">
+            <p>🔵 Staging Environment | Last Updated: September 1, 2025</p>
+            <p>🔒 Development Access Only | All Apps Connected to Phoenix Hub System</p>
         </div>
     </div>
 
     <script>
         function launchNovaxe() {
-            alert('🎹 Launching Novaxe Angular 20 Production...
+            alert('🎹 Launching Nova20CCC Magic 18...\n\nThis will open the Angular 20 app with Magic 18 as BOTTOM TAB with 18 icon!');
+            window.open('https://nova-magic18-m5lji3prr-markvandendools-projects.vercel.app', '_blank');
+        }
 
-Professional - grade music theory platform.');
-            window.open('http://localhost:4200', '_blank');
+        function launchObsidian() {
+            alert('🔮 Launching Obsidian Angular Latest...\n\nModern tab interface with advanced Magic 18 system and PS5-style components!');
+            window.open('https://novaxe-obsidian-9e7defset-markvandendools-projects.vercel.app', '_blank');
         }
 
         function launchMSM() {
-            alert('📊 Launching Million Song Mind Production...\n\nREAL React app with harmonic profiling and MusicViz dashboard.');
-            window.open('https://millionsongmindweb-6ly6rmjg8-markvandendools-projects.vercel.app', '_blank');
+            alert('📊 Launching Million Song Mind REAL React App...\n\nHarmonic analysis, MusicViz dashboard, Data3 processing!');
+            window.open('https://million-song-mind.vercel.app', '_blank');
         }
 
         function launchChordCubes() {
-            alert('🧊 Launching ChordCubes 5.0 Production...
-
-3D harmonic visualization system.');
-            window.open('https://millionsongmind-unity2-izuw36kvx-markvandendools-projects.vercel.app/', '_blank');
+            alert('� Launching ChordCubes 5.0 - Revolutionary Audio Cutoff System...\n\n3D harmonic visualization with instant audio control!');
+            window.open('https://chordcubes-5-0-2r5b8qhl7-markvandendools-projects.vercel.app', '_blank');
         }
 
         function launchMagic18() {
-            alert('� Launching Magic 18 Widget Production...
-
-Interactive chord chart system.');
-            window.open('https://magic18.novaxe.com', '_blank');
+            alert('✨ Magic 18 Widget Assembly Required...\n\nWidget components identified, assembly in progress!');
+            // Will be implemented when Magic 18 widget is assembled
         }
 
         function launchSalesFunnel() {
-            alert('💰 Launching Sales Funnel Production...
-
-Lovable - built marketing automation.');
-            window.open('https://sound-sale-forge.com', '_blank');
+            alert('💼 Launching Dist-Minimal Sales System...\n\nMinimal deployment system with streamlined interface!');
+            window.open('https://dist-minimal.vercel.app', '_blank');
         }
 
         function launchUltimate() {
-            alert('� Launching Ultimate Mobile Production...
-
-Cross - platform music ecosystem.');
-            window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
+            alert('🚀 Launching Deploy-Obsidian Ultimate...\n\nAdvanced deployment system with full feature set!');
+            window.open('https://deploy-obsidian.vercel.app', '_blank');
         }
     </script>
 </body>

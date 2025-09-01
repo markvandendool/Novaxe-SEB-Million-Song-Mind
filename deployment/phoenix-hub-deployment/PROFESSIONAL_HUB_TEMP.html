@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>� NOVAXE PROFESSIONAL HUB - Production Access</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2980b9 50%, #3498db 100%);
+            min-height: 100vh;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            text-align: center;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f8f8ff, #e6f3ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .env-badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .app-card {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .app-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(52, 152, 219, 0.4);
+            border-color: rgba(52, 152, 219, 0.8);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12);
+        }
+
+        .app-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .app-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .app-description {
+            font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .launch-btn {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
+        }
+
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+        }
+
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            opacity: 0.7;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+
+            .apps-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .container {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">� NOVAXE PROFESSIONAL</div>
+            <div class="tagline">Production Environment Access Portal</div>
+            <div class="env-badge">🚀 Production Environment</div>
+        </div>
+
+        <div class="apps-grid">
+            <div class="app-card" onclick="launchNovaxe()">
+                <div class="status-indicator"></div>
+                <div class="app-icon">🎹</div>
+                <div class="app-title">Novaxe Angular 20</div>
+                <div class="app-description">Complete music theory app with Magic 18 harmonic analysis, interactive
+                    instruments, and chord progression tools</div>
+                <button class="launch-btn">Launch Novaxe App</button>
+            </div>
+
+            <div class="app-card" onclick="launchMSM()">
+                <div class="status-indicator"></div>
+                <div class="app-icon">📊</div>
+                <div class="app-title">Million Song Mind</div>
+                <div class="app-description">React dashboard for harmonic analysis, MusicViz, Data3 processing, and song
+                    structure visualization</div>
+                <button class="launch-btn">Launch MSM React</button>
+            </div>
+
+            <div class="app-card" onclick="launchChordCubes()">
+                <div class="status-indicator"></div>
+                <div class="app-icon">🎲</div>
+                <div class="app-title">ChordCubes</div>
+                <div class="app-description">3D harmonic visualization with interactive chord cubes and voice leading
+                    analysis</div>
+                <button class="launch-btn">Launch ChordCubes</button>
+            </div>
+
+            <div class="app-card" onclick="launchMagic18()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">✨</div>
+                <div class="app-title">Magic 18 Widget</div>
+                <div class="app-description">Standalone harmonic analysis widget for Magic 18 chord system integration
+                </div>
+                <button class="launch-btn">Launch Magic 18</button>
+            </div>
+
+            <div class="app-card" onclick="launchSalesFunnel()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">💼</div>
+                <div class="app-title">Sales Funnel</div>
+                <div class="app-description">Landing page and conversion system for Novaxe ecosystem products</div>
+                <button class="launch-btn">Launch Sales Funnel</button>
+            </div>
+
+            <div class="app-card" onclick="launchUltimate()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">🚀</div>
+                <div class="app-title">Ultimate Mobile App</div>
+                <div class="app-description">Cross-platform mobile application unifying all Novaxe ecosystem features
+                </div>
+                <button class="launch-btn">Launch Ultimate App</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🔵 Staging Environment | Last Updated: September 1, 2025</p>
+            <p>🔒 Development Access Only | All Apps Connected to Phoenix Hub System</p>
+        </div>
+    </div>
+
+    <script>
+        function launchNovaxe() {
+            alert('🎹 Launching Novaxe Angular 20 Production...\n\nThis will open the Angular 20 app with full Magic 18 harmonic analysis!');
+            window.open('https://site-static-pbiqj8wvy-markvandendools-projects.vercel.app', '_blank');
+        }
+
+        function launchMSM() {
+            alert('📊 Launching Million Song Mind REAL React App...\n\nHarmonic analysis, MusicViz dashboard, Data3 processing!');
+            window.open('https://millionsongmindweb-6ly6rmjg8-markvandendools-projects.vercel.app', '_blank');
+        }
+
+        function launchChordCubes() {
+            alert('🎲 Launching ChordCubes 3D Visualization...\n\nInteractive chord cubes with voice leading!');
+            window.open('https://chordcubes-v1-1qdbk2qmu-markvandendools-projects.vercel.app', '_blank');
+        }
+
+        function launchMagic18() {
+            alert('✨ Magic 18 Widget Assembly Required...\n\nWidget components identified, assembly in progress!');
+            // Will be implemented when Magic 18 widget is assembled
+        }
+
+        function launchSalesFunnel() {
+            alert('💼 Sales Funnel Deployment Pending...\n\nGitHub repository located, deployment scheduled!');
+            // Will be implemented when sales funnel is deployed
+        }
+
+        function launchUltimate() {
+            alert('🚀 Ultimate Mobile App Development Phase...\n\nCross-platform roadmap in progress!');
+            // Will be implemented when Ultimate Mobile App is developed
+        }
+    </script>
+</body>
+
+</html>

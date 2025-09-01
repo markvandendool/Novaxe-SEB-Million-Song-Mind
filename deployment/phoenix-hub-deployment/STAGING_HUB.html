@@ -10,13 +10,6 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-
-            function launchUltimate() {
-                alert('🚀 Launching Ultimate Mobile App Staging...\n\nCross-platform music ecosystem prototype with iOS/Android/macOS/Windows roadmap.');
-                window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
-            }
-
-            </script>
         }
 
         body {
@@ -50,38 +43,41 @@
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
         }
 
-        .subtitle {
-            font-size: 1.8rem;
-            color: rgba(255, 255, 255, 0.9);
+        .tagline {
+            font-size: 1.3rem;
+            opacity: 0.9;
             margin-bottom: 10px;
-            font-weight: 700;
+            font-weight: 300;
         }
 
-        .tagline {
-            font-size: 1.2rem;
-            color: rgba(255, 255, 255, 0.8);
-            background: rgba(52, 152, 219, 0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
+        .env-badge {
             display: inline-block;
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
 
         .apps-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 25px;
-            margin: 40px 0;
+            margin-top: 40px;
         }
 
         .app-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border: 2px solid rgba(52, 152, 219, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
             border-radius: 20px;
             padding: 25px;
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
 
         .app-card:hover {
@@ -98,78 +94,70 @@
             left: 0;
             right: 0;
             height: 4px;
-            background: linear-gradient(90deg, transparent, rgba(52, 152, 219, 0.8), transparent);
-            animation: shimmer 3s linear infinite;
+            background: linear-gradient(90deg, #3498db, #2ecc71, #f39c12);
         }
 
         .app-icon {
-            font-size: 3.5rem;
+            font-size: 3rem;
             margin-bottom: 15px;
+            display: block;
         }
 
         .app-title {
             font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 8px;
-            color: #3498db;
+            margin-bottom: 10px;
+            color: #fff;
         }
 
         .app-description {
-            color: rgba(255, 255, 255, 0.85);
-            margin-bottom: 20px;
-            line-height: 1.4;
             font-size: 0.95rem;
+            opacity: 0.85;
+            margin-bottom: 20px;
+            line-height: 1.5;
         }
 
-        .launch-button {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
+        .launch-btn {
+            background: linear-gradient(45deg, #3498db, #2ecc71);
             border: none;
-            border-radius: 12px;
             padding: 12px 24px;
-            font-size: 1rem;
+            border-radius: 25px;
+            color: white;
             font-weight: 600;
+            font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-block;
             width: 100%;
         }
 
-        .launch-button:hover {
+        .launch-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(52, 152, 219, 0.5);
-            background: linear-gradient(135deg, #2980b9, #1f4e79);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4);
         }
 
-        .status {
+        .status-indicator {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2ecc71;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.6);
+            animation: pulse 2s infinite;
+        }
+
+        .status-offline {
+            background: #e74c3c;
+            box-shadow: 0 0 10px rgba(231, 76, 60, 0.6);
+        }
+
+        .footer {
             margin-top: 40px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            border: 2px solid rgba(52, 152, 219, 0.3);
-        }
-
-        .status h3 {
-            color: #3498db;
-            margin-bottom: 15px;
-        }
-
-        .status-item {
-            margin: 8px 0;
-            padding: 5px 0;
-        }
-
-        .staging {
-            color: #3498db;
-        }
-
-        .developing {
-            color: #f39c12;
-        }
-
-        .broken {
-            color: #e74c3c;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.85rem;
+            opacity: 0.7;
         }
 
         @keyframes fadeInUp {
@@ -184,19 +172,23 @@
             }
         }
 
-        @keyframes shimmer {
-            0% {
-                transform: translateX(-100%);
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
             }
 
-            100% {
-                transform: translateX(100%);
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
             }
         }
 
         @media (max-width: 768px) {
             .logo {
-                font-size: 3rem;
+                font-size: 2.5rem;
             }
 
             .apps-grid {
@@ -204,8 +196,8 @@
                 gap: 20px;
             }
 
-            .app-card {
-                padding: 20px;
+            .container {
+                padding: 0 10px;
             }
         }
     </style>
@@ -214,135 +206,101 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="logo">🔵 NOVAXE STAGING HUB</h1>
-            <p class="subtitle">Development & Testing Environment</p>
-            <p class="tagline">🚧 Fast Access to All Staging Versions 🚧</p>
+            <div class="logo">🔵 NOVAXE STAGING</div>
+            <div class="tagline">Development Environment Access Portal</div>
+            <div class="env-badge">🧪 Staging Environment</div>
         </div>
 
         <div class="apps-grid">
-            <div class="app-card">
+            <div class="app-card" onclick="launchNovaxe()">
+                <div class="status-indicator"></div>
                 <div class="app-icon">🎹</div>
-                <h2 class="app-title">a) Novaxe Angular 20</h2>
-                <p class="app-description">
-                    127,000+ line professional DAW-level music theory engine with 43+ TonalJS integrations.
-                </p>
-                <button class="launch-button" onclick="launchNovaxe()">
-                    🚀 Launch Novaxe Staging
-                </button>
+                <div class="app-title">Novaxe Angular 20</div>
+                <div class="app-description">Complete music theory app with Magic 18 harmonic analysis, interactive
+                    instruments, and chord progression tools</div>
+                <button class="launch-btn">Launch Novaxe App</button>
             </div>
 
-            <div class="app-card">
+            <div class="app-card" onclick="launchMSM()">
+                <div class="status-indicator"></div>
                 <div class="app-icon">📊</div>
-                <h2 class="app-title">b) Million Song Mind</h2>
-                <p class="app-description">
-                    React 18 harmonic analysis platform with Chordonomicon data3 analysis engine.
-                </p>
-                <button class="launch-button" onclick="launchMSM()">
-                    📈 Launch MSM Staging
-                </button>
+                <div class="app-title">Million Song Mind</div>
+                <div class="app-description">React dashboard for harmonic analysis, MusicViz, Data3 processing, and song
+                    structure visualization</div>
+                <button class="launch-btn">Launch MSM React</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">🎯</div>
-                <h2 class="app-title">c) ChordCubes 5.0</h2>
-                <p class="app-description">
-                    Latest ChordCubes with revolutionary audio cutoff system and transport bridge integration.
-                </p>
-                <button class="launch-button" onclick="launchChordCubes()">
-                    🎲 Launch ChordCubes Staging
-                </button>
+            <div class="app-card" onclick="launchChordCubes()">
+                <div class="status-indicator"></div>
+                <div class="app-icon">🎲</div>
+                <div class="app-title">ChordCubes</div>
+                <div class="app-description">3D harmonic visualization with interactive chord cubes and voice leading
+                    analysis</div>
+                <button class="launch-btn">Launch ChordCubes</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">🎵</div>
-                <h2 class="app-title">d) Magic 18 Widget</h2>
-                <p class="app-description">
-                    Interactive SVG chart widget system - currently rebuilding from scattered components.
-                </p>
-                <button class="launch-button" onclick="launchMagic18()">
-                    🔮 Launch Magic18 Staging
-                </button>
+            <div class="app-card" onclick="launchMagic18()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">✨</div>
+                <div class="app-title">Magic 18 Widget</div>
+                <div class="app-description">Standalone harmonic analysis widget for Magic 18 chord system integration
+                </div>
+                <button class="launch-btn">Launch Magic 18</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">💰</div>
-                <h2 class="app-title">e) Sales Funnel</h2>
-                <p class="app-description">
-                    Lovable-built marketing and sales system for the Novaxe ecosystem.
-                </p>
-                <button class="launch-button" onclick="launchSalesFunnel()">
-                    💼 Launch Sales Staging
-                </button>
+            <div class="app-card" onclick="launchSalesFunnel()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">💼</div>
+                <div class="app-title">Sales Funnel</div>
+                <div class="app-description">Landing page and conversion system for Novaxe ecosystem products</div>
+                <button class="launch-btn">Launch Sales Funnel</button>
             </div>
 
-            <div class="app-card">
-                <div class="app-icon">📱</div>
-                <h2 class="app-title">f) ULTIMATE Mobile</h2>
-                <p class="app-description">
-                    Cross-platform mobile unification of all Novaxe widgets in native component form.
-                </p>
-                <button class="launch-button" onclick="launchUltimate()">
-                    🌟 Launch Ultimate Staging
-                </button>
+            <div class="app-card" onclick="launchUltimate()">
+                <div class="status-indicator status-offline"></div>
+                <div class="app-icon">🚀</div>
+                <div class="app-title">Ultimate Mobile App</div>
+                <div class="app-description">Cross-platform mobile application unifying all Novaxe ecosystem features
+                </div>
+                <button class="launch-btn">Launch Ultimate App</button>
             </div>
         </div>
 
-        <div class="status">
-            <h3>🔧 Staging Application Status</h3>
-            <div class="status-item">
-                <span id="novaxe-status" class="staging">● Novaxe Angular: Staging Ready</span>
-            </div>
-            <div class="status-item">
-                <span id="msm-status" class="staging">● Million Song Mind: Staging Ready</span>
-            </div>
-            <div class="status-item">
-                <span id="cubes-status" class="staging">● ChordCubes 5.0: Staging Ready</span>
-            </div>
-            <div class="status-item">
-                <span id="magic18-status" class="developing">● Magic 18 Widget: In Development</span>
-            </div>
-            <div class="status-item">
-                <span id="sales-status" class="developing">● Sales Funnel: In Development</span>
-            </div>
-            <div class="status-item">
-                <span id="ultimate-status" class="developing">● Ultimate Mobile: Architecture Planning</span>
-            </div>
+        <div class="footer">
+            <p>🔵 Staging Environment | Last Updated: September 1, 2025</p>
+            <p>🔒 Development Access Only | All Apps Connected to Phoenix Hub System</p>
         </div>
     </div>
 
     <script>
         function launchNovaxe() {
-            alert('🎹 Launching Novaxe Angular 20 Staging...\n\nThis will open the development version with Magic 18 widget tab.');
-            window.open('http://localhost:4201', '_blank');
+            alert('🎹 Launching Novaxe Angular 20 Staging...\n\nThis will open the Angular 20 app with Magic 18 harmonic analysis!');
+            window.open('https://millionsongmindweb-ofi8a5cc1-markvandendools-projects.vercel.app', '_blank');
         }
 
         function launchMSM() {
-            alert('📊 Launching Million Song Mind REAL React App...
-
-Harmonic analysis, MusicViz dashboard, Data3 processing!');
+            alert('📊 Launching Million Song Mind REAL React App...\n\nHarmonic analysis, MusicViz dashboard, Data3 processing!');
             window.open('https://millionsongmindweb-6ly6rmjg8-markvandendools-projects.vercel.app', '_blank');
         }
 
         function launchChordCubes() {
-            alert('🧊 Launching ChordCubes 5.0 Staging...\n\n3D harmonic visualization with voice leading.');
-            window.open('https://millionsongmind-unity2-izuw36kvx-markvandendools-projects.vercel.app/', '_blank');
+            alert('🎲 Launching ChordCubes 3D Visualization...\n\nInteractive chord cubes with voice leading!');
+            window.open('https://chordcubes-v1-1qdbk2qmu-markvandendools-projects.vercel.app', '_blank');
         }
 
         function launchMagic18() {
-            alert('🎵 Magic 18 Widget Staging...\n\nCurrently rebuilding from scattered components.');
-            // TODO: Point to actual staging URL
-            window.open('http://localhost:8005', '_blank');
+            alert('✨ Magic 18 Widget Assembly Required...\n\nWidget components identified, assembly in progress!');
+            // Will be implemented when Magic 18 widget is assembled
         }
 
         function launchSalesFunnel() {
-            alert('💰 Sales Funnel Staging...\n\nLovable-built marketing system (Sound Sale Forge).');
-            window.open('https://github.com/markvandendool/sound-sale-forge', '_blank');
+            alert('💼 Sales Funnel Deployment Pending...\n\nGitHub repository located, deployment scheduled!');
+            // Will be implemented when sales funnel is deployed
         }
 
         function launchUltimate() {
-            alert('� Launching Ultimate Mobile App Staging...\n\nCross-platform music ecosystem prototype with iOS/Android/macOS/Windows roadmap.');
-            window.open('ULTIMATE_MOBILE_STAGING.html', '_blank');
-        }
+            alert('🚀 Ultimate Mobile App Development Phase...\n\nCross-platform roadmap in progress!');
+            // Will be implemented when Ultimate Mobile App is developed
         }
     </script>
 </body>
