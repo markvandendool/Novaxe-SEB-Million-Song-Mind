@@ -61,33 +61,56 @@ function initializeStavesIntegration() {
  * Set up UI button controls for musical staves
  */
 function setupStavesControls() {
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: setupStavesControls called');
+    
     const showBtn = document.getElementById('show-staves');
     const hideBtn = document.getElementById('hide-staves');
     const testBtn = document.getElementById('test-progression');
 
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Button elements found:');
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: - Show button:', !!showBtn);
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: - Hide button:', !!hideBtn);
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: - Test button:', !!testBtn);
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: - musicalStaves3D instance:', !!musicalStaves3D);
+
     if (showBtn) {
         showBtn.addEventListener('click', () => {
+            console.log('[STAVES INTEGRATION] 🎼 VERBOSE: === SHOW STAVES CLICKED ===');
+            console.log('[STAVES INTEGRATION] 🎼 VERBOSE: musicalStaves3D available:', !!musicalStaves3D);
             if (musicalStaves3D) {
+                console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Calling musicalStaves3D.createStaves()...');
                 musicalStaves3D.createStaves();
-                console.log('[STAVES INTEGRATION] Staves created');
+                console.log('[STAVES INTEGRATION] ✅ Staves creation triggered');
+            } else {
+                console.error('[STAVES INTEGRATION] ❌ musicalStaves3D not available!');
             }
         });
+        console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Show button listener attached');
+    } else {
+        console.error('[STAVES INTEGRATION] ❌ Show button not found!');
     }
 
     if (hideBtn) {
         hideBtn.addEventListener('click', () => {
+            console.log('[STAVES INTEGRATION] 🎼 VERBOSE: === HIDE STAVES CLICKED ===');
             if (musicalStaves3D) {
                 musicalStaves3D.setVisible(false);
-                console.log('[STAVES INTEGRATION] Staves hidden');
+                console.log('[STAVES INTEGRATION] ✅ Staves hidden');
             }
         });
+        console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Hide button listener attached');
     }
 
     if (testBtn) {
         testBtn.addEventListener('click', () => {
+            console.log('[STAVES INTEGRATION] 🎼 VERBOSE: === TEST PROGRESSION CLICKED ===');
+            console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Calling testThreeVoiceProgression()...');
             testThreeVoiceProgression();
         });
+        console.log('[STAVES INTEGRATION] 🎼 VERBOSE: Test button listener attached');
     }
+    
+    console.log('[STAVES INTEGRATION] 🎼 VERBOSE: setupStavesControls completed');
 }
 
 /**

@@ -16,7 +16,7 @@ class MusicalStaves3D {
             treble: { x: 0, y: 8, z: 4 },    // Treble clef staff - FLOATING ABOVE melody area
             bass: { x: 0, y: 4, z: 4 }       // Bass clef staff - FLOATING ABOVE bass area
         };
-        
+
         // MASSIVE scale to match Million Song Mind title system
         this.staveScale = {
             width: 20,    // Even bigger than melody titles (16)
@@ -31,41 +31,54 @@ class MusicalStaves3D {
             minimum: 5      // Total minimum voices when locked
         };
 
-        console.log('[MUSICAL STAVES 3D] Initialized');
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Initialized with positions:', this.positions);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Scale:', this.staveScale);
     }
 
     /**
      * Create piano staves for sophisticated 3-7 note harmony display
      */
     createStaves() {
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: createStaves() called');
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow available:', !!window.VF);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Scene available:', !!this.scene);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Camera available:', !!this.camera);
+        
         if (!window.VF) {
-            console.error('[MUSICAL STAVES 3D] VexFlow not loaded');
+            console.error('[MUSICAL STAVES 3D] ❌ VexFlow not loaded');
             return;
         }
 
         // Clear existing staves
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Clearing existing staves...');
         this.clearStaves();
 
         try {
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Creating treble staff at position:', this.positions.treble);
             // Create treble staff (upper harmonies from ChordCubes)
             this.staves.treble = this.createSingleStaff(
                 this.positions.treble,
                 'treble',
                 'Treble - Upper Harmonies'
             );
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Treble staff created:', !!this.staves.treble);
 
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Creating bass staff at position:', this.positions.bass);
             // Create bass staff (bass notes + lower harmonies from ChordCubes)
             this.staves.bass = this.createSingleStaff(
                 this.positions.bass,
                 'bass',
                 'Bass - Lower Harmonies & Bass'
             );
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Bass staff created:', !!this.staves.bass);
 
             this.isVisible = true;
             console.log('[MUSICAL STAVES 3D] ✅ Created piano staff system (treble + bass)');
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Scene children count:', this.scene.children.length);
 
         } catch (error) {
             console.error('[MUSICAL STAVES 3D] ❌ Error creating staves:', error);
+            console.error('[MUSICAL STAVES 3D] ❌ Error stack:', error.stack);
         }
     }
 
@@ -73,31 +86,44 @@ class MusicalStaves3D {
      * Create a single staff at specified 3D position
      */
     createSingleStaff(position, clef, title) {
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: createSingleStaff called for', clef, 'at position', position);
+        
         // MASSIVE canvas for crisp quality at huge scale
         const canvas = document.createElement('canvas');
         canvas.width = 2048;  // Much bigger for crisp rendering
         canvas.height = 512;  // Proportional height
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Canvas created:', canvas.width + 'x' + canvas.height);
 
         const renderer = new VF.Renderer(canvas, VF.Renderer.Backends.CANVAS);
         const context = renderer.getContext();
         context.setFont('Arial', 12);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow renderer and context created');
 
-        // Create MASSIVE stave with clef and time signature (scaled for 2048px canvas)
-        const stave = new VF.Stave(20, 100, 1900);  // Much wider stave for the massive canvas
-        stave.addClef(clef);
-        stave.addTimeSignature('4/4');
-        stave.addKeySignature('C'); // C Major for now
-        stave.setContext(context).draw();
+        try {
+            // Create MASSIVE stave with clef and time signature (scaled for 2048px canvas)
+            const stave = new VF.Stave(20, 100, 1900);  // Much wider stave for the massive canvas
+            stave.addClef(clef);
+            stave.addTimeSignature('4/4');
+            stave.addKeySignature('C'); // C Major for now
+            stave.setContext(context).draw();
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: VexFlow stave drawn successfully');
 
-        // Add title with bigger font
-        context.fillStyle = '#000';
-        context.font = '24px Arial';  // Bigger font for massive scale
-        context.fillText(title, 20, 50);
+            // Add title with bigger font
+            context.fillStyle = '#000';
+            context.font = '24px Arial';  // Bigger font for massive scale
+            context.fillText(title, 20, 50);
+            console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Title added:', title);
+
+        } catch (error) {
+            console.error('[MUSICAL STAVES 3D] ❌ Error drawing VexFlow stave:', error);
+            throw error;
+        }
 
         // Convert canvas to texture and create 3D mesh
         const texture = new THREE.CanvasTexture(canvas);
         texture.minFilter = THREE.LinearFilter;
         texture.magFilter = THREE.LinearFilter;
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Texture created from canvas');
 
         // MASSIVE geometry to match MELODY/BASSLINE titles (16x8) - even bigger!
         const geometry = new THREE.PlaneGeometry(this.staveScale.width, this.staveScale.height);
@@ -107,13 +133,18 @@ class MusicalStaves3D {
             alphaTest: 0.1,
             side: THREE.DoubleSide  // Visible from both sides
         });
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Geometry created:', this.staveScale.width + 'x' + this.staveScale.height);
 
         const mesh = new THREE.Mesh(geometry, material);
         mesh.position.set(position.x, position.y, position.z);
         // Don't look at camera - keep them horizontal like the MELODY/BASS titles
         mesh.rotation.x = -Math.PI / 4; // Slight angle for better visibility
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Mesh created and positioned at:', mesh.position);
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Mesh rotation:', mesh.rotation);
 
+        console.log('[MUSICAL STAVES 3D] 🎼 VERBOSE: Adding mesh to scene...');
         this.scene.add(mesh);
+        console.log('[MUSICAL STAVES 3D] ✅ VERBOSE: Mesh added to scene successfully!');
 
         return {
             mesh,
