@@ -3450,6 +3450,14 @@ class OrchestralAudioEngine {
             bass: null,
             melody: null
         };
+        
+        // NEW: Track active notes for proper cutoff
+        this.activeNotes = {
+            chord: new Map(), // noteId -> {sampler, notes, releaseCallback}
+            bass: new Map(),
+            melody: new Map()
+        };
+        this.noteIdCounter = 0;
 
         // CORRECTED INSTRUMENT MAPPINGS WITH ACTUAL WEBAUDIOFONT IDS
         // These are the REAL, WORKING instrument variable names in WebAudioFont
@@ -4165,8 +4173,33 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples - AudioTime: ${this.audioContext.currentTime.toFixed(3)}`);
             try {
-                instrument.sampler.triggerAttackRelease(notes, duration + 's', undefined, volume * chordVolume);
-                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples played successfully - Duration: ${duration}s`);
+                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
+                const noteId = ++this.noteIdCounter;
+                console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for manual control`);
+                
+                // Trigger attack (start notes)
+                instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
+                
+                // Schedule release after duration
+                const releaseTimeout = setTimeout(() => {
+                    try {
+                        instrument.sampler.triggerRelease(notes);
+                        console.log(`[AUDIO ENGINE] ⏰ Auto-released chord notes ${noteId} after ${duration}s`);
+                        this.activeNotes.chord.delete(noteId);
+                    } catch (e) {
+                        console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
+                    }
+                }, duration * 1000);
+                
+                // Track this note for manual cutoff
+                this.activeNotes.chord.set(noteId, {
+                    sampler: instrument.sampler,
+                    notes: notes,
+                    releaseTimeout: releaseTimeout,
+                    startTime: this.audioContext.currentTime
+                });
+                
+                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with manual control - Duration: ${duration}s`);
                 return; // Exit if successful
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
@@ -4291,9 +4324,38 @@ class OrchestralAudioEngine {
         if (instrument.sampler && !instrument.fallback) {
             console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples for bass`);
             try {
-                instrument.sampler.triggerAttackRelease(note, duration + 's', undefined, volume * bassVolume);
+                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
+                const noteId = ++this.noteIdCounter;
+                console.log(`[AUDIO ENGINE] 🎯 Starting bass note with ID ${noteId} for manual control`);
+                
+                // Trigger attack (start note)
+                instrument.sampler.triggerAttack(note, undefined, volume * bassVolume);
+                
+                // Schedule release after duration
+                const releaseTimeout = setTimeout(() => {
+                    try {
+                        instrument.sampler.triggerRelease(note);
+                        console.log(`[AUDIO ENGINE] ⏰ Auto-released bass note ${noteId} after ${duration}s`);
+                        this.activeNotes.bass.delete(noteId);
+                    } catch (e) {
+                        console.warn(`[AUDIO ENGINE] Auto-release error for bass ${noteId}:`, e);
+                    }
+                }, duration * 1000);
+                
+                // Track this note for manual cutoff
+                this.activeNotes.bass.set(noteId, {
+                    sampler: instrument.sampler,
+                    notes: [note], // Make it consistent with chord (array format)
+                    releaseTimeout: releaseTimeout,
+                    startTime: this.audioContext.currentTime
+                });
+                
+                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} bass started with manual control - Duration: ${duration}s`);
+                return; // Exit if successful
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler bass error:', error);
+                console.log(`[AUDIO ENGINE] 🔄 FALLING BACK to enhanced synth for bass`);
+                // Continue to fallback
             }
         }
         // PRIORITY 2: Use WebAudioFont if available
@@ -4442,66 +4504,87 @@ class OrchestralAudioEngine {
         return status;
     }
 
-    // COMPREHENSIVE AUDIO CUTOFF for Free Play Mode
+    // COMPREHENSIVE AUDIO CUTOFF with Active Note Tracking
     cutoffCurrentChord() {
         const cutoffTime = this.audioContext.currentTime.toFixed(3);
         console.log(`[AUDIO ENGINE] 🔇 IMMEDIATE CUTOFF at time ${cutoffTime}`);
-        console.log(`[AUDIO ENGINE DEBUG] currentInstruments:`, Object.keys(this.currentInstruments));
+        console.log(`[CUTOFF] 📊 Active notes before cutoff:`, {
+            chord: this.activeNotes.chord.size,
+            bass: this.activeNotes.bass.size,
+            melody: this.activeNotes.melody.size
+        });
 
         let releasedCount = 0;
         const cutoffMethods = [];
 
-        // For each instrument, try ALL available cutoff methods
+        // NEW METHOD: Stop tracked active notes immediately  
+        for (const [type, notesMap] of Object.entries(this.activeNotes)) {
+            if (notesMap.size === 0) continue;
+            
+            console.log(`[CUTOFF] 🎯 Stopping ${notesMap.size} active ${type} notes...`);
+            
+            for (const [noteId, noteInfo] of notesMap.entries()) {
+                try {
+                    // Cancel scheduled auto-release
+                    if (noteInfo.releaseTimeout) {
+                        clearTimeout(noteInfo.releaseTimeout);
+                        console.log(`[CUTOFF] ⏰ Cancelled auto-release for ${type} note ${noteId}`);
+                    }
+                    
+                    // Manually trigger release immediately
+                    if (noteInfo.sampler && noteInfo.notes) {
+                        if (Array.isArray(noteInfo.notes)) {
+                            noteInfo.sampler.triggerRelease(noteInfo.notes);
+                        } else {
+                            noteInfo.sampler.triggerRelease([noteInfo.notes]);
+                        }
+                        console.log(`[CUTOFF] ✅ Immediately released ${type} note ${noteId}:`, noteInfo.notes);
+                        releasedCount++;
+                    }
+                } catch (error) {
+                    console.warn(`[CUTOFF] ❌ Failed to release ${type} note ${noteId}:`, error);
+                }
+            }
+            
+            // Clear the tracking map
+            notesMap.clear();
+            cutoffMethods.push(`${type}-tracked-notes`);
+        }
+
+        // FALLBACK: Try old methods for any untracked notes
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (!instrument) continue;
             
-            console.log(`[AUDIO ENGINE DEBUG] Checking ${type}: hasSampler=${!!instrument?.sampler}, hasSynth=${!!instrument?.synth}, hasPreset=${!!instrument?.preset}, isFallback=${!!instrument?.fallback}`);
-            
-            // METHOD 1: Stop Tone.js Sampler (real samples)
+            // Try releaseAll() as fallback
             if (instrument.sampler && !instrument.fallback) {
                 try {
-                    console.log(`[CUTOFF] 🎯 Releasing ${type} SAMPLER immediately...`);
+                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} sampler...`);
                     instrument.sampler.releaseAll();
-                    console.log(`[CUTOFF] ✅ ${type} sampler released`);
-                    releasedCount++;
-                    cutoffMethods.push(`${type}-sampler`);
+                    cutoffMethods.push(`${type}-fallback-releaseAll`);
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ ${type} sampler release failed:`, error);
+                    console.warn(`[CUTOFF] ❌ Fallback releaseAll failed for ${type}:`, error);
                 }
             }
             
-            // METHOD 2: Stop enhanced Tone.js synth (fallback)  
             if (instrument.synth) {
                 try {
-                    console.log(`[CUTOFF] 🎯 Releasing ${type} SYNTH immediately...`);
+                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} synth...`);
                     instrument.synth.releaseAll();
-                    console.log(`[CUTOFF] ✅ ${type} synth released`);
-                    releasedCount++;
-                    cutoffMethods.push(`${type}-synth`);
+                    cutoffMethods.push(`${type}-fallback-synth`);
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ ${type} synth release failed:`, error);
+                    console.warn(`[CUTOFF] ❌ Fallback synth release failed for ${type}:`, error);
                 }
             }
 
-            // METHOD 3: WebAudioFont (cannot stop mid-playback, log for visibility)
+            // WebAudioFont (cannot stop mid-playback, log for visibility)
             if (instrument.preset && !instrument.info?.fallback) {
                 console.log(`[CUTOFF] ⚠️  ${type} uses WebAudioFont - cannot stop mid-playback`);
-                cutoffMethods.push(`${type}-webaudifont-nostop`);
+                cutoffMethods.push(`${type}-webaudiofont-nostop`);
             }
         }
 
-        console.log(`[CUTOFF] 🎯 CUTOFF COMPLETE: Released ${releasedCount} instruments using methods: [${cutoffMethods.join(', ')}]`);
+        console.log(`[CUTOFF] 🎯 CUTOFF COMPLETE: Released ${releasedCount} tracked notes using methods: [${cutoffMethods.join(', ')}]`);
         console.log(`[CUTOFF] ⏰ Cutoff finished at time ${this.audioContext.currentTime.toFixed(3)}`);
-        
-        // EMERGENCY: Try global Tone.js stop if available
-        try {
-            if (window.Tone && Tone.Transport) {
-                console.log('[CUTOFF] 🚨 EMERGENCY: Attempting global Tone.js stop...');
-                // Don't stop the transport, but try to release any hanging notes
-            }
-        } catch (error) {
-            // Ignore - this is just emergency cleanup
-        }
     }
 }
 
