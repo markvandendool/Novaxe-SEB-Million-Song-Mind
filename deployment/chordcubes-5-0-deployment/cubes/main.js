@@ -40,7 +40,10 @@
 // CLAUDE'S PART 3: PROPER IMPORT ORDER
 // ============================================
 
-// Import transport bridge FIRST (it will expose globally)
+// Import critical monitoring system FIRST
+import { ChordCubesMonitor } from './monitor.js';
+
+// Import transport bridge SECOND (it will expose globally)
 import { chordCubesTransport } from './transport-bridge.js';
 
 // IMMEDIATE DEBUG: Check if import worked
