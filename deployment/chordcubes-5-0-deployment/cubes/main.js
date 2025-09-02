@@ -3305,6 +3305,56 @@ document.addEventListener('keyup', (e) => {
     console.log(`[GLOBAL KEYUP] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 }, { capture: true, passive: false });
 
+// ============================================
+// 🎼 PHASE 2B: CHORD QUALITY FORCING SYSTEM
+// ============================================
+
+// Global chord quality forcing state
+let chordQualityForcing = {
+    minor: false,      // 'm' key - force minor quality
+    major: false,      // 'n' key - force major quality  
+    diminished: false  // 'd' key - force diminished quality
+};
+
+// Add chord quality forcing keyboard handlers
+document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+    
+    switch(key) {
+        case 'm':
+            chordQualityForcing.minor = true;
+            console.log('[CHORD FORCING] Minor quality activated');
+            break;
+        case 'n':
+            chordQualityForcing.major = true;
+            console.log('[CHORD FORCING] Major quality activated');
+            break;
+        case 'd':
+            chordQualityForcing.diminished = true;
+            console.log('[CHORD FORCING] Diminished quality activated');
+            break;
+    }
+}, { capture: true, passive: false });
+
+document.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+    
+    switch(key) {
+        case 'm':
+            chordQualityForcing.minor = false;
+            console.log('[CHORD FORCING] Minor quality deactivated');
+            break;
+        case 'n':
+            chordQualityForcing.major = false;
+            console.log('[CHORD FORCING] Major quality deactivated');
+            break;
+        case 'd':
+            chordQualityForcing.diminished = false;
+            console.log('[CHORD FORCING] Diminished quality deactivated');
+            break;
+    }
+}, { capture: true, passive: false });
+
 // Audio state (declare before any usage)
 let audioCtx = null;
 let withSeventh = false;
@@ -6886,10 +6936,91 @@ function getVoiceLeadingContext(currentChord, voice) {
     return context;
 }
 
+// ============================================
+// 🎼 PHASE 2B: CHORD QUALITY FORCING LOGIC
+// ============================================
+
+/**
+ * Apply chord quality forcing to a chord's note set
+ * @param {Array} baseNotes - Original chord notes (e.g. ['C', 'E', 'G', 'B'])
+ * @param {string} romanLabel - Roman numeral label for visual updates
+ * @returns {Object} { notes: Array, modifiedRoman: string }
+ */
+function applyChordQualityForcing(baseNotes, romanLabel) {
+    if (!baseNotes || baseNotes.length < 3) return { notes: baseNotes, modifiedRoman: romanLabel };
+    
+    let modifiedNotes = [...baseNotes];
+    let modifiedRoman = romanLabel;
+    
+    // Apply quality forcing based on active keys
+    if (chordQualityForcing.minor) {
+        // Force minor: lower the 3rd by a semitone
+        if (modifiedNotes.length >= 2) {
+            const thirdNote = modifiedNotes[1];
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const flatThirdPc = (rootPc + 3) % 12; // minor 3rd = 3 semitones
+            modifiedNotes[1] = noteNameFromPC(flatThirdPc);
+            
+            // Update roman numeral to lowercase
+            modifiedRoman = romanLabel.toLowerCase();
+            console.log(`[FORCE MINOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
+        }
+    }
+    
+    else if (chordQualityForcing.major) {
+        // Force major: raise the 3rd by a semitone if it's currently minor
+        if (modifiedNotes.length >= 2) {
+            const thirdNote = modifiedNotes[1];
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const majorThirdPc = (rootPc + 4) % 12; // major 3rd = 4 semitones
+            modifiedNotes[1] = noteNameFromPC(majorThirdPc);
+            
+            // Update roman numeral to uppercase
+            modifiedRoman = romanLabel.toUpperCase().replace(/[º7øb♭]/g, '');
+            console.log(`[FORCE MAJOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
+        }
+    }
+    
+    else if (chordQualityForcing.diminished) {
+        // Force diminished: flatten both 3rd and 5th
+        if (modifiedNotes.length >= 3) {
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const flatThirdPc = (rootPc + 3) % 12; // minor 3rd
+            const flatFifthPc = (rootPc + 6) % 12; // diminished 5th (tritone)
+            
+            modifiedNotes[1] = noteNameFromPC(flatThirdPc);
+            modifiedNotes[2] = noteNameFromPC(flatFifthPc);
+            
+            // Update roman numeral to diminished notation
+            const baseRoman = romanLabel.replace(/[º7øIVivb♭]/g, '');
+            modifiedRoman = baseRoman.toLowerCase() + 'º';
+            console.log(`[FORCE DIMINISHED] ${romanLabel} → ${modifiedRoman}, 3rd & 5th modified`);
+        }
+    }
+    
+    return { notes: modifiedNotes, modifiedRoman };
+}
+
+/**
+ * Convert pitch class (0-11) to note name
+ */
+function noteNameFromPC(pc) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    return noteNames[pc];
+}
+
 // Chord bed: lock voices into C4..C5 regardless of chord
 function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+    
+    // 🎼 PHASE 2B: Apply chord quality forcing
+    const forcingResult = applyChordQualityForcing(names, roman);
+    names = forcingResult.notes;
+    // Note: modifiedRoman would be used for visual updates (cube face text)
 
     // ALWAYS include 7th for diminished chords and I7 chords
     const isDiminished = roman.includes('º') || roman.includes('ø');
@@ -6917,7 +7048,12 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
 // Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+    
+    // 🎼 PHASE 2B: Apply chord quality forcing for bass voice
+    const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
+    names = forcingResult.notes;
+    
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const rootPc = pcOf(names[0]);
     const bottomPc = pcOf(names[r]);
@@ -6932,7 +7068,12 @@ function getBassMidiForObject(obj) {
 // Melody: map top-face tone into a higher octave anchored to the chord root
 function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+    
+    // 🎼 PHASE 2B: Apply chord quality forcing for melody voice  
+    const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
+    names = forcingResult.notes;
+    
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const topIdx = (r + 2) % 4;
     const rootPc = pcOf(names[0]);
