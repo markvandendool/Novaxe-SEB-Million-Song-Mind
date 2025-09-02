@@ -2041,16 +2041,19 @@ async function loadInstruments() {
             }).connect(melodyBus);
 
             const makeTonePlayable = (synth) => ({
-                play(midi, time, opts = {}) {
-                    const ctx = ensureAudio();
-                    const nowCtx = ctx.currentTime;
-                    const offset = Math.max(0, (time ?? nowCtx) - nowCtx);
-                    const when = window.Tone.now() + offset;
-                    const duration = opts.duration ?? 0.5;
-                    const velocity = 1.0; // use bus gains for mix; ensure audibility
+                async play(midi, time, opts = {}) {
                     try {
+                        // EDIT 3: Handle AudioContext properly with async/await
+                        const ctx = await ensureAudio();
+                        const nowCtx = ctx.currentTime;
+                        const offset = Math.max(0, (time ?? nowCtx) - nowCtx);
+                        const when = window.Tone.now() + offset;
+                        const duration = opts.duration ?? 0.5;
+                        const velocity = 1.0; // use bus gains for mix; ensure audibility
                         synth.triggerAttackRelease(window.Tone.Frequency(midi, 'midi'), duration, when, velocity);
-                    } catch (e) { console.warn('[obs-cubes] Tone play error', e); }
+                    } catch (e) {
+                        console.warn('[obs-cubes] Tone play error', e);
+                    }
                 }
             });
 
@@ -2449,10 +2452,45 @@ function enforceRestZones() {
     }
 }
 
-// Simple WebAudio chord playback
+// Simple WebAudio chord playback - EDIT 3: Singleton AudioContext with user interaction requirement
+let audioContextInitialized = false;
+let audioContextPromise = null;
+
 function ensureAudio() {
-    if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-    return audioCtx;
+    // Return existing context if available
+    if (audioCtx && audioCtx.state !== 'closed') {
+        return Promise.resolve(audioCtx);
+    }
+
+    // Return existing promise if initialization is in progress
+    if (audioContextPromise) {
+        return audioContextPromise;
+    }
+
+    // Initialize once with proper user interaction handling
+    audioContextPromise = new Promise(async (resolve, reject) => {
+        try {
+            if (!audioCtx || audioCtx.state === 'closed') {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                console.log('🎵 AudioContext created:', audioCtx.state);
+            }
+
+            // Handle suspended state (requires user interaction)
+            if (audioCtx.state === 'suspended') {
+                console.log('🔇 AudioContext suspended - waiting for user interaction');
+                // Don't spam resume attempts, just wait for user gesture
+                return resolve(audioCtx);
+            }
+
+            audioContextInitialized = true;
+            resolve(audioCtx);
+        } catch (error) {
+            console.error('❌ AudioContext creation failed:', error);
+            reject(error);
+        }
+    });
+
+    return audioContextPromise;
 }
 const NOTE_INDEX = { C: 0, 'C#': 1, Db: 1, D: 2, 'D#': 3, Eb: 3, E: 4, F: 5, 'F#': 6, Gb: 6, G: 7, 'G#': 8, Ab: 8, A: 9, 'A#': 10, Bb: 10, B: 11 };
 function noteToFreq(semitoneIndex, octave = 4) { const a4 = 440; const a4Index = 9 + 12 * 4; const idx = semitoneIndex + 12 * octave; return a4 * Math.pow(2, (idx - a4Index) / 12); }
@@ -2495,38 +2533,91 @@ function buildVoiceFreqs(roman, rotationIndex, includeSeventh) {
     return asc.map(m => 440 * Math.pow(2, (m - (9 + 12 * 4)) / 12));
 }
 
-// v1.0 chord audition using WebAudio oscillators (independent of soundfont loading)
-function playChordForObjectV1(obj) {
-    const ctx = ensureAudio();
-    const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
-    const now = ctx.currentTime;
-    const duration = 1.1;
-    // Master
-    const master = ctx.createGain(); master.gain.value = 0.9; master.connect(ctx.destination);
-    const chordBus = ctx.createGain(); chordBus.gain.value = 0.22; chordBus.connect(master);
-    const bassBus = ctx.createGain(); bassBus.gain.value = 0.28; bassBus.connect(master);
-    const melodyBus = ctx.createGain(); melodyBus.gain.value = 0.24; melodyBus.connect(master);
-    const env = (g, t0, d) => { g.gain.setValueAtTime(0.0, t0); g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01); g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03); g.gain.linearRampToValueAtTime(0.0, t0 + d); };
-    const lowest = freqsAsc[0];
-    const highest = freqsAsc[freqsAsc.length - 1];
-    // Chord bed
-    freqsAsc.forEach((f, i) => {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = i === 3 ? 'triangle' : 'sine';
-        osc.frequency.value = f; osc.connect(g).connect(chordBus);
-        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
-    });
-    // Bass
-    if (lowest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'sawtooth'; osc.frequency.value = lowest; osc.connect(g).connect(bassBus);
-        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
-    }
-    // Melody
-    if (highest) {
-        const osc = ctx.createOscillator(); const g = ctx.createGain();
-        osc.type = 'square'; osc.frequency.value = highest; osc.connect(g).connect(melodyBus);
-        env(g, now, duration); osc.start(now); osc.stop(now + duration + 0.02);
+// v1.0 chord audition using WebAudio oscillators - EDIT 3: Promise-based with proper error handling
+async function playChordForObjectV1(obj) {
+    try {
+        const ctx = await ensureAudio();
+
+        // Attempt to resume context if suspended (user interaction required)
+        if (ctx.state === 'suspended') {
+            try {
+                await ctx.resume();
+                console.log('🔊 AudioContext resumed');
+            } catch (error) {
+                console.log('⚠️ AudioContext resume failed - requires user gesture');
+                return; // Silently fail, don't spam console
+            }
+        }
+
+        const freqsAsc = buildVoiceFreqs(obj.userData.roman, obj.userData.rotationIndex || 0, withSeventh);
+        const now = ctx.currentTime;
+        const duration = 1.1;
+
+        // Master
+        const master = ctx.createGain();
+        master.gain.value = 0.9;
+        master.connect(ctx.destination);
+
+        const chordBus = ctx.createGain();
+        chordBus.gain.value = 0.22;
+        chordBus.connect(master);
+
+        const bassBus = ctx.createGain();
+        bassBus.gain.value = 0.28;
+        bassBus.connect(master);
+
+        const melodyBus = ctx.createGain();
+        melodyBus.gain.value = 0.24;
+        melodyBus.connect(master);
+
+        const env = (g, t0, d) => {
+            g.gain.setValueAtTime(0.0, t0);
+            g.gain.linearRampToValueAtTime(g.gain.value + 0.001, t0 + 0.01);
+            g.gain.linearRampToValueAtTime(g.gain.value, t0 + 0.03);
+            g.gain.linearRampToValueAtTime(0.0, t0 + d);
+        };
+
+        const lowest = freqsAsc[0];
+        const highest = freqsAsc[freqsAsc.length - 1];
+
+        // Chord bed
+        freqsAsc.forEach((f, i) => {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = i === 3 ? 'triangle' : 'sine';
+            osc.frequency.value = f;
+            osc.connect(g).connect(chordBus);
+            env(g, now, duration);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        });
+
+        // Bass
+        if (lowest) {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.value = lowest;
+            osc.connect(g).connect(bassBus);
+            env(g, now, duration);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        }
+
+        // Melody
+        if (highest) {
+            const osc = ctx.createOscillator();
+            const g = ctx.createGain();
+            osc.type = 'square';
+            osc.frequency.value = highest;
+            osc.connect(g).connect(melodyBus);
+            env(g, now, duration);
+            osc.start(now);
+            osc.stop(now + duration + 0.02);
+        }
+
+    } catch (error) {
+        console.error('🎵 Chord playback error:', error);
     }
 }
 function midiToFreq(m) { return 440 * Math.pow(2, (m - 69) / 12); }

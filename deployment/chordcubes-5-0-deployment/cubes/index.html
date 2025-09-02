@@ -422,15 +422,16 @@
 			<!-- CLEAN ALIGNED INSTRUMENT LAYOUT -->
 			<div
 				style="display: inline-flex; align-items: flex-start; margin-left: 12px; gap: 20px; vertical-align: top; margin-top: 24px;">
-				<!-- Bass Column -->
 				<div style="display: flex; flex-direction: column; align-items: flex-start;">
 					<label style="margin-bottom: 2px; font-size: 12px;">Bass Instrument</label>
 					<select id="bass-inst" style="width: 120px; margin-bottom: 6px;">
 						<option value="contrabass" selected>Contrabass</option>
 						<option value="acoustic_bass">Acoustic Bass</option>
 						<option value="electric_bass_finger">Electric Bass</option>
+						<option value="electric_bass_pick">Electric Bass (Pick)</option>
 						<option value="cello">Cello</option>
-						<option value="synth_bass_1">Synth Bass</option>
+						<option value="synth_bass_1">Synth Bass 1</option>
+						<option value="synth_bass_2">Synth Bass 2</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Bass Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -454,9 +455,15 @@
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Instrument</label>
 					<select id="chord-inst" style="width: 120px; margin-bottom: 6px;">
 						<option value="acoustic_grand_piano" selected>Piano</option>
+						<option value="electric_piano_1">Electric Piano 1</option>
+						<option value="electric_piano_2">Electric Piano 2</option>
+						<option value="harpsichord">Harpsichord</option>
+						<option value="church_organ">Church Organ</option>
+						<option value="jazz_organ">Jazz Organ</option>
 						<option value="string_ensemble_1">Strings (Ensemble)</option>
-						<option value="choir_aahs">Choir</option>
 						<option value="string_ensemble_2">Strings 2</option>
+						<option value="choir_aahs">Choir</option>
+						<option value="accordion">Accordion</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -481,10 +488,18 @@
 					<label style="margin-bottom: 2px; font-size: 12px;">Melody Instrument</label>
 					<select id="melody-inst" style="width: 120px; margin-bottom: 6px;">
 						<option value="violin" selected>Violin</option>
+						<option value="viola">Viola</option>
+						<option value="cello">Cello</option>
 						<option value="flute">Flute</option>
 						<option value="clarinet">Clarinet</option>
+						<option value="oboe">Oboe</option>
+						<option value="bassoon">Bassoon</option>
+						<option value="alto_sax">Alto Sax</option>
+						<option value="tenor_sax">Tenor Sax</option>
 						<option value="trumpet">Trumpet</option>
-						<option value="cello">Cello</option>
+						<option value="trombone">Trombone</option>
+						<option value="french_horn">French Horn</option>
+						<option value="orchestral_harp">Orchestral Harp</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Melody Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -559,7 +574,7 @@
 				<span id="improv-mode-free"
 					style="cursor: pointer; margin-right: 8px; opacity: 1; font-size: 18px; transition: all 0.3s ease; transform: scale(1.2);"
 					title="Free Improv: Root position only">🎵</span>
-				DRUM MACHINE
+				Edit 5
 				<span id="improv-mode-creation"
 					style="cursor: pointer; margin-left: 8px; opacity: 0.4; font-size: 18px; transition: all 0.3s ease; transform: scale(1);"
 					title="Creation Improv: Full inversions + front row">🎼</span>
@@ -567,6 +582,9 @@
 			<span id="drum-play-progression"
 				style="cursor: pointer; margin-left: 12px; margin-right: 8px; font-size: 20px; opacity: 1.0; transition: all 0.2s ease; color: #00ff00; text-shadow: 0 0 4px rgba(0,255,0,0.5); background: rgba(0,255,0,0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,255,0,0.3);"
 				title="Play Progression">▶</span>
+			<span id="drum-stop-progression"
+				style="cursor: pointer; margin-right: 8px; font-size: 20px; opacity: 1.0; transition: all 0.2s ease; color: #ff0000; text-shadow: 0 0 4px rgba(255,0,0,0.5); background: rgba(255,0,0,0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,0,0,0.3);"
+				title="Stop Progression">⏹</span>
 			<div class="status-indicator" id="status-light"></div>
 		</div>
 
@@ -668,6 +686,7 @@
 	<script src="./musical-staves-3d.js"></script>
 	<script src="./staves-integration.js"></script>
 	<script type="module" src="./chords.js?v=4"></script>
+	<script type="module" src="./instrumentManager.js"></script>
 	<script type="module" src="./main.js?v=152"></script>
 	<script src="./professional-drum-machine.js?v=11"></script>
 

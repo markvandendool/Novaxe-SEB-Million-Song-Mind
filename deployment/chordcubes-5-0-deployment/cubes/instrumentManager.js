@@ -171,3 +171,95 @@ export async function ensureInstruments(ac, names) {
 }
 
 
+
+// Simple manager - works with your existing OrchestralAudioEngine
+class InstrumentManager {
+  constructor(audioContext, destinationNode) {
+    this.context = audioContext || (window.Tone && Tone.context._context);
+    this.destination = destinationNode || (this.context && this.context.destination);
+    this.instruments = new Map();
+  }
+
+  async loadInstrument(name) {
+    const mappedName = NAME_MAP[name] || name;
+    if (this.instruments.has(mappedName)) {
+      return this.instruments.get(mappedName);
+    }
+
+    // Create a simple WebAudioFont instrument wrapper
+    if (window.webAudioFontPlayer && window[`_tone_${mappedName}_sf2`]) {
+      const instrument = {
+        name: mappedName,
+        synth: window[`_tone_${mappedName}_sf2`],
+        context: this.context,
+        destination: this.destination,
+        
+        play: function(note, when = 0, duration = 1) {
+          const pitch = this.noteToMidi(note);
+          window.webAudioFontPlayer.queueWaveTable(
+            this.context, 
+            this.destination, 
+            this.synth, 
+            when, 
+            pitch, 
+            duration
+          );
+        },
+        
+        noteToMidi: function(note) {
+          const noteMap = {
+            'C': 0, 'C#': 1, 'Db': 1, 'D': 2, 'D#': 3, 'Eb': 3, 'E': 4, 'F': 5, 
+            'F#': 6, 'Gb': 6, 'G': 7, 'G#': 8, 'Ab': 8, 'A': 9, 'A#': 10, 'Bb': 10, 'B': 11
+          };
+          const match = note.match(/^([A-G][#b]?)(\d+)$/);
+          if (!match) return 60; // Default to C4
+          const [, noteName, octave] = match;
+          return (parseInt(octave) + 1) * 12 + noteMap[noteName];
+        }
+      };
+      
+      this.instruments.set(mappedName, instrument);
+      return instrument;
+    }
+    
+    return null;
+  }
+
+  getInstrument(name) {
+    const mappedName = NAME_MAP[name] || name;
+    return this.instruments.get(mappedName);
+  }
+
+  getAllInstruments() {
+    return Array.from(this.instruments.keys());
+  }
+  
+  getAllInstrumentOptions() {
+    return Object.keys(NAME_MAP);
+  }
+
+  // Main playNote method called by main.js
+  async playNote(instrumentId, note, duration = 1, volume = 0.7) {
+    console.log(`[INSTRUMENT MANAGER] PlayNote: ${instrumentId}, ${note}, dur=${duration}, vol=${volume}`);
+    
+    let instrument = this.getInstrument(instrumentId);
+    if (!instrument) {
+      instrument = await this.loadInstrument(instrumentId);
+    }
+    
+    if (!instrument) {
+      console.warn(`[INSTRUMENT MANAGER] Instrument not found: ${instrumentId}`);
+      return;
+    }
+
+    try {
+      // Use the instrument's play method
+      instrument.play(note, (this.context ? this.context.currentTime : 0), duration);
+      console.log(`[INSTRUMENT MANAGER] ✅ Successfully played ${note} with ${instrumentId}`);
+    } catch (error) {
+      console.error(`[INSTRUMENT MANAGER] Error playing ${note} with ${instrumentId}:`, error);
+    }
+  }
+}
+
+export default InstrumentManager;

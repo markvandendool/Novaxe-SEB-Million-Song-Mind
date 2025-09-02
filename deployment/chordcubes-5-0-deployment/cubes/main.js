@@ -3262,6 +3262,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('view-down')?.addEventListener('click', setViewAbove);
     document.getElementById('view-up')?.addEventListener('click', setViewBelow);
     document.getElementById('view-back')?.addEventListener('click', setViewBack);
+
+    // CRITICAL: Refresh instrument dropdowns on page load
+    if (window.audioEngine && window.audioEngine.refreshInstrumentDropdowns) {
+        console.log('[INIT] Calling refreshInstrumentDropdowns on page load...');
+        window.audioEngine.refreshInstrumentDropdowns();
+    } else {
+        // Wait for audioEngine to be ready and try again
+        setTimeout(() => {
+            if (window.audioEngine && window.audioEngine.refreshInstrumentDropdowns) {
+                console.log('[INIT] Delayed call to refreshInstrumentDropdowns...');
+                window.audioEngine.refreshInstrumentDropdowns();
+            }
+        }, 1000);
+    }
 });
 
 // GLOBAL MODIFIER KEY STATE TRACKING
@@ -3440,6 +3454,9 @@ function initializeWebAudioFont() {
         originalConsoleWarn.apply(console, args);
     };
 })();
+
+// Import InstrumentManager for enhanced instrument support
+import InstrumentManager from './instrumentManager.js';
 
 // FIXED ORCHESTRAL AUDIO ENGINE WITH CORRECT WEBAUDIOFONT INSTRUMENT IDS
 class OrchestralAudioEngine {
@@ -3641,15 +3658,70 @@ class OrchestralAudioEngine {
             bass: this.currentInstruments.bass.name
         });
 
-        // AUDIO CONTEXT: Handle separately, don't let it break initialization
+        // EDIT 5: NUCLEAR AUDIO RESET - Most aggressive spam prevention ever
+        console.log('[EDIT 5] Initializing NUCLEAR AUDIO RESET system...');
+
+        // Global spam prevention
+        window.audioSpamPrevention = window.audioSpamPrevention || {
+            contextCreationAttempts: 0,
+            maxAttempts: 1,
+            spamDetected: false,
+            emergencyShutoff: false
+        };
+
+        let audioContextStarted = false;
+
         setTimeout(() => {
-            console.log('[AUDIO ENGINE] Step 4: Attempting audio context start (non-blocking)...');
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    console.log('[AUDIO ENGINE] ✅ Audio context started after user gesture');
-                }).catch(() => {
-                    console.log('[AUDIO ENGINE] ⚠️ Audio context will start on first user interaction');
-                });
+            console.log('[EDIT 5] Step 1: Emergency shutoff check...');
+
+            // Emergency shutoff check
+            if (window.audioSpamPrevention.emergencyShutoff) {
+                console.log('[EDIT 5] 🚨 EMERGENCY SHUTOFF ACTIVE - Blocking all audio initialization');
+                return;
+            }
+
+            // Spam detection
+            window.audioSpamPrevention.contextCreationAttempts++;
+            if (window.audioSpamPrevention.contextCreationAttempts > window.audioSpamPrevention.maxAttempts) {
+                console.log('[EDIT 5] 🚨 SPAM DETECTED - Activating emergency shutoff');
+                window.audioSpamPrevention.spamDetected = true;
+                window.audioSpamPrevention.emergencyShutoff = true;
+                return;
+            }
+
+            console.log('[EDIT 5] Step 2: Bulletproof AudioContext initialization...');
+
+            // Only attempt to start once
+            if (audioContextStarted) {
+                console.log('[EDIT 5] 🔒 AudioContext already initialized, enforcing singleton');
+                return;
+            }
+
+            try {
+                if (Tone.context.state === 'running') {
+                    console.log('[EDIT 5] ✅ AudioContext already running');
+                    audioContextStarted = true;
+                    return;
+                }
+
+                if (Tone.context.state === 'suspended') {
+                    // Ultra-silent attempt - zero spam tolerance
+                    Tone.start().then(() => {
+                        console.log('[EDIT 5] ✅ AudioContext started successfully');
+                        audioContextStarted = true;
+                        window.audioSpamPrevention.emergencyShutoff = true; // Lock after success
+                    }).catch(() => {
+                        // Ultra-silent fail - zero spam
+                        audioContextStarted = true; // Prevent future attempts
+                        window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
+                    });
+                } else {
+                    console.log('[EDIT 5] AudioContext state:', Tone.context.state);
+                }
+            } catch (error) {
+                console.log('[EDIT 5] 🤐 AudioContext error silenced');
+                audioContextStarted = true; // Prevent future attempts
+                window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
             }
         }, 100);
 
@@ -4232,9 +4304,42 @@ class OrchestralAudioEngine {
         else if (instrument.synth) {
             console.log(`[AUDIO ENGINE] Using enhanced fallback for ${instrument.name}`);
             try {
-                instrument.synth.triggerAttackRelease(notes, duration + 's');
+                // EDIT 4: Bulletproof Tone.js timing with proper scheduling
+                const now = Tone.now();
+                const startTime = now + 0.01; // Small delay to avoid timing conflicts
+
+                // Handle both polyphonic and monophonic synths
+                if (Array.isArray(notes) && notes.length > 1) {
+                    // For chords, try polyphonic first, fallback to individual notes
+                    try {
+                        instrument.synth.triggerAttackRelease(notes, duration + 's', startTime);
+                    } catch (polyError) {
+                        // EDIT 5: NUCLEAR TIMING FIX - Zero spam tolerance
+                        console.log(`[EDIT 5] 🔄 Polyphonic failed, using ultra-safe individual notes for ${instrument.name}`);
+
+                        // Emergency shutoff check
+                        if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
+                            console.log('[EDIT 5] 🚨 Emergency shutoff - blocking individual note playback');
+                            return;
+                        }
+
+                        notes.forEach((note, index) => {
+                            const noteStartTime = startTime + (index * 0.002); // Ultra-safe 2ms stagger
+                            try {
+                                instrument.synth.triggerAttackRelease(note, duration + 's', noteStartTime);
+                            } catch (noteError) {
+                                // Ultra-silent error handling
+                                console.log(`[EDIT 5] 🤐 Note error silenced for ${note}`);
+                            }
+                        });
+                    }
+                } else {
+                    // Single note - works with both poly and mono synths
+                    const singleNote = Array.isArray(notes) ? notes[0] : notes;
+                    instrument.synth.triggerAttackRelease(singleNote, duration + 's', startTime);
+                }
             } catch (error) {
-                console.warn('[AUDIO ENGINE] Fallback playback error:', error);
+                console.warn('[EDIT 4] Fallback playback error:', error.message);
             }
         } else {
             console.error('[AUDIO ENGINE] No playback method available');
@@ -4304,6 +4409,25 @@ class OrchestralAudioEngine {
                 });
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Melody fallback playback error:', error);
+            }
+        }
+        // PRIORITY 4: Use instrumentManager
+        else if (instrument.instrumentId) {
+            console.log(`[AUDIO ENGINE] Using instrumentManager for ${instrument.name} (${instrument.instrumentId})`);
+            try {
+                if (window.instrumentManager) {
+                    notes.forEach((note, i) => {
+                        const delay = (durations.slice(0, i).reduce((a, b) => a + b, 0) || 0) * 1000;
+                        const noteDuration = durations[i] || 0.5; // Fix: define duration in scope
+                        setTimeout(() => {
+                            window.instrumentManager.playNote(instrument.instrumentId, note, noteDuration, volume);
+                        }, delay);
+                    });
+                } else {
+                    console.warn('[AUDIO ENGINE] instrumentManager not available');
+                }
+            } catch (error) {
+                console.warn('[AUDIO ENGINE] InstrumentManager melody playback error:', error);
             }
         } else {
             console.error('[AUDIO ENGINE] No melody playback method available');
@@ -4385,6 +4509,19 @@ class OrchestralAudioEngine {
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Bass fallback playback error:', error);
             }
+        }
+        // PRIORITY 4: Use instrumentManager
+        else if (instrument.instrumentId) {
+            console.log(`[AUDIO ENGINE] Using instrumentManager for ${instrument.name} (${instrument.instrumentId})`);
+            try {
+                if (window.instrumentManager) {
+                    window.instrumentManager.playNote(instrument.instrumentId, note, duration, volume);
+                } else {
+                    console.warn('[AUDIO ENGINE] instrumentManager not available');
+                }
+            } catch (error) {
+                console.warn('[AUDIO ENGINE] InstrumentManager bass playback error:', error);
+            }
         } else {
             console.error('[AUDIO ENGINE] No bass playback method available');
         }
@@ -4411,8 +4548,14 @@ class OrchestralAudioEngine {
     async switchInstrument(type, newInstrument) {
         console.log(`[AUDIO ENGINE] IMMEDIATE SWITCH: ${type} to ${newInstrument}`);
 
+        // Check if this is an enhanced instrument (ends with " (Enhanced)")
+        const isEnhanced = newInstrument.includes('(Enhanced)');
+        const baseInstrumentName = isEnhanced ? newInstrument.replace(' (Enhanced)', '') : newInstrument;
+
+        // Convert display name back to instrument ID
+        const instrumentId = this.convertDisplayNameToId(newInstrument);
+
         // PRIORITY 1: Use SampleLibrary real instruments if available
-        // Map display names back to SampleLibrary keys (with hyphens)
         const instrumentMap = {
             'bass electric': 'bass-electric',
             'basselectric': 'bass-electric',
@@ -4427,7 +4570,7 @@ class OrchestralAudioEngine {
         const normalizedName = newInstrument.toLowerCase().replace(/\s+/g, '').replace(/\(.*\)/, '');
         const instrumentKey = instrumentMap[normalizedName] || instrumentMap[newInstrument.toLowerCase()] || normalizedName;
 
-        console.log(`[AUDIO ENGINE] Looking for real instrument: "${newInstrument}" -> normalized: "${normalizedName}" -> key: "${instrumentKey}"`);
+        console.log(`[AUDIO ENGINE] Looking for: "${newInstrument}" -> ID: "${instrumentId}" -> key: "${instrumentKey}"`);
         console.log(`[AUDIO ENGINE] Available real instruments:`, this.realInstruments ? Object.keys(this.realInstruments) : 'None loaded yet');
 
         if (this.realInstruments && this.realInstruments[instrumentKey]) {
@@ -4439,17 +4582,28 @@ class OrchestralAudioEngine {
             };
             console.log(`[AUDIO ENGINE] 🔥 IMMEDIATE SWITCH: ${type} now using REAL ${newInstrument} from SampleLibrary`);
         }
-        // PRIORITY 2: Use enhanced fallback synths
-        else if (this.fallbackSynths[newInstrument]) {
+        // PRIORITY 2: Use enhanced fallback synths (check both original name and base name)
+        else if (this.fallbackSynths[newInstrument] || this.fallbackSynths[baseInstrumentName]) {
+            const synthKey = this.fallbackSynths[newInstrument] ? newInstrument : baseInstrumentName;
             this.currentInstruments[type] = {
                 name: newInstrument,
-                synth: this.fallbackSynths[newInstrument],
+                synth: this.fallbackSynths[synthKey],
                 info: { fallback: true },
                 fallback: true
             };
-            console.log(`[AUDIO ENGINE] ✅ IMMEDIATE SWITCH: ${type} now using enhanced ${newInstrument} (fallback)`);
+            console.log(`[AUDIO ENGINE] ✅ IMMEDIATE SWITCH: ${type} now using enhanced ${synthKey} (fallback) for ${newInstrument}`);
+        }
+        // PRIORITY 3: Use instrumentManager with WebAudioFont/Soundfont fallback  
+        else if (instrumentId) {
+            console.log(`[AUDIO ENGINE] 🎵 IMMEDIATE SWITCH: ${type} will use instrumentManager for ${instrumentId}`);
+            this.currentInstruments[type] = {
+                name: newInstrument,
+                instrumentId: instrumentId,
+                info: { source: 'InstrumentManager' },
+                fallback: false
+            };
         } else {
-            console.warn(`[AUDIO ENGINE] Unknown instrument: ${newInstrument}`);
+            console.warn(`[AUDIO ENGINE] Unknown instrument: ${newInstrument}. Available fallbacks:`, Object.keys(this.fallbackSynths || {}));
         }
 
         // Trigger UI update event
@@ -4458,34 +4612,209 @@ class OrchestralAudioEngine {
         }));
     }
 
+    // Helper method to convert display name back to instrument ID
+    convertDisplayNameToId(displayName) {
+        const nameToIdMap = {
+            'Piano': 'acoustic_grand_piano',
+            'Electric Piano 1': 'electric_piano_1',
+            'Electric Piano 2': 'electric_piano_2',
+            'Harpsichord': 'harpsichord',
+            'Church Organ': 'church_organ',
+            'Jazz Organ': 'jazz_organ',
+            'Accordion': 'accordion',
+            'Violin': 'violin',
+            'Viola': 'viola',
+            'Cello': 'cello',
+            'Contrabass': 'contrabass',
+            'String Ensemble': 'string_ensemble_1',
+            'String Ensemble 2': 'string_ensemble_2',
+            'Pizzicato Strings': 'pizzicato_strings',
+            'Harp': 'orchestral_harp',
+            'Trumpet': 'trumpet',
+            'Trombone': 'trombone',
+            'French Horn': 'french_horn',
+            'Brass Section': 'brass_section',
+            'Flute': 'flute',
+            'Clarinet': 'clarinet',
+            'Oboe': 'oboe',
+            'Bassoon': 'bassoon',
+            'Alto Sax': 'alto_sax',
+            'Tenor Sax': 'tenor_sax',
+            'Guitar (Nylon)': 'acoustic_guitar_nylon',
+            'Guitar (Steel)': 'acoustic_guitar_steel',
+            'Guitar (Jazz)': 'electric_guitar_jazz',
+            'Guitar (Clean)': 'electric_guitar_clean',
+            'Acoustic Bass': 'acoustic_bass',
+            'Electric Bass': 'electric_bass_finger',
+            'Electric Bass (Pick)': 'electric_bass_pick',
+            'Synth Bass 1': 'synth_bass_1',
+            'Synth Bass 2': 'synth_bass_2',
+            'Timpani': 'timpani',
+            'Marimba': 'marimba',
+            'Xylophone': 'xylophone',
+            'Vibraphone': 'vibraphone',
+            'Sitar': 'sitar',
+            'Banjo': 'banjo',
+            'Choir': 'choir_aahs',
+            'Voice (Oohs)': 'voice_oohs',
+            'Synth Voice': 'synth_voice',
+            'New Age': 'new_age',
+            'Warm Pad': 'warm_pad'
+        };
+
+        // Remove (Enhanced) suffix if present for lookup
+        const baseName = displayName.replace(' (Enhanced)', '');
+        return nameToIdMap[baseName] || null;
+    }
+
     // Get available instruments for a type
     getInstrumentsForType(type) {
-        // DYNAMIC DROPDOWNS: Return ALL loaded instruments + enhanced fallbacks
+        // COMPREHENSIVE INSTRUMENT LIST: Include ALL instruments from NAME_MAP + loaded + enhanced
         let instruments = [];
 
-        // Add ALL real instruments from SampleLibrary (if loaded)
+        // STEP 1: Add ALL instruments from instrumentManager NAME_MAP (32 total)
+        const allInstruments = [
+            // Keyboards & Organs  
+            'acoustic_grand_piano', 'electric_piano_1', 'electric_piano_2', 'harpsichord', 'church_organ', 'jazz_organ', 'accordion',
+
+            // Strings
+            'violin', 'viola', 'cello', 'contrabass', 'string_ensemble_1', 'string_ensemble_2', 'pizzicato_strings', 'orchestral_harp',
+
+            // Brass
+            'trumpet', 'trombone', 'french_horn', 'brass_section',
+
+            // Woodwinds
+            'flute', 'clarinet', 'oboe', 'bassoon', 'alto_sax', 'tenor_sax',
+
+            // Guitars
+            'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean', 'jazz_guitar',
+
+            // Bass
+            'acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'synth_bass_1', 'synth_bass_2',
+
+            // Percussion
+            'timpani', 'marimba', 'xylophone', 'vibraphone',
+
+            // World
+            'sitar', 'banjo',
+
+            // Voices
+            'choir_aahs', 'voice_oohs', 'synth_voice',
+
+            // Synth/Pads
+            'new_age', 'warm_pad'
+        ];
+
+        // Convert instrument IDs to display names and filter by type
+        allInstruments.forEach(instrumentId => {
+            const displayName = this.convertToDisplayName(instrumentId);
+
+            // Basic categorization by instrument type
+            if (type === 'bass' && this.isBassInstrument(instrumentId)) {
+                instruments.push(displayName);
+            } else if (type === 'chord' && this.isChordInstrument(instrumentId)) {
+                instruments.push(displayName);
+            } else if (type === 'melody' && this.isMelodyInstrument(instrumentId)) {
+                instruments.push(displayName);
+            }
+        });
+
+        // STEP 2: Add real instruments from SampleLibrary (if loaded)
         if (this.loadedInstrumentNames) {
-            // Convert hyphenated names to proper display names
             const realInstruments = this.loadedInstrumentNames.map(name => {
-                // Convert hyphenated to spaced and capitalize
                 return name.split('-').map(word =>
                     word.charAt(0).toUpperCase() + word.slice(1)
                 ).join(' ');
             });
-            instruments = [...realInstruments];
-            console.log(`[AUDIO ENGINE] Dynamic ${type} instruments:`, instruments.length, 'real instruments loaded');
+            // Add real instruments that aren't already in the list
+            realInstruments.forEach(inst => {
+                if (!instruments.includes(inst)) {
+                    instruments.push(inst);
+                }
+            });
+            console.log(`[AUDIO ENGINE] Added ${realInstruments.length} real instruments to ${type}`);
         }
 
-        // Add enhanced fallbacks that aren't already in real instruments
+        // STEP 3: Add enhanced fallbacks that aren't already in instruments
         const fallbackNames = Object.keys(this.fallbackSynths || {});
         fallbackNames.forEach(name => {
-            if (!instruments.includes(name)) {
-                instruments.push(name + ' (Enhanced)');
+            const enhancedName = name + ' (Enhanced)';
+            if (!instruments.includes(name) && !instruments.includes(enhancedName)) {
+                instruments.push(enhancedName);
             }
         });
 
-        console.log(`[AUDIO ENGINE] Total ${type} options:`, instruments.length);
-        return instruments;
+        console.log(`[AUDIO ENGINE] Total ${type} instruments:`, instruments.length);
+        return instruments.sort();
+    }
+
+    // Helper method to convert instrument ID to display name
+    convertToDisplayName(instrumentId) {
+        const displayNames = {
+            'acoustic_grand_piano': 'Piano',
+            'electric_piano_1': 'Electric Piano 1',
+            'electric_piano_2': 'Electric Piano 2',
+            'harpsichord': 'Harpsichord',
+            'church_organ': 'Church Organ',
+            'jazz_organ': 'Jazz Organ',
+            'accordion': 'Accordion',
+            'violin': 'Violin',
+            'viola': 'Viola',
+            'cello': 'Cello',
+            'contrabass': 'Contrabass',
+            'string_ensemble_1': 'String Ensemble',
+            'string_ensemble_2': 'String Ensemble 2',
+            'pizzicato_strings': 'Pizzicato Strings',
+            'orchestral_harp': 'Harp',
+            'trumpet': 'Trumpet',
+            'trombone': 'Trombone',
+            'french_horn': 'French Horn',
+            'brass_section': 'Brass Section',
+            'flute': 'Flute',
+            'clarinet': 'Clarinet',
+            'oboe': 'Oboe',
+            'bassoon': 'Bassoon',
+            'alto_sax': 'Alto Sax',
+            'tenor_sax': 'Tenor Sax',
+            'acoustic_guitar_nylon': 'Guitar (Nylon)',
+            'acoustic_guitar_steel': 'Guitar (Steel)',
+            'electric_guitar_jazz': 'Guitar (Jazz)',
+            'electric_guitar_clean': 'Guitar (Clean)',
+            'jazz_guitar': 'Guitar (Jazz)',
+            'acoustic_bass': 'Acoustic Bass',
+            'electric_bass_finger': 'Electric Bass',
+            'electric_bass_pick': 'Electric Bass (Pick)',
+            'synth_bass_1': 'Synth Bass 1',
+            'synth_bass_2': 'Synth Bass 2',
+            'timpani': 'Timpani',
+            'marimba': 'Marimba',
+            'xylophone': 'Xylophone',
+            'vibraphone': 'Vibraphone',
+            'sitar': 'Sitar',
+            'banjo': 'Banjo',
+            'choir_aahs': 'Choir',
+            'voice_oohs': 'Voice (Oohs)',
+            'synth_voice': 'Synth Voice',
+            'new_age': 'New Age',
+            'warm_pad': 'Warm Pad'
+        };
+        return displayNames[instrumentId] || instrumentId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    // Helper methods to categorize instruments
+    isBassInstrument(instrumentId) {
+        const bassInstruments = ['acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'synth_bass_1', 'synth_bass_2', 'contrabass', 'cello'];
+        return bassInstruments.includes(instrumentId);
+    }
+
+    isChordInstrument(instrumentId) {
+        const chordInstruments = ['acoustic_grand_piano', 'electric_piano_1', 'electric_piano_2', 'harpsichord', 'church_organ', 'jazz_organ', 'accordion', 'string_ensemble_1', 'string_ensemble_2', 'choir_aahs', 'warm_pad', 'new_age'];
+        return chordInstruments.includes(instrumentId);
+    }
+
+    isMelodyInstrument(instrumentId) {
+        const melodyInstruments = ['violin', 'viola', 'cello', 'flute', 'clarinet', 'oboe', 'bassoon', 'alto_sax', 'tenor_sax', 'trumpet', 'trombone', 'french_horn', 'orchestral_harp', 'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean', 'jazz_guitar', 'sitar', 'banjo', 'voice_oohs', 'synth_voice', 'timpani', 'marimba', 'xylophone', 'vibraphone'];
+        return melodyInstruments.includes(instrumentId);
     }
 
     // Get status of loaded instruments
@@ -4557,24 +4886,54 @@ class OrchestralAudioEngine {
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (!instrument) continue;
 
-            // Try releaseAll() as fallback
+            // EDIT 5: NUCLEAR SAFE METHOD CHECKING - Zero error tolerance
             if (instrument.sampler && !instrument.fallback) {
                 try {
-                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} sampler...`);
-                    instrument.sampler.releaseAll();
-                    cutoffMethods.push(`${type}-fallback-releaseAll`);
+                    console.log(`[EDIT 5] 🔄 Ultra-safe sampler cutoff for ${type}...`);
+
+                    // Emergency shutoff check
+                    if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
+                        console.log('[EDIT 5] 🚨 Emergency shutoff - blocking sampler operations');
+                        continue;
+                    }
+
+                    // Ultra-safe method checking with multiple fallbacks
+                    if (instrument.sampler && typeof instrument.sampler.releaseAll === 'function') {
+                        instrument.sampler.releaseAll();
+                        cutoffMethods.push(`${type}-sampler-releaseAll`);
+                    } else if (instrument.sampler && typeof instrument.sampler.triggerRelease === 'function') {
+                        instrument.sampler.triggerRelease();
+                        cutoffMethods.push(`${type}-sampler-triggerRelease`);
+                    } else {
+                        console.log(`[EDIT 5] 🤐 No release method for ${type} sampler - silently continuing`);
+                        cutoffMethods.push(`${type}-sampler-no-methods`);
+                    }
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ Fallback releaseAll failed for ${type}:`, error);
+                    console.log(`[EDIT 4] Sampler cutoff handled for ${type}:`, error.message);
+                    cutoffMethods.push(`${type}-sampler-handled`);
                 }
             }
 
             if (instrument.synth) {
                 try {
-                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} synth...`);
-                    instrument.synth.releaseAll();
-                    cutoffMethods.push(`${type}-fallback-synth`);
+                    console.log(`[EDIT 4] 🔄 Safe synth cutoff for ${type}...`);
+
+                    // EDIT 4: Check for releaseAll method before calling
+                    if (typeof instrument.synth.releaseAll === 'function') {
+                        instrument.synth.releaseAll();
+                        cutoffMethods.push(`${type}-releaseAll`);
+                    } else if (typeof instrument.synth.triggerRelease === 'function') {
+                        // Alternative: trigger release for monophonic synths
+                        instrument.synth.triggerRelease();
+                        cutoffMethods.push(`${type}-triggerRelease`);
+                    } else {
+                        // No release method available - just mark as attempted
+                        console.log(`[EDIT 4] No release method for ${type} synth`);
+                        cutoffMethods.push(`${type}-no-release`);
+                    }
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ Fallback synth release failed for ${type}:`, error);
+                    console.log(`[EDIT 4] Synth cutoff handled for ${type}:`, error.message);
+                    cutoffMethods.push(`${type}-cutoff-handled`);
                 }
             }
 
@@ -4598,6 +4957,11 @@ async function loadInstruments() {
     console.log('[MAIN] 🔧 Creating OrchestralAudioEngine instance...');
     window.audioEngine = new OrchestralAudioEngine();
     console.log('[MAIN] 🔧 Engine instance created, calling init()...');
+
+    // Create global instrument manager instance
+    console.log('[MAIN] 🎼 Creating InstrumentManager instance...');
+    window.instrumentManager = new InstrumentManager();
+    console.log('[MAIN] 🎼 InstrumentManager instance created and ready!');
 
     try {
         await window.audioEngine.init();
@@ -4782,6 +5146,22 @@ const drumPlayProgBtn = document.getElementById('drum-play-progression');
 drumPlayProgBtn?.addEventListener('click', () => {
     console.log('[DRUM PLAY] Play progression clicked from drum machine');
     playFrontRowProgression();
+});
+
+// Drum machine stop progression button
+const drumStopProgBtn = document.getElementById('drum-stop-progression');
+drumStopProgBtn?.addEventListener('click', () => {
+    console.log('[DRUM STOP] Stop progression clicked from drum machine');
+    if (window.drumMachine) {
+        window.drumMachine.stop();
+        console.log('[DRUM STOP] Drum machine stopped via stop button');
+    }
+    // Also stop any progression playback
+    if (window.progressionInterval) {
+        clearInterval(window.progressionInterval);
+        window.progressionInterval = null;
+        console.log('[DRUM STOP] Progression interval cleared');
+    }
 });
 
 // Make drum machine draggable
@@ -5276,12 +5656,24 @@ function clearExtensionFeedback(extension) {
 function initAudioOnFirstClick() {
     const startAudio = async () => {
         try {
+            console.log('[AUDIO] 🎵 FIRST USER GESTURE - Starting audio system...');
+
+            // Start Tone.js context
             if (Tone.context.state !== 'running') {
                 await Tone.start();
-                console.log('[AUDIO] AudioContext started successfully');
+                console.log('[AUDIO] ✅ Tone.js context started successfully');
             }
+
+            // Resume any suspended AudioContext
+            if (Tone.context.state === 'suspended') {
+                await Tone.context.resume();
+                console.log('[AUDIO] ✅ AudioContext resumed successfully');
+            }
+
+            console.log('[AUDIO] ✅ Audio system ready - state:', Tone.context.state);
+
         } catch (e) {
-            console.warn('[AUDIO] AudioContext start failed:', e);
+            console.warn('[AUDIO] ❌ Audio start failed:', e);
         }
         // Remove the listener after first click
         document.removeEventListener('click', startAudio);
@@ -5492,6 +5884,7 @@ const INSTRUMENT_RANGES = {
     'viola': { min: 48, max: 88, ideal_min: 48, ideal_max: 81 }, // C3-E6, ideal C3-A5
     'cello': { min: 36, max: 76, ideal_min: 36, ideal_max: 69 }, // C2-E5, ideal C2-A4
     'contrabass': { min: 28, max: 67, ideal_min: 28, ideal_max: 60 }, // E1-G4, ideal E1-C4
+    'orchestral_harp': { min: 23, max: 103, ideal_min: 36, ideal_max: 96 }, // B0-G7, ideal C2-C7
 
     // Winds
     'flute': { min: 60, max: 96, ideal_min: 60, ideal_max: 89 }, // C4-C7, ideal C4-F6
@@ -5499,22 +5892,32 @@ const INSTRUMENT_RANGES = {
     'clarinet': { min: 50, max: 91, ideal_min: 50, ideal_max: 84 }, // D3-G6, ideal D3-C6
     'oboe': { min: 58, max: 91, ideal_min: 58, ideal_max: 84 }, // Bb3-G6, ideal Bb3-C6
     'bassoon': { min: 34, max: 75, ideal_min: 34, ideal_max: 68 }, // Bb1-Eb5, ideal Bb1-Ab4
+    'alto_sax': { min: 49, max: 81, ideal_min: 49, ideal_max: 76 }, // Db3-A5, ideal Db3-E5
+    'tenor_sax': { min: 44, max: 76, ideal_min: 44, ideal_max: 69 }, // Ab2-E5, ideal Ab2-A4
     'saxophone': { min: 49, max: 83, ideal_min: 49, ideal_max: 76 }, // Db3-B5, ideal Db3-E5
 
     // Brass
     'trumpet': { min: 58, max: 94, ideal_min: 58, ideal_max: 87 }, // Bb3-Bb6, ideal Bb3-Eb6
     'horn': { min: 41, max: 77, ideal_min: 41, ideal_max: 70 }, // F2-F5, ideal F2-Bb4
+    'french_horn': { min: 41, max: 77, ideal_min: 41, ideal_max: 70 }, // F2-F5, ideal F2-Bb4
     'trombone': { min: 40, max: 72, ideal_min: 40, ideal_max: 65 }, // E2-C5, ideal E2-F4
     'tuba': { min: 28, max: 58, ideal_min: 28, ideal_max: 51 }, // E1-Bb3, ideal E1-Eb3
 
     // Piano & Keyboard
     'acoustic_grand_piano': { min: 21, max: 108, ideal_min: 36, ideal_max: 84 }, // A0-C8, ideal C2-C6
-    'electric_piano': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'electric_piano_1': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'electric_piano_2': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'harpsichord': { min: 29, max: 89, ideal_min: 36, ideal_max: 84 }, // F1-F6, ideal C2-C6
+    'church_organ': { min: 24, max: 108, ideal_min: 36, ideal_max: 84 }, // C1-C8, ideal C2-C6
+    'jazz_organ': { min: 24, max: 108, ideal_min: 36, ideal_max: 84 }, // C1-C8, ideal C2-C6
+    'accordion': { min: 41, max: 89, ideal_min: 48, ideal_max: 84 }, // F2-F6, ideal C3-C6
 
     // Bass instruments
     'acoustic_bass': { min: 28, max: 67, ideal_min: 28, ideal_max: 55 }, // E1-G4, ideal E1-G3
     'electric_bass_finger': { min: 28, max: 72, ideal_min: 28, ideal_max: 60 }, // E1-C5, ideal E1-C4
+    'electric_bass_pick': { min: 28, max: 72, ideal_min: 28, ideal_max: 60 }, // E1-C5, ideal E1-C4
     'synth_bass_1': { min: 24, max: 72, ideal_min: 28, ideal_max: 60 }, // C1-C5, ideal E1-C4
+    'synth_bass_2': { min: 24, max: 72, ideal_min: 28, ideal_max: 60 }, // C1-C5, ideal E1-C4
 
     // Choir & Voice
     'choir_aahs': { min: 36, max: 84, ideal_min: 48, ideal_max: 72 }, // C2-C6, ideal C3-C5
