@@ -5617,7 +5617,10 @@ document.addEventListener('keydown', (e) => {
             CHROMATIC_EXTENSIONS[key].normal;
 
         activeExtensions.add(extension);
-        console.log(`[CHORD EXT] Added ${extension.name} (${extension.description})`);
+        
+        // PHASE 2A: Enhanced logging for compound intervals
+        const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
+        console.log(`[PHASE 2A] ${intervalType} INTERVAL: ${key}${e.shiftKey ? '+Shift' : ''} → ${extension.name} (${extension.description})`);
 
         // Visual feedback - could add UI indicator here
         showExtensionFeedback(extension);
@@ -5654,7 +5657,10 @@ document.addEventListener('keyup', (e) => {
             CHROMATIC_EXTENSIONS[key].normal;
 
         activeExtensions.delete(extension);
-        console.log(`[CHORD EXT] Removed ${extension.name}`);
+        
+        // PHASE 2A: Enhanced logging for compound interval release
+        const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
+        console.log(`[PHASE 2A] Released ${intervalType}: ${extension.name}`);
 
         // Clear visual feedback
         clearExtensionFeedback(extension);
@@ -5728,46 +5734,57 @@ initAudioOnFirstClick();
 // CHROMATIC CHORD EXTENSION SYSTEM
 // Maps number keys to chromatic intervals from root
 const CHROMATIC_EXTENSIONS = {
+    // PHASE 2A: COMPOUND INTERVALS SYSTEM
+    // Pattern: Number alone = Simple interval, Shift+Number = Compound interval (same note class, octave higher)
+    
     '1': {
         normal: { interval: 1, name: 'b2', description: 'minor 2nd' },
-        shift: { interval: 13, name: 'b9', description: 'minor 9th (compound)' }
+        shift: { interval: 13, name: 'b9', description: 'minor 9th (compound b2)' }
     },
     '2': {
-        normal: { interval: 2, name: 'sus2', description: 'suspended 2nd' },
-        shift: { interval: 14, name: 'add9', description: 'added 9th' }
+        normal: { interval: 2, name: '2', description: 'major 2nd' },
+        shift: { interval: 14, name: '9', description: 'major 9th (compound 2nd)' }
     },
     '3': {
-        normal: { interval: 3, name: '#9', description: 'sharp 9th' },
-        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound)' }
+        normal: { interval: 3, name: 'b3', description: 'minor 3rd' },
+        shift: { interval: 15, name: 'b10', description: 'minor 10th (compound b3)' }
     },
-    // '4' is major 3rd - currently unused
+    '4': {
+        normal: { interval: 4, name: '3', description: 'major 3rd' },
+        shift: { interval: 16, name: '10', description: 'major 10th (compound 3rd)' }
+    },
     '5': {
-        normal: { interval: 5, name: 'sus4', description: 'suspended 4th' },
-        shift: { interval: 17, name: 'add11', description: 'added 11th' }
+        normal: { interval: 5, name: '4', description: 'perfect 4th' },
+        shift: { interval: 17, name: '11', description: 'perfect 11th (compound 4th)' }
     },
     '6': {
-        normal: { interval: 6, name: '#4/#11', description: 'sharp 4th/11th' },
-        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound)' }
+        normal: { interval: 6, name: '#4', description: 'augmented 4th/tritone' },
+        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound #4)' }
     },
     '7': {
-        normal: { interval: 7, name: '5', description: 'perfect 5th (power chord)' },
-        shift: { interval: 19, name: '5', description: 'perfect 5th (compound)' }
+        normal: { interval: 7, name: '5', description: 'perfect 5th' },
+        shift: { interval: 19, name: '12', description: 'perfect 12th (compound 5th)' }
     },
     '8': {
         normal: { interval: 8, name: 'b6', description: 'minor 6th' },
-        shift: { interval: 20, name: 'b13', description: 'minor 13th' }
+        shift: { interval: 20, name: 'b13', description: 'minor 13th (compound b6)' }
     },
     '9': {
+        // PHASE 2A TASK 2A: SPECIFIED BEHAVIOR - 9 alone = 6th, Shift+9 = 13th
         normal: { interval: 9, name: '6', description: 'major 6th' },
-        shift: { interval: 21, name: '13', description: 'major 13th' }
+        shift: { interval: 21, name: '13', description: 'major 13th (compound 6th)' }
     },
     '0': {
-        normal: { interval: 10, name: 'b7', description: 'minor 7th (override)' },
-        shift: { interval: 22, name: 'b7', description: 'minor 7th (compound)' }
+        normal: { interval: 10, name: 'b7', description: 'minor 7th' },
+        shift: { interval: 22, name: 'b14', description: 'minor 14th (compound b7)' }
     },
     '-': {
-        normal: { interval: 11, name: 'maj7', description: 'major 7th (override)' },
-        shift: { interval: 23, name: 'maj7', description: 'major 7th (compound)' }
+        normal: { interval: 11, name: 'maj7', description: 'major 7th' },
+        shift: { interval: 23, name: 'maj14', description: 'major 14th (compound maj7)' }
+    },
+    '=': {
+        normal: { interval: 12, name: '8va', description: 'octave' },
+        shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
     }
 };
 
