@@ -3319,8 +3319,8 @@ let chordQualityForcing = {
 // Add chord quality forcing keyboard handlers
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
-    
-    switch(key) {
+
+    switch (key) {
         case 'm':
             chordQualityForcing.minor = true;
             console.log('[CHORD FORCING] Minor quality activated');
@@ -3338,8 +3338,8 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('keyup', (e) => {
     const key = e.key.toLowerCase();
-    
-    switch(key) {
+
+    switch (key) {
         case 'm':
             chordQualityForcing.minor = false;
             console.log('[CHORD FORCING] Minor quality deactivated');
@@ -3708,8 +3708,8 @@ class OrchestralAudioEngine {
             bass: this.currentInstruments.bass.name
         });
 
-        // EDIT 5: NUCLEAR AUDIO RESET - Most aggressive spam prevention ever
-        console.log('[EDIT 5] Initializing NUCLEAR AUDIO RESET system...');
+        // VERSION 1.0: NUCLEAR AUDIO RESET - Most aggressive spam prevention ever
+        console.log('[V1.0] Initializing NUCLEAR AUDIO RESET system...');
 
         // Global spam prevention
         window.audioSpamPrevention = window.audioSpamPrevention || {
@@ -3722,34 +3722,34 @@ class OrchestralAudioEngine {
         let audioContextStarted = false;
 
         setTimeout(() => {
-            console.log('[EDIT 5] Step 1: Emergency shutoff check...');
+            console.log('[V1.0] Step 1: Emergency shutoff check...');
 
             // Emergency shutoff check
             if (window.audioSpamPrevention.emergencyShutoff) {
-                console.log('[EDIT 5] 🚨 EMERGENCY SHUTOFF ACTIVE - Blocking all audio initialization');
+                console.log('[V1.0] 🚨 EMERGENCY SHUTOFF ACTIVE - Blocking all audio initialization');
                 return;
             }
 
             // Spam detection
             window.audioSpamPrevention.contextCreationAttempts++;
             if (window.audioSpamPrevention.contextCreationAttempts > window.audioSpamPrevention.maxAttempts) {
-                console.log('[EDIT 5] 🚨 SPAM DETECTED - Activating emergency shutoff');
+                console.log('[V1.0] 🚨 SPAM DETECTED - Activating emergency shutoff');
                 window.audioSpamPrevention.spamDetected = true;
                 window.audioSpamPrevention.emergencyShutoff = true;
                 return;
             }
 
-            console.log('[EDIT 5] Step 2: Bulletproof AudioContext initialization...');
+            console.log('[V1.0] Step 2: Bulletproof AudioContext initialization...');
 
             // Only attempt to start once
             if (audioContextStarted) {
-                console.log('[EDIT 5] 🔒 AudioContext already initialized, enforcing singleton');
+                console.log('[V1.0] 🔒 AudioContext already initialized, enforcing singleton');
                 return;
             }
 
             try {
                 if (Tone.context.state === 'running') {
-                    console.log('[EDIT 5] ✅ AudioContext already running');
+                    console.log('[V1.0] ✅ AudioContext already running');
                     audioContextStarted = true;
                     return;
                 }
@@ -3757,7 +3757,7 @@ class OrchestralAudioEngine {
                 if (Tone.context.state === 'suspended') {
                     // Ultra-silent attempt - zero spam tolerance
                     Tone.start().then(() => {
-                        console.log('[EDIT 5] ✅ AudioContext started successfully');
+                        console.log('[V1.0] ✅ AudioContext started successfully');
                         audioContextStarted = true;
                         window.audioSpamPrevention.emergencyShutoff = true; // Lock after success
                     }).catch(() => {
@@ -3766,10 +3766,10 @@ class OrchestralAudioEngine {
                         window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
                     });
                 } else {
-                    console.log('[EDIT 5] AudioContext state:', Tone.context.state);
+                    console.log('[V1.0] AudioContext state:', Tone.context.state);
                 }
             } catch (error) {
-                console.log('[EDIT 5] 🤐 AudioContext error silenced');
+                console.log('[V1.0] 🤐 AudioContext error silenced');
                 audioContextStarted = true; // Prevent future attempts
                 window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
             }
@@ -4364,12 +4364,12 @@ class OrchestralAudioEngine {
                     try {
                         instrument.synth.triggerAttackRelease(notes, duration + 's', startTime);
                     } catch (polyError) {
-                        // EDIT 5: NUCLEAR TIMING FIX - Zero spam tolerance
-                        console.log(`[EDIT 5] 🔄 Polyphonic failed, using ultra-safe individual notes for ${instrument.name}`);
+                        // V1.0: NUCLEAR TIMING FIX - Zero spam tolerance
+                        console.log(`[V1.0] 🔄 Polyphonic failed, using ultra-safe individual notes for ${instrument.name}`);
 
                         // Emergency shutoff check
                         if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
-                            console.log('[EDIT 5] 🚨 Emergency shutoff - blocking individual note playback');
+                            console.log('[V1.0] 🚨 Emergency shutoff - blocking individual note playback');
                             return;
                         }
 
@@ -4379,7 +4379,7 @@ class OrchestralAudioEngine {
                                 instrument.synth.triggerAttackRelease(note, duration + 's', noteStartTime);
                             } catch (noteError) {
                                 // Ultra-silent error handling
-                                console.log(`[EDIT 5] 🤐 Note error silenced for ${note}`);
+                                console.log(`[V1.0] 🤐 Note error silenced for ${note}`);
                             }
                         });
                     }
@@ -4936,14 +4936,14 @@ class OrchestralAudioEngine {
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (!instrument) continue;
 
-            // EDIT 5: NUCLEAR SAFE METHOD CHECKING - Zero error tolerance
+            // V1.0: NUCLEAR SAFE METHOD CHECKING - Zero error tolerance
             if (instrument.sampler && !instrument.fallback) {
                 try {
-                    console.log(`[EDIT 5] 🔄 Ultra-safe sampler cutoff for ${type}...`);
+                    console.log(`[V1.0] 🔄 Ultra-safe sampler cutoff for ${type}...`);
 
                     // Emergency shutoff check
                     if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
-                        console.log('[EDIT 5] 🚨 Emergency shutoff - blocking sampler operations');
+                        console.log('[V1.0] 🚨 Emergency shutoff - blocking sampler operations');
                         continue;
                     }
 
@@ -4955,7 +4955,7 @@ class OrchestralAudioEngine {
                         instrument.sampler.triggerRelease();
                         cutoffMethods.push(`${type}-sampler-triggerRelease`);
                     } else {
-                        console.log(`[EDIT 5] 🤐 No release method for ${type} sampler - silently continuing`);
+                        console.log(`[V1.0] 🤐 No release method for ${type} sampler - silently continuing`);
                         cutoffMethods.push(`${type}-sampler-no-methods`);
                     }
                 } catch (error) {
@@ -5197,7 +5197,7 @@ playProgressionBtnMain?.addEventListener('click', () => {
 // PHASE 1 TASK 1B: EMERGENCY STOP FUNCTIONALITY
 emergencyStopBtn?.addEventListener('click', () => {
     console.log('[EMERGENCY STOP] 🛑 Emergency stop activated!');
-    
+
     // Stop all audio playback immediately
     try {
         if (window.chordCubesTransport && window.chordCubesTransport.stop) {
@@ -5205,21 +5205,21 @@ emergencyStopBtn?.addEventListener('click', () => {
             console.log('[EMERGENCY STOP] ✅ Transport stopped');
         }
     } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Transport stop failed:', e); }
-    
+
     try {
         if (window.drumMachine && window.drumMachine.stop) {
             window.drumMachine.stop();
             console.log('[EMERGENCY STOP] ✅ Drum machine stopped');
         }
     } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Drum machine stop failed:', e); }
-    
+
     try {
         if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
             window.improvDownbeatTracker.stop();
             console.log('[EMERGENCY STOP] ✅ Improv tracker stopped');
         }
     } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Improv tracker stop failed:', e); }
-    
+
     // Stop any active progression intervals
     try {
         if (window.progressionInterval) {
@@ -5228,7 +5228,7 @@ emergencyStopBtn?.addEventListener('click', () => {
             console.log('[EMERGENCY STOP] ✅ Progression interval cleared');
         }
     } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Progression interval clear failed:', e); }
-    
+
     console.log('[EMERGENCY STOP] 🎯 All audio playback stopped');
 });
 
@@ -5667,7 +5667,7 @@ document.addEventListener('keydown', (e) => {
             CHROMATIC_EXTENSIONS[key].normal;
 
         activeExtensions.add(extension);
-        
+
         // PHASE 2A: Enhanced logging for compound intervals
         const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
         console.log(`[PHASE 2A] ${intervalType} INTERVAL: ${key}${e.shiftKey ? '+Shift' : ''} → ${extension.name} (${extension.description})`);
@@ -5707,7 +5707,7 @@ document.addEventListener('keyup', (e) => {
             CHROMATIC_EXTENSIONS[key].normal;
 
         activeExtensions.delete(extension);
-        
+
         // PHASE 2A: Enhanced logging for compound interval release
         const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
         console.log(`[PHASE 2A] Released ${intervalType}: ${extension.name}`);
@@ -5786,7 +5786,7 @@ initAudioOnFirstClick();
 const CHROMATIC_EXTENSIONS = {
     // PHASE 2A: COMPOUND INTERVALS SYSTEM
     // Pattern: Number alone = Simple interval, Shift+Number = Compound interval (same note class, octave higher)
-    
+
     '1': {
         normal: { interval: 1, name: 'b2', description: 'minor 2nd' },
         shift: { interval: 13, name: 'b9', description: 'minor 9th (compound b2)' }
@@ -6114,7 +6114,7 @@ resetBtn?.addEventListener('click', () => {
     // PHASE 1: ENHANCED RESET - STOP ALL AUDIO PLAYBACK
     // =====================================================
     console.log('[ENHANCED RESET] 🛑 Stopping all audio playback');
-    
+
     // Stop transport system
     try {
         if (window.chordCubesTransport && window.chordCubesTransport.stop) {
@@ -6122,7 +6122,7 @@ resetBtn?.addEventListener('click', () => {
             console.log('[ENHANCED RESET] ✅ Transport stopped');
         }
     } catch (e) { console.log('[ENHANCED RESET] ⚠️ Transport stop failed:', e); }
-    
+
     // Stop drum machine
     try {
         if (window.drumMachine && window.drumMachine.stop) {
@@ -6130,7 +6130,7 @@ resetBtn?.addEventListener('click', () => {
             console.log('[ENHANCED RESET] ✅ Drum machine stopped');
         }
     } catch (e) { console.log('[ENHANCED RESET] ⚠️ Drum machine stop failed:', e); }
-    
+
     // Stop improvisation tracker
     try {
         if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
@@ -6157,15 +6157,15 @@ resetBtn?.addEventListener('click', () => {
         lockedMelody = null;
         renderMelodyLane();
         setMelodyLockVisual('open');
-        
+
         // Clear bass locks
         lockedBass = null;
         renderBassLane();
         setBassLockVisual('open');
-        
+
         // Clear locked lines
         clearLockedLines();
-        
+
         console.log('[ENHANCED RESET] ✅ All voice locks cleared');
     } catch (e) { console.log('[ENHANCED RESET] ⚠️ Lock clearing failed:', e); }
 
@@ -6948,10 +6948,10 @@ function getVoiceLeadingContext(currentChord, voice) {
  */
 function applyChordQualityForcing(baseNotes, romanLabel) {
     if (!baseNotes || baseNotes.length < 3) return { notes: baseNotes, modifiedRoman: romanLabel };
-    
+
     let modifiedNotes = [...baseNotes];
     let modifiedRoman = romanLabel;
-    
+
     // Apply quality forcing based on active keys
     if (chordQualityForcing.minor) {
         // Force minor: lower the 3rd by a semitone
@@ -6961,13 +6961,13 @@ function applyChordQualityForcing(baseNotes, romanLabel) {
             const rootPc = pcOf(root);
             const flatThirdPc = (rootPc + 3) % 12; // minor 3rd = 3 semitones
             modifiedNotes[1] = noteNameFromPC(flatThirdPc);
-            
+
             // Update roman numeral to lowercase
             modifiedRoman = romanLabel.toLowerCase();
             console.log(`[FORCE MINOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
         }
     }
-    
+
     else if (chordQualityForcing.major) {
         // Force major: raise the 3rd by a semitone if it's currently minor
         if (modifiedNotes.length >= 2) {
@@ -6976,13 +6976,13 @@ function applyChordQualityForcing(baseNotes, romanLabel) {
             const rootPc = pcOf(root);
             const majorThirdPc = (rootPc + 4) % 12; // major 3rd = 4 semitones
             modifiedNotes[1] = noteNameFromPC(majorThirdPc);
-            
+
             // Update roman numeral to uppercase
             modifiedRoman = romanLabel.toUpperCase().replace(/[º7øb♭]/g, '');
             console.log(`[FORCE MAJOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
         }
     }
-    
+
     else if (chordQualityForcing.diminished) {
         // Force diminished: flatten both 3rd and 5th
         if (modifiedNotes.length >= 3) {
@@ -6990,17 +6990,17 @@ function applyChordQualityForcing(baseNotes, romanLabel) {
             const rootPc = pcOf(root);
             const flatThirdPc = (rootPc + 3) % 12; // minor 3rd
             const flatFifthPc = (rootPc + 6) % 12; // diminished 5th (tritone)
-            
+
             modifiedNotes[1] = noteNameFromPC(flatThirdPc);
             modifiedNotes[2] = noteNameFromPC(flatFifthPc);
-            
+
             // Update roman numeral to diminished notation
             const baseRoman = romanLabel.replace(/[º7øIVivb♭]/g, '');
             modifiedRoman = baseRoman.toLowerCase() + 'º';
             console.log(`[FORCE DIMINISHED] ${romanLabel} → ${modifiedRoman}, 3rd & 5th modified`);
         }
     }
-    
+
     return { notes: modifiedNotes, modifiedRoman };
 }
 
@@ -7024,8 +7024,8 @@ function noteNameFromPC(pc) {
  */
 function applyVoiceRangeLimit(midi, voice) {
     let minMidi, maxMidi;
-    
-    switch(voice) {
+
+    switch (voice) {
         case 'bass':
             minMidi = 24; // C1
             maxMidi = 60; // C4
@@ -7041,23 +7041,23 @@ function applyVoiceRangeLimit(midi, voice) {
         default:
             return midi; // No limiting for unknown voices
     }
-    
+
     let constrainedMidi = midi;
-    
+
     // If below range, jump up octaves
     while (constrainedMidi < minMidi) {
         constrainedMidi += 12;
     }
-    
+
     // If above range, jump down octaves
     while (constrainedMidi > maxMidi) {
         constrainedMidi -= 12;
     }
-    
+
     if (constrainedMidi !== midi) {
         console.log(`[RANGE LIMIT] ${voice}: ${midi} → ${constrainedMidi} (range: ${minMidi}-${maxMidi})`);
     }
-    
+
     return constrainedMidi;
 }
 
@@ -7065,7 +7065,7 @@ function applyVoiceRangeLimit(midi, voice) {
 function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
     let names = transposeNotes(tones, currentKey);
-    
+
     // 🎼 PHASE 2B: Apply chord quality forcing
     const forcingResult = applyChordQualityForcing(names, roman);
     names = forcingResult.notes;
@@ -7092,7 +7092,7 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     midis.sort((a, b) => a - b);
     // Ensure within [60, 71]
     const constrainedMidis = midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
-    
+
     // 🎼 PHASE 2C: Apply chord voice range limits
     return constrainedMidis.map(midi => applyVoiceRangeLimit(midi, 'chord'));
 }
@@ -7101,11 +7101,11 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     let names = transposeNotes(tones, currentKey);
-    
+
     // 🎼 PHASE 2B: Apply chord quality forcing for bass voice
     const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
     names = forcingResult.notes;
-    
+
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const rootPc = pcOf(names[0]);
     const bottomPc = pcOf(names[r]);
@@ -7113,10 +7113,10 @@ function getBassMidiForObject(obj) {
     const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
     const diff = (bottomPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    
+
     // 🎼 PHASE 2C: Apply bass voice range limits (C1-C4)
     const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'bass');
-    
+
     console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${constrainedMidi}`);
     return constrainedMidi; // within bass range limits
 }
@@ -7125,11 +7125,11 @@ function getBassMidiForObject(obj) {
 function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
     let names = transposeNotes(tones, currentKey);
-    
+
     // 🎼 PHASE 2B: Apply chord quality forcing for melody voice  
     const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
     names = forcingResult.notes;
-    
+
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const topIdx = (r + 2) % 4;
     const rootPc = pcOf(names[0]);
@@ -7138,10 +7138,10 @@ function getMelodyMidiForObject(obj) {
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
     const diff = (topPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    
+
     // 🎼 PHASE 2C: Apply melody voice range limits (C4-C7)
     const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'melody');
-    
+
     console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${constrainedMidi}`);
     return constrainedMidi;
 }
@@ -7762,7 +7762,7 @@ function setupRhythmControls() {
             }
             // REMOVED: The problematic stop logic that would stop progression
             // OLD CODE WAS: } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) { transport.stop(); }
-            
+
             console.log(`[TASK 1C] Drums ${drumsOn ? 'unmuted' : 'muted'} - progression continues playing`);
         });
     }
