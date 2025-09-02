@@ -5701,6 +5701,7 @@ document.addEventListener('keydown', async (e) => {
     // All chords show the same simple interval
     if (CHROMATIC_EXTENSIONS[key] && !e.shiftKey && !e.altKey && !extensionKeyStates[key]) {
         extensionKeyStates[key] = true;
+        extensionKeyTypes[key] = 'simple'; // Track that this key activated a simple interval
         
         const extension = CHROMATIC_EXTENSIONS[key].normal; // Always use simple interval
         activeExtensions.add(extension);
@@ -5720,6 +5721,7 @@ document.addEventListener('keydown', async (e) => {
     // All chords show the same compound interval
     if (CHROMATIC_EXTENSIONS[key] && e.altKey && !e.shiftKey && !extensionKeyStates[key]) {
         extensionKeyStates[key] = true;
+        extensionKeyTypes[key] = 'compound'; // Track that this key activated a compound interval
         
         const extension = CHROMATIC_EXTENSIONS[key].shift; // Use compound interval
         activeExtensions.add(extension);
@@ -5770,21 +5772,25 @@ document.addEventListener('keyup', async (e) => {
     if (CHROMATIC_EXTENSIONS[key] && extensionKeyStates[key]) {
         extensionKeyStates[key] = false;
 
-        // Determine which extension was active based on what modifiers were used
+        // Use the tracked extension type instead of checking current modifier states
+        const extensionType = extensionKeyTypes[key];
         let extension;
-        if (e.altKey && !e.shiftKey) {
-            // Option + number was pressed
+        
+        if (extensionType === 'compound') {
             extension = CHROMATIC_EXTENSIONS[key].shift; // compound
-        } else if (!e.altKey && !e.shiftKey) {
-            // Number alone was pressed  
+        } else if (extensionType === 'simple') {
             extension = CHROMATIC_EXTENSIONS[key].normal; // simple
         } else {
-            // Shift + number or other combo - do nothing
+            // Unknown type - shouldn't happen, but handle gracefully
+            console.warn(`[NEW SYSTEM] Unknown extension type for key: ${key}`);
             return;
         }
 
+        // Clean up tracking
+        delete extensionKeyTypes[key];
         activeExtensions.delete(extension);
-        console.log(`[NEW SYSTEM] Released: ${extension.name}`);
+        
+        console.log(`[NEW SYSTEM] Released ${extensionType}: ${extension.name}`);
 
         // VISUAL FEEDBACK: Update all chord cube faces to remove extension preview
         clearExtensionFeedback(extension);
@@ -5914,9 +5920,10 @@ const CHROMATIC_EXTENSIONS = {
     }
 };
 
-// Track currently held extensions
+// Track currently held extensions and their types
 let activeExtensions = new Set();
 let extensionKeyStates = {};
+let extensionKeyTypes = {}; // Track which type (simple/compound) was activated for each key
 
 // DEBUG: Test b7th extension for all chord types
 function testB7thForAllChords() {
