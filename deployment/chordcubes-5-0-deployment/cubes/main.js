@@ -792,8 +792,7 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
 
 // Refresh all cube faces to reflect current 7th setting or preview mode
 async function refreshAllCubeFaces(previewWith7th = false) {
-    const effectiveWithSeventh = previewWith7th || withSeventh;
-    console.log(`[REFRESH FACES] Updating all cube faces for withSeventh: ${effectiveWithSeventh} (preview: ${previewWith7th})`);
+    console.log(`[NEW SYSTEM] Refreshing faces - previewWith7th: ${previewWith7th}, withSeventh: ${withSeventh}`);
 
     try {
         // Update front-row cubes
@@ -802,9 +801,27 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current/preview 7th setting and extensions
+                // NEW SYSTEM: Exclude Ib7 and diminished chords from 7th preview
+                const isDiminished = roman.includes('º') || roman.includes('ø');
+                const isIb7 = roman === 'Ib7' || roman.includes('Ib7');
+                const shouldExcludeFromPreview = isDiminished || isIb7;
+
+                let effectiveWith7th;
+                if (shouldExcludeFromPreview) {
+                    // These chords always keep their permanent 7th, ignore preview
+                    effectiveWith7th = withSeventh; // Use normal setting
+                    console.log(`[NEW SYSTEM] ${roman}: Excluded from 7th preview (permanent 7th)`);
+                } else {
+                    // Apply 7th preview to eligible chords
+                    effectiveWith7th = previewWith7th || withSeventh;
+                    if (previewWith7th) {
+                        console.log(`[NEW SYSTEM] ${roman}: Applying 7th preview`);
+                    }
+                }
+
+                // Generate new texture with effective 7th setting and extensions
                 const oldWithSeventh = withSeventh;
-                withSeventh = effectiveWithSeventh; // Temporarily set for texture generation
+                withSeventh = effectiveWith7th; // Temporarily set for texture generation
                 const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
                 withSeventh = oldWithSeventh; // Restore original setting
 
@@ -825,9 +842,23 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current/preview 7th setting and extensions
+                // NEW SYSTEM: Exclude Ib7 and diminished chords from 7th preview
+                const isDiminished = roman.includes('º') || roman.includes('ø');
+                const isIb7 = roman === 'Ib7' || roman.includes('Ib7');
+                const shouldExcludeFromPreview = isDiminished || isIb7;
+
+                let effectiveWith7th;
+                if (shouldExcludeFromPreview) {
+                    // These chords always keep their permanent 7th, ignore preview
+                    effectiveWith7th = withSeventh; // Use normal setting
+                } else {
+                    // Apply 7th preview to eligible chords
+                    effectiveWith7th = previewWith7th || withSeventh;
+                }
+
+                // Generate new texture with effective 7th setting and extensions
                 const oldWithSeventh = withSeventh;
-                withSeventh = effectiveWithSeventh; // Temporarily set for texture generation
+                withSeventh = effectiveWith7th; // Temporarily set for texture generation
                 const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
                 withSeventh = oldWithSeventh; // Restore original setting
 
@@ -838,6 +869,7 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                     if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
                     cube.material[frontFaceIndex].map = newTexture;
                     cube.material[frontFaceIndex].needsUpdate = true;
+                }
                 }
             }
         }
@@ -5652,43 +5684,72 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// CHROMATIC EXTENSION KEYBOARD HANDLERS
+// INTUITIVE KEYBOARD HANDLERS - NEW SYSTEM V1.29
 document.addEventListener('keydown', async (e) => {
     const key = e.key;
 
-    // Handle chromatic extensions (number keys and minus)
-    if (CHROMATIC_EXTENSIONS[key] && !extensionKeyStates[key]) {
+    // SHIFT ALONE = 7TH MODE (shows individual 7ths for each chord)
+    // Excludes Ib7 and diminished chords - they permanently have 7th
+    if (e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey && key === 'Shift') {
+        console.log(`[NEW SYSTEM] Shift pressed - enabling 7th mode for all eligible chords`);
+        await refreshAllCubeFaces(true); // previewWith7th = true
+        e.preventDefault();
+        return;
+    }
+
+    // NUMBERS ALONE = SIMPLE INTERVALS (2, 4, 6, 8)
+    // All chords show the same simple interval
+    if (CHROMATIC_EXTENSIONS[key] && !e.shiftKey && !e.altKey && !extensionKeyStates[key]) {
         extensionKeyStates[key] = true;
-
-        const extension = e.shiftKey ?
-            CHROMATIC_EXTENSIONS[key].shift :
-            CHROMATIC_EXTENSIONS[key].normal;
-
+        
+        const extension = CHROMATIC_EXTENSIONS[key].normal; // Always use simple interval
         activeExtensions.add(extension);
 
-        // PHASE 2A: Enhanced logging for compound intervals
-        const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
-        console.log(`[PHASE 2A] ${intervalType} INTERVAL: ${key}${e.shiftKey ? '+Shift' : ''} → ${extension.name} (${extension.description})`);
+        console.log(`[NEW SYSTEM] SIMPLE INTERVAL: ${key} → ${extension.name} (${extension.description})`);
+        console.log(`[NEW SYSTEM] All chords will show: ${extension.name}`);
 
-        // VISUAL FEEDBACK: Update all chord cube faces to show extension preview
+        // VISUAL FEEDBACK: Update all chord cube faces to show simple extension
         showExtensionFeedback(extension);
         await refreshAllCubeFaces();
-        console.log(`[VISUAL PREVIEW] Updated all chord faces with ${extension.name} extension`);
 
         e.preventDefault();
+        return;
     }
 
-    // Handle Alt+7 for 7th toggle (replacing old shift+7)
-    if (key === '7' && e.altKey && !e.shiftKey) {
-        const with7thCheckbox = document.getElementById('with-7th');
-        if (with7thCheckbox) {
-            with7thCheckbox.checked = !with7thCheckbox.checked;
-            console.log(`[7TH TOGGLE] ${with7thCheckbox.checked ? 'Enabled' : 'Disabled'} 7ths via Alt+7`);
-        }
+    // OPTION + NUMBERS = COMPOUND INTERVALS (9, 11, 13, etc.)  
+    // All chords show the same compound interval
+    if (CHROMATIC_EXTENSIONS[key] && e.altKey && !e.shiftKey && !extensionKeyStates[key]) {
+        extensionKeyStates[key] = true;
+        
+        const extension = CHROMATIC_EXTENSIONS[key].shift; // Use compound interval
+        activeExtensions.add(extension);
+
+        console.log(`[NEW SYSTEM] COMPOUND INTERVAL: Option+${key} → ${extension.name} (${extension.description})`);
+        console.log(`[NEW SYSTEM] All chords will show: ${extension.name}`);
+
+        // VISUAL FEEDBACK: Update all chord cube faces to show compound extension
+        showExtensionFeedback(extension);
+        await refreshAllCubeFaces();
+
         e.preventDefault();
+        return;
     }
 
-    // DEBUG: Alt+T to test b7th for all chords
+    // SHIFT + NUMBERS = DOES NOTHING (shift is only for 7ths)
+    if (CHROMATIC_EXTENSIONS[key] && e.shiftKey && !e.altKey) {
+        console.log(`[NEW SYSTEM] Shift+${key} ignored - Shift is only for 7ths`);
+        e.preventDefault();
+        return;
+    }
+
+    // OPTION ALONE = DOES NOTHING (must be paired with numbers)
+    if (key === 'Alt' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        console.log(`[NEW SYSTEM] Option alone ignored - must be paired with numbers`);
+        e.preventDefault();
+        return;
+    }
+
+    // DEBUG: Alt+T to test b7th for all chords (keep for debugging)
     if (key === 't' && e.altKey) {
         testB7thForAllChords();
         e.preventDefault();
@@ -5698,24 +5759,37 @@ document.addEventListener('keydown', async (e) => {
 document.addEventListener('keyup', async (e) => {
     const key = e.key;
 
-    // Remove extension when key is released
+    // SHIFT RELEASED = Exit 7th mode
+    if (key === 'Shift') {
+        console.log(`[NEW SYSTEM] Shift released - exiting 7th mode`);
+        await refreshAllCubeFaces(false); // previewWith7th = false
+        return;
+    }
+
+    // Remove extension when number key is released
     if (CHROMATIC_EXTENSIONS[key] && extensionKeyStates[key]) {
         extensionKeyStates[key] = false;
 
-        const extension = e.shiftKey ?
-            CHROMATIC_EXTENSIONS[key].shift :
-            CHROMATIC_EXTENSIONS[key].normal;
+        // Determine which extension was active based on what modifiers were used
+        let extension;
+        if (e.altKey && !e.shiftKey) {
+            // Option + number was pressed
+            extension = CHROMATIC_EXTENSIONS[key].shift; // compound
+        } else if (!e.altKey && !e.shiftKey) {
+            // Number alone was pressed  
+            extension = CHROMATIC_EXTENSIONS[key].normal; // simple
+        } else {
+            // Shift + number or other combo - do nothing
+            return;
+        }
 
         activeExtensions.delete(extension);
-
-        // PHASE 2A: Enhanced logging for compound interval release
-        const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
-        console.log(`[PHASE 2A] Released ${intervalType}: ${extension.name}`);
+        console.log(`[NEW SYSTEM] Released: ${extension.name}`);
 
         // VISUAL FEEDBACK: Update all chord cube faces to remove extension preview
         clearExtensionFeedback(extension);
         await refreshAllCubeFaces();
-        console.log(`[VISUAL PREVIEW] Updated all chord faces - removed ${extension.name} extension`);
+        console.log(`[NEW SYSTEM] Removed ${extension.name} from all chord faces`);
     }
 });
 
