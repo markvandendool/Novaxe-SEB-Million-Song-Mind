@@ -571,11 +571,18 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // Right
     ctx.fillRect(size - borderPx, 0, borderPx, size);
 
-    // Parse base text - NO SUPERSCRIPT EXTRACTION, let Font Jan16 handle everything
+    // Parse base text - Handle applied chord (7) removal for shelf display
     let base = String(labelText).trim();
     
-    // Remove parentheses notation (7)(b9) -> 7b9 for Font Jan16 processing
-    base = base.replace(/\(([^)]+)\)/g, '$1');
+    // APPLIED CHORD FIX: Remove (7) from applied chords when not in 7th mode
+    // Only for II(7), III(7), VI(7), VII(7) - preserve other (7) notations like V(7)(b9)
+    if (!withSeventh && /^(II|III|VI|VII)\(7\)$/.test(base)) {
+        base = base.replace(/\(7\)$/, ''); // Strip (7) from end
+        console.log(`[APPLIED CHORD FIX] Removed (7) from shelf display: ${labelText} → ${base}`);
+    } else {
+        // Remove parentheses notation (7)(b9) -> 7b9 for Font Jan16 processing (for non-applied chords)
+        base = base.replace(/\(([^)]+)\)/g, '$1');
+    }
     
     const baseTrim = base.trim();
     const basePretty = toMusicalGlyphs(baseTrim);
@@ -585,7 +592,32 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
 
     // Typography base (Cochin/Times)
     const centerX = size / 2; const centerY = size / 2; // Perfect center like alphabet block
-    const baseSize = 430;
+    
+    // SUBTLE RESPONSIVE TEXT SIZING - Only minimal adjustments for very long text
+    const textLength = basePretty.length;
+    
+    // Much more conservative base size adjustments
+    let baseSize = 430; // Default for most text (1-4 chars)
+    
+    if (textLength >= 8) {
+        baseSize = 380; // Only for very long text (8+ chars) - small reduction
+    } else if (textLength >= 6) {
+        baseSize = 405; // Long text (6-7 chars) - minimal reduction
+    }
+    
+    // Only check if text is REALLY too wide (more generous threshold)
+    const availableWidth = size - (borderPx * 1.8); // More generous margin
+    ctx.font = `400 ${baseSize}px ${SERIF_STACK}`;
+    const textMetrics = ctx.measureText(basePretty);
+    const actualWidth = textMetrics.width;
+    
+    // Only scale down if text is significantly overflowing (90% threshold instead of 100%)
+    if (actualWidth > availableWidth * 0.9) {
+        const oldSize = baseSize;
+        baseSize = Math.floor(baseSize * 0.95); // Very gentle 5% reduction
+        console.log(`[GENTLE RESIZE] ${basePretty}: ${oldSize}px → ${baseSize}px (width: ${actualWidth.toFixed(1)} vs ${(availableWidth * 0.9).toFixed(1)})`);
+    }
+    
     const cochin = SERIF_STACK;
     // Draw centered base text - Font Jan16 handles all ligatures naturally
     ctx.save();
@@ -648,9 +680,13 @@ function darken(hex, factor = 0.65) {
 const appliedAnnotation = {
     'I7': 'V of IV',
     'II(7)': 'V of V',
+    'II': 'V of V',           // Shelf display without 7th
     'III(7)': 'V of vi',
+    'III': 'V of vi',         // Shelf display without 7th
     'VI(7)': 'V of ii',
+    'VI': 'V of ii',          // Shelf display without 7th
     'VII(7)': 'V of iii',
+    'VII': 'V of iii',        // Shelf display without 7th
     '#iº': 'vii° of ii',
     '#iiº': 'vii° of iii',
     '#ivø': 'viiø of V',
@@ -711,10 +747,15 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
     const isMajorChord = /^[IVX]+$/i.test(baseRoman) && baseRoman === baseRoman.toUpperCase() && !romanLabel.startsWith('b');
     const isDominantV = romanLabel.startsWith('V') && !romanLabel.includes('º') && !romanLabel.includes('ø');
 
+    // Applied chord mapping - these should NOT get automatic 7th on shelf display
+    // Check for both II(7) and II forms, since shelf uses II(7), III(7), VI(7), VII(7)
+    const isAppliedChord = ['VII', 'III', 'VI', 'II', 'VII(7)', 'III(7)', 'VI(7)', 'II(7)'].includes(romanLabel);
+    
     // Check if we should show 7th: special chords, global setting, or forced
-    const shouldShow7th = isDiminished || isI7 || isV7b9 || withSeventh || force7th;
+    // EXCLUDE applied chords on shelf display (VII, III, VI, II and their (7) variants)
+    const shouldShow7th = isDiminished || isI7 || isV7b9 || (withSeventh && !isAppliedChord) || force7th;
 
-    console.log(`[FONT DEBUG] ${romanLabel}: baseRoman="${baseRoman}", isMajor=${isMajorChord}, isDominant=${isDominantV}, shouldShow7th=${shouldShow7th}`);
+    console.log(`[FONT DEBUG] ${romanLabel}: baseRoman="${baseRoman}", isMajor=${isMajorChord}, isDominant=${isDominantV}, isApplied=${isAppliedChord}, shouldShow7th=${shouldShow7th}`);
 
     // Add 7th to display if not already present - CORRECT NOTATION for Font Jan16
     if (shouldShow7th && !label.includes('7')) {
@@ -749,9 +790,10 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
     return makeFrontLabelTextureStyled(displayLabel, romanLabel);
 }
 
-// Refresh all cube faces to reflect current 7th setting
-async function refreshAllCubeFaces() {
-    console.log(`[REFRESH FACES] Updating all cube faces for withSeventh: ${withSeventh}`);
+// Refresh all cube faces to reflect current 7th setting or preview mode
+async function refreshAllCubeFaces(previewWith7th = false) {
+    const effectiveWithSeventh = previewWith7th || withSeventh;
+    console.log(`[REFRESH FACES] Updating all cube faces for withSeventh: ${effectiveWithSeventh} (preview: ${previewWith7th})`);
 
     try {
         // Update front-row cubes
@@ -760,8 +802,11 @@ async function refreshAllCubeFaces() {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current 7th setting and extensions
+                // Generate new texture with current/preview 7th setting and extensions
+                const oldWithSeventh = withSeventh;
+                withSeventh = effectiveWithSeventh; // Temporarily set for texture generation
                 const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
+                withSeventh = oldWithSeventh; // Restore original setting
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
@@ -780,8 +825,11 @@ async function refreshAllCubeFaces() {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current 7th setting and extensions
+                // Generate new texture with current/preview 7th setting and extensions
+                const oldWithSeventh = withSeventh;
+                withSeventh = effectiveWithSeventh; // Temporarily set for texture generation
                 const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
+                withSeventh = oldWithSeventh; // Restore original setting
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
@@ -3286,19 +3334,35 @@ let globalModifierState = {
 
 // BULLETPROOF KEYBOARD MODIFIER DETECTION - HIGHEST PRIORITY
 document.addEventListener('keydown', (e) => {
+    const wasAltPressed = globalModifierState.altPressed;
+    
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
+
+    // VISUAL PREVIEW: Alt key (Opt) shows 7th preview on all chords
+    if (e.altKey && !wasAltPressed) {
+        console.log('[7TH PREVIEW] Alt key pressed - showing 7th preview on all chords');
+        refreshAllCubeFaces(true); // Preview mode with 7ths
+    }
 
     console.log(`[GLOBAL KEYDOWN] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 }, { capture: true, passive: false });
 
 document.addEventListener('keyup', (e) => {
+    const wasAltPressed = globalModifierState.altPressed;
+    
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
+
+    // VISUAL PREVIEW: Alt key release - restore normal chord display
+    if (!e.altKey && wasAltPressed) {
+        console.log('[7TH PREVIEW] Alt key released - restoring normal chord display');
+        refreshAllCubeFaces(false); // Normal mode
+    }
 
     console.log(`[GLOBAL KEYUP] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 }, { capture: true, passive: false });
@@ -5589,7 +5653,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // CHROMATIC EXTENSION KEYBOARD HANDLERS
-document.addEventListener('keydown', (e) => {
+document.addEventListener('keydown', async (e) => {
     const key = e.key;
 
     // Handle chromatic extensions (number keys and minus)
@@ -5606,8 +5670,10 @@ document.addEventListener('keydown', (e) => {
         const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
         console.log(`[PHASE 2A] ${intervalType} INTERVAL: ${key}${e.shiftKey ? '+Shift' : ''} → ${extension.name} (${extension.description})`);
 
-        // Visual feedback - could add UI indicator here
+        // VISUAL FEEDBACK: Update all chord cube faces to show extension preview
         showExtensionFeedback(extension);
+        await refreshAllCubeFaces();
+        console.log(`[VISUAL PREVIEW] Updated all chord faces with ${extension.name} extension`);
 
         e.preventDefault();
     }
@@ -5629,7 +5695,7 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-document.addEventListener('keyup', (e) => {
+document.addEventListener('keyup', async (e) => {
     const key = e.key;
 
     // Remove extension when key is released
@@ -5646,8 +5712,10 @@ document.addEventListener('keyup', (e) => {
         const intervalType = e.shiftKey ? 'COMPOUND' : 'SIMPLE';
         console.log(`[PHASE 2A] Released ${intervalType}: ${extension.name}`);
 
-        // Clear visual feedback
+        // VISUAL FEEDBACK: Update all chord cube faces to remove extension preview
         clearExtensionFeedback(extension);
+        await refreshAllCubeFaces();
+        console.log(`[VISUAL PREVIEW] Updated all chord faces - removed ${extension.name} extension`);
     }
 });
 
@@ -5767,7 +5835,7 @@ const CHROMATIC_EXTENSIONS = {
         shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
     },
     '=': {
-        normal: { interval: 12, name: '8va', description: 'octave' },
+        normal: { interval: 12, name: '(8)', description: 'octave' },
         shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
     }
 };
