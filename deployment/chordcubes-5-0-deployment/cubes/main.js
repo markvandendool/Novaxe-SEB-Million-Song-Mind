@@ -7012,6 +7012,55 @@ function noteNameFromPC(pc) {
     return noteNames[pc];
 }
 
+// ============================================
+// 🎼 PHASE 2C: VOICE RANGE LIMITING SYSTEM
+// ============================================
+
+/**
+ * Apply hard range limits to MIDI notes
+ * @param {number} midi - MIDI note number to constrain
+ * @param {string} voice - Voice type ('bass', 'melody', 'chord')
+ * @returns {number} Constrained MIDI note within voice range
+ */
+function applyVoiceRangeLimit(midi, voice) {
+    let minMidi, maxMidi;
+    
+    switch(voice) {
+        case 'bass':
+            minMidi = 24; // C1
+            maxMidi = 60; // C4
+            break;
+        case 'melody':
+            minMidi = 60; // C4
+            maxMidi = 96; // C7
+            break;
+        case 'chord':
+            minMidi = 48; // C3
+            maxMidi = 84; // C6
+            break;
+        default:
+            return midi; // No limiting for unknown voices
+    }
+    
+    let constrainedMidi = midi;
+    
+    // If below range, jump up octaves
+    while (constrainedMidi < minMidi) {
+        constrainedMidi += 12;
+    }
+    
+    // If above range, jump down octaves
+    while (constrainedMidi > maxMidi) {
+        constrainedMidi -= 12;
+    }
+    
+    if (constrainedMidi !== midi) {
+        console.log(`[RANGE LIMIT] ${voice}: ${midi} → ${constrainedMidi} (range: ${minMidi}-${maxMidi})`);
+    }
+    
+    return constrainedMidi;
+}
+
 // Chord bed: lock voices into C4..C5 regardless of chord
 function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
@@ -7042,7 +7091,10 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     const midis = use.map(n => baseC4 + pcOf(n));
     midis.sort((a, b) => a - b);
     // Ensure within [60, 71]
-    return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+    const constrainedMidis = midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+    
+    // 🎼 PHASE 2C: Apply chord voice range limits
+    return constrainedMidis.map(midi => applyVoiceRangeLimit(midi, 'chord'));
 }
 
 // Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
@@ -7061,8 +7113,12 @@ function getBassMidiForObject(obj) {
     const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
     const diff = (bottomPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${finalMidi}`);
-    return finalMidi; // within one octave above root
+    
+    // 🎼 PHASE 2C: Apply bass voice range limits (C1-C4)
+    const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'bass');
+    
+    console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${constrainedMidi}`);
+    return constrainedMidi; // within bass range limits
 }
 
 // Melody: map top-face tone into a higher octave anchored to the chord root
@@ -7082,8 +7138,12 @@ function getMelodyMidiForObject(obj) {
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
     const diff = (topPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${finalMidi}`);
-    return finalMidi;
+    
+    // 🎼 PHASE 2C: Apply melody voice range limits (C4-C7)
+    const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'melody');
+    
+    console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${constrainedMidi}`);
+    return constrainedMidi;
 }
 
 function makeNumberPlane(text, width = 0.9) {
