@@ -5,14 +5,15 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>🎼 ChordCubes 5.0 PHOENIX ULTRA - Revolutionary Audio Cutoff System ⚡</title>
-	
+
 	<!-- ===== UNMISTAKABLE VERSION IDENTIFICATION ===== -->
 	<meta name="chordcubes-version" content="5.0-PHOENIX-ULTRA" />
 	<meta name="chordcubes-build-date" content="2025-09-01" />
 	<meta name="chordcubes-phase" content="6-PRODUCTION-COMPLETE" />
 	<meta name="chordcubes-staging" content="OFFICIAL-STAGING-VERSION" />
 	<meta name="chordcubes-branch" content="chord-cubes-phoenix-ultra-5.0" />
-	<meta name="description" content="ChordCubes 5.0 Phoenix Ultra - The OFFICIAL staging version with complete Phase 6 production systems" />
+	<meta name="description"
+		content="ChordCubes 5.0 Phoenix Ultra - The OFFICIAL staging version with complete Phase 6 production systems" />
 	<link rel="stylesheet" href="./styles.css?v=2" />
 	<style>
 		@font-face {
@@ -491,6 +492,10 @@
 					<button id="play-progression-main"
 						style="width:120px; padding:4px; margin-top:4px; background:#333; color:#fff; border:1px solid #555; border-radius:4px; cursor:pointer;">▶
 						Play Progression</button>
+					<!-- RED STOP BUTTON - Item #2 Enhancement -->
+					<button id="stop-progression-main"
+						style="width:120px; padding:4px; margin-top:4px; background:#cc0000; color:#fff; border:1px solid #990000; border-radius:4px; cursor:pointer; font-weight:bold;">⏹
+						STOP</button>
 				</div>
 
 				<!-- Melody Column -->
@@ -625,6 +630,17 @@
 		<div class="main-controls">
 			<button class="control-btn play-btn" id="drum-toggle">▶ DRUMS OFF</button>
 			<button class="control-btn metronome-btn" id="metronome-toggle">🔔 CLICK OFF</button>
+		</div>
+
+		<!-- ITEM #4 ENHANCEMENT - Separate Drum Controls -->
+		<div class="main-controls" style="margin-top: 8px; padding-top: 8px; border-top: 1px solid #444;">
+			<div style="font-size: 11px; color: #888; margin-bottom: 4px; text-align: center;">SEPARATE CONTROLS</div>
+			<button class="control-btn" id="drum-enable"
+				style="background: #006600; font-size: 11px; padding: 3px 8px;">🔊 Enable Drums</button>
+			<button class="control-btn" id="drum-disable"
+				style="background: #660000; font-size: 11px; padding: 3px 8px;">🔇 Disable Drums</button>
+			<button class="control-btn" id="drum-stop-playback"
+				style="background: #444; font-size: 11px; padding: 3px 8px;">⏹ Stop Playback</button>
 		</div>
 
 		<!-- Pattern Sequencer -->

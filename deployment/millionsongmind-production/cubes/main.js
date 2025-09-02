@@ -5214,6 +5214,28 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
     }
 
+    // CHORD QUALITY FORCING SYSTEM - m/n/d keys
+    if ((key === 'm' || key === 'n' || key === 'd') && !e.altKey && !e.ctrlKey && !e.metaKey) {
+        const qualityMap = {
+            'm': 'minor',    // m = minor only affects 3rd (diamond 6)
+            'n': 'diminished', // n = diminished 
+            'd': 'dominant'    // d = dominant
+        };
+
+        const quality = qualityMap[key];
+        console.log(`[CHORD QUALITY] Force ${quality} quality requested`);
+
+        // Apply to currently selected or hovered cube
+        const targetCube = getActiveChordCube();
+        if (targetCube) {
+            forceChordQuality(targetCube, quality);
+        } else {
+            console.log(`[CHORD QUALITY] No active cube to apply ${quality} quality`);
+        }
+
+        e.preventDefault();
+    }
+
     // DEBUG: Alt+T to test b7th for all chords
     if (key === 't' && e.altKey) {
         testB7thForAllChords();
@@ -5397,6 +5419,234 @@ function testExtensionSystem() {
 
 // Expose test function for manual debugging
 window.testExtensionSystem = testExtensionSystem;
+
+// CHORD QUALITY FORCING SYSTEM
+// Get the currently active cube (hovered or selected)
+function getActiveChordCube() {
+    // Method 1: Use currentFreePlayChord if available
+    if (currentFreePlayChord && currentFreePlayChord.cubeObject) {
+        return currentFreePlayChord.cubeObject;
+    }
+
+    // Method 2: Find the most recently played cube from lineup
+    if (lineup && lineup.length > 0) {
+        // Return the first cube in lineup as active selection
+        return lineup[0];
+    }
+
+    // Method 3: Try to get cube from mouse position (fallback)
+    try {
+        const intersects = getIntersects();
+        if (intersects.length > 0) {
+            return intersects[0].object;
+        }
+    } catch (e) {
+        // Intersect may fail, continue to fallback
+    }
+
+    console.log('[CHORD QUALITY] No active cube found');
+    return null;
+}
+
+// Force chord quality modification
+function forceChordQuality(cubeObject, quality) {
+    if (!cubeObject || !cubeObject.userData || !cubeObject.userData.roman) {
+        console.warn('[CHORD QUALITY] Invalid cube object');
+        return;
+    }
+
+    const chordKey = cubeObject.userData.roman;
+    console.log(`[CHORD QUALITY] Applying ${quality} quality to chord ${chordKey}`);
+
+    // Get the current chord notes
+    const baseNotes = noteSetsC[chordKey] || [];
+    if (baseNotes.length === 0) {
+        console.warn(`[CHORD QUALITY] No base notes found for chord ${chordKey}`);
+        return;
+    }
+
+    // Apply quality transformation
+    let modifiedNotes = [...baseNotes];
+    const rootNote = getChordRootNote(chordKey);
+
+    switch (quality) {
+        case 'minor':
+            // m = minor only affects 3rd (diamond 6)
+            modifiedNotes = forceMinorThird(modifiedNotes, rootNote);
+            break;
+        case 'diminished':
+            // n = diminished
+            modifiedNotes = forceDiminishedQuality(modifiedNotes, rootNote);
+            break;
+        case 'dominant':
+            // d = dominant
+            modifiedNotes = forceDominantQuality(modifiedNotes, rootNote);
+            break;
+        default:
+            console.warn(`[CHORD QUALITY] Unknown quality: ${quality}`);
+            return;
+    }
+
+    // Transpose to current key
+    const transposedNotes = transposeNotes(modifiedNotes, currentKey);
+
+    // Apply range constraints
+    const chordInstrument = document.getElementById('chord-inst')?.value || 'string_ensemble_1';
+    const constrainedNotes = transposedNotes.map(note => {
+        const midi = Tone.Frequency(note).toMidi();
+        const constrainedMidi = constrainToInstrumentRange(midi, chordInstrument, 'melody');
+        return Tone.Frequency(constrainedMidi, 'midi').toNote();
+    });
+
+    // Play the modified chord
+    console.log(`[CHORD QUALITY] Playing ${quality} ${chordKey}: ${constrainedNotes.join(', ')}`);
+    window.audioEngine.playChord(constrainedNotes, 2.0, 0.7);
+
+    // Show visual feedback
+    showChordQualityFeedback(quality, chordKey);
+}
+
+// Force minor third (m key)
+function forceMinorThird(notes, rootNote) {
+    const rootNoteBase = rootNote.replace(/[0-9]/g, '');
+    const major3rd = intervalToNoteName(rootNote, 4); // major 3rd
+    const minor3rd = intervalToNoteName(rootNote, 3); // minor 3rd
+
+    let modifiedNotes = [...notes];
+
+    // Replace any major 3rd with minor 3rd
+    if (major3rd && minor3rd) {
+        const maj3rdBase = major3rd.replace(/[0-9]/g, '');
+        const min3rdBase = minor3rd.replace(/[0-9]/g, '');
+
+        modifiedNotes = modifiedNotes.map(note => {
+            const noteBase = note.replace(/[0-9]/g, '');
+            return noteBase === maj3rdBase ? minor3rd : note;
+        });
+
+        // If no major 3rd was present, add minor 3rd
+        if (!notes.some(note => note.replace(/[0-9]/g, '') === maj3rdBase) &&
+            !notes.some(note => note.replace(/[0-9]/g, '') === min3rdBase)) {
+            modifiedNotes.push(minor3rd);
+        }
+    }
+
+    return modifiedNotes;
+}
+
+// Force diminished quality (n key)
+function forceDiminishedQuality(notes, rootNote) {
+    let modifiedNotes = [...notes];
+
+    // Apply diminished intervals: minor 3rd and diminished 5th
+    const minor3rd = intervalToNoteName(rootNote, 3);
+    const dim5th = intervalToNoteName(rootNote, 6); // tritone
+
+    if (minor3rd && dim5th) {
+        // Replace existing 3rd and 5th
+        const min3rdBase = minor3rd.replace(/[0-9]/g, '');
+        const dim5thBase = dim5th.replace(/[0-9]/g, '');
+
+        // Remove existing 3rds and 5ths, add diminished ones
+        modifiedNotes = modifiedNotes.filter(note => {
+            const noteBase = note.replace(/[0-9]/g, '');
+            const major3rd = intervalToNoteName(rootNote, 4);
+            const perfect5th = intervalToNoteName(rootNote, 7);
+
+            const maj3rdBase = major3rd ? major3rd.replace(/[0-9]/g, '') : null;
+            const perf5thBase = perfect5th ? perfect5th.replace(/[0-9]/g, '') : null;
+
+            return noteBase !== maj3rdBase && noteBase !== perf5thBase;
+        });
+
+        // Add diminished intervals
+        if (!modifiedNotes.some(note => note.replace(/[0-9]/g, '') === min3rdBase)) {
+            modifiedNotes.push(minor3rd);
+        }
+        if (!modifiedNotes.some(note => note.replace(/[0-9]/g, '') === dim5thBase)) {
+            modifiedNotes.push(dim5th);
+        }
+    }
+
+    return modifiedNotes;
+}
+
+// Force dominant quality (d key)
+function forceDominantQuality(notes, rootNote) {
+    let modifiedNotes = [...notes];
+
+    // Dominant = major 3rd + minor 7th
+    const major3rd = intervalToNoteName(rootNote, 4);
+    const minor7th = intervalToNoteName(rootNote, 10);
+
+    if (major3rd && minor7th) {
+        const maj3rdBase = major3rd.replace(/[0-9]/g, '');
+        const min7thBase = minor7th.replace(/[0-9]/g, '');
+
+        // Ensure major 3rd (replace minor 3rd if present)
+        const minor3rd = intervalToNoteName(rootNote, 3);
+        if (minor3rd) {
+            const min3rdBase = minor3rd.replace(/[0-9]/g, '');
+            modifiedNotes = modifiedNotes.map(note => {
+                const noteBase = note.replace(/[0-9]/g, '');
+                return noteBase === min3rdBase ? major3rd : note;
+            });
+        }
+
+        // Add major 3rd if not present
+        if (!modifiedNotes.some(note => note.replace(/[0-9]/g, '') === maj3rdBase)) {
+            modifiedNotes.push(major3rd);
+        }
+
+        // Add minor 7th
+        if (!modifiedNotes.some(note => note.replace(/[0-9]/g, '') === min7thBase)) {
+            modifiedNotes.push(minor7th);
+        }
+    }
+
+    return modifiedNotes;
+}
+
+// Show visual feedback for chord quality forcing
+function showChordQualityFeedback(quality, chordKey) {
+    let indicator = document.getElementById('chord-quality-indicator');
+    if (!indicator) {
+        indicator = document.createElement('div');
+        indicator.id = 'chord-quality-indicator';
+        indicator.style.cssText = `
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background: rgba(255, 140, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+            font-weight: bold;
+            z-index: 10001;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        `;
+        document.body.appendChild(indicator);
+    }
+
+    const qualityNames = {
+        'minor': 'Minor',
+        'diminished': 'Diminished',
+        'dominant': 'Dominant'
+    };
+
+    indicator.textContent = `${qualityNames[quality] || quality} ${chordKey}`;
+    indicator.style.display = 'block';
+
+    // Auto-hide after 2 seconds
+    setTimeout(() => {
+        if (indicator) {
+            indicator.style.display = 'none';
+        }
+    }, 2000);
+}
 
 // Get the actual root note for a chord based on its Roman numeral and current key
 function getChordRootNote(chordKey) {
@@ -6640,8 +6890,16 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
         }
     }
 
+    // Apply industry standard range constraints to chord notes  
+    const chordInstrument = document.getElementById('chord-inst')?.value || 'string_ensemble_1';
+    const constrainedNoteNames = noteNames.map(note => {
+        const midi = Tone.Frequency(note).toMidi();
+        const constrainedMidi = constrainToInstrumentRange(midi, chordInstrument, 'melody');
+        return Tone.Frequency(constrainedMidi, 'midi').toNote();
+    });
+
     // Play chord using orchestral engine
-    window.audioEngine.playChord(noteNames, duration, 0.5);
+    window.audioEngine.playChord(constrainedNoteNames, duration, 0.5);
 
     // Bass: if locked, use locked line; else use cube bottom face - WITH VOICE LEADING 3
     if (isBassEnabled()) {
@@ -8648,8 +8906,16 @@ async function playFrontRowProgression() {
                         console.log(`[TRANSPORT EXT] Extended chord notes: ${chordNotes.join(', ')}`);
                     }
 
+                    // Apply industry standard range constraints to chord notes
+                    const chordInstrument = document.getElementById('chord-inst')?.value || 'string_ensemble_1';
+                    const constrainedChordNotes = chordNotes.map(note => {
+                        const midi = Tone.Frequency(note).toMidi();
+                        const constrainedMidi = constrainToInstrumentRange(midi, chordInstrument, 'melody');
+                        return Tone.Frequency(constrainedMidi, 'midi').toNote();
+                    });
+
                     // Play with NEW AUDIO ENGINE using FULL DURATION
-                    window.audioEngine.playChord(chordNotes, chordDurationSeconds, 0.7);
+                    window.audioEngine.playChord(constrainedChordNotes, chordDurationSeconds, 0.7);
 
                     // Play bass if enabled - SKIP if locked bass exists (will be played below)
                     if (bassEnabled && !lockedBass) {

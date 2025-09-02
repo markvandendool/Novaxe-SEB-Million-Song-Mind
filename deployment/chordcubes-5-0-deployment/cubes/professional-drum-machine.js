@@ -257,6 +257,32 @@ class ProfessionalDrumMachine {
             });
         }
 
+        // ITEM #4 ENHANCEMENT - Separate Drum Control Event Listeners
+        const drumEnableBtn = document.getElementById('drum-enable');
+        const drumDisableBtn = document.getElementById('drum-disable');
+        const drumStopPlaybackBtn = document.getElementById('drum-stop-playback');
+
+        if (drumEnableBtn) {
+            drumEnableBtn.addEventListener('click', async () => {
+                console.log('[DRUMS] Enable button clicked');
+                await this.enableDrums();
+            });
+        }
+
+        if (drumDisableBtn) {
+            drumDisableBtn.addEventListener('click', async () => {
+                console.log('[DRUMS] Disable button clicked');
+                await this.disableDrums();
+            });
+        }
+
+        if (drumStopPlaybackBtn) {
+            drumStopPlaybackBtn.addEventListener('click', async () => {
+                console.log('[DRUMS] Stop playback button clicked');
+                await this.stopDrumPlayback();
+            });
+        }
+
         // Drum Volume Control
         const drumVolumeSlider = document.getElementById('drum-volume-slider');
         const drumVolumeDisplay = document.getElementById('drum-volume-display');
@@ -443,6 +469,94 @@ class ProfessionalDrumMachine {
                 step.classList.remove('playing');
             });
         }
+    }
+
+    // ITEM #4 ENHANCEMENT - Separate drum functions
+    async enableDrums() {
+        console.log('[DRUM MACHINE] Enabling drums (keeping current pattern)');
+
+        // This method doesn't start playback, just enables drums capability
+        // The pattern selection and UI state remain unchanged
+        const drumToggle = document.getElementById('drum-toggle');
+        const statusLight = document.getElementById('status-light');
+
+        if (drumToggle) {
+            drumToggle.textContent = '▶ DRUMS OFF';
+            drumToggle.classList.remove('playing');
+            drumToggle.disabled = false; // Make sure button is enabled
+        }
+        if (statusLight) statusLight.classList.remove('active');
+
+        console.log('[DRUM MACHINE] Drums enabled and ready to play');
+        return { enabled: true, playing: false };
+    }
+
+    async disableDrums() {
+        console.log('[DRUM MACHINE] Disabling drums completely');
+
+        // Stop if currently playing
+        if (this.isPlaying) {
+            await this.stopDrumPlayback();
+        }
+
+        // Disable drum controls
+        const drumToggle = document.getElementById('drum-toggle');
+        const statusLight = document.getElementById('status-light');
+
+        if (drumToggle) {
+            drumToggle.textContent = '❌ DRUMS DISABLED';
+            drumToggle.classList.remove('playing');
+            drumToggle.disabled = true; // Disable the button
+        }
+        if (statusLight) statusLight.classList.remove('active');
+
+        console.log('[DRUM MACHINE] Drums disabled completely');
+        return { enabled: false, playing: false };
+    }
+
+    async stopDrumPlayback() {
+        console.log('[DRUM MACHINE] Stopping drum playback (keeping drums enabled)');
+
+        if (this.isPlaying) {
+            // Stop playback but keep drums enabled
+            if (this.sequence) {
+                this.sequence.stop();
+                this.sequence.dispose();
+                this.sequence = null;
+            }
+            Tone.Transport.stop();
+
+            this.isPlaying = false;
+
+            const drumToggle = document.getElementById('drum-toggle');
+            const statusLight = document.getElementById('status-light');
+
+            if (drumToggle) {
+                drumToggle.textContent = '▶ DRUMS OFF';
+                drumToggle.classList.remove('playing');
+                // Keep button enabled for next play
+            }
+            if (statusLight) statusLight.classList.remove('active');
+
+            // Disable IMPROV MODE when drums stop
+            if (window.disableImprovMode && typeof window.disableImprovMode === 'function') {
+                window.disableImprovMode();
+            }
+
+            const transportStatus = document.getElementById('transport-status');
+            if (transportStatus) transportStatus.textContent = 'Stopped';
+
+            // Clear playhead
+            document.querySelectorAll('.step').forEach(step => {
+                step.classList.remove('playing');
+            });
+
+            console.log('[DRUM MACHINE] Playback stopped - drums remain enabled and ready');
+            return { enabled: true, playbackStopped: true };
+        }
+
+        console.log('[DRUM MACHINE] Drums were not playing');
+        return { enabled: true, playbackStopped: false };
     }
 
     toggleMetronome() {

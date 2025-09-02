@@ -397,6 +397,38 @@ class ChordCubesTransport {
         return this.drumsOn;
     }
 
+    // ITEM #4 ENHANCEMENT - Separate drum functions
+    enableDrums() {
+        this.drumsOn = true;
+        console.log('[TRANSPORT] Drums ENABLED');
+        return this.drumsOn;
+    }
+
+    disableDrums() {
+        this.drumsOn = false;
+        console.log('[TRANSPORT] Drums DISABLED');
+
+        // If currently playing, restart without drums
+        if (this.isPlaying) {
+            this.stop();
+            this.start();
+        }
+
+        return this.drumsOn;
+    }
+
+    stopDrumPlayback() {
+        console.log('[TRANSPORT] Stopping drum playback (keeping drums enabled)');
+
+        // Stop current playback but keep drums enabled for next play
+        if (this.isPlaying) {
+            this.stop();
+        }
+
+        // Note: drumsOn remains unchanged - drums stay enabled for next playback
+        return { drumsEnabled: this.drumsOn, playbackStopped: true };
+    }
+
     toggleMetronome() {
         this.metronomOn = !this.metronomOn;
         console.log(`[TRANSPORT] Metronome ${this.metronomOn ? 'ON' : 'OFF'}`);
