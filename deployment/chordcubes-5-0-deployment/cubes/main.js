@@ -4354,7 +4354,7 @@ class OrchestralAudioEngine {
         else if (instrument.synth) {
             console.log(`[AUDIO ENGINE] Using enhanced fallback for ${instrument.name}`);
             try {
-                // EDIT 4: Bulletproof Tone.js timing with proper scheduling
+                // V1.1: Bulletproof Tone.js timing with proper scheduling
                 const now = Tone.now();
                 const startTime = now + 0.01; // Small delay to avoid timing conflicts
 
@@ -4389,7 +4389,7 @@ class OrchestralAudioEngine {
                     instrument.synth.triggerAttackRelease(singleNote, duration + 's', startTime);
                 }
             } catch (error) {
-                console.warn('[EDIT 4] Fallback playback error:', error.message);
+                console.warn('[V1.1] Fallback playback error:', error.message);
             }
         } else {
             console.error('[AUDIO ENGINE] No playback method available');
@@ -4959,16 +4959,16 @@ class OrchestralAudioEngine {
                         cutoffMethods.push(`${type}-sampler-no-methods`);
                     }
                 } catch (error) {
-                    console.log(`[EDIT 4] Sampler cutoff handled for ${type}:`, error.message);
+                    console.log(`[V1.1] Sampler cutoff handled for ${type}:`, error.message);
                     cutoffMethods.push(`${type}-sampler-handled`);
                 }
             }
 
             if (instrument.synth) {
                 try {
-                    console.log(`[EDIT 4] 🔄 Safe synth cutoff for ${type}...`);
+                    console.log(`[V1.1] 🔄 Safe synth cutoff for ${type}...`);
 
-                    // EDIT 4: Check for releaseAll method before calling
+                    // V1.1: Check for releaseAll method before calling
                     if (typeof instrument.synth.releaseAll === 'function') {
                         instrument.synth.releaseAll();
                         cutoffMethods.push(`${type}-releaseAll`);
@@ -4978,11 +4978,11 @@ class OrchestralAudioEngine {
                         cutoffMethods.push(`${type}-triggerRelease`);
                     } else {
                         // No release method available - just mark as attempted
-                        console.log(`[EDIT 4] No release method for ${type} synth`);
+                        console.log(`[V1.1] No release method for ${type} synth`);
                         cutoffMethods.push(`${type}-no-release`);
                     }
                 } catch (error) {
-                    console.log(`[EDIT 4] Synth cutoff handled for ${type}:`, error.message);
+                    console.log(`[V1.1] Synth cutoff handled for ${type}:`, error.message);
                     cutoffMethods.push(`${type}-cutoff-handled`);
                 }
             }
