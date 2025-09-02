@@ -5747,7 +5747,7 @@ const CHROMATIC_EXTENSIONS = {
     },
     '3': {
         normal: { interval: 3, name: 'b3', description: 'minor 3rd' },
-        shift: { interval: 15, name: 'b10', description: 'minor 10th (compound b3)' }
+        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound #2)' }
     },
     '4': {
         normal: { interval: 4, name: '3', description: 'major 3rd' },
