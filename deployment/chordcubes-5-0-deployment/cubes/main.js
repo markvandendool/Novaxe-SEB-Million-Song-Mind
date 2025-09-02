@@ -5131,6 +5131,9 @@ playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 const playChordsBtnMain = document.getElementById('play-chords');
 const playProgressionBtnMain = document.getElementById('play-progression-main');
 
+// PHASE 1 TASK 1B: EMERGENCY STOP BUTTON
+const emergencyStopBtn = document.getElementById('emergency-stop-btn');
+
 playChordsBtnMain?.addEventListener('click', () => {
     console.log('[UI PLAY CHORDS] Playing current progression as individual chords');
     playFrontRowProgression(); // For now, same as progression - can be customized later
@@ -5139,6 +5142,44 @@ playChordsBtnMain?.addEventListener('click', () => {
 playProgressionBtnMain?.addEventListener('click', () => {
     console.log('[UI PLAY PROGRESSION] Playing front row progression from main UI');
     playFrontRowProgression();
+});
+
+// PHASE 1 TASK 1B: EMERGENCY STOP FUNCTIONALITY
+emergencyStopBtn?.addEventListener('click', () => {
+    console.log('[EMERGENCY STOP] 🛑 Emergency stop activated!');
+    
+    // Stop all audio playback immediately
+    try {
+        if (window.chordCubesTransport && window.chordCubesTransport.stop) {
+            window.chordCubesTransport.stop();
+            console.log('[EMERGENCY STOP] ✅ Transport stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Transport stop failed:', e); }
+    
+    try {
+        if (window.drumMachine && window.drumMachine.stop) {
+            window.drumMachine.stop();
+            console.log('[EMERGENCY STOP] ✅ Drum machine stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Drum machine stop failed:', e); }
+    
+    try {
+        if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
+            window.improvDownbeatTracker.stop();
+            console.log('[EMERGENCY STOP] ✅ Improv tracker stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Improv tracker stop failed:', e); }
+    
+    // Stop any active progression intervals
+    try {
+        if (window.progressionInterval) {
+            clearInterval(window.progressionInterval);
+            window.progressionInterval = null;
+            console.log('[EMERGENCY STOP] ✅ Progression interval cleared');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Progression interval clear failed:', e); }
+    
+    console.log('[EMERGENCY STOP] 🎯 All audio playback stopped');
 });
 
 // Drum machine play progression button
@@ -6000,8 +6041,70 @@ maxArrowsInput?.addEventListener('input', (e) => {
     } catch (_) { }
 })();
 resetBtn?.addEventListener('click', () => {
-    console.log('[RESET] Resetting to melody view and clearing lineup');
+    console.log('[ENHANCED RESET] 🔄 Full system reset initiated');
 
+    // =====================================================
+    // PHASE 1: ENHANCED RESET - STOP ALL AUDIO PLAYBACK
+    // =====================================================
+    console.log('[ENHANCED RESET] 🛑 Stopping all audio playback');
+    
+    // Stop transport system
+    try {
+        if (window.chordCubesTransport && window.chordCubesTransport.stop) {
+            window.chordCubesTransport.stop();
+            console.log('[ENHANCED RESET] ✅ Transport stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Transport stop failed:', e); }
+    
+    // Stop drum machine
+    try {
+        if (window.drumMachine && window.drumMachine.stop) {
+            window.drumMachine.stop();
+            console.log('[ENHANCED RESET] ✅ Drum machine stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Drum machine stop failed:', e); }
+    
+    // Stop improvisation tracker
+    try {
+        if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
+            window.improvDownbeatTracker.stop();
+            console.log('[ENHANCED RESET] ✅ Improv tracker stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Improv tracker stop failed:', e); }
+
+    // =====================================================
+    // PHASE 2: CLEAR PROGRESSION QUEUE & RESET COUNTERS
+    // =====================================================
+    console.log('[ENHANCED RESET] 🗑️ Clearing progression queue');
+    try {
+        globalProgressionIndex = 0; // Reset global counter
+        console.log('[ENHANCED RESET] ✅ Global progression index reset');
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Counter reset failed:', e); }
+
+    // =====================================================
+    // PHASE 3: UNLOCK ALL VOICES (MELODY, BASS, CHORDS)
+    // =====================================================
+    console.log('[ENHANCED RESET] 🔓 Unlocking all voices');
+    try {
+        // Clear melody locks
+        lockedMelody = null;
+        renderMelodyLane();
+        setMelodyLockVisual('open');
+        
+        // Clear bass locks
+        lockedBass = null;
+        renderBassLane();
+        setBassLockVisual('open');
+        
+        // Clear locked lines
+        clearLockedLines();
+        
+        console.log('[ENHANCED RESET] ✅ All voice locks cleared');
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Lock clearing failed:', e); }
+
+    // =====================================================
+    // PHASE 4: EXISTING RESET FUNCTIONALITY (PRESERVED)
+    // =====================================================
     clearArrows(); // Clear arrows on reset
 
     // Return all active cubes to their shelf origin and clear lineup
@@ -6021,7 +6124,7 @@ resetBtn?.addEventListener('click', () => {
     lineup = [];
 
     // RESTORE MELODY VIEW AND DEFAULT LIGHTING
-    console.log('[RESET] Restoring melody view and lighting');
+    console.log('[ENHANCED RESET] 🎭 Restoring melody view and lighting');
     setViewAbove(); // Return to melody view
 
     // Reset lighting to default
@@ -6033,8 +6136,7 @@ resetBtn?.addEventListener('click', () => {
     stageSpot.intensity = 0.0;
     stageMode = false;
 
-    // Also clear any locked lanes to avoid leftover markers
-    try { clearLockedLines(); setMelodyLockVisual('open'); setBassLockVisual('open'); } catch (_) { }
+    console.log('[ENHANCED RESET] 🎉 Full system reset complete!');
 });
 
 // Lock icon events handled above via melodyLockIcon/bassLockIcon
@@ -7420,26 +7522,30 @@ function setupRhythmControls() {
         });
     }
 
-    // Drum Toggle
+    // Drum Toggle - PHASE 1 TASK 1C: Fixed to only mute drums, not stop progression
     const drumToggle = document.getElementById('drum-toggle');
     if (drumToggle) {
         drumToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Drum button clicked');
+            console.log('[CONTROLS] Drum button clicked - TASK 1C FIX');
 
             // Ensure audio context is started
             await transport.ensureAudioContext();
 
             // Toggle drums
             const drumsOn = transport.toggleDrums();
-            drumToggle.textContent = `Drums: ${drumsOn ? 'On' : 'Off'}`;
+            drumToggle.textContent = `${drumsOn ? '▶ DRUMS ON' : '▶ DRUMS OFF'}`;
             drumToggle.style.backgroundColor = drumsOn ? '#4CAF50' : '#333';
 
-            // Start/stop transport if needed
+            // TASK 1C FIX: Only start transport if turning drums ON
+            // Do NOT stop transport when turning drums off - just mute them
             if (drumsOn && !transport.isPlaying) {
                 await transport.start();
-            } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) {
-                transport.stop();
+                console.log('[TASK 1C] Started transport for drums');
             }
+            // REMOVED: The problematic stop logic that would stop progression
+            // OLD CODE WAS: } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) { transport.stop(); }
+            
+            console.log(`[TASK 1C] Drums ${drumsOn ? 'unmuted' : 'muted'} - progression continues playing`);
         });
     }
 

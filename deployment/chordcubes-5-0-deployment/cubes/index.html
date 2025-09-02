@@ -430,8 +430,14 @@
 						<option value="electric_bass_finger">Electric Bass</option>
 						<option value="electric_bass_pick">Electric Bass (Pick)</option>
 						<option value="cello">Cello</option>
+						<option value="viola">Viola</option>
 						<option value="synth_bass_1">Synth Bass 1</option>
 						<option value="synth_bass_2">Synth Bass 2</option>
+						<option value="trombone">Trombone</option>
+						<option value="french_horn">French Horn</option>
+						<option value="bassoon">Bassoon</option>
+						<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+						<option value="acoustic_guitar_steel">Steel Guitar</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Bass Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -454,16 +460,31 @@
 				<div style="display: flex; flex-direction: column; align-items: flex-start;">
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Instrument</label>
 					<select id="chord-inst" style="width: 120px; margin-bottom: 6px;">
-						<option value="acoustic_grand_piano" selected>Piano</option>
-						<option value="electric_piano_1">Electric Piano 1</option>
-						<option value="electric_piano_2">Electric Piano 2</option>
-						<option value="harpsichord">Harpsichord</option>
-						<option value="church_organ">Church Organ</option>
-						<option value="jazz_organ">Jazz Organ</option>
-						<option value="string_ensemble_1">Strings (Ensemble)</option>
-						<option value="string_ensemble_2">Strings 2</option>
-						<option value="choir_aahs">Choir</option>
-						<option value="accordion">Accordion</option>
+						<optgroup label="🎹 Keyboards">
+							<option value="acoustic_grand_piano" selected>Piano</option>
+							<option value="electric_piano_1">Electric Piano 1</option>
+							<option value="electric_piano_2">Electric Piano 2</option>
+							<option value="harpsichord">Harpsichord</option>
+						</optgroup>
+						<optgroup label="🎺 Organs">
+							<option value="church_organ">Church Organ</option>
+							<option value="jazz_organ">Jazz Organ</option>
+						</optgroup>
+						<optgroup label="🎻 Strings">
+							<option value="string_ensemble_1">Strings (Ensemble)</option>
+							<option value="string_ensemble_2">Strings 2</option>
+							<option value="pizzicato_strings">Pizzicato Strings</option>
+						</optgroup>
+						<optgroup label="👥 Voices">
+							<option value="choir_aahs">Choir</option>
+							<option value="voice_oohs">Voice Oohs</option>
+							<option value="synth_voice">Synth Voice</option>
+						</optgroup>
+						<optgroup label="🎸 Other">
+							<option value="accordion">Accordion</option>
+							<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+							<option value="acoustic_guitar_steel">Steel Guitar</option>
+						</optgroup>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -481,6 +502,10 @@
 					<button id="play-progression-main"
 						style="width:120px; padding:4px; margin-top:4px; background:#333; color:#fff; border:1px solid #555; border-radius:4px; cursor:pointer;">▶
 						Play Progression</button>
+					<!-- PHASE 1 TASK 1B: RED STOP BUTTON -->
+					<button id="emergency-stop-btn"
+						style="width:120px; padding:4px; margin-top:4px; background:#cc0000; color:#fff; border:1px solid #aa0000; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 2px 4px rgba(204,0,0,0.5);">🛑
+						STOP</button>
 				</div>
 
 				<!-- Melody Column -->
@@ -500,6 +525,15 @@
 						<option value="trombone">Trombone</option>
 						<option value="french_horn">French Horn</option>
 						<option value="orchestral_harp">Orchestral Harp</option>
+						<option value="marimba">Marimba</option>
+						<option value="xylophone">Xylophone</option>
+						<option value="vibraphone">Vibraphone</option>
+						<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+						<option value="acoustic_guitar_steel">Steel Guitar</option>
+						<option value="voice_oohs">Voice Oohs</option>
+						<option value="synth_voice">Synth Voice</option>
+						<option value="sitar">Sitar</option>
+						<option value="banjo">Banjo</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Melody Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
