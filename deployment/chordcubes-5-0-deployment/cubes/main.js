@@ -1,5 +1,5 @@
 // ============================================
-// 🎼 CHORDCUBES 5.0 - REVOLUTIONARY AUDIO CUTOFF SYSTEM
+// 🎼 CHORDCUBES 6.0 V1.2 - REVOLUTIONARY FONT JAN16 SYSTEM
 // ============================================
 // CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
 // ============================================
@@ -521,12 +521,30 @@ function setViewBelow() {
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    // VERY tight kerning around accidentals - no spacing between glyph and numeral
-    let out = String(s)
-        .replace(/\s*#\s*/g, '♯')  // No space before sharp
-        .replace(/([A-Ga-g])\s*b/g, '$1♭')   // Eb → E♭ with no space
-        .replace(/\bb(?=(?:\d|[IViv]))/g, '♭'); // b3/bVI → ♭3/♭VI
-    return out;
+    
+    // 🎼 FONT JAN16 LIGATURE SYSTEM - Novaxe's Masterful Implementation
+    // Based on archaeological findings: flats use lowercase 'l' to trigger ligatures
+    // Font Jan16.otf (135,500 bytes) transforms 'l' → ♭ via built-in ligatures
+    
+    let result = String(s);
+    
+    // CORE TRANSFORMATION: b→l (flats use lowercase 'l' ligature)
+    // Examples: Bb→Bl, bVI→lVI, m7b5→m7l5
+    result = result.replace(/([A-Ga-g])b/g, '$1l');    // Note flats: Bb→Bl, Eb→El
+    result = result.replace(/\bb(?=(?:\d|[IViv]))/g, 'l'); // Roman flats: bVI→lVI, b3→l3
+    
+    // PRESERVE CASE SENSITIVITY for chord quality (user requirement)
+    // Major = uppercase (IV), minor = lowercase (iv), minor still uses 'm'
+    
+    // CLEAN UP: Remove excessive spaces around accidentals for tight kerning
+    result = result.replace(/\s*#\s*/g, '#');         // Keep # as-is for sharps
+    result = result.replace(/\s*l\s*/g, 'l');         // Clean spacing around 'l' ligature
+    
+    // SPECIAL CASES: Let diminished symbols render naturally with Font Jan16
+    result = result.replace(/dim/g, 'º');             // Diminished: dim→º (full diminished)
+    // Keep º and ø as-is for natural Font Jan16 rendering
+    
+    return result;
 }
 
 // Generate a canvas texture for labels (advanced with stacked superscripts)
@@ -553,84 +571,46 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // Right
     ctx.fillRect(size - borderPx, 0, borderPx, size);
 
-    // Parse base, superscripts (includes º/ø), and annotation
-    const supers = [];
+    // Parse base text - NO SUPERSCRIPT EXTRACTION, let Font Jan16 handle everything
     let base = String(labelText).trim();
-    // supers from parentheses e.g., (7)(b9)
-    const paren = [...base.matchAll(/\(([^)]+)\)/g)].map(m => m[1]);
-    if (paren.length) { supers.push(...paren); base = base.replace(/\([^)]*\)/g, ''); }
-    // Move all 'ø' characters to supers block
-    if (base.includes('ø')) { const count = (base.match(/ø/g) || []).length; for (let i = 0; i < count; i++) supers.push('ø'); base = base.replace(/ø/g, ''); }
-    // Extract trailing dim/half-dim with 7
-    const dimMatch = base.match(/(º7|º)$/);
-    if (dimMatch) { supers.push(dimMatch[1]); base = base.replace(/(º7|º)$/, ''); }
-    // Extract trailing numbers like 7
-    const trailing = base.match(/^(.*?)([#b]?\d+)$/);
-    if (trailing) { base = trailing[1]; supers.push(trailing[2]); }
-
+    
+    // Remove parentheses notation (7)(b9) -> 7b9 for Font Jan16 processing
+    base = base.replace(/\(([^)]+)\)/g, '$1');
+    
     const baseTrim = base.trim();
     const basePretty = toMusicalGlyphs(baseTrim);
-    let supersPretty = supers.map(s => toMusicalGlyphs(s));
 
     // Embossed text color: EXACT same as border color (per requirement)
     const fill = strokeColor;
 
     // Typography base (Cochin/Times)
-    const centerX = size / 2; const baselineY = size / 2 + 6;
+    const centerX = size / 2; const centerY = size / 2; // Perfect center like alphabet block
     const baseSize = 430;
     const cochin = SERIF_STACK;
-    // Draw centered base (without leading accidental token)
+    // Draw centered base text - Font Jan16 handles all ligatures naturally
     ctx.save();
     ctx.fillStyle = fill;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-    ctx.font = `700 ${baseSize}px ${cochin}`;
-    ctx.fillText(basePretty, centerX, baselineY);
-    ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
-    ctx.strokeText(basePretty, centerX, baselineY - 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `400 ${baseSize}px ${cochin}`;
+    ctx.fillText(basePretty, centerX, centerY);
     ctx.restore();
 
-    // (No global accidental/ø repositioning; special alignment remains only for specific labels like '#ivø')
-
-    // Supers: Finale Numerics (music), large and clear; include ø/º as supers
-    if (supersPretty.length && romanLabel !== '#ivø') {
-        const supSize = 220;
-        const supFamily = `900 ${supSize}px ${MUSIC_STACK}, ${SERIF_STACK}`;
-        const rightX = size - 90; let y = 170;
-        for (const token of supersPretty) {
-            const text = String(token);
-            ctx.save();
-            // Light capsule for contrast
-            ctx.font = supFamily; const w = ctx.measureText(text).width;
-            const padX = 10, padY = 8; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
-            ctx.fillStyle = 'rgba(255,255,255,0.12)';
-            ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.rect(rectX, rectY, w + padX * 2, supSize + padY * 1.2); ctx.fill(); ctx.stroke();
-            // Text
-            ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-            ctx.fillStyle = fill;
-            ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-            ctx.font = supFamily; ctx.fillText(text, rightX, y);
-            ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 4;
-            ctx.strokeText(text, rightX, y - 1);
-            ctx.restore();
-            y += supSize * 0.92;
-        }
-    }
+    // NO SUPERSCRIPTS - Font Jan16 ligature system handles 7th notation naturally
 
     // Applied-chord annotation small text at bottom
     const annotation = annotationForRoman(romanLabel);
     if (annotation) {
         const a = toMusicalGlyphs(annotation).replace(/ of /g, ' of ');
-        ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        // COMMENTED OUT: Heavy font styling that was trying to mimic custom font
+        // ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        ctx.font = `400 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`; // Reduced weight from 800 to 400
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = fill;
-        ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+        // COMMENTED OUT: Shadow effects that were trying to mimic custom font
+        // ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
         const annY = size - 105;
         ctx.fillText(`[${a}]`, size / 2, annY);
-        ctx.shadowColor = 'transparent';
+        // ctx.shadowColor = 'transparent';
     }
 
     const tex = new THREE.CanvasTexture(c);
@@ -717,29 +697,42 @@ function candidatePngNamesForRoman(roman) {
 }
 
 function loadFaceTexture(label, romanLabel, force7th = false, extensions = null) {
-    // AUTOMATICALLY ADD 7TH NOTATION for diminished, I7, V(b7)(b9) chords, OR when global withSeventh is true
+    // Font Jan16 ligature system handles all notation naturally - no manipulation needed
     let displayLabel = label;
+    
     const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
     const isI7 = romanLabel === 'I7' || romanLabel === 'i7';
     const isV7b9 = romanLabel === 'V(7)(b9)' || romanLabel === 'V(b7)(b9)';
+    
+    // Determine chord type for proper 7th notation
+    // Major chord = starts with uppercase Roman numeral (I, II, III, IV, V, VI, VII)
+    // Minor chord = starts with lowercase or has flat prefix (i, ii, iii, iv, v, vi, vii, bIII, bVI, bVII)
+    const baseRoman = romanLabel.replace(/[7º♭ø\(b\)#]/g, ''); // Remove all accidentals and extensions
+    const isMajorChord = /^[IVX]+$/i.test(baseRoman) && baseRoman === baseRoman.toUpperCase() && !romanLabel.startsWith('b');
+    const isDominantV = romanLabel.startsWith('V') && !romanLabel.includes('º') && !romanLabel.includes('ø');
 
     // Check if we should show 7th: special chords, global setting, or forced
     const shouldShow7th = isDiminished || isI7 || isV7b9 || withSeventh || force7th;
 
-    // Add 7th to display if not already present
-    if (shouldShow7th && !label.includes('7') && !label.includes('(7)')) {
+    console.log(`[FONT DEBUG] ${romanLabel}: baseRoman="${baseRoman}", isMajor=${isMajorChord}, isDominant=${isDominantV}, shouldShow7th=${shouldShow7th}`);
+
+    // Add 7th to display if not already present - CORRECT NOTATION for Font Jan16
+    if (shouldShow7th && !label.includes('7')) {
         if (isDiminished && romanLabel.includes('º') && !romanLabel.includes('º7')) {
-            // For diminished, show º7 instead of just º
+            // For FULL diminished: º7 (Font Jan16 handles proper diminished 7th notation)
             displayLabel = label.replace('º', 'º7');
         } else if (isDiminished && romanLabel.includes('ø') && !romanLabel.includes('ø7')) {
-            // For half-diminished, show ø7 instead of just ø
+            // For HALF diminished: ø7 (Font Jan16 handles proper half-diminished notation)
             displayLabel = label.replace('ø', 'ø7');
-        } else if (isI7) {
-            // For I7, add (7) superscript
-            displayLabel = label + '(7)';
+        } else if (isDominantV) {
+            // For DOMINANT chords (V7): use simple 7
+            displayLabel = label + '7';
+        } else if (isMajorChord && !isV7b9) {
+            // For MAJOR 7th chords (I7, IV7, etc.): use M7 for natural symbol
+            displayLabel = label + 'M7';
         } else if (!isV7b9) {
-            // For all other chords (except V(b7)(b9) which already has full notation)
-            displayLabel = label + '(7)';
+            // For minor 7th chords and others: use simple 7
+            displayLabel = label + '7';
         }
     }
 
@@ -750,12 +743,9 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
         console.log(`[FONT] Added extensions: ${displayLabel} (extensions: ${extensions.map(e => e.name).join(', ')})`);
     }
 
-    // V(b7)(b9) chords should always show full notation (already in the label)
-    // This chord is special - it must always include the b9 to differentiate from basic V
+    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel}, withSeventh: ${withSeventh}, force7th: ${force7th}, isMajor: ${isMajorChord}, isDominant: ${isDominantV})`);
 
-    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel}, withSeventh: ${withSeventh}, force7th: ${force7th})`);
-
-    // Always use canvas-rendered texture; no PNGs
+    // Always use canvas-rendered texture with Font Jan16 ligature system
     return makeFrontLabelTextureStyled(displayLabel, romanLabel);
 }
 
@@ -1268,7 +1258,9 @@ function makeTitleTexture(lines, opts = {}) {
     const fontSettings = currentFontSettings?.[fontTarget] || currentFontSettings?.['chord-face'];
 
     const family = opts.family || fontSettings?.family || 'Arial';
-    const weight = opts.weight || fontSettings?.weight || 900;
+    // COMMENTED OUT: Heavy font weight that was trying to mimic custom font
+    // const weight = opts.weight || fontSettings?.weight || 900;
+    const weight = opts.weight || fontSettings?.weight || 400; // Reduced from 900 to 400
     const size = opts.size || fontSettings?.size || 220;
     const gap = opts.lineGap || fontSettings?.lineHeight || 0.68;
     const letterSpacing = opts.letterSpacing || fontSettings?.letterSpacing || 0;
@@ -1633,11 +1625,17 @@ async function ensureFontsLoaded() {
     link.href = 'https://fonts.googleapis.com/css2?family=Noto+Music&display=swap';
     document.head.appendChild(link);
     const loads = [
+        // COMMENTED OUT: Heavy font weights that were trying to mimic custom font
         // Serif stack (Cochin/Times)
-        `700 430px ${SERIF_STACK}`,
+        // `700 430px ${SERIF_STACK}`,
         // Music stack (Noto Music/Finale/Bravura)
-        `900 220px ${MUSIC_STACK}`,
-        `800 130px ${MUSIC_STACK}`
+        // `900 220px ${MUSIC_STACK}`,
+        // `800 130px ${MUSIC_STACK}`
+        
+        // Simplified font loading without heavy weights
+        `400 430px ${SERIF_STACK}`,
+        `400 220px ${MUSIC_STACK}`,
+        `400 130px ${MUSIC_STACK}`
     ].map(spec => {
         try { return document.fonts.load(spec); } catch (_) { return Promise.resolve(); }
     });
@@ -3759,11 +3757,12 @@ class OrchestralAudioEngine {
                     Tone.start().then(() => {
                         console.log('[V1.0] ✅ AudioContext started successfully');
                         audioContextStarted = true;
-                        window.audioSpamPrevention.emergencyShutoff = true; // Lock after success
+                        // V1.4 CRITICAL FIX: Keep emergency shutoff OFF to allow audio playback
+                        console.log('[V1.4] 🎵 AUDIO PLAYBACK ENABLED - Emergency shutoff remains OFF');
                     }).catch(() => {
                         // Ultra-silent fail - zero spam
                         audioContextStarted = true; // Prevent future attempts
-                        window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
+                        window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock ONLY on failure
                     });
                 } else {
                     console.log('[V1.0] AudioContext state:', Tone.context.state);
@@ -4281,8 +4280,7 @@ class OrchestralAudioEngine {
     }
 
     playChord(notes, duration = 2, volume = 0.5) {
-        // CLAUDE'S ENGINE vNEXT: Always ready with immediate fallbacks - no blocking checks!
-
+        // V1.8 CRITICAL SIMPLIFICATION: Restore working version logic - NO OVERCOMPLICATED TRACKING
         const instrument = this.currentInstruments.chord;
         if (!instrument) {
             console.error('[AUDIO ENGINE] No chord instrument loaded');
@@ -4295,45 +4293,16 @@ class OrchestralAudioEngine {
 
         // PRIORITY 1: Use real Tone.js Sampler if available
         if (instrument.sampler && !instrument.fallback) {
-            console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples - AudioTime: ${this.audioContext.currentTime.toFixed(3)}`);
+            console.log(`[AUDIO ENGINE] Using real ${instrument.name} samples`);
             try {
-                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
-                const noteId = ++this.noteIdCounter;
-                console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for manual control`);
-
-                // Trigger attack (start notes)
-                instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
-
-                // Schedule release after duration
-                const releaseTimeout = setTimeout(() => {
-                    try {
-                        instrument.sampler.triggerRelease(notes);
-                        console.log(`[AUDIO ENGINE] ⏰ Auto-released chord notes ${noteId} after ${duration}s`);
-                        this.activeNotes.chord.delete(noteId);
-                    } catch (e) {
-                        console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
-                    }
-                }, duration * 1000);
-
-                // Track this note for manual cutoff
-                this.activeNotes.chord.set(noteId, {
-                    sampler: instrument.sampler,
-                    notes: notes,
-                    releaseTimeout: releaseTimeout,
-                    startTime: this.audioContext.currentTime
-                });
-
-                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with manual control - Duration: ${duration}s`);
-                return; // Exit if successful
+                instrument.sampler.triggerAttackRelease(notes, duration + 's');
+                return;
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
-                console.log(`[AUDIO ENGINE] 🔄 FALLING BACK to enhanced synth for ${instrument.name}`);
-                // Continue to fallback logic instead of returning
             }
         }
         // PRIORITY 2: Use WebAudioFont if available
         else if (instrument.preset && !instrument.info?.fallback) {
-            // WebAudioFont playback
             const when = this.audioContext.currentTime;
             const preset = instrument.preset;
             const midiNotes = notes.map(note => this.noteToMidi(note));
@@ -4350,46 +4319,13 @@ class OrchestralAudioEngine {
                 );
             });
         }
-        // PRIORITY 3: Use enhanced Tone.js fallback
+        // PRIORITY 3: Use enhanced Tone.js fallback - SIMPLE VERSION
         else if (instrument.synth) {
             console.log(`[AUDIO ENGINE] Using enhanced fallback for ${instrument.name}`);
             try {
-                // V1.1: Bulletproof Tone.js timing with proper scheduling
-                const now = Tone.now();
-                const startTime = now + 0.01; // Small delay to avoid timing conflicts
-
-                // Handle both polyphonic and monophonic synths
-                if (Array.isArray(notes) && notes.length > 1) {
-                    // For chords, try polyphonic first, fallback to individual notes
-                    try {
-                        instrument.synth.triggerAttackRelease(notes, duration + 's', startTime);
-                    } catch (polyError) {
-                        // V1.0: NUCLEAR TIMING FIX - Zero spam tolerance
-                        console.log(`[V1.0] 🔄 Polyphonic failed, using ultra-safe individual notes for ${instrument.name}`);
-
-                        // Emergency shutoff check
-                        if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
-                            console.log('[V1.0] 🚨 Emergency shutoff - blocking individual note playback');
-                            return;
-                        }
-
-                        notes.forEach((note, index) => {
-                            const noteStartTime = startTime + (index * 0.002); // Ultra-safe 2ms stagger
-                            try {
-                                instrument.synth.triggerAttackRelease(note, duration + 's', noteStartTime);
-                            } catch (noteError) {
-                                // Ultra-silent error handling
-                                console.log(`[V1.0] 🤐 Note error silenced for ${note}`);
-                            }
-                        });
-                    }
-                } else {
-                    // Single note - works with both poly and mono synths
-                    const singleNote = Array.isArray(notes) ? notes[0] : notes;
-                    instrument.synth.triggerAttackRelease(singleNote, duration + 's', startTime);
-                }
+                instrument.synth.triggerAttackRelease(notes, duration + 's');
             } catch (error) {
-                console.warn('[V1.1] Fallback playback error:', error.message);
+                console.warn('[AUDIO ENGINE] Fallback playback error:', error);
             }
         } else {
             console.error('[AUDIO ENGINE] No playback method available');
@@ -4942,10 +4878,8 @@ class OrchestralAudioEngine {
                     console.log(`[V1.0] 🔄 Ultra-safe sampler cutoff for ${type}...`);
 
                     // Emergency shutoff check
-                    if (window.audioSpamPrevention && window.audioSpamPrevention.emergencyShutoff) {
-                        console.log('[V1.0] 🚨 Emergency shutoff - blocking sampler operations');
-                        continue;
-                    }
+                    // V1.7 CRITICAL FIX: DISABLE emergency shutoff in cutoff operations too
+                    console.log('[V1.7] 🎵 Emergency shutoff disabled for sampler cutoff - FULL CONTROL ENABLED');
 
                     // Ultra-safe method checking with multiple fallbacks
                     if (instrument.sampler && typeof instrument.sampler.releaseAll === 'function') {
@@ -5829,8 +5763,8 @@ const CHROMATIC_EXTENSIONS = {
         shift: { interval: 22, name: 'b14', description: 'minor 14th (compound b7)' }
     },
     '-': {
-        normal: { interval: 11, name: 'maj7', description: 'major 7th' },
-        shift: { interval: 23, name: 'maj14', description: 'major 14th (compound maj7)' }
+        normal: { interval: 11, name: 'M7', description: 'major 7th' },
+        shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
     },
     '=': {
         normal: { interval: 12, name: '8va', description: 'octave' },

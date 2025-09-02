@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>🎼 ChordCubes 5.0 - Revolutionary Audio Cutoff System ⚡</title>
+	<title>🎼 ChordCubes 6.0 V1.2 - Revolutionary Font Jan16 System ⚡</title>
 	<link rel="stylesheet" href="./styles.css?v=2" />
 	<style>
 		@font-face {
@@ -15,6 +15,31 @@
 			font-weight: 400;
 			font-style: normal;
 			font-display: swap;
+		}
+
+		@font-face {
+			font-family: 'FontJan16';
+			src: url('./fonts/Font Jan16.otf') format('opentype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
+		}
+
+		/* FONT JAN16 LIGATURE ENABLEMENT - Novaxe's Masterful System */
+		.font-jan16-ligatures {
+			font-family: 'FontJan16', 'Cochin', 'Times New Roman', serif;
+			font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
+			font-variant-ligatures: common-ligatures discretionary-ligatures;
+			text-rendering: optimizeLegibility;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+
+		/* Apply ligature features globally to ensure Font Jan16 b→l transformation works */
+		* {
+			font-feature-settings: "liga" 1, "kern" 1;
+			font-variant-ligatures: common-ligatures;
+			text-rendering: optimizeLegibility;
 		}
 
 		/* GIANT 2.0 Version Display */
@@ -608,7 +633,7 @@
 				<span id="improv-mode-free"
 					style="cursor: pointer; margin-right: 8px; opacity: 1; font-size: 18px; transition: all 0.3s ease; transform: scale(1.2);"
 					title="Free Improv: Root position only">🎵</span>
-				Edit 5
+				V1.18
 				<span id="improv-mode-creation"
 					style="cursor: pointer; margin-left: 8px; opacity: 0.4; font-size: 18px; transition: all 0.3s ease; transform: scale(1);"
 					title="Creation Improv: Full inversions + front row">🎼</span>
