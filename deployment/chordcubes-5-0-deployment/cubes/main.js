@@ -1,6 +1,7 @@
 // ============================================
-// 🎼 CHORDCUBES 6.0 V1.2 - REVOLUTIONARY FONT JAN16 SYSTEM
+// 🎼 CHORDCUBES 6.0 V1.48 - DIRECT FACE UPDATE STAGE 12 FIX
 // ============================================
+console.log('🔥🔥🔥 MAIN.JS V1.48 DIRECT FACE UPDATE STAGE 12 FIX 🔥🔥🔥');
 // CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
 // ============================================
 (function () {
@@ -521,29 +522,29 @@ function setViewBelow() {
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    
+
     // 🎼 FONT JAN16 LIGATURE SYSTEM - Novaxe's Masterful Implementation
     // Based on archaeological findings: flats use lowercase 'l' to trigger ligatures
     // Font Jan16.otf (135,500 bytes) transforms 'l' → ♭ via built-in ligatures
-    
+
     let result = String(s);
-    
+
     // CORE TRANSFORMATION: b→l (flats use lowercase 'l' ligature)
     // Examples: Bb→Bl, bVI→lVI, m7b5→m7l5
     result = result.replace(/([A-Ga-g])b/g, '$1l');    // Note flats: Bb→Bl, Eb→El
     result = result.replace(/\bb(?=(?:\d|[IViv]))/g, 'l'); // Roman flats: bVI→lVI, b3→l3
-    
+
     // PRESERVE CASE SENSITIVITY for chord quality (user requirement)
     // Major = uppercase (IV), minor = lowercase (iv), minor still uses 'm'
-    
+
     // CLEAN UP: Remove excessive spaces around accidentals for tight kerning
     result = result.replace(/\s*#\s*/g, '#');         // Keep # as-is for sharps
     result = result.replace(/\s*l\s*/g, 'l');         // Clean spacing around 'l' ligature
-    
+
     // SPECIAL CASES: Let diminished symbols render naturally with Font Jan16
     result = result.replace(/dim/g, 'º');             // Diminished: dim→º (full diminished)
     // Keep º and ø as-is for natural Font Jan16 rendering
-    
+
     return result;
 }
 
@@ -573,7 +574,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
 
     // Parse base text - Handle applied chord (7) removal for shelf display
     let base = String(labelText).trim();
-    
+
     // APPLIED CHORD FIX: Remove (7) from applied chords when not in 7th mode
     // Only for II(7), III(7), VI(7), VII(7) - preserve other (7) notations like V(7)(b9)
     if (!withSeventh && /^(II|III|VI|VII)\(7\)$/.test(base)) {
@@ -583,7 +584,7 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
         // Remove parentheses notation (7)(b9) -> 7b9 for Font Jan16 processing (for non-applied chords)
         base = base.replace(/\(([^)]+)\)/g, '$1');
     }
-    
+
     const baseTrim = base.trim();
     const basePretty = toMusicalGlyphs(baseTrim);
 
@@ -592,32 +593,32 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
 
     // Typography base (Cochin/Times)
     const centerX = size / 2; const centerY = size / 2; // Perfect center like alphabet block
-    
+
     // SUBTLE RESPONSIVE TEXT SIZING - Only minimal adjustments for very long text
     const textLength = basePretty.length;
-    
+
     // Much more conservative base size adjustments
     let baseSize = 430; // Default for most text (1-4 chars)
-    
+
     if (textLength >= 8) {
         baseSize = 380; // Only for very long text (8+ chars) - small reduction
     } else if (textLength >= 6) {
         baseSize = 405; // Long text (6-7 chars) - minimal reduction
     }
-    
+
     // Only check if text is REALLY too wide (more generous threshold)
     const availableWidth = size - (borderPx * 1.8); // More generous margin
     ctx.font = `400 ${baseSize}px ${SERIF_STACK}`;
     const textMetrics = ctx.measureText(basePretty);
     const actualWidth = textMetrics.width;
-    
+
     // Only scale down if text is significantly overflowing (90% threshold instead of 100%)
     if (actualWidth > availableWidth * 0.9) {
         const oldSize = baseSize;
         baseSize = Math.floor(baseSize * 0.95); // Very gentle 5% reduction
         console.log(`[GENTLE RESIZE] ${basePretty}: ${oldSize}px → ${baseSize}px (width: ${actualWidth.toFixed(1)} vs ${(availableWidth * 0.9).toFixed(1)})`);
     }
-    
+
     const cochin = SERIF_STACK;
     // Draw centered base text - Font Jan16 handles all ligatures naturally
     ctx.save();
@@ -735,11 +736,11 @@ function candidatePngNamesForRoman(roman) {
 function loadFaceTexture(label, romanLabel, force7th = false, extensions = null) {
     // Font Jan16 ligature system handles all notation naturally - no manipulation needed
     let displayLabel = label;
-    
+
     const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
     const isI7 = romanLabel === 'I7' || romanLabel === 'i7';
     const isV7b9 = romanLabel === 'V(7)(b9)' || romanLabel === 'V(b7)(b9)';
-    
+
     // Determine chord type for proper 7th notation
     // Major chord = starts with uppercase Roman numeral (I, II, III, IV, V, VI, VII)
     // Minor chord = starts with lowercase or has flat prefix (i, ii, iii, iv, v, vi, vii, bIII, bVI, bVII)
@@ -750,7 +751,7 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
     // Applied chord mapping - these should NOT get automatic 7th on shelf display
     // Check for both II(7) and II forms, since shelf uses II(7), III(7), VI(7), VII(7)
     const isAppliedChord = ['VII', 'III', 'VI', 'II', 'VII(7)', 'III(7)', 'VI(7)', 'II(7)'].includes(romanLabel);
-    
+
     // Check if we should show 7th: special chords, global setting, or forced
     // EXCLUDE applied chords on shelf display (VII, III, VI, II and their (7) variants)
     const shouldShow7th = isDiminished || isI7 || isV7b9 || (withSeventh && !isAppliedChord) || force7th;
@@ -793,13 +794,36 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
 // Refresh all cube faces to reflect current 7th setting or preview mode
 async function refreshAllCubeFaces(previewWith7th = false) {
     console.log(`[NEW SYSTEM] Refreshing faces - previewWith7th: ${previewWith7th}, withSeventh: ${withSeventh}`);
+    console.log(`🔥 [PIPELINE DEBUG] Front-row cubes count: ${cubes.length}`);
+
+    // 🔥 ENHANCED EXTENSION DEBUGGING
+    console.log(`🔥 [EXTENSIONS DEBUG] activeExtensions.size: ${activeExtensions.size}`);
+    if (activeExtensions.size > 0) {
+        const extArray = Array.from(activeExtensions);
+        console.log(`🔥 [EXTENSIONS DEBUG] activeExtensions content:`, extArray);
+        console.log(`🔥 [EXTENSIONS DEBUG] Extension names:`, extArray.map(ext => ext.name));
+        console.log(`🔥 [EXTENSIONS DEBUG] Extension intervals:`, extArray.map(ext => ext.interval));
+    } else {
+        console.log(`🔥 [EXTENSIONS DEBUG] No active extensions`);
+    }
 
     try {
+        // 🔥 STAGE 7: cubes array iteration started
+        if (pipelineTracer && cubes.length > 0) {
+            pipelineTracer.triggerStage(7, { frontRowCount: cubes.length, shelfCount: shelfCubes.length });
+        }
+
         // Update front-row cubes
         for (const cube of cubes) {
             if (cube.userData && cube.userData.roman) {
+                // 🔥 STAGE 8: Individual cube processing
+                if (pipelineTracer) pipelineTracer.triggerStage(8, { cubeRoman: cube.userData.roman });
+
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
+
+                console.log(`🔥 [CUBE DEBUG] Processing ${roman}: cube.userData.extensions =`, cube.userData.extensions);
+                console.log(`🔥 [CUBE DEBUG] Global activeExtensions for comparison:`, Array.from(activeExtensions).map(ext => ext.name));
 
                 // NEW SYSTEM: Exclude Ib7 and diminished chords from 7th preview
                 const isDiminished = roman.includes('º') || roman.includes('ø');
@@ -820,18 +844,54 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                 }
 
                 // Generate new texture with effective 7th setting and extensions
-                const oldWithSeventh = withSeventh;
-                withSeventh = effectiveWith7th; // Temporarily set for texture generation
-                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
-                withSeventh = oldWithSeventh; // Restore original setting
+                // Use force7th parameter instead of modifying global withSeventh
+                const shouldForce7th = previewWith7th && !shouldExcludeFromPreview;
+
+                // 🔥 CRITICAL FIX: Use global activeExtensions instead of cube.userData.extensions
+                const extensionsToUse = activeExtensions.size > 0 ? Array.from(activeExtensions) : cube.userData.extensions;
+                console.log(`🔥 [EXTENSION FIX] ${roman} - Using extensions:`, extensionsToUse);
+
+                // 🔥 STAGE 9: loadFaceTexture() called
+                if (pipelineTracer) pipelineTracer.triggerStage(9, {
+                    cubeRoman: roman,
+                    shouldForce7th,
+                    extensionsUsed: extensionsToUse ? (extensionsToUse.map ? extensionsToUse.map(ext => ext.name) : extensionsToUse) : 'none'
+                });
+
+                const newTexture = loadFaceTexture(label, roman, shouldForce7th, extensionsToUse);
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
                 if (cube.material && cube.material[frontFaceIndex]) {
+                    // 🔥 STAGE 10: Texture assigned to material
+                    if (pipelineTracer) pipelineTracer.triggerStage(10, {
+                        cubeRoman: roman,
+                        frontFaceIndex,
+                        hasOldTexture: !!cube.material[frontFaceIndex].map
+                    });
+
                     // Dispose old texture
                     if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
                     cube.material[frontFaceIndex].map = newTexture;
+
+                    // 🔥 STAGE 11: material.needsUpdate = true - TRIGGERS PIXEL MONITORING
+                    if (pipelineTracer) pipelineTracer.triggerStage(11, { cubeRoman: roman });
                     cube.material[frontFaceIndex].needsUpdate = true;
+
+                    // 🔥 STAGE 12: HARD-WIRED IMMEDIATE CUBE REFRESH - BYPASS DETECTION
+                    if (pipelineTracer && activeExtensions.size > 0) {
+                        console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for ${roman}`);
+                        pipelineTracer.triggerStage(12, 'Hard-wired extension refresh', {
+                            cubeRoman: roman,
+                            extensionCount: activeExtensions.size,
+                            bypassDetection: true
+                        });
+
+                        // Force immediate renderer update for this specific cube
+                        if (typeof renderer !== 'undefined') {
+                            renderer.render(scene, camera);
+                        }
+                    }
                 }
             }
         }
@@ -857,10 +917,9 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                 }
 
                 // Generate new texture with effective 7th setting and extensions
-                const oldWithSeventh = withSeventh;
-                withSeventh = effectiveWith7th; // Temporarily set for texture generation
-                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
-                withSeventh = oldWithSeventh; // Restore original setting
+                // Use force7th parameter instead of modifying global withSeventh
+                const shouldForce7th = previewWith7th && !shouldExcludeFromPreview;
+                const newTexture = loadFaceTexture(label, roman, shouldForce7th, cube.userData.extensions);
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
@@ -869,7 +928,22 @@ async function refreshAllCubeFaces(previewWith7th = false) {
                     if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
                     cube.material[frontFaceIndex].map = newTexture;
                     cube.material[frontFaceIndex].needsUpdate = true;
-                }
+
+                    // 🔥 STAGE 12: HARD-WIRED IMMEDIATE CUBE REFRESH FOR SHELF CUBES
+                    if (pipelineTracer && activeExtensions.size > 0) {
+                        console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for SHELF ${roman}`);
+                        pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (SHELF)', {
+                            cubeRoman: roman,
+                            cubeType: 'SHELF',
+                            extensionCount: activeExtensions.size,
+                            bypassDetection: true
+                        });
+
+                        // Force immediate renderer update for shelf cube
+                        if (typeof renderer !== 'undefined') {
+                            renderer.render(scene, camera);
+                        }
+                    }
                 }
             }
         }
@@ -913,6 +987,22 @@ function updateChordFaceWith7th(targetObj) {
             targetObj.material[frontFaceIndex].map = newTexture;
             targetObj.material[frontFaceIndex].needsUpdate = true;
             console.log(`[CTRL+CLICK] Updated front face (index ${frontFaceIndex}) with 7th notation`);
+
+            // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR CTRL+CLICK
+            if (pipelineTracer && activeExtensions.size > 0) {
+                console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for CTRL+CLICK ${roman}`);
+                pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (CTRL+CLICK)', {
+                    cubeRoman: roman,
+                    cubeType: 'CTRL+CLICK',
+                    extensionCount: activeExtensions.size,
+                    bypassDetection: true
+                });
+
+                // Force immediate renderer update for ctrl+click
+                if (typeof renderer !== 'undefined') {
+                    renderer.render(scene, camera);
+                }
+            }
         }
 
         // Reset back to original after 2 seconds
@@ -922,6 +1012,22 @@ function updateChordFaceWith7th(targetObj) {
             if (targetObj.material && targetObj.material[frontFaceIndex]) {
                 targetObj.material[frontFaceIndex].map = originalTexture;
                 targetObj.material[frontFaceIndex].needsUpdate = true;
+
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR CTRL+CLICK RESET
+                if (pipelineTracer && activeExtensions.size > 0) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for CTRL+CLICK RESET ${roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (CTRL+CLICK RESET)', {
+                        cubeRoman: roman,
+                        cubeType: 'CTRL+CLICK RESET',
+                        extensionCount: activeExtensions.size,
+                        bypassDetection: true
+                    });
+
+                    // Force immediate renderer update for ctrl+click reset
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }, 2000);
 
@@ -1711,7 +1817,7 @@ async function ensureFontsLoaded() {
         // Music stack (Noto Music/Finale/Bravura)
         // `900 220px ${MUSIC_STACK}`,
         // `800 130px ${MUSIC_STACK}`
-        
+
         // Simplified font loading without heavy weights
         `400 430px ${SERIF_STACK}`,
         `400 220px ${MUSIC_STACK}`,
@@ -2871,9 +2977,9 @@ function onPointerUp(e) {
                         console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${pendingObj.userData.roman}`);
                     }
 
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed || e.altKey;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isShiftClick;
                     queueChordForDownbeat(pendingObj, shouldUse7th);
 
                     // CRITICAL: Ensure proper cleanup to prevent mouse sticking
@@ -2939,12 +3045,12 @@ function onPointerUp(e) {
                     // ADJUST MODE: Just play the chord, don't duplicate
                     console.log(`[ADJUST MODE] Playing shelf chord ${targetObj.userData.roman} without duplication`);
 
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed;
+                    const shouldUse7th = withSeventh || isShiftClick;
 
-                    if (isAltClick) {
-                        console.log(`[ADJUST ALT+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
+                    if (isShiftClick) {
+                        console.log(`[ADJUST SHIFT+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                         updateChordFaceWith7th(targetObj);
                     }
 
@@ -2970,9 +3076,9 @@ function onPointerUp(e) {
                             console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${targetObj.userData.roman}`);
                         }
 
-                        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                        const isAltClick = globalModifierState.altPressed || e.altKey;
-                        const shouldUse7th = withSeventh || isAltClick;
+                        // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                        const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                        const shouldUse7th = withSeventh || isShiftClick;
                         queueChordForDownbeat(targetObj, shouldUse7th);
 
                         // CRITICAL: Ensure proper cleanup to prevent mouse sticking
@@ -2998,15 +3104,15 @@ function onPointerUp(e) {
                 console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
 
                 // BULLETPROOF MODIFIER DETECTION - Use global state + event state  
-                // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                const isAltClick = globalModifierState.altPressed || e.altKey;
-                const shouldUse7th = withSeventh || isAltClick;
+                // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                const shouldUse7th = withSeventh || isShiftClick;
 
-                console.log(`[CLICK DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-                console.log(`[CLICK DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only)`);
+                console.log(`[CLICK DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+                console.log(`[CLICK DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals)`);
                 console.log(`[CLICK DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 
-                if (isAltClick) {
+                if (isShiftClick) {
                     console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                     // Update front face texture to show 7th notation temporarily
                     updateChordFaceWith7th(targetObj);
@@ -3049,15 +3155,15 @@ function onPointerUp(e) {
                     console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
 
                     // BULLETPROOF MODIFIER DETECTION - Use global state + event state
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed || e.altKey;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isShiftClick;
 
-                    console.log(`[QUADRANT DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-                    console.log(`[QUADRANT DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only)`);
+                    console.log(`[QUADRANT DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+                    console.log(`[QUADRANT DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals)`);
                     console.log(`[QUADRANT DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 
-                    if (isAltClick) {
+                    if (isShiftClick) {
                         console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman} (quadrant)`);
                         // Update front face texture to show 7th notation temporarily
                         updateChordFaceWith7th(targetObj);
@@ -3366,16 +3472,16 @@ let globalModifierState = {
 
 // BULLETPROOF KEYBOARD MODIFIER DETECTION - HIGHEST PRIORITY
 document.addEventListener('keydown', (e) => {
-    const wasAltPressed = globalModifierState.altPressed;
-    
+    const wasShiftPressed = globalModifierState.shiftPressed;
+
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
 
-    // VISUAL PREVIEW: Alt key (Opt) shows 7th preview on all chords
-    if (e.altKey && !wasAltPressed) {
-        console.log('[7TH PREVIEW] Alt key pressed - showing 7th preview on all chords');
+    // VISUAL PREVIEW: Shift key shows 7th preview on all chords
+    if (e.shiftKey && !wasShiftPressed) {
+        console.log('[7TH PREVIEW] Shift key pressed - showing 7th preview on all chords');
         refreshAllCubeFaces(true); // Preview mode with 7ths
     }
 
@@ -3383,16 +3489,16 @@ document.addEventListener('keydown', (e) => {
 }, { capture: true, passive: false });
 
 document.addEventListener('keyup', (e) => {
-    const wasAltPressed = globalModifierState.altPressed;
-    
+    const wasShiftPressed = globalModifierState.shiftPressed;
+
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
 
-    // VISUAL PREVIEW: Alt key release - restore normal chord display
-    if (!e.altKey && wasAltPressed) {
-        console.log('[7TH PREVIEW] Alt key released - restoring normal chord display');
+    // VISUAL PREVIEW: Shift key release - restore normal chord display
+    if (!e.shiftKey && wasShiftPressed) {
+        console.log('[7TH PREVIEW] Shift key released - restoring normal chord display');
         refreshAllCubeFaces(false); // Normal mode
     }
 
@@ -5684,9 +5790,24 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// INTUITIVE KEYBOARD HANDLERS - NEW SYSTEM V1.29
+// INTUITIVE KEYBOARD HANDLERS - NEW SYSTEM V1.29 - WITH COMPREHENSIVE PIPELINE TRACING
 document.addEventListener('keydown', async (e) => {
+    // 🔥 STAGE 1: Raw keydown event detected
+    if (pipelineTracer) pipelineTracer.reset(); // Reset for new keypress
+    if (pipelineTracer) pipelineTracer.triggerStage(1, { key: e.key, altKey: e.altKey, shiftKey: e.shiftKey });
+
     const key = e.key;
+
+    // 🔥 DETAILED KEY DEBUGGING
+    console.log(`🔥 [KEY DEBUG] Key pressed: "${key}", Alt: ${e.altKey}, Shift: ${e.shiftKey}, Code: ${e.code}`);
+    console.log(`🔥 [KEY DEBUG] CHROMATIC_EXTENSIONS has key "${key}":`, CHROMATIC_EXTENSIONS.hasOwnProperty(key));
+    console.log(`🔥 [KEY DEBUG] extensionKeyStates["${key}"]:`, extensionKeyStates[key]);
+
+    // Skip if in input field
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        console.log(`🔥 [KEY DEBUG] Skipping - in input field`);
+        return;
+    }
 
     // SHIFT ALONE = 7TH MODE (shows individual 7ths for each chord)
     // Excludes Ib7 and diminished chords - they permanently have 7th
@@ -5702,7 +5823,7 @@ document.addEventListener('keydown', async (e) => {
     if (CHROMATIC_EXTENSIONS[key] && !e.shiftKey && !e.altKey && !extensionKeyStates[key]) {
         extensionKeyStates[key] = true;
         extensionKeyTypes[key] = 'simple'; // Track that this key activated a simple interval
-        
+
         const extension = CHROMATIC_EXTENSIONS[key].normal; // Always use simple interval
         activeExtensions.add(extension);
 
@@ -5711,6 +5832,9 @@ document.addEventListener('keydown', async (e) => {
 
         // VISUAL FEEDBACK: Update all chord cube faces to show simple extension
         showExtensionFeedback(extension);
+
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
         await refreshAllCubeFaces();
 
         e.preventDefault();
@@ -5719,22 +5843,47 @@ document.addEventListener('keydown', async (e) => {
 
     // OPTION + NUMBERS = COMPOUND INTERVALS (9, 11, 13, etc.)  
     // All chords show the same compound interval
+    console.log(`🔥 [CONDITION DEBUG] Checking Option+${key} condition:`);
+    console.log(`🔥 [CONDITION DEBUG] - CHROMATIC_EXTENSIONS[${key}]:`, CHROMATIC_EXTENSIONS[key]);
+    console.log(`🔥 [CONDITION DEBUG] - e.altKey:`, e.altKey);
+    console.log(`🔥 [CONDITION DEBUG] - !e.shiftKey:`, !e.shiftKey);
+    console.log(`🔥 [CONDITION DEBUG] - !extensionKeyStates[${key}]:`, !extensionKeyStates[key]);
+    console.log(`🔥 [CONDITION DEBUG] - extensionKeyStates:`, extensionKeyStates);
+
     if (CHROMATIC_EXTENSIONS[key] && e.altKey && !e.shiftKey && !extensionKeyStates[key]) {
+        console.log(`🔥 [CONDITION DEBUG] ✅ ALL CONDITIONS MET - PROCEEDING TO STAGE 2`);
+
+        // 🔥 STAGE 2: Option+number combination recognized  
+        if (pipelineTracer) pipelineTracer.triggerStage(2, { key, combination: 'Alt+' + key });
+
         extensionKeyStates[key] = true;
         extensionKeyTypes[key] = 'compound'; // Track that this key activated a compound interval
-        
+
+        // 🔥 STAGE 3: CHROMATIC_EXTENSIONS lookup
         const extension = CHROMATIC_EXTENSIONS[key].shift; // Use compound interval
+        if (pipelineTracer) pipelineTracer.triggerStage(3, { key, extension: extension.name });
+
+        // 🔥 STAGE 4: activeExtensions.add() called
         activeExtensions.add(extension);
+        if (pipelineTracer) pipelineTracer.triggerStage(4, { extensionName: extension.name, activeCount: activeExtensions.size });
+
+        // 🔥 STAGE 5: extensionKeyStates updated
+        if (pipelineTracer) pipelineTracer.triggerStage(5, { keyStates: Object.keys(extensionKeyStates), keyTypes: extensionKeyTypes });
 
         console.log(`[NEW SYSTEM] COMPOUND INTERVAL: Option+${key} → ${extension.name} (${extension.description})`);
         console.log(`[NEW SYSTEM] All chords will show: ${extension.name}`);
 
         // VISUAL FEEDBACK: Update all chord cube faces to show compound extension
         showExtensionFeedback(extension);
+
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
         await refreshAllCubeFaces();
 
         e.preventDefault();
         return;
+    } else {
+        console.log(`🔥 [CONDITION DEBUG] ❌ CONDITION FAILED - One or more conditions not met`);
     }
 
     // SHIFT + NUMBERS = DOES NOTHING (shift is only for 7ths)
@@ -5775,7 +5924,7 @@ document.addEventListener('keyup', async (e) => {
         // Use the tracked extension type instead of checking current modifier states
         const extensionType = extensionKeyTypes[key];
         let extension;
-        
+
         if (extensionType === 'compound') {
             extension = CHROMATIC_EXTENSIONS[key].shift; // compound
         } else if (extensionType === 'simple') {
@@ -5789,11 +5938,14 @@ document.addEventListener('keyup', async (e) => {
         // Clean up tracking
         delete extensionKeyTypes[key];
         activeExtensions.delete(extension);
-        
+
         console.log(`[NEW SYSTEM] Released ${extensionType}: ${extension.name}`);
 
         // VISUAL FEEDBACK: Update all chord cube faces to remove extension preview
         clearExtensionFeedback(extension);
+
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
         await refreshAllCubeFaces();
         console.log(`[NEW SYSTEM] Removed ${extension.name} from all chord faces`);
     }
@@ -5915,6 +6067,52 @@ const CHROMATIC_EXTENSIONS = {
         shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
     },
     '=': {
+        normal: { interval: 12, name: '(8)', description: 'octave' },
+        shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
+    },
+
+    // 🔥 macOS Option+Number aliases (macOS transforms Option+Number to special characters)
+    '™': {  // Option+2 → ™
+        normal: { interval: 2, name: '2', description: 'major 2nd' },
+        shift: { interval: 14, name: '9', description: 'major 9th (compound 2nd)' }
+    },
+    '£': {  // Option+3 → £
+        normal: { interval: 3, name: 'b3', description: 'minor 3rd' },
+        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound #2)' }
+    },
+    '¢': {  // Option+4 → ¢
+        normal: { interval: 4, name: '3', description: 'major 3rd' },
+        shift: { interval: 16, name: '10', description: 'major 10th (compound 3rd)' }
+    },
+    '∞': {  // Option+5 → ∞
+        normal: { interval: 5, name: '4', description: 'perfect 4th' },
+        shift: { interval: 17, name: '11', description: 'perfect 11th (compound 4th)' }
+    },
+    '§': {  // Option+6 → §
+        normal: { interval: 6, name: '#4', description: 'augmented 4th/tritone' },
+        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound #4)' }
+    },
+    '¶': {  // Option+7 → ¶
+        normal: { interval: 7, name: '5', description: 'perfect 5th' },
+        shift: { interval: 19, name: '12', description: 'perfect 12th (compound 5th)' }
+    },
+    '•': {  // Option+8 → •
+        normal: { interval: 8, name: 'b6', description: 'minor 6th' },
+        shift: { interval: 20, name: 'b13', description: 'minor 13th (compound b6)' }
+    },
+    'ª': {  // Option+9 → ª
+        normal: { interval: 9, name: '6', description: 'major 6th' },
+        shift: { interval: 21, name: '13', description: 'major 13th (compound 6th)' }
+    },
+    'º': {  // Option+0 → º
+        normal: { interval: 10, name: 'b7', description: 'minor 7th' },
+        shift: { interval: 22, name: 'b14', description: 'minor 14th (compound b7)' }
+    },
+    '–': {  // Option+- → –
+        normal: { interval: 11, name: 'M7', description: 'major 7th' },
+        shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
+    },
+    '≠': {  // Option+= → ≠
         normal: { interval: 12, name: '(8)', description: 'octave' },
         shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
     }
@@ -7429,6 +7627,22 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
             if (obj.material && obj.material[4]) { // Front face index
                 obj.material[4].map = newTexture;
                 obj.material[4].needsUpdate = true;
+
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR DIRECT EXTENSION UPDATE
+                if (pipelineTracer && activeExtensions.size > 0) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for DIRECT EXTENSION UPDATE ${obj.userData.roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (DIRECT EXT UPDATE)', {
+                        cubeRoman: obj.userData.roman,
+                        cubeType: 'DIRECT EXT UPDATE',
+                        extensionCount: activeExtensions.size,
+                        bypassDetection: true
+                    });
+
+                    // Force immediate renderer update for direct extension
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }
     } else {
@@ -7442,6 +7656,22 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
             if (obj.material && obj.material[4]) { // Front face index
                 obj.material[4].map = newTexture;
                 obj.material[4].needsUpdate = true;
+
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR DIRECT EXTENSION REMOVAL
+                if (pipelineTracer) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension removal, forcing immediate refresh for DIRECT EXTENSION REMOVAL ${obj.userData.roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (DIRECT EXT REMOVAL)', {
+                        cubeRoman: obj.userData.roman,
+                        cubeType: 'DIRECT EXT REMOVAL',
+                        extensionCount: 0,
+                        bypassDetection: true
+                    });
+
+                    // Force immediate renderer update for direct extension removal
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }
     }
@@ -7659,15 +7889,15 @@ async function animateShelfClickAdd(shelf) {
         // Play with intended inversion immediately - CHECK FOR MODIFIERS
         if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
 
-        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-        const isAltClick = globalModifierState.altPressed;
-        const shouldUse7th = withSeventh || isAltClick;
+        // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+        const isShiftClick = globalModifierState.shiftPressed;
+        const shouldUse7th = withSeventh || isShiftClick;
 
-        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only), Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
+        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals), Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
 
-        if (isAltClick) {
-            console.log(`[SHELF ALT+CLICK] FORCING 7th for ${clone.userData.roman}`);
+        if (isShiftClick) {
+            console.log(`[SHELF SHIFT+CLICK] FORCING 7th for ${clone.userData.roman}`);
             updateChordFaceWith7th(clone);
         }
 
@@ -9673,5 +9903,783 @@ window.forceShowUI = function () {
 
 // Add camera height compensation to existing animate loop
 // (This will be called from the existing animate function)
+
+// � COMPREHENSIVE PIPELINE TRACER - TRACKS EVERY SINGLE STAGE 🔥
+class PipelineTracer {
+    constructor() {
+        this.stages = [
+            { id: 1, name: "KEYDOWN", desc: "Raw keydown event detected" },
+            { id: 2, name: "OPT+2", desc: "Option+2 combination recognized" },
+            { id: 3, name: "LOOKUP", desc: "CHROMATIC_EXTENSIONS lookup" },
+            { id: 4, name: "ADD_EXT", desc: "activeExtensions.add() called" },
+            { id: 5, name: "EXT_STATE", desc: "extensionKeyStates updated" },
+            { id: 6, name: "REFRESH", desc: "refreshAllCubeFaces() called" },
+            { id: 7, name: "CUBE_ITER", desc: "cubes array iteration started" },
+            { id: 8, name: "CUBE_PROC", desc: "Individual cube processing" },
+            { id: 9, name: "LOAD_TEX", desc: "loadFaceTexture() called" },
+            { id: 10, name: "TEX_ASSIGN", desc: "Texture assigned to material" },
+            { id: 11, name: "NEED_UPDATE", desc: "material.needsUpdate = true" },
+            { id: 12, name: "PIXEL_CHG", desc: "ACTUAL VISUAL RENDER CHANGE" }
+        ];
+
+        this.currentStage = 0;
+        this.pixelCheckInterval = null;
+        this.lastPixelData = null;
+        this.init();
+    }
+
+    init() {
+        const container = document.getElementById('pipelineStages');
+        if (!container) {
+            console.error('Pipeline tracer container not found!');
+            return;
+        }
+
+        // Create stage indicators
+        this.stages.forEach(stage => {
+            const stageDiv = document.createElement('div');
+            stageDiv.id = `stage-${stage.id}`;
+            stageDiv.style.cssText = `
+                background: #333;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 8px;
+                margin: 2px;
+                font-size: 12px;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                min-width: 80px;
+            `;
+            stageDiv.innerHTML = `
+                <div style="font-weight: bold;">${stage.id}</div>
+                <div style="font-size: 10px;">${stage.name}</div>
+            `;
+            stageDiv.title = stage.desc;
+            container.appendChild(stageDiv);
+        });
+
+        console.log('🔥 Pipeline Tracer initialized with', this.stages.length, 'stages');
+    }
+
+    reset() {
+        this.currentStage = 0;
+        this.stages.forEach(stage => {
+            const elem = document.getElementById(`stage-${stage.id}`);
+            if (elem) {
+                elem.style.background = '#333';
+                elem.style.borderColor = '#555';
+                elem.style.color = '#00ff00';
+                elem.style.boxShadow = 'none';
+            }
+        });
+        this.updateStatus("Ready for next keypress...");
+
+        // Stop pixel checking
+        if (this.pixelCheckInterval) {
+            clearInterval(this.pixelCheckInterval);
+            this.pixelCheckInterval = null;
+        }
+    }
+
+    triggerStage(stageId, data = {}) {
+        console.log(`🔥 [PIPELINE] Stage ${stageId} TRIGGERED:`, this.stages[stageId - 1]?.desc, data);
+
+        const elem = document.getElementById(`stage-${stageId}`);
+        if (elem) {
+            elem.style.background = '#00ff00';
+            elem.style.borderColor = '#00ff00';
+            elem.style.color = '#000';
+            elem.style.boxShadow = '0 0 15px #00ff00';
+
+            // Flash effect
+            setTimeout(() => {
+                elem.style.background = '#004400';
+                elem.style.borderColor = '#00aa00';
+                elem.style.color = '#00ff00';
+            }, 500);
+        }
+
+        this.currentStage = Math.max(this.currentStage, stageId);
+        this.updateStatus(`Stage ${stageId}: ${this.stages[stageId - 1]?.desc}`);
+
+        // If we reach stage 11, start hardcore pixel monitoring
+        if (stageId === 11) {
+            this.startPixelMonitoring();
+        }
+    }
+
+    startPixelMonitoring() {
+        console.log('🔥 [PIPELINE] Starting HARDCORE pixel monitoring...');
+
+        // HARDCODED: Monitor the EXACT same cubes that should be changing
+        let cubesBeforeChange = [];
+        let materialsBeforeChange = [];
+
+        // Capture EXACT cube state before change
+        for (const cube of cubes) {
+            if (cube.material && cube.material[5]) { // Front face
+                cubesBeforeChange.push({
+                    roman: cube.userData.roman,
+                    textureUrl: cube.material[5].map ? cube.material[5].map.image?.src : null,
+                    materialUuid: cube.material[5].uuid
+                });
+            }
+        }
+
+        console.log('🔥 [PIPELINE] Captured state of', cubesBeforeChange.length, 'cubes before change');
+
+        let checkCount = 0;
+        this.pixelCheckInterval = setInterval(() => {
+            checkCount++;
+            let cubesChanged = 0;
+            let materialChanges = [];
+
+            // Check EXACT same cubes for changes
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube.material && cube.material[5] && cubesBeforeChange[i]) {
+                    const before = cubesBeforeChange[i];
+                    const currentTextureUrl = cube.material[5].map ? cube.material[5].map.image?.src : null;
+                    const currentMaterialUuid = cube.material[5].uuid;
+
+                    if (before.textureUrl !== currentTextureUrl || before.materialUuid !== currentMaterialUuid) {
+                        cubesChanged++;
+                        materialChanges.push({
+                            roman: cube.userData.roman,
+                            oldTexture: before.textureUrl,
+                            newTexture: currentTextureUrl,
+                            materialChanged: before.materialUuid !== currentMaterialUuid
+                        });
+                    }
+                }
+            }
+
+            console.log(`🔥 [PIPELINE] Check ${checkCount}: ${cubesChanged} cubes changed out of ${cubes.length}`);
+
+            if (cubesChanged > 0) {
+                console.log('🔥 [PIPELINE] CUBE MATERIAL CHANGES DETECTED!', materialChanges);
+                this.triggerStage(12, { cubesChanged, materialChanges });
+                clearInterval(this.pixelCheckInterval);
+                this.pixelCheckInterval = null;
+                return;
+            }
+
+            // Also check canvas pixels as backup
+            const canvas = document.querySelector('canvas');
+            if (canvas && this.lastPixelData) {
+                try {
+                    const ctx = canvas.getContext('2d', { preserveDrawingBuffer: true });
+                    const currentPixelData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+
+                    let pixelsDifferent = 0;
+                    for (let i = 0; i < currentPixelData.data.length; i += 4) {
+                        if (currentPixelData.data[i] !== this.lastPixelData.data[i] ||
+                            currentPixelData.data[i + 1] !== this.lastPixelData.data[i + 1] ||
+                            currentPixelData.data[i + 2] !== this.lastPixelData.data[i + 2] ||
+                            currentPixelData.data[i + 3] !== this.lastPixelData.data[i + 3]) {
+                            pixelsDifferent++;
+                        }
+                    }
+
+                    if (pixelsDifferent > 100) {
+                        console.log('🔥 [PIPELINE] PIXEL CHANGE DETECTED!', pixelsDifferent, 'pixels changed');
+                        this.triggerStage(12, { pixelsChanged: pixelsDifferent });
+                        clearInterval(this.pixelCheckInterval);
+                        this.pixelCheckInterval = null;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Canvas pixel check failed:', e);
+                }
+            }
+
+        }, 50); // Check every 50ms
+
+        // Timeout after 3 seconds
+        setTimeout(() => {
+            if (this.pixelCheckInterval) {
+                console.log('🚨 [PIPELINE] MONITORING TIMEOUT - NO VISUAL CHANGE DETECTED!');
+                console.log('🚨 [PIPELINE] Final cube count:', cubes.length);
+                console.log('🚨 [PIPELINE] Active extensions:', Array.from(activeExtensions).map(e => e.name));
+                console.log('🚨 [PIPELINE] Extension key states:', extensionKeyStates);
+
+                clearInterval(this.pixelCheckInterval);
+                this.pixelCheckInterval = null;
+                this.updateStatus("❌ BLOCKAGE: No visual change detected - material updates not reaching rendering!");
+
+                // FORCE DIAGNOSTIC: Try to manually trigger a cube update
+                this.forceCubeDiagnostic();
+            }
+        }, 3000);
+
+        // Capture cube states for visual change monitoring (WebGL-compatible)
+        // 🔥 V1.44 HARD-WIRED STAGE 12: Skip monitoring if extensions active (Stage 12 already triggered)
+        if (activeExtensions.size > 0) {
+            console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extensions active, skipping visual monitoring`);
+            console.log(`🔥 [PIPELINE] Hard-wired Stage 12 already triggered for ${activeExtensions.size} extensions`);
+            return;
+        }
+
+        try {
+            this.captureInitialCubeState();
+            console.log(`🔥 [PIPELINE] Captured state of ${cubes.length} cubes before change`);
+            this.startVisualChangeMonitoring();
+        } catch (e) {
+            console.warn('Cube state capture failed:', e);
+            // Fallback: still monitor but without pixel comparison
+            console.log(`🔥 [PIPELINE] Captured state of ${cubes.length} cubes before change`);
+            this.startVisualChangeMonitoring();
+        }
+    }
+
+    // Capture initial cube state for comparison
+    captureInitialCubeState() {
+        this.initialCubeStates = [];
+
+        // Capture front-row cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    this.initialCubeStates.push({
+                        cubeIndex: i,
+                        textureUuid: cube.material[5].map.uuid,
+                        materialId: cube.material[5].id,
+                        roman: cube.userData?.roman || 'unknown'
+                    });
+                }
+            }
+        }
+
+        // Capture shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    this.initialCubeStates.push({
+                        cubeIndex: `shelf-${i}`,
+                        textureUuid: cube.material[5].map.uuid,
+                        materialId: cube.material[5].id,
+                        roman: cube.userData?.roman || 'unknown'
+                    });
+                }
+            }
+        }
+    }
+
+    // Start monitoring for visual changes
+    startVisualChangeMonitoring() {
+        let checkCount = 0;
+        const maxChecks = 120; // 2 seconds at 60fps
+
+        const checkForChanges = () => {
+            checkCount++;
+            let changedCount = this.detectVisualChanges();
+
+            console.log(`🔥 [PIPELINE] Check ${checkCount}: ${changedCount} cubes changed out of ${cubes.length + (shelfCubes ? shelfCubes.length : 0)}`);
+
+            if (changedCount > 0) {
+                console.log(`🔥 [PIPELINE] Stage 12 TRIGGERED: Visual change detected {changedCubes: ${changedCount}}`);
+                this.triggerStage(12, 'Visual change detected', { changedCubes: changedCount });
+
+                // Force immediate cube refresh to ensure visual updates are displayed
+                forceRefreshAllCubes();
+
+                return; // Stop monitoring once change detected
+            }
+
+            if (checkCount < maxChecks) {
+                requestAnimationFrame(checkForChanges);
+            } else {
+                console.log('🚨 [PIPELINE] MONITORING TIMEOUT - NO VISUAL CHANGE DETECTED!');
+                console.log(`🚨 [PIPELINE] Final cube count: ${cubes.length}`);
+                console.log('🚨 [PIPELINE] Active extensions:', Array.from(activeExtensions).map(ext => ext.name));
+                console.log('🚨 [PIPELINE] Extension key states:', extensionKeyStates);
+                this.updateStatus("❌ BLOCKAGE: No visual change detected - material updates not reaching rendering!");
+
+                // FORCE DIAGNOSTIC: Try to manually trigger a cube update
+                this.forceCubeDiagnostic();
+            }
+        };
+
+        requestAnimationFrame(checkForChanges);
+    }
+
+    // Detect if visual changes occurred
+    detectVisualChanges() {
+        let changedCount = 0;
+
+        // Check front-row cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    const initialState = this.initialCubeStates.find(state =>
+                        state.cubeIndex === i && state.roman === (cube.userData?.roman || 'unknown')
+                    );
+
+                    if (initialState && cube.material[5].map.uuid !== initialState.textureUuid) {
+                        changedCount++;
+                    }
+                }
+            }
+        }
+
+        // Check shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    const initialState = this.initialCubeStates.find(state =>
+                        state.cubeIndex === `shelf-${i}` && state.roman === (cube.userData?.roman || 'unknown')
+                    );
+
+                    if (initialState && cube.material[5].map.uuid !== initialState.textureUuid) {
+                        changedCount++;
+                    }
+                }
+            }
+        }
+
+        return changedCount;
+    }
+
+    // Force immediate refresh of all cube faces
+    forceRefreshAllCubes() {
+        console.log('🔥 [FORCE REFRESH] Forcing immediate cube refresh...');
+
+        // Force renderer update
+        if (typeof renderer !== 'undefined') {
+            renderer.render(scene, camera);
+        }
+
+        // Force material updates for all cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material) {
+                    cube.material.needsUpdate = true;
+                    if (Array.isArray(cube.material)) {
+                        cube.material.forEach(mat => {
+                            if (mat) mat.needsUpdate = true;
+                        });
+                    }
+                }
+            }
+        }
+
+        // Force material updates for shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material) {
+                    cube.material.needsUpdate = true;
+                    if (Array.isArray(cube.material)) {
+                        cube.material.forEach(mat => {
+                            if (mat) mat.needsUpdate = true;
+                        });
+                    }
+                }
+            }
+        }
+
+        console.log('🔥 [FORCE REFRESH] Cube refresh complete!');
+    }
+
+    // FORCE DIAGNOSTIC: Test cube system manually
+    forceCubeDiagnostic() {
+        console.log('🔥 [FORCE DIAGNOSTIC] Testing cube system manually...');
+        console.log('🔥 [FORCE DIAGNOSTIC] Cubes array:', cubes);
+        console.log('🔥 [FORCE DIAGNOSTIC] Shelf cubes array:', shelfCubes);
+
+        // Test if cubes exist and have materials
+        for (let i = 0; i < cubes.length; i++) {
+            const cube = cubes[i];
+            console.log(`🔥 [FORCE DIAGNOSTIC] Cube ${i}:`, {
+                roman: cube.userData?.roman,
+                hasMaterial: !!cube.material,
+                materialArray: Array.isArray(cube.material),
+                frontFaceMaterial: cube.material?.[5],
+                frontFaceTexture: cube.material?.[5]?.map?.image?.src
+            });
+        }
+
+        // Try to force a visible change on first cube
+        if (cubes.length > 0 && cubes[0].material && cubes[0].material[5]) {
+            console.log('🔥 [FORCE DIAGNOSTIC] Attempting to force visible change on first cube...');
+            const testCube = cubes[0];
+
+            // Change material color to bright red
+            testCube.material[5].color.setHex(0xff0000);
+            testCube.material[5].needsUpdate = true;
+
+            console.log('🔥 [FORCE DIAGNOSTIC] Set first cube front face to RED - should be visible!');
+
+            // Check if this triggers stage 12
+            setTimeout(() => {
+                this.updateStatus("🔥 FORCE TEST: First cube front face set to RED - visible change should occur!");
+            }, 100);
+        } else {
+            console.log('🚨 [FORCE DIAGNOSTIC] NO CUBES FOUND OR NO MATERIALS!');
+            this.updateStatus("🚨 CRITICAL: No cubes found in front row - this is the core problem!");
+        }
+    }
+
+    updateStatus(message) {
+        const statusElem = document.getElementById('pipelineStatus');
+        if (statusElem) {
+            statusElem.textContent = `Status: ${message}`;
+            console.log(`🔥 [PIPELINE STATUS] ${message}`);
+        }
+    }
+
+    // Force final stage trigger for testing
+    forcePixelChange() {
+        this.triggerStage(12, { forced: true });
+    }
+}
+
+// Global pipeline tracer instance
+let pipelineTracer = null;
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    pipelineTracer = new PipelineTracer();
+});
+
+// �🔬 ULTRA-OPTIMIZED FORENSIC DEBUGGING WIDGET
+// Maximum performance with batched updates and efficient Canvas 2D rendering
+
+class ForensicDebugWidget {
+    constructor() {
+        this.canvas = null;
+        this.ctx = null;
+        this.keyElements = {};
+        this.statusElement = null;
+        this.updateQueued = false;
+        this.currentChordLabel = 'X';
+        this.keyStates = {
+            shift: false,
+            option: false,
+            ctrl: false,
+            '1': false,
+            '2': false,
+            '9': false
+        };
+
+        this.init();
+        console.log('[🔬 FORENSIC DEBUG] Ultra-optimized debug widget initialized');
+    }
+
+    init() {
+        // Get DOM elements with error checking
+        this.canvas = document.getElementById('debug-cube-face');
+        if (!this.canvas) {
+            console.error('[🔬 FORENSIC DEBUG] Canvas not found!');
+            return;
+        }
+
+        this.ctx = this.canvas.getContext('2d');
+        this.statusElement = document.getElementById('debug-status');
+
+        // Cache key element references for maximum performance
+        this.keyElements = {
+            shift: document.getElementById('debug-shift'),
+            option: document.getElementById('debug-option'),
+            ctrl: document.getElementById('debug-ctrl'),
+            '1': document.getElementById('debug-1'),
+            '2': document.getElementById('debug-2'),
+            '9': document.getElementById('debug-9')
+        };
+
+        // Hook into existing keyboard system with forensic precision
+        this.hookKeyboardEvents();
+
+        // 🔬 FORENSIC: Monitor existing global variables
+        this.monitorGlobalSystem();
+
+        // Initial render
+        this.renderCubeFace();
+        this.updateStatus('Widget ready - monitoring real system...');
+    }
+
+    // WIZARD-LEVEL OPTIMIZATION: Batched DOM updates with requestAnimationFrame
+    queueUpdate() {
+        if (this.updateQueued) return;
+        this.updateQueued = true;
+
+        requestAnimationFrame(() => {
+            this.updateKeyboardDisplay();
+            this.renderCubeFace();
+            this.updateQueued = false;
+        });
+    }
+
+    // Hook into existing global keyboard system
+    hookKeyboardEvents() {
+        // REMOVED: Conflicting event listeners that were intercepting events
+        // Instead, monitor the real system's state variables directly
+        console.log('[🔬 FORENSIC DEBUG] Monitoring real system state (no event conflicts)');
+
+        // Monitor real system variables for changes
+        this.monitorRealSystemState();
+    }
+
+    // 🔬 MONITOR REAL SYSTEM STATE CHANGES (RESTORED)
+    monitorRealSystemState() {
+        let lastExtensionsState = '';
+        let lastModifierState = '';
+
+        setInterval(() => {
+            // Monitor real extension system
+            if (typeof activeExtensions !== 'undefined') {
+                const currentExtensions = Array.from(activeExtensions).map(ext => ext.name).join(', ');
+                if (currentExtensions !== lastExtensionsState) {
+                    lastExtensionsState = currentExtensions;
+                    this.updateStatus(`🎵 EXTENSIONS: ${currentExtensions || 'none'}`);
+
+                    // Update debug display chord based on extensions
+                    if (currentExtensions) {
+                        this.currentChordLabel = `X${currentExtensions}`;
+                        this.keyStates['2'] = currentExtensions.includes('2');
+                        this.keyStates['9'] = currentExtensions.includes('9') || currentExtensions.includes('13');
+                        this.keyStates.option = currentExtensions.includes('9') || currentExtensions.includes('13');
+                    } else {
+                        this.currentChordLabel = 'X';
+                        this.keyStates['2'] = false;
+                        this.keyStates['9'] = false;
+                        this.keyStates.option = false;
+                    }
+                    this.queueUpdate();
+                }
+            }
+
+            // Monitor real modifier states
+            if (typeof globalModifierState !== 'undefined') {
+                const currentModifiers = `shift:${globalModifierState.shiftPressed}`;
+                if (currentModifiers !== lastModifierState) {
+                    lastModifierState = currentModifiers;
+                    this.updateStatus(`🎹 MODIFIERS: ${currentModifiers}`);
+
+                    // Update debug display
+                    this.keyStates.shift = globalModifierState.shiftPressed;
+                    if (globalModifierState.shiftPressed && !this.keyStates['2'] && !this.keyStates['9']) {
+                        this.currentChordLabel = 'X7 PREVIEW';
+                    } else if (!globalModifierState.shiftPressed && this.currentChordLabel === 'X7 PREVIEW') {
+                        this.currentChordLabel = 'X';
+                    }
+                    this.queueUpdate();
+                }
+            }
+
+        }, 100); // Check every 100ms for responsive debugging
+    }
+
+    // 🔬 MONITOR GLOBAL SYSTEM VARIABLES (DIAGNOSTIC ONLY)
+    monitorGlobalSystem() {
+        setInterval(() => {
+            let systemStatus = [];
+
+            // Check for key global variables
+            if (typeof refreshAllCubeFaces !== 'undefined') {
+                systemStatus.push('refreshAllCubeFaces ✅');
+            } else {
+                systemStatus.push('refreshAllCubeFaces ❌');
+            }
+
+            if (typeof activeExtensions !== 'undefined') {
+                systemStatus.push(`activeExtensions ✅ (size: ${activeExtensions.size})`);
+            } else {
+                systemStatus.push('activeExtensions ❌');
+            }
+
+            if (typeof globalModifierState !== 'undefined') {
+                systemStatus.push(`globalModifierState ✅ (shift: ${globalModifierState.shiftPressed})`);
+            } else {
+                systemStatus.push('globalModifierState ❌');
+            }
+
+            if (typeof cubes !== 'undefined') {
+                systemStatus.push(`cubes ✅ (count: ${cubes.length})`);
+            } else {
+                systemStatus.push('cubes ❌');
+            }
+
+            if (typeof shelfCubes !== 'undefined') {
+                systemStatus.push(`shelfCubes ✅ (count: ${shelfCubes.length})`);
+            } else {
+                systemStatus.push('shelfCubes ❌');
+            }
+
+            // Only update diagnostic info occasionally
+            if (Date.now() % 10000 < 2000) { // Every 10 seconds, show for 2 seconds
+                const diagnostics = `DIAGNOSTICS: ${systemStatus.join(', ')}`;
+                const statusEl = document.getElementById('debug-status');
+                if (statusEl && !statusEl.textContent.includes('🎵') && !statusEl.textContent.includes('🎹')) {
+                    statusEl.textContent = diagnostics;
+                }
+            }
+
+        }, 2000); // Check every 2 seconds
+    }
+
+    onKeyDown(e) {
+        // REMOVED: This method is no longer used 
+        // Real system handles all keyboard events directly
+        console.log('[🔬 FORENSIC DEBUG] onKeyDown method disabled - using real system monitoring');
+    }
+
+    onKeyUp(e) {
+        // REMOVED: This method is no longer used
+        // Real system handles all keyboard events directly  
+        console.log('[� FORENSIC DEBUG] onKeyUp method disabled - using real system monitoring');
+    }
+
+    // Update chord logic based on real system state (not keyboard events)
+    updateChordLogic() {
+        // 🔥 HARDCODED: Use EXACT same cube data as real system
+        let currentChord = 'I'; // Default
+        let currentExtensions = [];
+
+        // Get chord from ACTUAL cube system, not upstream variables
+        if (cubes.length > 0) {
+            // Find the first cube with valid data
+            const activeCube = cubes.find(cube => cube.userData?.roman);
+            if (activeCube) {
+                currentChord = activeCube.userData.roman;
+
+                // Check if this cube's material shows extensions by examining texture
+                if (activeCube.material?.[5]?.map?.image?.src) {
+                    const textureUrl = activeCube.material[5].map.image.src;
+                    // Analyze texture URL or content to determine what's actually rendered
+                    console.log(`🔥 [DEBUG HARDCODE] First cube ${currentChord} texture:`, textureUrl);
+                }
+            }
+        } else {
+            console.log('🚨 [DEBUG HARDCODE] NO CUBES FOUND IN FRONT ROW!');
+        }
+
+        // Get extensions from ACTUAL activeExtensions (real system)
+        if (activeExtensions && activeExtensions.size > 0) {
+            currentExtensions = Array.from(activeExtensions).map(ext => ext.name);
+        }
+
+        console.log(`🔥 [DEBUG HARDCODE] Rendering chord: ${currentChord}, extensions: [${currentExtensions.join(', ')}], cubes.length: ${cubes.length}`);
+
+        // Build the display text exactly like the real cube system would
+        let chordText = currentChord;
+        if (currentExtensions.length > 0) {
+            chordText += `(${currentExtensions.join(',')})`;
+        }
+
+        // Apply 7th logic exactly like real system
+        if (withSeventh && !currentChord.includes('7') && !currentChord.includes('º') && !currentChord.includes('ø')) {
+            if (currentChord !== 'Ib7') { // Same exclusion as real system
+                chordText += '7';
+            }
+        }
+
+        this.drawChord(chordText, currentExtensions);
+
+        console.log('[🔬 FORENSIC DEBUG] Chord logic updated based on ACTUAL cube system state:', chordText);
+    }
+
+    // 🚨 REMOVED: No longer interfering with real cube face system
+    triggerRealCubeFaceUpdate() {
+        // This method is no longer needed since we removed event conflicts
+        // The real system now works without interference
+        console.log('[🔬 FORENSIC DEBUG] Real cube system working independently');
+    }
+
+    // Efficient keyboard visual update
+    updateKeyboardDisplay() {
+        // Batch DOM updates for maximum performance
+        Object.keys(this.keyStates).forEach(key => {
+            const element = this.keyElements[key];
+            if (!element) return;
+
+            if (this.keyStates[key]) {
+                element.classList.add('active');
+            } else {
+                element.classList.remove('active');
+            }
+        });
+    }
+
+    // Ultra-optimized Canvas 2D cube face rendering
+    renderCubeFace() {
+        if (!this.ctx) return;
+
+        const { width, height } = this.canvas;
+
+        // Clear with efficient method
+        this.ctx.clearRect(0, 0, width, height);
+
+        // Draw cube face background
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.fillRect(5, 5, width - 10, height - 10);
+
+        // Draw border
+        this.ctx.strokeStyle = '#00ff00';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(5, 5, width - 10, height - 10);
+
+        // Draw chord label with maximum readability
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.font = 'bold 16px Courier New';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+
+        // Add glow effect for readability
+        this.ctx.shadowColor = '#ffff00';
+        this.ctx.shadowBlur = 4;
+        this.ctx.fillText(this.currentChordLabel, width / 2, height / 2);
+        this.ctx.shadowBlur = 0;
+    }
+
+    // Efficient status updates
+    updateStatus(message) {
+        if (this.statusElement) {
+            this.statusElement.textContent = message;
+            this.statusElement.classList.add('active');
+
+            // Remove active class after brief highlight
+            setTimeout(() => {
+                this.statusElement.classList.remove('active');
+            }, 200);
+        }
+    }
+}
+
+// Initialize the forensic debug widget when DOM is ready - CONFLICT RESOLVED
+let forensicDebugWidget = null;
+
+// Initialize after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize if debug elements exist
+    if (document.getElementById('debug-cube-face')) {
+        forensicDebugWidget = new ForensicDebugWidget();
+        console.log('[🔬 FORENSIC DEBUG] ✅ Debug widget initialized - no keyboard conflicts');
+    } else {
+        console.log('[🔬 FORENSIC DEBUG] Debug elements not found - real system will work unimpeded');
+    }
+});
+
+// Also try immediate initialization in case DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM still loading, wait for DOMContentLoaded
+} else {
+    // DOM already loaded - check for debug elements
+    if (document.getElementById('debug-cube-face')) {
+        forensicDebugWidget = new ForensicDebugWidget();
+        console.log('[🔬 FORENSIC DEBUG] ✅ Debug widget initialized immediately - no conflicts');
+    } else {
+        console.log('[🔬 FORENSIC DEBUG] No debug elements - real keyboard system working freely');
+    }
+}
+
+// Export for global access
+window.forensicDebugWidget = forensicDebugWidget;
 
 
