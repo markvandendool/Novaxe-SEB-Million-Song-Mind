@@ -1,7 +1,7 @@
 // ============================================
-// 🎼 CHORDCUBES 6.0 V1.48 - DIRECT FACE UPDATE STAGE 12 FIX
+// 🎼 CHORDCUBES 6.0 V1.49 - MAIN MENU STOP BUTTON
 // ============================================
-console.log('🔥🔥🔥 MAIN.JS V1.48 DIRECT FACE UPDATE STAGE 12 FIX 🔥🔥🔥');
+console.log('🔥🔥🔥 MAIN.JS V1.49 MAIN MENU STOP BUTTON 🔥🔥🔥');
 // CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
 // ============================================
 (function () {
