@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Million Song Mind V1.0</title>
+</head>
+<body>
+    <div id="root"></div>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script>
+        const e = React.createElement;
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(e('h1', {style: {color: '#3b82f6', fontSize: '4rem', fontWeight: 900, textAlign: 'center', marginTop: '2rem'}}, 
+            'MILLION SONG MIND ', 
+            e('span', {style: {color: '#2563eb'}}, 'V1.0')
+        ));
+        console.log('React app mounted successfully');
+    </script>
+</body>
+</html>

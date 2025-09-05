@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>OBS Cubes - Interactive Musical Chord Visualization | Million Song Mind</title>
+	<meta name="description"
+		content="Professional 3D chord visualization tool with interactive cubes, real-time audio, and advanced musical analysis. Powered by Three.js and Web Audio API.">
+	<meta name="keywords"
+		content="music theory, chord visualization, three.js, interactive music, web audio, sound visualization">
+
+	<!-- Open Graph / Facebook -->
+	<meta property="og:type" content="website">
+	<meta property="og:url" content="https://millionsonmind.com/cubes/">
+	<meta property="og:title" content="OBS Cubes - Interactive Musical Chord Visualization">
+	<meta property="og:description"
+		content="Professional 3D chord visualization with interactive cubes and real-time audio">
+	<meta property="og:image" content="https://millionsonmind.com/cubes/favicon.ico">
+
+	<!-- Twitter -->
+	<meta property="twitter:card" content="summary_large_image">
+	<meta property="twitter:url" content="https://millionsonmind.com/cubes/">
+	<meta property="twitter:title" content="OBS Cubes - Interactive Musical Chord Visualization">
+	<meta property="twitter:description"
+		content="Professional 3D chord visualization with interactive cubes and real-time audio">
+	<meta property="twitter:image" content="https://millionsonmind.com/cubes/favicon.ico">
+
+	<link rel="canonical" href="https://millionsonmind.com/cubes/">
+	<link rel="icon" href="./favicon.ico" type="image/x-icon">
+	<link rel="stylesheet" href="./styles.css" />
+
+	<!-- Preload critical resources -->
+	<link rel="preload" href="https://unpkg.com/three@0.160.0/build/three.module.js" as="script" crossorigin>
+	<link rel="preload" href="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js" as="script">
+
+	<style>
+		/* Critical CSS for font loading */
+		@font-face {
+			font-family: 'NVXDiamond';
+			src: url('../fonts/NVX Diamond Font.otf') format('opentype'),
+				url('./assets/fonts/NVX-Diamond-Font.otf') format('opentype');
+			font-weight: 400;
+			font-style: normal;
+			font-display: swap;
+		}
+
+		/* Loading spinner for better UX */
+		.loading-overlay {
+			position: fixed;
+			top: 0;
+			left: 0;
+			width: 100%;
+			height: 100%;
+			background: #222222;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			z-index: 10000;
+			font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+			color: #ffffff;
+		}
+
+		.loading-content {
+			text-align: center;
+		}
+
+		.loading-spinner {
+			width: 40px;
+			height: 40px;
+			border: 4px solid #333;
+			border-top: 4px solid #0099ff;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin: 0 auto 20px;
+		}
+
+		@keyframes spin {
+			0% {
+				transform: rotate(0deg);
+			}
+
+			100% {
+				transform: rotate(360deg);
+			}
+		}
+
+		.loading-text {
+			font-size: 18px;
+			margin-bottom: 10px;
+		}
+
+		.loading-subtext {
+			font-size: 14px;
+			opacity: 0.7;
+		}
+	</style>
+
+	<!-- SoundFont Player with fallback -->
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"
+		onerror="console.warn('SoundFont Player failed to load from CDN, using fallback audio')"></script>
+</head>
+
+<body>
+	<!-- Loading overlay -->
+	<div class="loading-overlay" id="loadingOverlay">
+		<div class="loading-content">
+			<div class="loading-spinner"></div>
+			<div class="loading-text">Loading OBS Cubes</div>
+			<div class="loading-subtext">Initializing 3D environment...</div>
+		</div>
+	</div>
+
+	<div id="ui">
+		<div class="row">
+			<label>Key</label>
+			<select id="key-select">
+				<option value="C" selected>C</option>
+				<option value="Db">Db</option>
+				<option value="D">D</option>
+				<option value="Eb">Eb</option>
+				<option value="E">E</option>
+				<option value="F">F</option>
+				<option value="F#">F#</option>
+				<option value="G">G</option>
+				<option value="Ab">Ab</option>
+				<option value="A">A</option>
+				<option value="Bb">Bb</option>
+				<option value="B">B</option>
+			</select>
+			<label>Set</label>
+			<select id="set-select">
+				<option value="all" selected>All</option>
+				<option value="major">Major</option>
+				<option value="applied">Applied</option>
+				<option value="minor">Minor</option>
+			</select>
+			<label>Label</label>
+			<select id="label-mode">
+				<option value="roman" selected>Roman</option>
+				<option value="letter">Letter</option>
+			</select>
+			<button id="arrange-btn">Arrange</button>
+			<button id="reset-btn">Reset</button>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="adjust-toggle" /> Adjust shelf
+			</label>
+			<button id="save-map-btn" title="Download shelf_map.json">Save Map</button>
+			<label class="file-btn">
+				Load Map
+				<input type="file" id="load-map-input" accept="application/json" hidden />
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="with-7th" /> With 7th
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="bass-enabled" checked /> Bass
+			</label>
+			<label style="margin-left:8px;">
+				<input type="checkbox" id="melody-enabled" /> Melody
+			</label>
+			<label style="margin-left:12px;">Chord Inst</label>
+			<select id="chord-inst">
+				<option value="string_ensemble_1" selected>Strings (Ensemble)</option>
+				<option value="acoustic_grand_piano">Piano</option>
+				<option value="choir_aahs">Choir</option>
+				<option value="string_ensemble_2">Strings 2</option>
+			</select>
+			<label style="margin-left:12px;">Bass Inst</label>
+			<select id="bass-inst">
+				<option value="contrabass" selected>Contrabass</option>
+				<option value="acoustic_bass">Acoustic Bass</option>
+				<option value="electric_bass_finger">Electric Bass</option>
+				<option value="cello">Cello</option>
+				<option value="synth_bass_1">Synth Bass</option>
+			</select>
+			<label style="margin-left:12px;">Melody Inst</label>
+			<select id="melody-inst">
+				<option value="violin" selected>Violin</option>
+				<option value="flute">Flute</option>
+				<option value="clarinet">Clarinet</option>
+				<option value="trumpet">Trumpet</option>
+				<option value="cello">Cello</option>
+			</select>
+			<label style="margin-left:12px;">Voice Leading</label>
+			<select id="voice-leading-mode">
+				<option value="vl1" selected>Voice leading 1</option>
+				<option value="vl2">Voice leading 2</option>
+			</select>
+			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
+		</div>
+		<div class="row small">
+			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
+		</div>
+		<div class="row small" id="color-cal">
+			<label style="margin-right:6px;">Colors</label>
+			<label>Tonic <input type="color" id="color-tonic" value="#62d1e6"></label>
+			<label style="margin-left:8px;">Subdom <input type="color" id="color-sub" value="#6b46c1"></label>
+			<label style="margin-left:8px;">Dominant <input type="color" id="color-dom" value="#ff7a45"></label>
+			<label style="margin-left:8px;">Neutral <input type="color" id="color-neu" value="#bfbfbf"></label>
+		</div>
+		<div class="row small" id="giant-toggles">
+			<label>Giant Melody <input type="checkbox" id="show-giant-melody" checked /></label>
+			<label style="margin-left:8px;">Giant Bass <input type="checkbox" id="show-giant-bass" checked /></label>
+			<button id="menu-lock-melody" style="margin-left:12px;">Lock Melody</button>
+			<button id="menu-unlock-melody">Unlock Melody</button>
+			<button id="menu-lock-bass" style="margin-left:12px;">Lock Bass</button>
+			<button id="menu-unlock-bass">Unlock Bass</button>
+		</div>
+	</div>
+	<canvas id="scene"></canvas>
+	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
+
+	<div id="camera-ui">
+		<button id="view-down" title="Melody View">Melody View</button>
+		<button id="view-up" title="Bass View">Bass View</button>
+	</div>
+
+	<!-- Module imports with CDN fallbacks -->
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/",
+			"troika-three-text": "https://unpkg.com/troika-three-text@0.49.0/dist/troika-three-text.esm.js"
+		}
+	}
+	</script>
+
+	<!-- Audio libraries with CDN fallbacks -->
+	<script src="https://unpkg.com/tone@14.8.49/build/Tone.js"
+		onerror="console.warn('Tone.js failed to load from CDN')"></script>
+	<script src="https://cdn.jsdelivr.net/npm/@tonaljs/tonal@4.12.1/build/tonal.min.js"
+		onerror="console.warn('Tonal.js failed to load from CDN')"></script>
+
+	<!-- Core application modules -->
+	<script type="module" src="./chords.js?v=2.0"></script>
+	<script type="module" src="./main.js?v=2.0"></script>
+
+	<!-- Production initialization script -->
+	<script>
+		// Hide loading overlay once everything is loaded
+		window.addEventListener('load', function () {
+			setTimeout(() => {
+				const overlay = document.getElementById('loadingOverlay');
+				if (overlay) {
+					overlay.style.transition = 'opacity 0.5s ease';
+					overlay.style.opacity = '0';
+					setTimeout(() => overlay.remove(), 500);
+				}
+			}, 1000); // Give modules time to initialize
+		});
+
+		// Error handling for production
+		window.addEventListener('error', function (e) {
+			console.error('OBS Cubes Error:', e.error);
+			// Could add user-friendly error display here
+		});
+
+		// Performance monitoring
+		window.addEventListener('DOMContentLoaded', function () {
+			console.log('OBS Cubes - Production Version 2.0');
+			console.log('Performance:', {
+				loadTime: performance.now(),
+				userAgent: navigator.userAgent,
+				webgl: !!window.WebGLRenderingContext
+			});
+		});
+	</script>
+</body>
+
+</html>

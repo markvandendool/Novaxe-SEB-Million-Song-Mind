@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>OBS Cubes</title>
+	<link rel="stylesheet" href="./styles.css" />
+	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
+</head>
+
+<body>
+	<div id="ui">
+		<div class="row">
+			<label>Key</label>
+			<select id="key-select">
+				<option value="C" selected>C</option>
+				<option value="Db">Db</option>
+				<option value="D">D</option>
+				<option value="Eb">Eb</option>
+				<option value="E">E</option>
+				<option value="F">F</option>
+				<option value="F#">F#</option>
+				<option value="G">G</option>
+				<option value="Ab">Ab</option>
+				<option value="A">A</option>
+				<option value="Bb">Bb</option>
+				<option value="B">B</option>
+			</select>
+			<label>Set</label>
+			<select id="set-select">
+				<option value="none" selected>None</option>
+				<option value="major">Major</option>
+				<option value="applied">Applied</option>
+				<option value="minor">Minor</option>
+				<option value="all">All</option>
+			</select>
+			<label>Label</label>
+			<select id="label-mode">
+				<option value="roman" selected>Roman</option>
+				<option value="letter">Letter</option>
+			</select>
+			<button id="arrange-btn">Arrange</button>
+			<button id="reset-btn">Reset</button>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="adjust-toggle" /> Adjust shelf
+			</label>
+			<button id="save-map-btn" title="Download shelf_map.json">Save Map</button>
+			<label class="file-btn">
+				Load Map
+				<input type="file" id="load-map-input" accept="application/json" hidden />
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="with-7th" /> With 7th
+			</label>
+			<label style="margin-left:12px;">
+				<input type="checkbox" id="bass-enabled" checked /> Bass
+			</label>
+			<label style="margin-left:8px;">
+				<input type="checkbox" id="melody-enabled" /> Melody
+			</label>
+			<label style="margin-left:12px;">Chord Inst</label>
+			<select id="chord-inst">
+				<option value="acoustic_grand_piano" selected>Piano</option>
+				<option value="string_ensemble_1">Strings</option>
+				<option value="electric_piano_1">EPiano</option>
+				<option value="choir_aahs">Choir</option>
+			</select>
+			<label style="margin-left:12px;">Bass Inst</label>
+			<select id="bass-inst">
+				<option value="acoustic_bass" selected>Acoustic Bass</option>
+				<option value="electric_bass_finger">Electric Bass</option>
+				<option value="synth_bass_1">Synth Bass</option>
+			</select>
+			<label style="margin-left:12px;">Melody Inst</label>
+			<select id="melody-inst">
+				<option value="flute" selected>Flute</option>
+				<option value="violin">Violin</option>
+				<option value="clarinet">Clarinet</option>
+				<option value="trumpet">Trumpet</option>
+			</select>
+			<button id="play-progression" style="margin-left:12px;">Play Progression</button>
+		</div>
+		<div class="row small">
+			<span>Tip: Click center of chord face to replay; non-label faces audition single notes.</span>
+		</div>
+	</div>
+	<canvas id="scene"></canvas>
+	<div class="adjust-hint">Adjust mode: drag shelf cubes; scroll to scale; Save Map to download JSON.</div>
+
+	<div id="camera-ui">
+		<button id="view-down" title="Melody View">Melody View</button>
+		<button id="view-up" title="Bass View">Bass View</button>
+	</div>
+
+	<script type="importmap">
+	{
+		"imports": {
+			"three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+			"three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+		}
+	}
+	</script>
+	<script type="module" src="./chords.js"></script>
+	<script type="module" src="./main.js"></script>
+</body>
+
+</html>
