@@ -6,16 +6,44 @@
             "destination": "/cubes/index.html"
         },
         {
-            "source": "/cubes-staging",
-            "destination": "/cubes-staging/index.html"
+            "source": "/cubes/(.*)",
+            "destination": "/cubes/$1"
+        },
+        {
+            "source": "/msm",
+            "destination": "/msm/index.html"
+        },
+        {
+            "source": "/msm/(.*)",
+            "destination": "/msm/$1"
+        },
+        {
+            "source": "/novaxe",
+            "destination": "/novaxe/index.html"
+        },
+        {
+            "source": "/novaxe/(.*)",
+            "destination": "/novaxe/$1"
         },
         {
             "source": "/MSM",
             "destination": "/MSM/index.html"
         },
         {
+            "source": "/MSM/(.*)",
+            "destination": "/MSM/index.html"
+        },
+        {
             "source": "/obsidiannvx",
             "destination": "/obsidiannvx/index.html"
+        },
+        {
+            "source": "/phoenix-hub",
+            "destination": "/phoenix-hub/index.html"
+        },
+        {
+            "source": "/phoenix-hub/(.*)",
+            "destination": "/phoenix-hub/$1"
         }
     ],
     "headers": [
@@ -46,7 +74,33 @@
             ]
         },
         {
-            "source": "/(.*)\\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|otf)",
+            "source": "/(.*)\\.(js|mjs)",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/javascript"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/(.*)\\.(css)",
+            "headers": [
+                {
+                    "key": "Content-Type",
+                    "value": "text/css"
+                },
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/(.*)\\.(png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|otf)",
             "headers": [
                 {
                     "key": "Cache-Control",

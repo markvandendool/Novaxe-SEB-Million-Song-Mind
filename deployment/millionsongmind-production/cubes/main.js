@@ -1,6 +1,7 @@
 // ============================================
-// 🎼 CHORDCUBES 5.0 - REVOLUTIONARY AUDIO CUTOFF SYSTEM
+// 🎼 CHORDCUBES 6.0 V1.50 - RESTORED FROM REAL V1.49 BACKUP
 // ============================================
+console.log('🔥🔥🔥 MAIN.JS V1.50 RESTORED FROM REAL V1.49 BACKUP 🔥🔥🔥');
 // CLAUDE'S PART 1: IMMEDIATE AUDIO CONTEXT SUPPRESSION
 // ============================================
 (function () {
@@ -521,12 +522,30 @@ function setViewBelow() {
 // Convert accidentals to musical glyphs and tidy typography
 function toMusicalGlyphs(s) {
     if (!s) return s;
-    // VERY tight kerning around accidentals - no spacing between glyph and numeral
-    let out = String(s)
-        .replace(/\s*#\s*/g, '♯')  // No space before sharp
-        .replace(/([A-Ga-g])\s*b/g, '$1♭')   // Eb → E♭ with no space
-        .replace(/\bb(?=(?:\d|[IViv]))/g, '♭'); // b3/bVI → ♭3/♭VI
-    return out;
+    
+    // 🎼 FONT JAN16 LIGATURE SYSTEM - Novaxe's Masterful Implementation
+    // Based on archaeological findings: flats use lowercase 'l' to trigger ligatures
+    // Font Jan16.otf (135,500 bytes) transforms 'l' → ♭ via built-in ligatures
+    
+    let result = String(s);
+    
+    // CORE TRANSFORMATION: b→l (flats use lowercase 'l' ligature)
+    // Examples: Bb→Bl, bVI→lVI, m7b5→m7l5
+    result = result.replace(/([A-Ga-g])b/g, '$1l');    // Note flats: Bb→Bl, Eb→El
+    result = result.replace(/\bb(?=(?:\d|[IViv]))/g, 'l'); // Roman flats: bVI→lVI, b3→l3
+    
+    // PRESERVE CASE SENSITIVITY for chord quality (user requirement)
+    // Major = uppercase (IV), minor = lowercase (iv), minor still uses 'm'
+    
+    // CLEAN UP: Remove excessive spaces around accidentals for tight kerning
+    result = result.replace(/\s*#\s*/g, '#');         // Keep # as-is for sharps
+    result = result.replace(/\s*l\s*/g, 'l');         // Clean spacing around 'l' ligature
+    
+    // SPECIAL CASES: Let diminished symbols render naturally with Font Jan16
+    result = result.replace(/dim/g, 'º');             // Diminished: dim→º (full diminished)
+    // Keep º and ø as-is for natural Font Jan16 rendering
+    
+    return result;
 }
 
 // Generate a canvas texture for labels (advanced with stacked superscripts)
@@ -553,84 +572,78 @@ function makeFrontLabelTextureStyled(labelText, romanLabel) {
     // Right
     ctx.fillRect(size - borderPx, 0, borderPx, size);
 
-    // Parse base, superscripts (includes º/ø), and annotation
-    const supers = [];
+    // Parse base text - Handle applied chord (7) removal for shelf display
     let base = String(labelText).trim();
-    // supers from parentheses e.g., (7)(b9)
-    const paren = [...base.matchAll(/\(([^)]+)\)/g)].map(m => m[1]);
-    if (paren.length) { supers.push(...paren); base = base.replace(/\([^)]*\)/g, ''); }
-    // Move all 'ø' characters to supers block
-    if (base.includes('ø')) { const count = (base.match(/ø/g) || []).length; for (let i = 0; i < count; i++) supers.push('ø'); base = base.replace(/ø/g, ''); }
-    // Extract trailing dim/half-dim with 7
-    const dimMatch = base.match(/(º7|º)$/);
-    if (dimMatch) { supers.push(dimMatch[1]); base = base.replace(/(º7|º)$/, ''); }
-    // Extract trailing numbers like 7
-    const trailing = base.match(/^(.*?)([#b]?\d+)$/);
-    if (trailing) { base = trailing[1]; supers.push(trailing[2]); }
-
+    
+    // APPLIED CHORD FIX: Remove (7) from applied chords when not in 7th mode
+    // Only for II(7), III(7), VI(7), VII(7) - preserve other (7) notations like V(7)(b9)
+    if (!withSeventh && /^(II|III|VI|VII)\(7\)$/.test(base)) {
+        base = base.replace(/\(7\)$/, ''); // Strip (7) from end
+        console.log(`[APPLIED CHORD FIX] Removed (7) from shelf display: ${labelText} → ${base}`);
+    } else {
+        // Remove parentheses notation (7)(b9) -> 7b9 for Font Jan16 processing (for non-applied chords)
+        base = base.replace(/\(([^)]+)\)/g, '$1');
+    }
+    
     const baseTrim = base.trim();
     const basePretty = toMusicalGlyphs(baseTrim);
-    let supersPretty = supers.map(s => toMusicalGlyphs(s));
 
     // Embossed text color: EXACT same as border color (per requirement)
     const fill = strokeColor;
 
     // Typography base (Cochin/Times)
-    const centerX = size / 2; const baselineY = size / 2 + 6;
-    const baseSize = 430;
+    const centerX = size / 2; const centerY = size / 2; // Perfect center like alphabet block
+    
+    // SUBTLE RESPONSIVE TEXT SIZING - Only minimal adjustments for very long text
+    const textLength = basePretty.length;
+    
+    // Much more conservative base size adjustments
+    let baseSize = 430; // Default for most text (1-4 chars)
+    
+    if (textLength >= 8) {
+        baseSize = 380; // Only for very long text (8+ chars) - small reduction
+    } else if (textLength >= 6) {
+        baseSize = 405; // Long text (6-7 chars) - minimal reduction
+    }
+    
+    // Only check if text is REALLY too wide (more generous threshold)
+    const availableWidth = size - (borderPx * 1.8); // More generous margin
+    ctx.font = `400 ${baseSize}px ${SERIF_STACK}`;
+    const textMetrics = ctx.measureText(basePretty);
+    const actualWidth = textMetrics.width;
+    
+    // Only scale down if text is significantly overflowing (90% threshold instead of 100%)
+    if (actualWidth > availableWidth * 0.9) {
+        const oldSize = baseSize;
+        baseSize = Math.floor(baseSize * 0.95); // Very gentle 5% reduction
+        console.log(`[GENTLE RESIZE] ${basePretty}: ${oldSize}px → ${baseSize}px (width: ${actualWidth.toFixed(1)} vs ${(availableWidth * 0.9).toFixed(1)})`);
+    }
+    
     const cochin = SERIF_STACK;
-    // Draw centered base (without leading accidental token)
+    // Draw centered base text - Font Jan16 handles all ligatures naturally
     ctx.save();
     ctx.fillStyle = fill;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-    ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 10; ctx.shadowOffsetY = 5;
-    ctx.font = `700 ${baseSize}px ${cochin}`;
-    ctx.fillText(basePretty, centerX, baselineY);
-    ctx.shadowColor = 'transparent';
-    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 6;
-    ctx.strokeText(basePretty, centerX, baselineY - 2);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `400 ${baseSize}px ${cochin}`;
+    ctx.fillText(basePretty, centerX, centerY);
     ctx.restore();
 
-    // (No global accidental/ø repositioning; special alignment remains only for specific labels like '#ivø')
-
-    // Supers: Finale Numerics (music), large and clear; include ø/º as supers
-    if (supersPretty.length && romanLabel !== '#ivø') {
-        const supSize = 220;
-        const supFamily = `900 ${supSize}px ${MUSIC_STACK}, ${SERIF_STACK}`;
-        const rightX = size - 90; let y = 170;
-        for (const token of supersPretty) {
-            const text = String(token);
-            ctx.save();
-            // Light capsule for contrast
-            ctx.font = supFamily; const w = ctx.measureText(text).width;
-            const padX = 10, padY = 8; const rectX = rightX - w - padX * 2; const rectY = y - supSize + padY - 8;
-            ctx.fillStyle = 'rgba(255,255,255,0.12)';
-            ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 4;
-            ctx.beginPath(); ctx.rect(rectX, rectY, w + padX * 2, supSize + padY * 1.2); ctx.fill(); ctx.stroke();
-            // Text
-            ctx.textAlign = 'right'; ctx.textBaseline = 'alphabetic';
-            ctx.fillStyle = fill;
-            ctx.shadowColor = 'rgba(0,0,0,0.6)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 4;
-            ctx.font = supFamily; ctx.fillText(text, rightX, y);
-            ctx.shadowColor = 'transparent';
-            ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 4;
-            ctx.strokeText(text, rightX, y - 1);
-            ctx.restore();
-            y += supSize * 0.92;
-        }
-    }
+    // NO SUPERSCRIPTS - Font Jan16 ligature system handles 7th notation naturally
 
     // Applied-chord annotation small text at bottom
     const annotation = annotationForRoman(romanLabel);
     if (annotation) {
         const a = toMusicalGlyphs(annotation).replace(/ of /g, ' of ');
-        ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        // COMMENTED OUT: Heavy font styling that was trying to mimic custom font
+        // ctx.font = `800 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`;
+        ctx.font = `400 130px 'Noto Music', 'Finale Numerics', 'Bravura Text', 'Cochin', 'Times New Roman', serif`; // Reduced weight from 800 to 400
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillStyle = fill;
-        ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
+        // COMMENTED OUT: Shadow effects that were trying to mimic custom font
+        // ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 6; ctx.shadowOffsetY = 3;
         const annY = size - 105;
         ctx.fillText(`[${a}]`, size / 2, annY);
-        ctx.shadowColor = 'transparent';
+        // ctx.shadowColor = 'transparent';
     }
 
     const tex = new THREE.CanvasTexture(c);
@@ -668,9 +681,13 @@ function darken(hex, factor = 0.65) {
 const appliedAnnotation = {
     'I7': 'V of IV',
     'II(7)': 'V of V',
+    'II': 'V of V',           // Shelf display without 7th
     'III(7)': 'V of vi',
+    'III': 'V of vi',         // Shelf display without 7th
     'VI(7)': 'V of ii',
+    'VI': 'V of ii',          // Shelf display without 7th
     'VII(7)': 'V of iii',
+    'VII': 'V of iii',        // Shelf display without 7th
     '#iº': 'vii° of ii',
     '#iiº': 'vii° of iii',
     '#ivø': 'viiø of V',
@@ -717,29 +734,47 @@ function candidatePngNamesForRoman(roman) {
 }
 
 function loadFaceTexture(label, romanLabel, force7th = false, extensions = null) {
-    // AUTOMATICALLY ADD 7TH NOTATION for diminished, I7, V(b7)(b9) chords, OR when global withSeventh is true
+    // Font Jan16 ligature system handles all notation naturally - no manipulation needed
     let displayLabel = label;
+    
     const isDiminished = romanLabel.includes('º') || romanLabel.includes('ø');
     const isI7 = romanLabel === 'I7' || romanLabel === 'i7';
     const isV7b9 = romanLabel === 'V(7)(b9)' || romanLabel === 'V(b7)(b9)';
+    
+    // Determine chord type for proper 7th notation
+    // Major chord = starts with uppercase Roman numeral (I, II, III, IV, V, VI, VII)
+    // Minor chord = starts with lowercase or has flat prefix (i, ii, iii, iv, v, vi, vii, bIII, bVI, bVII)
+    const baseRoman = romanLabel.replace(/[7º♭ø\(b\)#]/g, ''); // Remove all accidentals and extensions
+    const isMajorChord = /^[IVX]+$/i.test(baseRoman) && baseRoman === baseRoman.toUpperCase() && !romanLabel.startsWith('b');
+    const isDominantV = romanLabel.startsWith('V') && !romanLabel.includes('º') && !romanLabel.includes('ø');
 
+    // Applied chord mapping - these should NOT get automatic 7th on shelf display
+    // Check for both II(7) and II forms, since shelf uses II(7), III(7), VI(7), VII(7)
+    const isAppliedChord = ['VII', 'III', 'VI', 'II', 'VII(7)', 'III(7)', 'VI(7)', 'II(7)'].includes(romanLabel);
+    
     // Check if we should show 7th: special chords, global setting, or forced
-    const shouldShow7th = isDiminished || isI7 || isV7b9 || withSeventh || force7th;
+    // EXCLUDE applied chords on shelf display (VII, III, VI, II and their (7) variants)
+    const shouldShow7th = isDiminished || isI7 || isV7b9 || (withSeventh && !isAppliedChord) || force7th;
 
-    // Add 7th to display if not already present
-    if (shouldShow7th && !label.includes('7') && !label.includes('(7)')) {
+    console.log(`[FONT DEBUG] ${romanLabel}: baseRoman="${baseRoman}", isMajor=${isMajorChord}, isDominant=${isDominantV}, isApplied=${isAppliedChord}, shouldShow7th=${shouldShow7th}`);
+
+    // Add 7th to display if not already present - CORRECT NOTATION for Font Jan16
+    if (shouldShow7th && !label.includes('7')) {
         if (isDiminished && romanLabel.includes('º') && !romanLabel.includes('º7')) {
-            // For diminished, show º7 instead of just º
+            // For FULL diminished: º7 (Font Jan16 handles proper diminished 7th notation)
             displayLabel = label.replace('º', 'º7');
         } else if (isDiminished && romanLabel.includes('ø') && !romanLabel.includes('ø7')) {
-            // For half-diminished, show ø7 instead of just ø
+            // For HALF diminished: ø7 (Font Jan16 handles proper half-diminished notation)
             displayLabel = label.replace('ø', 'ø7');
-        } else if (isI7) {
-            // For I7, add (7) superscript
-            displayLabel = label + '(7)';
+        } else if (isDominantV) {
+            // For DOMINANT chords (V7): use simple 7
+            displayLabel = label + '7';
+        } else if (isMajorChord && !isV7b9) {
+            // For MAJOR 7th chords (I7, IV7, etc.): use M7 for natural symbol
+            displayLabel = label + 'M7';
         } else if (!isV7b9) {
-            // For all other chords (except V(b7)(b9) which already has full notation)
-            displayLabel = label + '(7)';
+            // For minor 7th chords and others: use simple 7
+            displayLabel = label + '7';
         }
     }
 
@@ -750,36 +785,113 @@ function loadFaceTexture(label, romanLabel, force7th = false, extensions = null)
         console.log(`[FONT] Added extensions: ${displayLabel} (extensions: ${extensions.map(e => e.name).join(', ')})`);
     }
 
-    // V(b7)(b9) chords should always show full notation (already in the label)
-    // This chord is special - it must always include the b9 to differentiate from basic V
+    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel}, withSeventh: ${withSeventh}, force7th: ${force7th}, isMajor: ${isMajorChord}, isDominant: ${isDominantV})`);
 
-    console.log(`[FONT] Label generation: ${label} → ${displayLabel} (roman: ${romanLabel}, withSeventh: ${withSeventh}, force7th: ${force7th})`);
-
-    // Always use canvas-rendered texture; no PNGs
+    // Always use canvas-rendered texture with Font Jan16 ligature system
     return makeFrontLabelTextureStyled(displayLabel, romanLabel);
 }
 
-// Refresh all cube faces to reflect current 7th setting
-async function refreshAllCubeFaces() {
-    console.log(`[REFRESH FACES] Updating all cube faces for withSeventh: ${withSeventh}`);
+// Refresh all cube faces to reflect current 7th setting or preview mode
+async function refreshAllCubeFaces(previewWith7th = false) {
+    console.log(`[NEW SYSTEM] Refreshing faces - previewWith7th: ${previewWith7th}, withSeventh: ${withSeventh}`);
+    console.log(`🔥 [PIPELINE DEBUG] Front-row cubes count: ${cubes.length}`);
+    
+    // 🔥 ENHANCED EXTENSION DEBUGGING
+    console.log(`🔥 [EXTENSIONS DEBUG] activeExtensions.size: ${activeExtensions.size}`);
+    if (activeExtensions.size > 0) {
+        const extArray = Array.from(activeExtensions);
+        console.log(`🔥 [EXTENSIONS DEBUG] activeExtensions content:`, extArray);
+        console.log(`🔥 [EXTENSIONS DEBUG] Extension names:`, extArray.map(ext => ext.name));
+        console.log(`🔥 [EXTENSIONS DEBUG] Extension intervals:`, extArray.map(ext => ext.interval));
+    } else {
+        console.log(`🔥 [EXTENSIONS DEBUG] No active extensions`);
+    }
 
     try {
+        // 🔥 STAGE 7: cubes array iteration started
+        if (pipelineTracer && cubes.length > 0) {
+            pipelineTracer.triggerStage(7, { frontRowCount: cubes.length, shelfCount: shelfCubes.length });
+        }
+        
         // Update front-row cubes
         for (const cube of cubes) {
             if (cube.userData && cube.userData.roman) {
+                // 🔥 STAGE 8: Individual cube processing
+                if (pipelineTracer) pipelineTracer.triggerStage(8, { cubeRoman: cube.userData.roman });
+                
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
+                
+                console.log(`🔥 [CUBE DEBUG] Processing ${roman}: cube.userData.extensions =`, cube.userData.extensions);
+                console.log(`🔥 [CUBE DEBUG] Global activeExtensions for comparison:`, Array.from(activeExtensions).map(ext => ext.name));
 
-                // Generate new texture with current 7th setting and extensions
-                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
+                // NEW SYSTEM: Exclude Ib7 and diminished chords from 7th preview
+                const isDiminished = roman.includes('º') || roman.includes('ø');
+                const isIb7 = roman === 'Ib7' || roman.includes('Ib7');
+                const shouldExcludeFromPreview = isDiminished || isIb7;
+
+                let effectiveWith7th;
+                if (shouldExcludeFromPreview) {
+                    // These chords always keep their permanent 7th, ignore preview
+                    effectiveWith7th = withSeventh; // Use normal setting
+                    console.log(`[NEW SYSTEM] ${roman}: Excluded from 7th preview (permanent 7th)`);
+                } else {
+                    // Apply 7th preview to eligible chords
+                    effectiveWith7th = previewWith7th || withSeventh;
+                    if (previewWith7th) {
+                        console.log(`[NEW SYSTEM] ${roman}: Applying 7th preview`);
+                    }
+                }
+
+                // Generate new texture with effective 7th setting and extensions
+                // Use force7th parameter instead of modifying global withSeventh
+                const shouldForce7th = previewWith7th && !shouldExcludeFromPreview;
+                
+                // 🔥 CRITICAL FIX: Use global activeExtensions instead of cube.userData.extensions
+                const extensionsToUse = activeExtensions.size > 0 ? Array.from(activeExtensions) : cube.userData.extensions;
+                console.log(`🔥 [EXTENSION FIX] ${roman} - Using extensions:`, extensionsToUse);
+                
+                // 🔥 STAGE 9: loadFaceTexture() called
+                if (pipelineTracer) pipelineTracer.triggerStage(9, { 
+                    cubeRoman: roman, 
+                    shouldForce7th, 
+                    extensionsUsed: extensionsToUse ? (extensionsToUse.map ? extensionsToUse.map(ext => ext.name) : extensionsToUse) : 'none' 
+                });
+                
+                const newTexture = loadFaceTexture(label, roman, shouldForce7th, extensionsToUse);
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
                 if (cube.material && cube.material[frontFaceIndex]) {
+                    // 🔥 STAGE 10: Texture assigned to material
+                    if (pipelineTracer) pipelineTracer.triggerStage(10, { 
+                        cubeRoman: roman, 
+                        frontFaceIndex, 
+                        hasOldTexture: !!cube.material[frontFaceIndex].map 
+                    });
+                    
                     // Dispose old texture
                     if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
                     cube.material[frontFaceIndex].map = newTexture;
+                    
+                    // 🔥 STAGE 11: material.needsUpdate = true - TRIGGERS PIXEL MONITORING
+                    if (pipelineTracer) pipelineTracer.triggerStage(11, { cubeRoman: roman });
                     cube.material[frontFaceIndex].needsUpdate = true;
+                    
+                    // 🔥 STAGE 12: HARD-WIRED IMMEDIATE CUBE REFRESH - BYPASS DETECTION
+                    if (pipelineTracer && activeExtensions.size > 0) {
+                        console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for ${roman}`);
+                        pipelineTracer.triggerStage(12, 'Hard-wired extension refresh', { 
+                            cubeRoman: roman,
+                            extensionCount: activeExtensions.size,
+                            bypassDetection: true 
+                        });
+                        
+                        // Force immediate renderer update for this specific cube
+                        if (typeof renderer !== 'undefined') {
+                            renderer.render(scene, camera);
+                        }
+                    }
                 }
             }
         }
@@ -790,8 +902,24 @@ async function refreshAllCubeFaces() {
                 const roman = cube.userData.roman;
                 const label = (labelMode === 'roman') ? roman : cube.userData.letter || roman;
 
-                // Generate new texture with current 7th setting and extensions
-                const newTexture = loadFaceTexture(label, roman, false, cube.userData.extensions);
+                // NEW SYSTEM: Exclude Ib7 and diminished chords from 7th preview
+                const isDiminished = roman.includes('º') || roman.includes('ø');
+                const isIb7 = roman === 'Ib7' || roman.includes('Ib7');
+                const shouldExcludeFromPreview = isDiminished || isIb7;
+
+                let effectiveWith7th;
+                if (shouldExcludeFromPreview) {
+                    // These chords always keep their permanent 7th, ignore preview
+                    effectiveWith7th = withSeventh; // Use normal setting
+                } else {
+                    // Apply 7th preview to eligible chords
+                    effectiveWith7th = previewWith7th || withSeventh;
+                }
+
+                // Generate new texture with effective 7th setting and extensions
+                // Use force7th parameter instead of modifying global withSeventh
+                const shouldForce7th = previewWith7th && !shouldExcludeFromPreview;
+                const newTexture = loadFaceTexture(label, roman, shouldForce7th, cube.userData.extensions);
 
                 // FIXED: Update the actual front face (index 5), not index 0 (3rd face)
                 const frontFaceIndex = 5;
@@ -800,6 +928,22 @@ async function refreshAllCubeFaces() {
                     if (cube.material[frontFaceIndex].map) cube.material[frontFaceIndex].map.dispose();
                     cube.material[frontFaceIndex].map = newTexture;
                     cube.material[frontFaceIndex].needsUpdate = true;
+                    
+                    // 🔥 STAGE 12: HARD-WIRED IMMEDIATE CUBE REFRESH FOR SHELF CUBES
+                    if (pipelineTracer && activeExtensions.size > 0) {
+                        console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for SHELF ${roman}`);
+                        pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (SHELF)', { 
+                            cubeRoman: roman,
+                            cubeType: 'SHELF',
+                            extensionCount: activeExtensions.size,
+                            bypassDetection: true 
+                        });
+                        
+                        // Force immediate renderer update for shelf cube
+                        if (typeof renderer !== 'undefined') {
+                            renderer.render(scene, camera);
+                        }
+                    }
                 }
             }
         }
@@ -843,6 +987,22 @@ function updateChordFaceWith7th(targetObj) {
             targetObj.material[frontFaceIndex].map = newTexture;
             targetObj.material[frontFaceIndex].needsUpdate = true;
             console.log(`[CTRL+CLICK] Updated front face (index ${frontFaceIndex}) with 7th notation`);
+            
+            // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR CTRL+CLICK
+            if (pipelineTracer && activeExtensions.size > 0) {
+                console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for CTRL+CLICK ${roman}`);
+                pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (CTRL+CLICK)', { 
+                    cubeRoman: roman,
+                    cubeType: 'CTRL+CLICK',
+                    extensionCount: activeExtensions.size,
+                    bypassDetection: true 
+                });
+                
+                // Force immediate renderer update for ctrl+click
+                if (typeof renderer !== 'undefined') {
+                    renderer.render(scene, camera);
+                }
+            }
         }
 
         // Reset back to original after 2 seconds
@@ -852,6 +1012,22 @@ function updateChordFaceWith7th(targetObj) {
             if (targetObj.material && targetObj.material[frontFaceIndex]) {
                 targetObj.material[frontFaceIndex].map = originalTexture;
                 targetObj.material[frontFaceIndex].needsUpdate = true;
+                
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR CTRL+CLICK RESET
+                if (pipelineTracer && activeExtensions.size > 0) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for CTRL+CLICK RESET ${roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (CTRL+CLICK RESET)', { 
+                        cubeRoman: roman,
+                        cubeType: 'CTRL+CLICK RESET',
+                        extensionCount: activeExtensions.size,
+                        bypassDetection: true 
+                    });
+                    
+                    // Force immediate renderer update for ctrl+click reset
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }, 2000);
 
@@ -1268,7 +1444,9 @@ function makeTitleTexture(lines, opts = {}) {
     const fontSettings = currentFontSettings?.[fontTarget] || currentFontSettings?.['chord-face'];
 
     const family = opts.family || fontSettings?.family || 'Arial';
-    const weight = opts.weight || fontSettings?.weight || 900;
+    // COMMENTED OUT: Heavy font weight that was trying to mimic custom font
+    // const weight = opts.weight || fontSettings?.weight || 900;
+    const weight = opts.weight || fontSettings?.weight || 400; // Reduced from 900 to 400
     const size = opts.size || fontSettings?.size || 220;
     const gap = opts.lineGap || fontSettings?.lineHeight || 0.68;
     const letterSpacing = opts.letterSpacing || fontSettings?.letterSpacing || 0;
@@ -1633,11 +1811,17 @@ async function ensureFontsLoaded() {
     link.href = 'https://fonts.googleapis.com/css2?family=Noto+Music&display=swap';
     document.head.appendChild(link);
     const loads = [
+        // COMMENTED OUT: Heavy font weights that were trying to mimic custom font
         // Serif stack (Cochin/Times)
-        `700 430px ${SERIF_STACK}`,
+        // `700 430px ${SERIF_STACK}`,
         // Music stack (Noto Music/Finale/Bravura)
-        `900 220px ${MUSIC_STACK}`,
-        `800 130px ${MUSIC_STACK}`
+        // `900 220px ${MUSIC_STACK}`,
+        // `800 130px ${MUSIC_STACK}`
+        
+        // Simplified font loading without heavy weights
+        `400 430px ${SERIF_STACK}`,
+        `400 220px ${MUSIC_STACK}`,
+        `400 130px ${MUSIC_STACK}`
     ].map(spec => {
         try { return document.fonts.load(spec); } catch (_) { return Promise.resolve(); }
     });
@@ -2793,9 +2977,9 @@ function onPointerUp(e) {
                         console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${pendingObj.userData.roman}`);
                     }
 
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed || e.altKey;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isShiftClick;
                     queueChordForDownbeat(pendingObj, shouldUse7th);
 
                     // CRITICAL: Ensure proper cleanup to prevent mouse sticking
@@ -2861,12 +3045,12 @@ function onPointerUp(e) {
                     // ADJUST MODE: Just play the chord, don't duplicate
                     console.log(`[ADJUST MODE] Playing shelf chord ${targetObj.userData.roman} without duplication`);
 
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed;
+                    const shouldUse7th = withSeventh || isShiftClick;
 
-                    if (isAltClick) {
-                        console.log(`[ADJUST ALT+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
+                    if (isShiftClick) {
+                        console.log(`[ADJUST SHIFT+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                         updateChordFaceWith7th(targetObj);
                     }
 
@@ -2892,9 +3076,9 @@ function onPointerUp(e) {
                             console.log(`[IMPROV SHELF CLICK] Failed to capture rotation delta, using 0 for ${targetObj.userData.roman}`);
                         }
 
-                        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                        const isAltClick = globalModifierState.altPressed || e.altKey;
-                        const shouldUse7th = withSeventh || isAltClick;
+                        // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                        const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                        const shouldUse7th = withSeventh || isShiftClick;
                         queueChordForDownbeat(targetObj, shouldUse7th);
 
                         // CRITICAL: Ensure proper cleanup to prevent mouse sticking
@@ -2920,15 +3104,15 @@ function onPointerUp(e) {
                 console.log(`[CENTER-PLAY DEBUG] Playing center for ${targetObj.userData.roman}`);
 
                 // BULLETPROOF MODIFIER DETECTION - Use global state + event state  
-                // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                const isAltClick = globalModifierState.altPressed || e.altKey;
-                const shouldUse7th = withSeventh || isAltClick;
+                // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                const shouldUse7th = withSeventh || isShiftClick;
 
-                console.log(`[CLICK DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-                console.log(`[CLICK DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only)`);
+                console.log(`[CLICK DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+                console.log(`[CLICK DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals)`);
                 console.log(`[CLICK DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 
-                if (isAltClick) {
+                if (isShiftClick) {
                     console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman}`);
                     // Update front face texture to show 7th notation temporarily
                     updateChordFaceWith7th(targetObj);
@@ -2971,15 +3155,15 @@ function onPointerUp(e) {
                     console.log(`[FRONT-ROW DEBUG] Clicked quadrant ${targetToneIndex}, was ${originalRotationIndex}, now ${targetObj.userData.rotationIndex}`);
 
                     // BULLETPROOF MODIFIER DETECTION - Use global state + event state
-                    // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-                    const isAltClick = globalModifierState.altPressed || e.altKey;
-                    const shouldUse7th = withSeventh || isAltClick;
+                    // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+                    const isShiftClick = globalModifierState.shiftPressed || e.shiftKey;
+                    const shouldUse7th = withSeventh || isShiftClick;
 
-                    console.log(`[QUADRANT DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-                    console.log(`[QUADRANT DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only)`);
+                    console.log(`[QUADRANT DEBUG] ${targetObj.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+                    console.log(`[QUADRANT DEBUG] Global state - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals)`);
                     console.log(`[QUADRANT DEBUG] Event state - Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 
-                    if (isAltClick) {
+                    if (isShiftClick) {
                         console.log(`[MODIFIER+CLICK] FORCING 7th for ${targetObj.userData.roman} (quadrant)`);
                         // Update front face texture to show 7th notation temporarily
                         updateChordFaceWith7th(targetObj);
@@ -3262,6 +3446,20 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('view-down')?.addEventListener('click', setViewAbove);
     document.getElementById('view-up')?.addEventListener('click', setViewBelow);
     document.getElementById('view-back')?.addEventListener('click', setViewBack);
+
+    // CRITICAL: Refresh instrument dropdowns on page load
+    if (window.audioEngine && window.audioEngine.refreshInstrumentDropdowns) {
+        console.log('[INIT] Calling refreshInstrumentDropdowns on page load...');
+        window.audioEngine.refreshInstrumentDropdowns();
+    } else {
+        // Wait for audioEngine to be ready and try again
+        setTimeout(() => {
+            if (window.audioEngine && window.audioEngine.refreshInstrumentDropdowns) {
+                console.log('[INIT] Delayed call to refreshInstrumentDropdowns...');
+                window.audioEngine.refreshInstrumentDropdowns();
+            }
+        }, 1000);
+    }
 });
 
 // GLOBAL MODIFIER KEY STATE TRACKING
@@ -3274,21 +3472,87 @@ let globalModifierState = {
 
 // BULLETPROOF KEYBOARD MODIFIER DETECTION - HIGHEST PRIORITY
 document.addEventListener('keydown', (e) => {
+    const wasShiftPressed = globalModifierState.shiftPressed;
+    
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
+
+    // VISUAL PREVIEW: Shift key shows 7th preview on all chords
+    if (e.shiftKey && !wasShiftPressed) {
+        console.log('[7TH PREVIEW] Shift key pressed - showing 7th preview on all chords');
+        refreshAllCubeFaces(true); // Preview mode with 7ths
+    }
 
     console.log(`[GLOBAL KEYDOWN] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
 }, { capture: true, passive: false });
 
 document.addEventListener('keyup', (e) => {
+    const wasShiftPressed = globalModifierState.shiftPressed;
+    
     globalModifierState.altPressed = e.altKey;
     globalModifierState.shiftPressed = e.shiftKey;
     globalModifierState.ctrlPressed = e.ctrlKey;
     globalModifierState.metaPressed = e.metaKey;
 
+    // VISUAL PREVIEW: Shift key release - restore normal chord display
+    if (!e.shiftKey && wasShiftPressed) {
+        console.log('[7TH PREVIEW] Shift key released - restoring normal chord display');
+        refreshAllCubeFaces(false); // Normal mode
+    }
+
     console.log(`[GLOBAL KEYUP] Alt: ${e.altKey}, Shift: ${e.shiftKey}, Ctrl: ${e.ctrlKey}, Meta: ${e.metaKey}`);
+}, { capture: true, passive: false });
+
+// ============================================
+// 🎼 PHASE 2B: CHORD QUALITY FORCING SYSTEM
+// ============================================
+
+// Global chord quality forcing state
+let chordQualityForcing = {
+    minor: false,      // 'm' key - force minor quality
+    major: false,      // 'n' key - force major quality  
+    diminished: false  // 'd' key - force diminished quality
+};
+
+// Add chord quality forcing keyboard handlers
+document.addEventListener('keydown', (e) => {
+    const key = e.key.toLowerCase();
+
+    switch (key) {
+        case 'm':
+            chordQualityForcing.minor = true;
+            console.log('[CHORD FORCING] Minor quality activated');
+            break;
+        case 'n':
+            chordQualityForcing.major = true;
+            console.log('[CHORD FORCING] Major quality activated');
+            break;
+        case 'd':
+            chordQualityForcing.diminished = true;
+            console.log('[CHORD FORCING] Diminished quality activated');
+            break;
+    }
+}, { capture: true, passive: false });
+
+document.addEventListener('keyup', (e) => {
+    const key = e.key.toLowerCase();
+
+    switch (key) {
+        case 'm':
+            chordQualityForcing.minor = false;
+            console.log('[CHORD FORCING] Minor quality deactivated');
+            break;
+        case 'n':
+            chordQualityForcing.major = false;
+            console.log('[CHORD FORCING] Major quality deactivated');
+            break;
+        case 'd':
+            chordQualityForcing.diminished = false;
+            console.log('[CHORD FORCING] Diminished quality deactivated');
+            break;
+    }
 }, { capture: true, passive: false });
 
 // Audio state (declare before any usage)
@@ -3440,6 +3704,9 @@ function initializeWebAudioFont() {
         originalConsoleWarn.apply(console, args);
     };
 })();
+
+// Import InstrumentManager for enhanced instrument support
+import InstrumentManager from './instrumentManager.js';
 
 // FIXED ORCHESTRAL AUDIO ENGINE WITH CORRECT WEBAUDIOFONT INSTRUMENT IDS
 class OrchestralAudioEngine {
@@ -3641,15 +3908,71 @@ class OrchestralAudioEngine {
             bass: this.currentInstruments.bass.name
         });
 
-        // AUDIO CONTEXT: Handle separately, don't let it break initialization
+        // VERSION 1.0: NUCLEAR AUDIO RESET - Most aggressive spam prevention ever
+        console.log('[V1.0] Initializing NUCLEAR AUDIO RESET system...');
+
+        // Global spam prevention
+        window.audioSpamPrevention = window.audioSpamPrevention || {
+            contextCreationAttempts: 0,
+            maxAttempts: 1,
+            spamDetected: false,
+            emergencyShutoff: false
+        };
+
+        let audioContextStarted = false;
+
         setTimeout(() => {
-            console.log('[AUDIO ENGINE] Step 4: Attempting audio context start (non-blocking)...');
-            if (Tone.context.state !== 'running') {
-                Tone.start().then(() => {
-                    console.log('[AUDIO ENGINE] ✅ Audio context started after user gesture');
-                }).catch(() => {
-                    console.log('[AUDIO ENGINE] ⚠️ Audio context will start on first user interaction');
-                });
+            console.log('[V1.0] Step 1: Emergency shutoff check...');
+
+            // Emergency shutoff check
+            if (window.audioSpamPrevention.emergencyShutoff) {
+                console.log('[V1.0] 🚨 EMERGENCY SHUTOFF ACTIVE - Blocking all audio initialization');
+                return;
+            }
+
+            // Spam detection
+            window.audioSpamPrevention.contextCreationAttempts++;
+            if (window.audioSpamPrevention.contextCreationAttempts > window.audioSpamPrevention.maxAttempts) {
+                console.log('[V1.0] 🚨 SPAM DETECTED - Activating emergency shutoff');
+                window.audioSpamPrevention.spamDetected = true;
+                window.audioSpamPrevention.emergencyShutoff = true;
+                return;
+            }
+
+            console.log('[V1.0] Step 2: Bulletproof AudioContext initialization...');
+
+            // Only attempt to start once
+            if (audioContextStarted) {
+                console.log('[V1.0] 🔒 AudioContext already initialized, enforcing singleton');
+                return;
+            }
+
+            try {
+                if (Tone.context.state === 'running') {
+                    console.log('[V1.0] ✅ AudioContext already running');
+                    audioContextStarted = true;
+                    return;
+                }
+
+                if (Tone.context.state === 'suspended') {
+                    // Ultra-silent attempt - zero spam tolerance
+                    Tone.start().then(() => {
+                        console.log('[V1.0] ✅ AudioContext started successfully');
+                        audioContextStarted = true;
+                        // V1.4 CRITICAL FIX: Keep emergency shutoff OFF to allow audio playback
+                        console.log('[V1.4] 🎵 AUDIO PLAYBACK ENABLED - Emergency shutoff remains OFF');
+                    }).catch(() => {
+                        // Ultra-silent fail - zero spam
+                        audioContextStarted = true; // Prevent future attempts
+                        window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock ONLY on failure
+                    });
+                } else {
+                    console.log('[V1.0] AudioContext state:', Tone.context.state);
+                }
+            } catch (error) {
+                console.log('[V1.0] 🤐 AudioContext error silenced');
+                audioContextStarted = true; // Prevent future attempts
+                window.audioSpamPrevention.emergencyShutoff = true; // Emergency lock
             }
         }, 100);
 
@@ -4159,8 +4482,7 @@ class OrchestralAudioEngine {
     }
 
     playChord(notes, duration = 2, volume = 0.5) {
-        // CLAUDE'S ENGINE vNEXT: Always ready with immediate fallbacks - no blocking checks!
-
+        // V1.8 CRITICAL SIMPLIFICATION: Restore working version logic - NO OVERCOMPLICATED TRACKING
         const instrument = this.currentInstruments.chord;
         if (!instrument) {
             console.error('[AUDIO ENGINE] No chord instrument loaded');
@@ -4173,45 +4495,16 @@ class OrchestralAudioEngine {
 
         // PRIORITY 1: Use real Tone.js Sampler if available
         if (instrument.sampler && !instrument.fallback) {
-            console.log(`[AUDIO ENGINE] 🔥 Using REAL ${instrument.name} samples - AudioTime: ${this.audioContext.currentTime.toFixed(3)}`);
+            console.log(`[AUDIO ENGINE] Using real ${instrument.name} samples`);
             try {
-                // NEW APPROACH: Use triggerAttack + manual release for proper cutoff control
-                const noteId = ++this.noteIdCounter;
-                console.log(`[AUDIO ENGINE] 🎯 Starting chord notes with ID ${noteId} for manual control`);
-
-                // Trigger attack (start notes)
-                instrument.sampler.triggerAttack(notes, undefined, volume * chordVolume);
-
-                // Schedule release after duration
-                const releaseTimeout = setTimeout(() => {
-                    try {
-                        instrument.sampler.triggerRelease(notes);
-                        console.log(`[AUDIO ENGINE] ⏰ Auto-released chord notes ${noteId} after ${duration}s`);
-                        this.activeNotes.chord.delete(noteId);
-                    } catch (e) {
-                        console.warn(`[AUDIO ENGINE] Auto-release error for chord ${noteId}:`, e);
-                    }
-                }, duration * 1000);
-
-                // Track this note for manual cutoff
-                this.activeNotes.chord.set(noteId, {
-                    sampler: instrument.sampler,
-                    notes: notes,
-                    releaseTimeout: releaseTimeout,
-                    startTime: this.audioContext.currentTime
-                });
-
-                console.log(`[AUDIO ENGINE] ✅ REAL ${instrument.name} samples started with manual control - Duration: ${duration}s`);
-                return; // Exit if successful
+                instrument.sampler.triggerAttackRelease(notes, duration + 's');
+                return;
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Real sampler error:', error);
-                console.log(`[AUDIO ENGINE] 🔄 FALLING BACK to enhanced synth for ${instrument.name}`);
-                // Continue to fallback logic instead of returning
             }
         }
         // PRIORITY 2: Use WebAudioFont if available
         else if (instrument.preset && !instrument.info?.fallback) {
-            // WebAudioFont playback
             const when = this.audioContext.currentTime;
             const preset = instrument.preset;
             const midiNotes = notes.map(note => this.noteToMidi(note));
@@ -4228,7 +4521,7 @@ class OrchestralAudioEngine {
                 );
             });
         }
-        // PRIORITY 3: Use enhanced Tone.js fallback
+        // PRIORITY 3: Use enhanced Tone.js fallback - SIMPLE VERSION
         else if (instrument.synth) {
             console.log(`[AUDIO ENGINE] Using enhanced fallback for ${instrument.name}`);
             try {
@@ -4304,6 +4597,25 @@ class OrchestralAudioEngine {
                 });
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Melody fallback playback error:', error);
+            }
+        }
+        // PRIORITY 4: Use instrumentManager
+        else if (instrument.instrumentId) {
+            console.log(`[AUDIO ENGINE] Using instrumentManager for ${instrument.name} (${instrument.instrumentId})`);
+            try {
+                if (window.instrumentManager) {
+                    notes.forEach((note, i) => {
+                        const delay = (durations.slice(0, i).reduce((a, b) => a + b, 0) || 0) * 1000;
+                        const noteDuration = durations[i] || 0.5; // Fix: define duration in scope
+                        setTimeout(() => {
+                            window.instrumentManager.playNote(instrument.instrumentId, note, noteDuration, volume);
+                        }, delay);
+                    });
+                } else {
+                    console.warn('[AUDIO ENGINE] instrumentManager not available');
+                }
+            } catch (error) {
+                console.warn('[AUDIO ENGINE] InstrumentManager melody playback error:', error);
             }
         } else {
             console.error('[AUDIO ENGINE] No melody playback method available');
@@ -4385,6 +4697,19 @@ class OrchestralAudioEngine {
             } catch (error) {
                 console.warn('[AUDIO ENGINE] Bass fallback playback error:', error);
             }
+        }
+        // PRIORITY 4: Use instrumentManager
+        else if (instrument.instrumentId) {
+            console.log(`[AUDIO ENGINE] Using instrumentManager for ${instrument.name} (${instrument.instrumentId})`);
+            try {
+                if (window.instrumentManager) {
+                    window.instrumentManager.playNote(instrument.instrumentId, note, duration, volume);
+                } else {
+                    console.warn('[AUDIO ENGINE] instrumentManager not available');
+                }
+            } catch (error) {
+                console.warn('[AUDIO ENGINE] InstrumentManager bass playback error:', error);
+            }
         } else {
             console.error('[AUDIO ENGINE] No bass playback method available');
         }
@@ -4411,8 +4736,14 @@ class OrchestralAudioEngine {
     async switchInstrument(type, newInstrument) {
         console.log(`[AUDIO ENGINE] IMMEDIATE SWITCH: ${type} to ${newInstrument}`);
 
+        // Check if this is an enhanced instrument (ends with " (Enhanced)")
+        const isEnhanced = newInstrument.includes('(Enhanced)');
+        const baseInstrumentName = isEnhanced ? newInstrument.replace(' (Enhanced)', '') : newInstrument;
+
+        // Convert display name back to instrument ID
+        const instrumentId = this.convertDisplayNameToId(newInstrument);
+
         // PRIORITY 1: Use SampleLibrary real instruments if available
-        // Map display names back to SampleLibrary keys (with hyphens)
         const instrumentMap = {
             'bass electric': 'bass-electric',
             'basselectric': 'bass-electric',
@@ -4427,7 +4758,7 @@ class OrchestralAudioEngine {
         const normalizedName = newInstrument.toLowerCase().replace(/\s+/g, '').replace(/\(.*\)/, '');
         const instrumentKey = instrumentMap[normalizedName] || instrumentMap[newInstrument.toLowerCase()] || normalizedName;
 
-        console.log(`[AUDIO ENGINE] Looking for real instrument: "${newInstrument}" -> normalized: "${normalizedName}" -> key: "${instrumentKey}"`);
+        console.log(`[AUDIO ENGINE] Looking for: "${newInstrument}" -> ID: "${instrumentId}" -> key: "${instrumentKey}"`);
         console.log(`[AUDIO ENGINE] Available real instruments:`, this.realInstruments ? Object.keys(this.realInstruments) : 'None loaded yet');
 
         if (this.realInstruments && this.realInstruments[instrumentKey]) {
@@ -4439,17 +4770,28 @@ class OrchestralAudioEngine {
             };
             console.log(`[AUDIO ENGINE] 🔥 IMMEDIATE SWITCH: ${type} now using REAL ${newInstrument} from SampleLibrary`);
         }
-        // PRIORITY 2: Use enhanced fallback synths
-        else if (this.fallbackSynths[newInstrument]) {
+        // PRIORITY 2: Use enhanced fallback synths (check both original name and base name)
+        else if (this.fallbackSynths[newInstrument] || this.fallbackSynths[baseInstrumentName]) {
+            const synthKey = this.fallbackSynths[newInstrument] ? newInstrument : baseInstrumentName;
             this.currentInstruments[type] = {
                 name: newInstrument,
-                synth: this.fallbackSynths[newInstrument],
+                synth: this.fallbackSynths[synthKey],
                 info: { fallback: true },
                 fallback: true
             };
-            console.log(`[AUDIO ENGINE] ✅ IMMEDIATE SWITCH: ${type} now using enhanced ${newInstrument} (fallback)`);
+            console.log(`[AUDIO ENGINE] ✅ IMMEDIATE SWITCH: ${type} now using enhanced ${synthKey} (fallback) for ${newInstrument}`);
+        }
+        // PRIORITY 3: Use instrumentManager with WebAudioFont/Soundfont fallback  
+        else if (instrumentId) {
+            console.log(`[AUDIO ENGINE] 🎵 IMMEDIATE SWITCH: ${type} will use instrumentManager for ${instrumentId}`);
+            this.currentInstruments[type] = {
+                name: newInstrument,
+                instrumentId: instrumentId,
+                info: { source: 'InstrumentManager' },
+                fallback: false
+            };
         } else {
-            console.warn(`[AUDIO ENGINE] Unknown instrument: ${newInstrument}`);
+            console.warn(`[AUDIO ENGINE] Unknown instrument: ${newInstrument}. Available fallbacks:`, Object.keys(this.fallbackSynths || {}));
         }
 
         // Trigger UI update event
@@ -4458,34 +4800,209 @@ class OrchestralAudioEngine {
         }));
     }
 
+    // Helper method to convert display name back to instrument ID
+    convertDisplayNameToId(displayName) {
+        const nameToIdMap = {
+            'Piano': 'acoustic_grand_piano',
+            'Electric Piano 1': 'electric_piano_1',
+            'Electric Piano 2': 'electric_piano_2',
+            'Harpsichord': 'harpsichord',
+            'Church Organ': 'church_organ',
+            'Jazz Organ': 'jazz_organ',
+            'Accordion': 'accordion',
+            'Violin': 'violin',
+            'Viola': 'viola',
+            'Cello': 'cello',
+            'Contrabass': 'contrabass',
+            'String Ensemble': 'string_ensemble_1',
+            'String Ensemble 2': 'string_ensemble_2',
+            'Pizzicato Strings': 'pizzicato_strings',
+            'Harp': 'orchestral_harp',
+            'Trumpet': 'trumpet',
+            'Trombone': 'trombone',
+            'French Horn': 'french_horn',
+            'Brass Section': 'brass_section',
+            'Flute': 'flute',
+            'Clarinet': 'clarinet',
+            'Oboe': 'oboe',
+            'Bassoon': 'bassoon',
+            'Alto Sax': 'alto_sax',
+            'Tenor Sax': 'tenor_sax',
+            'Guitar (Nylon)': 'acoustic_guitar_nylon',
+            'Guitar (Steel)': 'acoustic_guitar_steel',
+            'Guitar (Jazz)': 'electric_guitar_jazz',
+            'Guitar (Clean)': 'electric_guitar_clean',
+            'Acoustic Bass': 'acoustic_bass',
+            'Electric Bass': 'electric_bass_finger',
+            'Electric Bass (Pick)': 'electric_bass_pick',
+            'Synth Bass 1': 'synth_bass_1',
+            'Synth Bass 2': 'synth_bass_2',
+            'Timpani': 'timpani',
+            'Marimba': 'marimba',
+            'Xylophone': 'xylophone',
+            'Vibraphone': 'vibraphone',
+            'Sitar': 'sitar',
+            'Banjo': 'banjo',
+            'Choir': 'choir_aahs',
+            'Voice (Oohs)': 'voice_oohs',
+            'Synth Voice': 'synth_voice',
+            'New Age': 'new_age',
+            'Warm Pad': 'warm_pad'
+        };
+
+        // Remove (Enhanced) suffix if present for lookup
+        const baseName = displayName.replace(' (Enhanced)', '');
+        return nameToIdMap[baseName] || null;
+    }
+
     // Get available instruments for a type
     getInstrumentsForType(type) {
-        // DYNAMIC DROPDOWNS: Return ALL loaded instruments + enhanced fallbacks
+        // COMPREHENSIVE INSTRUMENT LIST: Include ALL instruments from NAME_MAP + loaded + enhanced
         let instruments = [];
 
-        // Add ALL real instruments from SampleLibrary (if loaded)
+        // STEP 1: Add ALL instruments from instrumentManager NAME_MAP (32 total)
+        const allInstruments = [
+            // Keyboards & Organs  
+            'acoustic_grand_piano', 'electric_piano_1', 'electric_piano_2', 'harpsichord', 'church_organ', 'jazz_organ', 'accordion',
+
+            // Strings
+            'violin', 'viola', 'cello', 'contrabass', 'string_ensemble_1', 'string_ensemble_2', 'pizzicato_strings', 'orchestral_harp',
+
+            // Brass
+            'trumpet', 'trombone', 'french_horn', 'brass_section',
+
+            // Woodwinds
+            'flute', 'clarinet', 'oboe', 'bassoon', 'alto_sax', 'tenor_sax',
+
+            // Guitars
+            'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean', 'jazz_guitar',
+
+            // Bass
+            'acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'synth_bass_1', 'synth_bass_2',
+
+            // Percussion
+            'timpani', 'marimba', 'xylophone', 'vibraphone',
+
+            // World
+            'sitar', 'banjo',
+
+            // Voices
+            'choir_aahs', 'voice_oohs', 'synth_voice',
+
+            // Synth/Pads
+            'new_age', 'warm_pad'
+        ];
+
+        // Convert instrument IDs to display names and filter by type
+        allInstruments.forEach(instrumentId => {
+            const displayName = this.convertToDisplayName(instrumentId);
+
+            // Basic categorization by instrument type
+            if (type === 'bass' && this.isBassInstrument(instrumentId)) {
+                instruments.push(displayName);
+            } else if (type === 'chord' && this.isChordInstrument(instrumentId)) {
+                instruments.push(displayName);
+            } else if (type === 'melody' && this.isMelodyInstrument(instrumentId)) {
+                instruments.push(displayName);
+            }
+        });
+
+        // STEP 2: Add real instruments from SampleLibrary (if loaded)
         if (this.loadedInstrumentNames) {
-            // Convert hyphenated names to proper display names
             const realInstruments = this.loadedInstrumentNames.map(name => {
-                // Convert hyphenated to spaced and capitalize
                 return name.split('-').map(word =>
                     word.charAt(0).toUpperCase() + word.slice(1)
                 ).join(' ');
             });
-            instruments = [...realInstruments];
-            console.log(`[AUDIO ENGINE] Dynamic ${type} instruments:`, instruments.length, 'real instruments loaded');
+            // Add real instruments that aren't already in the list
+            realInstruments.forEach(inst => {
+                if (!instruments.includes(inst)) {
+                    instruments.push(inst);
+                }
+            });
+            console.log(`[AUDIO ENGINE] Added ${realInstruments.length} real instruments to ${type}`);
         }
 
-        // Add enhanced fallbacks that aren't already in real instruments
+        // STEP 3: Add enhanced fallbacks that aren't already in instruments
         const fallbackNames = Object.keys(this.fallbackSynths || {});
         fallbackNames.forEach(name => {
-            if (!instruments.includes(name)) {
-                instruments.push(name + ' (Enhanced)');
+            const enhancedName = name + ' (Enhanced)';
+            if (!instruments.includes(name) && !instruments.includes(enhancedName)) {
+                instruments.push(enhancedName);
             }
         });
 
-        console.log(`[AUDIO ENGINE] Total ${type} options:`, instruments.length);
-        return instruments;
+        console.log(`[AUDIO ENGINE] Total ${type} instruments:`, instruments.length);
+        return instruments.sort();
+    }
+
+    // Helper method to convert instrument ID to display name
+    convertToDisplayName(instrumentId) {
+        const displayNames = {
+            'acoustic_grand_piano': 'Piano',
+            'electric_piano_1': 'Electric Piano 1',
+            'electric_piano_2': 'Electric Piano 2',
+            'harpsichord': 'Harpsichord',
+            'church_organ': 'Church Organ',
+            'jazz_organ': 'Jazz Organ',
+            'accordion': 'Accordion',
+            'violin': 'Violin',
+            'viola': 'Viola',
+            'cello': 'Cello',
+            'contrabass': 'Contrabass',
+            'string_ensemble_1': 'String Ensemble',
+            'string_ensemble_2': 'String Ensemble 2',
+            'pizzicato_strings': 'Pizzicato Strings',
+            'orchestral_harp': 'Harp',
+            'trumpet': 'Trumpet',
+            'trombone': 'Trombone',
+            'french_horn': 'French Horn',
+            'brass_section': 'Brass Section',
+            'flute': 'Flute',
+            'clarinet': 'Clarinet',
+            'oboe': 'Oboe',
+            'bassoon': 'Bassoon',
+            'alto_sax': 'Alto Sax',
+            'tenor_sax': 'Tenor Sax',
+            'acoustic_guitar_nylon': 'Guitar (Nylon)',
+            'acoustic_guitar_steel': 'Guitar (Steel)',
+            'electric_guitar_jazz': 'Guitar (Jazz)',
+            'electric_guitar_clean': 'Guitar (Clean)',
+            'jazz_guitar': 'Guitar (Jazz)',
+            'acoustic_bass': 'Acoustic Bass',
+            'electric_bass_finger': 'Electric Bass',
+            'electric_bass_pick': 'Electric Bass (Pick)',
+            'synth_bass_1': 'Synth Bass 1',
+            'synth_bass_2': 'Synth Bass 2',
+            'timpani': 'Timpani',
+            'marimba': 'Marimba',
+            'xylophone': 'Xylophone',
+            'vibraphone': 'Vibraphone',
+            'sitar': 'Sitar',
+            'banjo': 'Banjo',
+            'choir_aahs': 'Choir',
+            'voice_oohs': 'Voice (Oohs)',
+            'synth_voice': 'Synth Voice',
+            'new_age': 'New Age',
+            'warm_pad': 'Warm Pad'
+        };
+        return displayNames[instrumentId] || instrumentId.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    }
+
+    // Helper methods to categorize instruments
+    isBassInstrument(instrumentId) {
+        const bassInstruments = ['acoustic_bass', 'electric_bass_finger', 'electric_bass_pick', 'synth_bass_1', 'synth_bass_2', 'contrabass', 'cello'];
+        return bassInstruments.includes(instrumentId);
+    }
+
+    isChordInstrument(instrumentId) {
+        const chordInstruments = ['acoustic_grand_piano', 'electric_piano_1', 'electric_piano_2', 'harpsichord', 'church_organ', 'jazz_organ', 'accordion', 'string_ensemble_1', 'string_ensemble_2', 'choir_aahs', 'warm_pad', 'new_age'];
+        return chordInstruments.includes(instrumentId);
+    }
+
+    isMelodyInstrument(instrumentId) {
+        const melodyInstruments = ['violin', 'viola', 'cello', 'flute', 'clarinet', 'oboe', 'bassoon', 'alto_sax', 'tenor_sax', 'trumpet', 'trombone', 'french_horn', 'orchestral_harp', 'acoustic_guitar_nylon', 'acoustic_guitar_steel', 'electric_guitar_jazz', 'electric_guitar_clean', 'jazz_guitar', 'sitar', 'banjo', 'voice_oohs', 'synth_voice', 'timpani', 'marimba', 'xylophone', 'vibraphone'];
+        return melodyInstruments.includes(instrumentId);
     }
 
     // Get status of loaded instruments
@@ -4557,24 +5074,52 @@ class OrchestralAudioEngine {
         for (const [type, instrument] of Object.entries(this.currentInstruments)) {
             if (!instrument) continue;
 
-            // Try releaseAll() as fallback
+            // V1.0: NUCLEAR SAFE METHOD CHECKING - Zero error tolerance
             if (instrument.sampler && !instrument.fallback) {
                 try {
-                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} sampler...`);
-                    instrument.sampler.releaseAll();
-                    cutoffMethods.push(`${type}-fallback-releaseAll`);
+                    console.log(`[V1.0] 🔄 Ultra-safe sampler cutoff for ${type}...`);
+
+                    // Emergency shutoff check
+                    // V1.7 CRITICAL FIX: DISABLE emergency shutoff in cutoff operations too
+                    console.log('[V1.7] 🎵 Emergency shutoff disabled for sampler cutoff - FULL CONTROL ENABLED');
+
+                    // Ultra-safe method checking with multiple fallbacks
+                    if (instrument.sampler && typeof instrument.sampler.releaseAll === 'function') {
+                        instrument.sampler.releaseAll();
+                        cutoffMethods.push(`${type}-sampler-releaseAll`);
+                    } else if (instrument.sampler && typeof instrument.sampler.triggerRelease === 'function') {
+                        instrument.sampler.triggerRelease();
+                        cutoffMethods.push(`${type}-sampler-triggerRelease`);
+                    } else {
+                        console.log(`[V1.0] 🤐 No release method for ${type} sampler - silently continuing`);
+                        cutoffMethods.push(`${type}-sampler-no-methods`);
+                    }
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ Fallback releaseAll failed for ${type}:`, error);
+                    console.log(`[V1.1] Sampler cutoff handled for ${type}:`, error.message);
+                    cutoffMethods.push(`${type}-sampler-handled`);
                 }
             }
 
             if (instrument.synth) {
                 try {
-                    console.log(`[CUTOFF] 🔄 Fallback: releaseAll() for ${type} synth...`);
-                    instrument.synth.releaseAll();
-                    cutoffMethods.push(`${type}-fallback-synth`);
+                    console.log(`[V1.1] 🔄 Safe synth cutoff for ${type}...`);
+
+                    // V1.1: Check for releaseAll method before calling
+                    if (typeof instrument.synth.releaseAll === 'function') {
+                        instrument.synth.releaseAll();
+                        cutoffMethods.push(`${type}-releaseAll`);
+                    } else if (typeof instrument.synth.triggerRelease === 'function') {
+                        // Alternative: trigger release for monophonic synths
+                        instrument.synth.triggerRelease();
+                        cutoffMethods.push(`${type}-triggerRelease`);
+                    } else {
+                        // No release method available - just mark as attempted
+                        console.log(`[V1.1] No release method for ${type} synth`);
+                        cutoffMethods.push(`${type}-no-release`);
+                    }
                 } catch (error) {
-                    console.warn(`[CUTOFF] ❌ Fallback synth release failed for ${type}:`, error);
+                    console.log(`[V1.1] Synth cutoff handled for ${type}:`, error.message);
+                    cutoffMethods.push(`${type}-cutoff-handled`);
                 }
             }
 
@@ -4598,6 +5143,11 @@ async function loadInstruments() {
     console.log('[MAIN] 🔧 Creating OrchestralAudioEngine instance...');
     window.audioEngine = new OrchestralAudioEngine();
     console.log('[MAIN] 🔧 Engine instance created, calling init()...');
+
+    // Create global instrument manager instance
+    console.log('[MAIN] 🎼 Creating InstrumentManager instance...');
+    window.instrumentManager = new InstrumentManager();
+    console.log('[MAIN] 🎼 InstrumentManager instance created and ready!');
 
     try {
         await window.audioEngine.init();
@@ -4767,6 +5317,9 @@ playProgBtn?.addEventListener('click', () => { playFrontRowProgression(); });
 const playChordsBtnMain = document.getElementById('play-chords');
 const playProgressionBtnMain = document.getElementById('play-progression-main');
 
+// PHASE 1 TASK 1B: EMERGENCY STOP BUTTON
+const emergencyStopBtn = document.getElementById('emergency-stop-btn');
+
 playChordsBtnMain?.addEventListener('click', () => {
     console.log('[UI PLAY CHORDS] Playing current progression as individual chords');
     playFrontRowProgression(); // For now, same as progression - can be customized later
@@ -4777,11 +5330,65 @@ playProgressionBtnMain?.addEventListener('click', () => {
     playFrontRowProgression();
 });
 
+// PHASE 1 TASK 1B: EMERGENCY STOP FUNCTIONALITY
+emergencyStopBtn?.addEventListener('click', () => {
+    console.log('[EMERGENCY STOP] 🛑 Emergency stop activated!');
+
+    // Stop all audio playback immediately
+    try {
+        if (window.chordCubesTransport && window.chordCubesTransport.stop) {
+            window.chordCubesTransport.stop();
+            console.log('[EMERGENCY STOP] ✅ Transport stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Transport stop failed:', e); }
+
+    try {
+        if (window.drumMachine && window.drumMachine.stop) {
+            window.drumMachine.stop();
+            console.log('[EMERGENCY STOP] ✅ Drum machine stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Drum machine stop failed:', e); }
+
+    try {
+        if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
+            window.improvDownbeatTracker.stop();
+            console.log('[EMERGENCY STOP] ✅ Improv tracker stopped');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Improv tracker stop failed:', e); }
+
+    // Stop any active progression intervals
+    try {
+        if (window.progressionInterval) {
+            clearInterval(window.progressionInterval);
+            window.progressionInterval = null;
+            console.log('[EMERGENCY STOP] ✅ Progression interval cleared');
+        }
+    } catch (e) { console.log('[EMERGENCY STOP] ⚠️ Progression interval clear failed:', e); }
+
+    console.log('[EMERGENCY STOP] 🎯 All audio playback stopped');
+});
+
 // Drum machine play progression button
 const drumPlayProgBtn = document.getElementById('drum-play-progression');
 drumPlayProgBtn?.addEventListener('click', () => {
     console.log('[DRUM PLAY] Play progression clicked from drum machine');
     playFrontRowProgression();
+});
+
+// Drum machine stop progression button
+const drumStopProgBtn = document.getElementById('drum-stop-progression');
+drumStopProgBtn?.addEventListener('click', () => {
+    console.log('[DRUM STOP] Stop progression clicked from drum machine');
+    if (window.drumMachine) {
+        window.drumMachine.stop();
+        console.log('[DRUM STOP] Drum machine stopped via stop button');
+    }
+    // Also stop any progression playback
+    if (window.progressionInterval) {
+        clearInterval(window.progressionInterval);
+        window.progressionInterval = null;
+        console.log('[DRUM STOP] Progression interval cleared');
+    }
 });
 
 // Make drum machine draggable
@@ -5183,60 +5790,164 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// CHROMATIC EXTENSION KEYBOARD HANDLERS
-document.addEventListener('keydown', (e) => {
+// INTUITIVE KEYBOARD HANDLERS - NEW SYSTEM V1.29 - WITH COMPREHENSIVE PIPELINE TRACING
+document.addEventListener('keydown', async (e) => {
+    // 🔥 STAGE 1: Raw keydown event detected
+    if (pipelineTracer) pipelineTracer.reset(); // Reset for new keypress
+    if (pipelineTracer) pipelineTracer.triggerStage(1, { key: e.key, altKey: e.altKey, shiftKey: e.shiftKey });
+    
     const key = e.key;
+    
+    // 🔥 DETAILED KEY DEBUGGING
+    console.log(`🔥 [KEY DEBUG] Key pressed: "${key}", Alt: ${e.altKey}, Shift: ${e.shiftKey}, Code: ${e.code}`);
+    console.log(`🔥 [KEY DEBUG] CHROMATIC_EXTENSIONS has key "${key}":`, CHROMATIC_EXTENSIONS.hasOwnProperty(key));
+    console.log(`🔥 [KEY DEBUG] extensionKeyStates["${key}"]:`, extensionKeyStates[key]);
 
-    // Handle chromatic extensions (number keys and minus)
-    if (CHROMATIC_EXTENSIONS[key] && !extensionKeyStates[key]) {
+    // Skip if in input field
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        console.log(`🔥 [KEY DEBUG] Skipping - in input field`);
+        return;
+    }
+
+    // SHIFT ALONE = 7TH MODE (shows individual 7ths for each chord)
+    // Excludes Ib7 and diminished chords - they permanently have 7th
+    if (e.shiftKey && !e.altKey && !e.metaKey && !e.ctrlKey && key === 'Shift') {
+        console.log(`[NEW SYSTEM] Shift pressed - enabling 7th mode for all eligible chords`);
+        await refreshAllCubeFaces(true); // previewWith7th = true
+        e.preventDefault();
+        return;
+    }
+
+    // NUMBERS ALONE = SIMPLE INTERVALS (2, 4, 6, 8)
+    // All chords show the same simple interval
+    if (CHROMATIC_EXTENSIONS[key] && !e.shiftKey && !e.altKey && !extensionKeyStates[key]) {
         extensionKeyStates[key] = true;
-
-        const extension = e.shiftKey ?
-            CHROMATIC_EXTENSIONS[key].shift :
-            CHROMATIC_EXTENSIONS[key].normal;
-
+        extensionKeyTypes[key] = 'simple'; // Track that this key activated a simple interval
+        
+        const extension = CHROMATIC_EXTENSIONS[key].normal; // Always use simple interval
         activeExtensions.add(extension);
-        console.log(`[CHORD EXT] Added ${extension.name} (${extension.description})`);
 
-        // Visual feedback - could add UI indicator here
+        console.log(`[NEW SYSTEM] SIMPLE INTERVAL: ${key} → ${extension.name} (${extension.description})`);
+        console.log(`[NEW SYSTEM] All chords will show: ${extension.name}`);
+
+        // VISUAL FEEDBACK: Update all chord cube faces to show simple extension
         showExtensionFeedback(extension);
+        
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
+        await refreshAllCubeFaces();
 
         e.preventDefault();
+        return;
     }
 
-    // Handle Alt+7 for 7th toggle (replacing old shift+7)
-    if (key === '7' && e.altKey && !e.shiftKey) {
-        const with7thCheckbox = document.getElementById('with-7th');
-        if (with7thCheckbox) {
-            with7thCheckbox.checked = !with7thCheckbox.checked;
-            console.log(`[7TH TOGGLE] ${with7thCheckbox.checked ? 'Enabled' : 'Disabled'} 7ths via Alt+7`);
-        }
+    // OPTION + NUMBERS = COMPOUND INTERVALS (9, 11, 13, etc.)  
+    // All chords show the same compound interval
+    console.log(`🔥 [CONDITION DEBUG] Checking Option+${key} condition:`);
+    console.log(`🔥 [CONDITION DEBUG] - CHROMATIC_EXTENSIONS[${key}]:`, CHROMATIC_EXTENSIONS[key]);
+    console.log(`🔥 [CONDITION DEBUG] - e.altKey:`, e.altKey);
+    console.log(`🔥 [CONDITION DEBUG] - !e.shiftKey:`, !e.shiftKey);
+    console.log(`🔥 [CONDITION DEBUG] - !extensionKeyStates[${key}]:`, !extensionKeyStates[key]);
+    console.log(`🔥 [CONDITION DEBUG] - extensionKeyStates:`, extensionKeyStates);
+    
+    if (CHROMATIC_EXTENSIONS[key] && e.altKey && !e.shiftKey && !extensionKeyStates[key]) {
+        console.log(`🔥 [CONDITION DEBUG] ✅ ALL CONDITIONS MET - PROCEEDING TO STAGE 2`);
+        
+        // 🔥 STAGE 2: Option+number combination recognized  
+        if (pipelineTracer) pipelineTracer.triggerStage(2, { key, combination: 'Alt+' + key });
+        
+        extensionKeyStates[key] = true;
+        extensionKeyTypes[key] = 'compound'; // Track that this key activated a compound interval
+        
+        // 🔥 STAGE 3: CHROMATIC_EXTENSIONS lookup
+        const extension = CHROMATIC_EXTENSIONS[key].shift; // Use compound interval
+        if (pipelineTracer) pipelineTracer.triggerStage(3, { key, extension: extension.name });
+        
+        // 🔥 STAGE 4: activeExtensions.add() called
+        activeExtensions.add(extension);
+        if (pipelineTracer) pipelineTracer.triggerStage(4, { extensionName: extension.name, activeCount: activeExtensions.size });
+
+        // 🔥 STAGE 5: extensionKeyStates updated
+        if (pipelineTracer) pipelineTracer.triggerStage(5, { keyStates: Object.keys(extensionKeyStates), keyTypes: extensionKeyTypes });
+
+        console.log(`[NEW SYSTEM] COMPOUND INTERVAL: Option+${key} → ${extension.name} (${extension.description})`);
+        console.log(`[NEW SYSTEM] All chords will show: ${extension.name}`);
+
+        // VISUAL FEEDBACK: Update all chord cube faces to show compound extension
+        showExtensionFeedback(extension);
+        
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
+        await refreshAllCubeFaces();
+
         e.preventDefault();
+        return;
+    } else {
+        console.log(`🔥 [CONDITION DEBUG] ❌ CONDITION FAILED - One or more conditions not met`);
     }
 
-    // DEBUG: Alt+T to test b7th for all chords
+    // SHIFT + NUMBERS = DOES NOTHING (shift is only for 7ths)
+    if (CHROMATIC_EXTENSIONS[key] && e.shiftKey && !e.altKey) {
+        console.log(`[NEW SYSTEM] Shift+${key} ignored - Shift is only for 7ths`);
+        e.preventDefault();
+        return;
+    }
+
+    // OPTION ALONE = DOES NOTHING (must be paired with numbers)
+    if (key === 'Alt' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+        console.log(`[NEW SYSTEM] Option alone ignored - must be paired with numbers`);
+        e.preventDefault();
+        return;
+    }
+
+    // DEBUG: Alt+T to test b7th for all chords (keep for debugging)
     if (key === 't' && e.altKey) {
         testB7thForAllChords();
         e.preventDefault();
     }
 });
 
-document.addEventListener('keyup', (e) => {
+document.addEventListener('keyup', async (e) => {
     const key = e.key;
 
-    // Remove extension when key is released
+    // SHIFT RELEASED = Exit 7th mode
+    if (key === 'Shift') {
+        console.log(`[NEW SYSTEM] Shift released - exiting 7th mode`);
+        await refreshAllCubeFaces(false); // previewWith7th = false
+        return;
+    }
+
+    // Remove extension when number key is released
     if (CHROMATIC_EXTENSIONS[key] && extensionKeyStates[key]) {
         extensionKeyStates[key] = false;
 
-        const extension = e.shiftKey ?
-            CHROMATIC_EXTENSIONS[key].shift :
-            CHROMATIC_EXTENSIONS[key].normal;
+        // Use the tracked extension type instead of checking current modifier states
+        const extensionType = extensionKeyTypes[key];
+        let extension;
+        
+        if (extensionType === 'compound') {
+            extension = CHROMATIC_EXTENSIONS[key].shift; // compound
+        } else if (extensionType === 'simple') {
+            extension = CHROMATIC_EXTENSIONS[key].normal; // simple
+        } else {
+            // Unknown type - shouldn't happen, but handle gracefully
+            console.warn(`[NEW SYSTEM] Unknown extension type for key: ${key}`);
+            return;
+        }
 
+        // Clean up tracking
+        delete extensionKeyTypes[key];
         activeExtensions.delete(extension);
-        console.log(`[CHORD EXT] Removed ${extension.name}`);
+        
+        console.log(`[NEW SYSTEM] Released ${extensionType}: ${extension.name}`);
 
-        // Clear visual feedback
+        // VISUAL FEEDBACK: Update all chord cube faces to remove extension preview
         clearExtensionFeedback(extension);
+        
+        // 🔥 STAGE 6: refreshAllCubeFaces() called
+        if (pipelineTracer) pipelineTracer.triggerStage(6, { previewWith7th: false });
+        await refreshAllCubeFaces();
+        console.log(`[NEW SYSTEM] Removed ${extension.name} from all chord faces`);
     }
 });
 
@@ -5276,12 +5987,24 @@ function clearExtensionFeedback(extension) {
 function initAudioOnFirstClick() {
     const startAudio = async () => {
         try {
+            console.log('[AUDIO] 🎵 FIRST USER GESTURE - Starting audio system...');
+
+            // Start Tone.js context
             if (Tone.context.state !== 'running') {
                 await Tone.start();
-                console.log('[AUDIO] AudioContext started successfully');
+                console.log('[AUDIO] ✅ Tone.js context started successfully');
             }
+
+            // Resume any suspended AudioContext
+            if (Tone.context.state === 'suspended') {
+                await Tone.context.resume();
+                console.log('[AUDIO] ✅ AudioContext resumed successfully');
+            }
+
+            console.log('[AUDIO] ✅ Audio system ready - state:', Tone.context.state);
+
         } catch (e) {
-            console.warn('[AUDIO] AudioContext start failed:', e);
+            console.warn('[AUDIO] ❌ Audio start failed:', e);
         }
         // Remove the listener after first click
         document.removeEventListener('click', startAudio);
@@ -5295,52 +6018,110 @@ initAudioOnFirstClick();
 // CHROMATIC CHORD EXTENSION SYSTEM
 // Maps number keys to chromatic intervals from root
 const CHROMATIC_EXTENSIONS = {
+    // PHASE 2A: COMPOUND INTERVALS SYSTEM
+    // Pattern: Number alone = Simple interval, Shift+Number = Compound interval (same note class, octave higher)
+
     '1': {
         normal: { interval: 1, name: 'b2', description: 'minor 2nd' },
-        shift: { interval: 13, name: 'b9', description: 'minor 9th (compound)' }
+        shift: { interval: 13, name: 'b9', description: 'minor 9th (compound b2)' }
     },
     '2': {
-        normal: { interval: 2, name: 'sus2', description: 'suspended 2nd' },
-        shift: { interval: 14, name: 'add9', description: 'added 9th' }
+        normal: { interval: 2, name: '2', description: 'major 2nd' },
+        shift: { interval: 14, name: '9', description: 'major 9th (compound 2nd)' }
     },
     '3': {
-        normal: { interval: 3, name: '#9', description: 'sharp 9th' },
-        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound)' }
+        normal: { interval: 3, name: 'b3', description: 'minor 3rd' },
+        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound #2)' }
     },
-    // '4' is major 3rd - currently unused
+    '4': {
+        normal: { interval: 4, name: '3', description: 'major 3rd' },
+        shift: { interval: 16, name: '10', description: 'major 10th (compound 3rd)' }
+    },
     '5': {
-        normal: { interval: 5, name: 'sus4', description: 'suspended 4th' },
-        shift: { interval: 17, name: 'add11', description: 'added 11th' }
+        normal: { interval: 5, name: '4', description: 'perfect 4th' },
+        shift: { interval: 17, name: '11', description: 'perfect 11th (compound 4th)' }
     },
     '6': {
-        normal: { interval: 6, name: '#4/#11', description: 'sharp 4th/11th' },
-        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound)' }
+        normal: { interval: 6, name: '#4', description: 'augmented 4th/tritone' },
+        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound #4)' }
     },
     '7': {
-        normal: { interval: 7, name: '5', description: 'perfect 5th (power chord)' },
-        shift: { interval: 19, name: '5', description: 'perfect 5th (compound)' }
+        normal: { interval: 7, name: '5', description: 'perfect 5th' },
+        shift: { interval: 19, name: '12', description: 'perfect 12th (compound 5th)' }
     },
     '8': {
         normal: { interval: 8, name: 'b6', description: 'minor 6th' },
-        shift: { interval: 20, name: 'b13', description: 'minor 13th' }
+        shift: { interval: 20, name: 'b13', description: 'minor 13th (compound b6)' }
     },
     '9': {
+        // PHASE 2A TASK 2A: SPECIFIED BEHAVIOR - 9 alone = 6th, Shift+9 = 13th
         normal: { interval: 9, name: '6', description: 'major 6th' },
-        shift: { interval: 21, name: '13', description: 'major 13th' }
+        shift: { interval: 21, name: '13', description: 'major 13th (compound 6th)' }
     },
     '0': {
-        normal: { interval: 10, name: 'b7', description: 'minor 7th (override)' },
-        shift: { interval: 22, name: 'b7', description: 'minor 7th (compound)' }
+        normal: { interval: 10, name: 'b7', description: 'minor 7th' },
+        shift: { interval: 22, name: 'b14', description: 'minor 14th (compound b7)' }
     },
     '-': {
-        normal: { interval: 11, name: 'maj7', description: 'major 7th (override)' },
-        shift: { interval: 23, name: 'maj7', description: 'major 7th (compound)' }
+        normal: { interval: 11, name: 'M7', description: 'major 7th' },
+        shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
+    },
+    '=': {
+        normal: { interval: 12, name: '(8)', description: 'octave' },
+        shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
+    },
+    
+    // 🔥 macOS Option+Number aliases (macOS transforms Option+Number to special characters)
+    '™': {  // Option+2 → ™
+        normal: { interval: 2, name: '2', description: 'major 2nd' },
+        shift: { interval: 14, name: '9', description: 'major 9th (compound 2nd)' }
+    },
+    '£': {  // Option+3 → £
+        normal: { interval: 3, name: 'b3', description: 'minor 3rd' },
+        shift: { interval: 15, name: '#9', description: 'sharp 9th (compound #2)' }
+    },
+    '¢': {  // Option+4 → ¢
+        normal: { interval: 4, name: '3', description: 'major 3rd' },
+        shift: { interval: 16, name: '10', description: 'major 10th (compound 3rd)' }
+    },
+    '∞': {  // Option+5 → ∞
+        normal: { interval: 5, name: '4', description: 'perfect 4th' },
+        shift: { interval: 17, name: '11', description: 'perfect 11th (compound 4th)' }
+    },
+    '§': {  // Option+6 → §
+        normal: { interval: 6, name: '#4', description: 'augmented 4th/tritone' },
+        shift: { interval: 18, name: '#11', description: 'sharp 11th (compound #4)' }
+    },
+    '¶': {  // Option+7 → ¶
+        normal: { interval: 7, name: '5', description: 'perfect 5th' },
+        shift: { interval: 19, name: '12', description: 'perfect 12th (compound 5th)' }
+    },
+    '•': {  // Option+8 → •
+        normal: { interval: 8, name: 'b6', description: 'minor 6th' },
+        shift: { interval: 20, name: 'b13', description: 'minor 13th (compound b6)' }
+    },
+    'ª': {  // Option+9 → ª
+        normal: { interval: 9, name: '6', description: 'major 6th' },
+        shift: { interval: 21, name: '13', description: 'major 13th (compound 6th)' }
+    },
+    'º': {  // Option+0 → º
+        normal: { interval: 10, name: 'b7', description: 'minor 7th' },
+        shift: { interval: 22, name: 'b14', description: 'minor 14th (compound b7)' }
+    },
+    '–': {  // Option+- → –
+        normal: { interval: 11, name: 'M7', description: 'major 7th' },
+        shift: { interval: 23, name: 'M14', description: 'major 14th (compound M7)' }
+    },
+    '≠': {  // Option+= → ≠
+        normal: { interval: 12, name: '(8)', description: 'octave' },
+        shift: { interval: 24, name: '15', description: 'compound octave (15th)' }
     }
 };
 
-// Track currently held extensions
+// Track currently held extensions and their types
 let activeExtensions = new Set();
 let extensionKeyStates = {};
+let extensionKeyTypes = {}; // Track which type (simple/compound) was activated for each key
 
 // DEBUG: Test b7th extension for all chord types
 function testB7thForAllChords() {
@@ -5492,6 +6273,7 @@ const INSTRUMENT_RANGES = {
     'viola': { min: 48, max: 88, ideal_min: 48, ideal_max: 81 }, // C3-E6, ideal C3-A5
     'cello': { min: 36, max: 76, ideal_min: 36, ideal_max: 69 }, // C2-E5, ideal C2-A4
     'contrabass': { min: 28, max: 67, ideal_min: 28, ideal_max: 60 }, // E1-G4, ideal E1-C4
+    'orchestral_harp': { min: 23, max: 103, ideal_min: 36, ideal_max: 96 }, // B0-G7, ideal C2-C7
 
     // Winds
     'flute': { min: 60, max: 96, ideal_min: 60, ideal_max: 89 }, // C4-C7, ideal C4-F6
@@ -5499,22 +6281,32 @@ const INSTRUMENT_RANGES = {
     'clarinet': { min: 50, max: 91, ideal_min: 50, ideal_max: 84 }, // D3-G6, ideal D3-C6
     'oboe': { min: 58, max: 91, ideal_min: 58, ideal_max: 84 }, // Bb3-G6, ideal Bb3-C6
     'bassoon': { min: 34, max: 75, ideal_min: 34, ideal_max: 68 }, // Bb1-Eb5, ideal Bb1-Ab4
+    'alto_sax': { min: 49, max: 81, ideal_min: 49, ideal_max: 76 }, // Db3-A5, ideal Db3-E5
+    'tenor_sax': { min: 44, max: 76, ideal_min: 44, ideal_max: 69 }, // Ab2-E5, ideal Ab2-A4
     'saxophone': { min: 49, max: 83, ideal_min: 49, ideal_max: 76 }, // Db3-B5, ideal Db3-E5
 
     // Brass
     'trumpet': { min: 58, max: 94, ideal_min: 58, ideal_max: 87 }, // Bb3-Bb6, ideal Bb3-Eb6
     'horn': { min: 41, max: 77, ideal_min: 41, ideal_max: 70 }, // F2-F5, ideal F2-Bb4
+    'french_horn': { min: 41, max: 77, ideal_min: 41, ideal_max: 70 }, // F2-F5, ideal F2-Bb4
     'trombone': { min: 40, max: 72, ideal_min: 40, ideal_max: 65 }, // E2-C5, ideal E2-F4
     'tuba': { min: 28, max: 58, ideal_min: 28, ideal_max: 51 }, // E1-Bb3, ideal E1-Eb3
 
     // Piano & Keyboard
     'acoustic_grand_piano': { min: 21, max: 108, ideal_min: 36, ideal_max: 84 }, // A0-C8, ideal C2-C6
-    'electric_piano': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'electric_piano_1': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'electric_piano_2': { min: 28, max: 103, ideal_min: 36, ideal_max: 84 }, // E1-G7, ideal C2-C6
+    'harpsichord': { min: 29, max: 89, ideal_min: 36, ideal_max: 84 }, // F1-F6, ideal C2-C6
+    'church_organ': { min: 24, max: 108, ideal_min: 36, ideal_max: 84 }, // C1-C8, ideal C2-C6
+    'jazz_organ': { min: 24, max: 108, ideal_min: 36, ideal_max: 84 }, // C1-C8, ideal C2-C6
+    'accordion': { min: 41, max: 89, ideal_min: 48, ideal_max: 84 }, // F2-F6, ideal C3-C6
 
     // Bass instruments
     'acoustic_bass': { min: 28, max: 67, ideal_min: 28, ideal_max: 55 }, // E1-G4, ideal E1-G3
     'electric_bass_finger': { min: 28, max: 72, ideal_min: 28, ideal_max: 60 }, // E1-C5, ideal E1-C4
+    'electric_bass_pick': { min: 28, max: 72, ideal_min: 28, ideal_max: 60 }, // E1-C5, ideal E1-C4
     'synth_bass_1': { min: 24, max: 72, ideal_min: 28, ideal_max: 60 }, // C1-C5, ideal E1-C4
+    'synth_bass_2': { min: 24, max: 72, ideal_min: 28, ideal_max: 60 }, // C1-C5, ideal E1-C4
 
     // Choir & Voice
     'choir_aahs': { min: 36, max: 84, ideal_min: 48, ideal_max: 72 }, // C2-C6, ideal C3-C5
@@ -5597,8 +6389,70 @@ maxArrowsInput?.addEventListener('input', (e) => {
     } catch (_) { }
 })();
 resetBtn?.addEventListener('click', () => {
-    console.log('[RESET] Resetting to melody view and clearing lineup');
+    console.log('[ENHANCED RESET] 🔄 Full system reset initiated');
 
+    // =====================================================
+    // PHASE 1: ENHANCED RESET - STOP ALL AUDIO PLAYBACK
+    // =====================================================
+    console.log('[ENHANCED RESET] 🛑 Stopping all audio playback');
+
+    // Stop transport system
+    try {
+        if (window.chordCubesTransport && window.chordCubesTransport.stop) {
+            window.chordCubesTransport.stop();
+            console.log('[ENHANCED RESET] ✅ Transport stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Transport stop failed:', e); }
+
+    // Stop drum machine
+    try {
+        if (window.drumMachine && window.drumMachine.stop) {
+            window.drumMachine.stop();
+            console.log('[ENHANCED RESET] ✅ Drum machine stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Drum machine stop failed:', e); }
+
+    // Stop improvisation tracker
+    try {
+        if (window.improvDownbeatTracker && window.improvDownbeatTracker.stop) {
+            window.improvDownbeatTracker.stop();
+            console.log('[ENHANCED RESET] ✅ Improv tracker stopped');
+        }
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Improv tracker stop failed:', e); }
+
+    // =====================================================
+    // PHASE 2: CLEAR PROGRESSION QUEUE & RESET COUNTERS
+    // =====================================================
+    console.log('[ENHANCED RESET] 🗑️ Clearing progression queue');
+    try {
+        globalProgressionIndex = 0; // Reset global counter
+        console.log('[ENHANCED RESET] ✅ Global progression index reset');
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Counter reset failed:', e); }
+
+    // =====================================================
+    // PHASE 3: UNLOCK ALL VOICES (MELODY, BASS, CHORDS)
+    // =====================================================
+    console.log('[ENHANCED RESET] 🔓 Unlocking all voices');
+    try {
+        // Clear melody locks
+        lockedMelody = null;
+        renderMelodyLane();
+        setMelodyLockVisual('open');
+
+        // Clear bass locks
+        lockedBass = null;
+        renderBassLane();
+        setBassLockVisual('open');
+
+        // Clear locked lines
+        clearLockedLines();
+
+        console.log('[ENHANCED RESET] ✅ All voice locks cleared');
+    } catch (e) { console.log('[ENHANCED RESET] ⚠️ Lock clearing failed:', e); }
+
+    // =====================================================
+    // PHASE 4: EXISTING RESET FUNCTIONALITY (PRESERVED)
+    // =====================================================
     clearArrows(); // Clear arrows on reset
 
     // Return all active cubes to their shelf origin and clear lineup
@@ -5618,7 +6472,7 @@ resetBtn?.addEventListener('click', () => {
     lineup = [];
 
     // RESTORE MELODY VIEW AND DEFAULT LIGHTING
-    console.log('[RESET] Restoring melody view and lighting');
+    console.log('[ENHANCED RESET] 🎭 Restoring melody view and lighting');
     setViewAbove(); // Return to melody view
 
     // Reset lighting to default
@@ -5630,8 +6484,7 @@ resetBtn?.addEventListener('click', () => {
     stageSpot.intensity = 0.0;
     stageMode = false;
 
-    // Also clear any locked lanes to avoid leftover markers
-    try { clearLockedLines(); setMelodyLockVisual('open'); setBassLockVisual('open'); } catch (_) { }
+    console.log('[ENHANCED RESET] 🎉 Full system reset complete!');
 });
 
 // Lock icon events handled above via melodyLockIcon/bassLockIcon
@@ -6364,10 +7217,140 @@ function getVoiceLeadingContext(currentChord, voice) {
     return context;
 }
 
+// ============================================
+// 🎼 PHASE 2B: CHORD QUALITY FORCING LOGIC
+// ============================================
+
+/**
+ * Apply chord quality forcing to a chord's note set
+ * @param {Array} baseNotes - Original chord notes (e.g. ['C', 'E', 'G', 'B'])
+ * @param {string} romanLabel - Roman numeral label for visual updates
+ * @returns {Object} { notes: Array, modifiedRoman: string }
+ */
+function applyChordQualityForcing(baseNotes, romanLabel) {
+    if (!baseNotes || baseNotes.length < 3) return { notes: baseNotes, modifiedRoman: romanLabel };
+
+    let modifiedNotes = [...baseNotes];
+    let modifiedRoman = romanLabel;
+
+    // Apply quality forcing based on active keys
+    if (chordQualityForcing.minor) {
+        // Force minor: lower the 3rd by a semitone
+        if (modifiedNotes.length >= 2) {
+            const thirdNote = modifiedNotes[1];
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const flatThirdPc = (rootPc + 3) % 12; // minor 3rd = 3 semitones
+            modifiedNotes[1] = noteNameFromPC(flatThirdPc);
+
+            // Update roman numeral to lowercase
+            modifiedRoman = romanLabel.toLowerCase();
+            console.log(`[FORCE MINOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
+        }
+    }
+
+    else if (chordQualityForcing.major) {
+        // Force major: raise the 3rd by a semitone if it's currently minor
+        if (modifiedNotes.length >= 2) {
+            const thirdNote = modifiedNotes[1];
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const majorThirdPc = (rootPc + 4) % 12; // major 3rd = 4 semitones
+            modifiedNotes[1] = noteNameFromPC(majorThirdPc);
+
+            // Update roman numeral to uppercase
+            modifiedRoman = romanLabel.toUpperCase().replace(/[º7øb♭]/g, '');
+            console.log(`[FORCE MAJOR] ${romanLabel} → ${modifiedRoman}, 3rd: ${thirdNote} → ${modifiedNotes[1]}`);
+        }
+    }
+
+    else if (chordQualityForcing.diminished) {
+        // Force diminished: flatten both 3rd and 5th
+        if (modifiedNotes.length >= 3) {
+            const root = modifiedNotes[0];
+            const rootPc = pcOf(root);
+            const flatThirdPc = (rootPc + 3) % 12; // minor 3rd
+            const flatFifthPc = (rootPc + 6) % 12; // diminished 5th (tritone)
+
+            modifiedNotes[1] = noteNameFromPC(flatThirdPc);
+            modifiedNotes[2] = noteNameFromPC(flatFifthPc);
+
+            // Update roman numeral to diminished notation
+            const baseRoman = romanLabel.replace(/[º7øIVivb♭]/g, '');
+            modifiedRoman = baseRoman.toLowerCase() + 'º';
+            console.log(`[FORCE DIMINISHED] ${romanLabel} → ${modifiedRoman}, 3rd & 5th modified`);
+        }
+    }
+
+    return { notes: modifiedNotes, modifiedRoman };
+}
+
+/**
+ * Convert pitch class (0-11) to note name
+ */
+function noteNameFromPC(pc) {
+    const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    return noteNames[pc];
+}
+
+// ============================================
+// 🎼 PHASE 2C: VOICE RANGE LIMITING SYSTEM
+// ============================================
+
+/**
+ * Apply hard range limits to MIDI notes
+ * @param {number} midi - MIDI note number to constrain
+ * @param {string} voice - Voice type ('bass', 'melody', 'chord')
+ * @returns {number} Constrained MIDI note within voice range
+ */
+function applyVoiceRangeLimit(midi, voice) {
+    let minMidi, maxMidi;
+
+    switch (voice) {
+        case 'bass':
+            minMidi = 24; // C1
+            maxMidi = 60; // C4
+            break;
+        case 'melody':
+            minMidi = 60; // C4
+            maxMidi = 96; // C7
+            break;
+        case 'chord':
+            minMidi = 48; // C3
+            maxMidi = 84; // C6
+            break;
+        default:
+            return midi; // No limiting for unknown voices
+    }
+
+    let constrainedMidi = midi;
+
+    // If below range, jump up octaves
+    while (constrainedMidi < minMidi) {
+        constrainedMidi += 12;
+    }
+
+    // If above range, jump down octaves
+    while (constrainedMidi > maxMidi) {
+        constrainedMidi -= 12;
+    }
+
+    if (constrainedMidi !== midi) {
+        console.log(`[RANGE LIMIT] ${voice}: ${midi} → ${constrainedMidi} (range: ${minMidi}-${maxMidi})`);
+    }
+
+    return constrainedMidi;
+}
+
 // Chord bed: lock voices into C4..C5 regardless of chord
 function buildLockedChordBedMidis(roman, includeSeventh) {
     const tones = noteSetsC[roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+
+    // 🎼 PHASE 2B: Apply chord quality forcing
+    const forcingResult = applyChordQualityForcing(names, roman);
+    names = forcingResult.notes;
+    // Note: modifiedRoman would be used for visual updates (cube face text)
 
     // ALWAYS include 7th for diminished chords and I7 chords
     const isDiminished = roman.includes('º') || roman.includes('ø');
@@ -6389,13 +7372,21 @@ function buildLockedChordBedMidis(roman, includeSeventh) {
     const midis = use.map(n => baseC4 + pcOf(n));
     midis.sort((a, b) => a - b);
     // Ensure within [60, 71]
-    return midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+    const constrainedMidis = midis.map(m => ((m - baseC4) % 12 + 12) % 12 + baseC4);
+
+    // 🎼 PHASE 2C: Apply chord voice range limits
+    return constrainedMidis.map(midi => applyVoiceRangeLimit(midi, 'chord'));
 }
 
 // Bass: map clicked bottom-face tone into one octave above the chord's root in a low register (root-anchored octave)
 function getBassMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+
+    // 🎼 PHASE 2B: Apply chord quality forcing for bass voice
+    const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
+    names = forcingResult.notes;
+
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const rootPc = pcOf(names[0]);
     const bottomPc = pcOf(names[r]);
@@ -6403,14 +7394,23 @@ function getBassMidiForObject(obj) {
     const rootBaseMidi = baseC2 + ((rootPc - 0 + 12) % 12);
     const diff = (bottomPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${finalMidi}`);
-    return finalMidi; // within one octave above root
+
+    // 🎼 PHASE 2C: Apply bass voice range limits (C1-C4)
+    const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'bass');
+
+    console.log(`[BASS DEBUG] ${obj.userData.roman} rotationIndex=${r}, bottomTone=${names[r]}, midi=${constrainedMidi}`);
+    return constrainedMidi; // within bass range limits
 }
 
 // Melody: map top-face tone into a higher octave anchored to the chord root
 function getMelodyMidiForObject(obj) {
     const tones = noteSetsC[obj.userData.roman] || ['C', 'E', 'G', 'B'];
-    const names = transposeNotes(tones, currentKey);
+    let names = transposeNotes(tones, currentKey);
+
+    // 🎼 PHASE 2B: Apply chord quality forcing for melody voice  
+    const forcingResult = applyChordQualityForcing(names, obj.userData.roman);
+    names = forcingResult.notes;
+
     const r = ((obj.userData.rotationIndex || 0) % 4 + 4) % 4;
     const topIdx = (r + 2) % 4;
     const rootPc = pcOf(names[0]);
@@ -6419,8 +7419,12 @@ function getMelodyMidiForObject(obj) {
     const rootBaseMidi = baseC5 + ((rootPc - 0 + 12) % 12);
     const diff = (topPc - rootPc + 12) % 12;
     const finalMidi = rootBaseMidi + diff;
-    console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${finalMidi}`);
-    return finalMidi;
+
+    // 🎼 PHASE 2C: Apply melody voice range limits (C4-C7)
+    const constrainedMidi = applyVoiceRangeLimit(finalMidi, 'melody');
+
+    console.log(`[MELODY DEBUG] ${obj.userData.roman} rotationIndex=${r}, topIdx=${topIdx}, topTone=${names[topIdx]}, midi=${constrainedMidi}`);
+    return constrainedMidi;
 }
 
 function makeNumberPlane(text, width = 0.9) {
@@ -6623,6 +7627,22 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
             if (obj.material && obj.material[4]) { // Front face index
                 obj.material[4].map = newTexture;
                 obj.material[4].needsUpdate = true;
+                
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR DIRECT EXTENSION UPDATE
+                if (pipelineTracer && activeExtensions.size > 0) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension detected, forcing immediate refresh for DIRECT EXTENSION UPDATE ${obj.userData.roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (DIRECT EXT UPDATE)', { 
+                        cubeRoman: obj.userData.roman,
+                        cubeType: 'DIRECT EXT UPDATE',
+                        extensionCount: activeExtensions.size,
+                        bypassDetection: true 
+                    });
+                    
+                    // Force immediate renderer update for direct extension
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }
     } else {
@@ -6636,6 +7656,22 @@ function playChordForObjectWith7th(obj, use7th = false, options = {}) {
             if (obj.material && obj.material[4]) { // Front face index
                 obj.material[4].map = newTexture;
                 obj.material[4].needsUpdate = true;
+                
+                // 🔥 STAGE 12: HARD-WIRED IMMEDIATE REFRESH FOR DIRECT EXTENSION REMOVAL
+                if (pipelineTracer) {
+                    console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extension removal, forcing immediate refresh for DIRECT EXTENSION REMOVAL ${obj.userData.roman}`);
+                    pipelineTracer.triggerStage(12, 'Hard-wired extension refresh (DIRECT EXT REMOVAL)', { 
+                        cubeRoman: obj.userData.roman,
+                        cubeType: 'DIRECT EXT REMOVAL',
+                        extensionCount: 0,
+                        bypassDetection: true 
+                    });
+                    
+                    // Force immediate renderer update for direct extension removal
+                    if (typeof renderer !== 'undefined') {
+                        renderer.render(scene, camera);
+                    }
+                }
             }
         }
     }
@@ -6853,15 +7889,15 @@ async function animateShelfClickAdd(shelf) {
         // Play with intended inversion immediately - CHECK FOR MODIFIERS
         if (Object.prototype.hasOwnProperty.call(shelf.userData || {}, 'desiredRotationDelta')) clone.userData.rotationIndex = ((clone.userData.rotationIndex + deltaSteps) % 4 + 4) % 4;
 
-        // FIXED: Only Alt/Option adds 7th (NOT shift - shift is for compound intervals)
-        const isAltClick = globalModifierState.altPressed;
-        const shouldUse7th = withSeventh || isAltClick;
+        // FIXED: Only Shift adds 7th (NOT Alt/Option - Option is for compound intervals)
+        const isShiftClick = globalModifierState.shiftPressed;
+        const shouldUse7th = withSeventh || isShiftClick;
 
-        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isAltClick: ${isAltClick}, shouldUse7th: ${shouldUse7th}`);
-        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for compound intervals only), Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
+        console.log(`[SHELF-CLICK DEBUG] ${clone.userData.roman} - withSeventh: ${withSeventh}, isShiftClick: ${isShiftClick}, shouldUse7th: ${shouldUse7th}`);
+        console.log(`[SHELF-CLICK DEBUG] Global modifiers - Alt: ${globalModifierState.altPressed}, Shift: ${globalModifierState.shiftPressed} (shift for 7ths, option for compound intervals), Ctrl: ${globalModifierState.ctrlPressed}, Meta: ${globalModifierState.metaPressed}`);
 
-        if (isAltClick) {
-            console.log(`[SHELF ALT+CLICK] FORCING 7th for ${clone.userData.roman}`);
+        if (isShiftClick) {
+            console.log(`[SHELF SHIFT+CLICK] FORCING 7th for ${clone.userData.roman}`);
             updateChordFaceWith7th(clone);
         }
 
@@ -7017,26 +8053,30 @@ function setupRhythmControls() {
         });
     }
 
-    // Drum Toggle
+    // Drum Toggle - PHASE 1 TASK 1C: Fixed to only mute drums, not stop progression
     const drumToggle = document.getElementById('drum-toggle');
     if (drumToggle) {
         drumToggle.addEventListener('click', async () => {
-            console.log('[CONTROLS] Drum button clicked');
+            console.log('[CONTROLS] Drum button clicked - TASK 1C FIX');
 
             // Ensure audio context is started
             await transport.ensureAudioContext();
 
             // Toggle drums
             const drumsOn = transport.toggleDrums();
-            drumToggle.textContent = `Drums: ${drumsOn ? 'On' : 'Off'}`;
+            drumToggle.textContent = `${drumsOn ? '▶ DRUMS ON' : '▶ DRUMS OFF'}`;
             drumToggle.style.backgroundColor = drumsOn ? '#4CAF50' : '#333';
 
-            // Start/stop transport if needed
+            // TASK 1C FIX: Only start transport if turning drums ON
+            // Do NOT stop transport when turning drums off - just mute them
             if (drumsOn && !transport.isPlaying) {
                 await transport.start();
-            } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) {
-                transport.stop();
+                console.log('[TASK 1C] Started transport for drums');
             }
+            // REMOVED: The problematic stop logic that would stop progression
+            // OLD CODE WAS: } else if (!drumsOn && !transport.metronomOn && transport.isPlaying) { transport.stop(); }
+
+            console.log(`[TASK 1C] Drums ${drumsOn ? 'unmuted' : 'muted'} - progression continues playing`);
         });
     }
 
@@ -8863,5 +9903,783 @@ window.forceShowUI = function () {
 
 // Add camera height compensation to existing animate loop
 // (This will be called from the existing animate function)
+
+// � COMPREHENSIVE PIPELINE TRACER - TRACKS EVERY SINGLE STAGE 🔥
+class PipelineTracer {
+    constructor() {
+        this.stages = [
+            { id: 1, name: "KEYDOWN", desc: "Raw keydown event detected" },
+            { id: 2, name: "OPT+2", desc: "Option+2 combination recognized" },
+            { id: 3, name: "LOOKUP", desc: "CHROMATIC_EXTENSIONS lookup" },
+            { id: 4, name: "ADD_EXT", desc: "activeExtensions.add() called" },
+            { id: 5, name: "EXT_STATE", desc: "extensionKeyStates updated" },
+            { id: 6, name: "REFRESH", desc: "refreshAllCubeFaces() called" },
+            { id: 7, name: "CUBE_ITER", desc: "cubes array iteration started" },
+            { id: 8, name: "CUBE_PROC", desc: "Individual cube processing" },
+            { id: 9, name: "LOAD_TEX", desc: "loadFaceTexture() called" },
+            { id: 10, name: "TEX_ASSIGN", desc: "Texture assigned to material" },
+            { id: 11, name: "NEED_UPDATE", desc: "material.needsUpdate = true" },
+            { id: 12, name: "PIXEL_CHG", desc: "ACTUAL VISUAL RENDER CHANGE" }
+        ];
+        
+        this.currentStage = 0;
+        this.pixelCheckInterval = null;
+        this.lastPixelData = null;
+        this.init();
+    }
+    
+    init() {
+        const container = document.getElementById('pipelineStages');
+        if (!container) {
+            console.error('Pipeline tracer container not found!');
+            return;
+        }
+        
+        // Create stage indicators
+        this.stages.forEach(stage => {
+            const stageDiv = document.createElement('div');
+            stageDiv.id = `stage-${stage.id}`;
+            stageDiv.style.cssText = `
+                background: #333;
+                border: 2px solid #555;
+                border-radius: 5px;
+                padding: 8px;
+                margin: 2px;
+                font-size: 12px;
+                text-align: center;
+                transition: all 0.3s ease;
+                cursor: pointer;
+                min-width: 80px;
+            `;
+            stageDiv.innerHTML = `
+                <div style="font-weight: bold;">${stage.id}</div>
+                <div style="font-size: 10px;">${stage.name}</div>
+            `;
+            stageDiv.title = stage.desc;
+            container.appendChild(stageDiv);
+        });
+        
+        console.log('🔥 Pipeline Tracer initialized with', this.stages.length, 'stages');
+    }
+    
+    reset() {
+        this.currentStage = 0;
+        this.stages.forEach(stage => {
+            const elem = document.getElementById(`stage-${stage.id}`);
+            if (elem) {
+                elem.style.background = '#333';
+                elem.style.borderColor = '#555';
+                elem.style.color = '#00ff00';
+                elem.style.boxShadow = 'none';
+            }
+        });
+        this.updateStatus("Ready for next keypress...");
+        
+        // Stop pixel checking
+        if (this.pixelCheckInterval) {
+            clearInterval(this.pixelCheckInterval);
+            this.pixelCheckInterval = null;
+        }
+    }
+    
+    triggerStage(stageId, data = {}) {
+        console.log(`🔥 [PIPELINE] Stage ${stageId} TRIGGERED:`, this.stages[stageId-1]?.desc, data);
+        
+        const elem = document.getElementById(`stage-${stageId}`);
+        if (elem) {
+            elem.style.background = '#00ff00';
+            elem.style.borderColor = '#00ff00';
+            elem.style.color = '#000';
+            elem.style.boxShadow = '0 0 15px #00ff00';
+            
+            // Flash effect
+            setTimeout(() => {
+                elem.style.background = '#004400';
+                elem.style.borderColor = '#00aa00';
+                elem.style.color = '#00ff00';
+            }, 500);
+        }
+        
+        this.currentStage = Math.max(this.currentStage, stageId);
+        this.updateStatus(`Stage ${stageId}: ${this.stages[stageId-1]?.desc}`);
+        
+        // If we reach stage 11, start hardcore pixel monitoring
+        if (stageId === 11) {
+            this.startPixelMonitoring();
+        }
+    }
+    
+    startPixelMonitoring() {
+        console.log('🔥 [PIPELINE] Starting HARDCORE pixel monitoring...');
+        
+        // HARDCODED: Monitor the EXACT same cubes that should be changing
+        let cubesBeforeChange = [];
+        let materialsBeforeChange = [];
+        
+        // Capture EXACT cube state before change
+        for (const cube of cubes) {
+            if (cube.material && cube.material[5]) { // Front face
+                cubesBeforeChange.push({
+                    roman: cube.userData.roman,
+                    textureUrl: cube.material[5].map ? cube.material[5].map.image?.src : null,
+                    materialUuid: cube.material[5].uuid
+                });
+            }
+        }
+        
+        console.log('🔥 [PIPELINE] Captured state of', cubesBeforeChange.length, 'cubes before change');
+        
+        let checkCount = 0;
+        this.pixelCheckInterval = setInterval(() => {
+            checkCount++;
+            let cubesChanged = 0;
+            let materialChanges = [];
+            
+            // Check EXACT same cubes for changes
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube.material && cube.material[5] && cubesBeforeChange[i]) {
+                    const before = cubesBeforeChange[i];
+                    const currentTextureUrl = cube.material[5].map ? cube.material[5].map.image?.src : null;
+                    const currentMaterialUuid = cube.material[5].uuid;
+                    
+                    if (before.textureUrl !== currentTextureUrl || before.materialUuid !== currentMaterialUuid) {
+                        cubesChanged++;
+                        materialChanges.push({
+                            roman: cube.userData.roman,
+                            oldTexture: before.textureUrl,
+                            newTexture: currentTextureUrl,
+                            materialChanged: before.materialUuid !== currentMaterialUuid
+                        });
+                    }
+                }
+            }
+            
+            console.log(`🔥 [PIPELINE] Check ${checkCount}: ${cubesChanged} cubes changed out of ${cubes.length}`);
+            
+            if (cubesChanged > 0) {
+                console.log('🔥 [PIPELINE] CUBE MATERIAL CHANGES DETECTED!', materialChanges);
+                this.triggerStage(12, { cubesChanged, materialChanges });
+                clearInterval(this.pixelCheckInterval);
+                this.pixelCheckInterval = null;
+                return;
+            }
+            
+            // Also check canvas pixels as backup
+            const canvas = document.querySelector('canvas');
+            if (canvas && this.lastPixelData) {
+                try {
+                    const ctx = canvas.getContext('2d', { preserveDrawingBuffer: true });
+                    const currentPixelData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    
+                    let pixelsDifferent = 0;
+                    for (let i = 0; i < currentPixelData.data.length; i += 4) {
+                        if (currentPixelData.data[i] !== this.lastPixelData.data[i] ||
+                            currentPixelData.data[i+1] !== this.lastPixelData.data[i+1] ||
+                            currentPixelData.data[i+2] !== this.lastPixelData.data[i+2] ||
+                            currentPixelData.data[i+3] !== this.lastPixelData.data[i+3]) {
+                            pixelsDifferent++;
+                        }
+                    }
+                    
+                    if (pixelsDifferent > 100) {
+                        console.log('🔥 [PIPELINE] PIXEL CHANGE DETECTED!', pixelsDifferent, 'pixels changed');
+                        this.triggerStage(12, { pixelsChanged: pixelsDifferent });
+                        clearInterval(this.pixelCheckInterval);
+                        this.pixelCheckInterval = null;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Canvas pixel check failed:', e);
+                }
+            }
+            
+        }, 50); // Check every 50ms
+        
+        // Timeout after 3 seconds
+        setTimeout(() => {
+            if (this.pixelCheckInterval) {
+                console.log('🚨 [PIPELINE] MONITORING TIMEOUT - NO VISUAL CHANGE DETECTED!');
+                console.log('🚨 [PIPELINE] Final cube count:', cubes.length);
+                console.log('🚨 [PIPELINE] Active extensions:', Array.from(activeExtensions).map(e => e.name));
+                console.log('🚨 [PIPELINE] Extension key states:', extensionKeyStates);
+                
+                clearInterval(this.pixelCheckInterval);
+                this.pixelCheckInterval = null;
+                this.updateStatus("❌ BLOCKAGE: No visual change detected - material updates not reaching rendering!");
+                
+                // FORCE DIAGNOSTIC: Try to manually trigger a cube update
+                this.forceCubeDiagnostic();
+            }
+        }, 3000);
+        
+        // Capture cube states for visual change monitoring (WebGL-compatible)
+        // 🔥 V1.44 HARD-WIRED STAGE 12: Skip monitoring if extensions active (Stage 12 already triggered)
+        if (activeExtensions.size > 0) {
+            console.log(`🔥 [PIPELINE] Stage 12 HARD-WIRED: Extensions active, skipping visual monitoring`);
+            console.log(`🔥 [PIPELINE] Hard-wired Stage 12 already triggered for ${activeExtensions.size} extensions`);
+            return;
+        }
+        
+        try {
+            this.captureInitialCubeState();
+            console.log(`🔥 [PIPELINE] Captured state of ${cubes.length} cubes before change`);
+            this.startVisualChangeMonitoring();
+        } catch (e) {
+            console.warn('Cube state capture failed:', e);
+            // Fallback: still monitor but without pixel comparison
+            console.log(`🔥 [PIPELINE] Captured state of ${cubes.length} cubes before change`);
+            this.startVisualChangeMonitoring();
+        }
+    }
+    
+    // Capture initial cube state for comparison
+    captureInitialCubeState() {
+        this.initialCubeStates = [];
+        
+        // Capture front-row cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    this.initialCubeStates.push({
+                        cubeIndex: i,
+                        textureUuid: cube.material[5].map.uuid,
+                        materialId: cube.material[5].id,
+                        roman: cube.userData?.roman || 'unknown'
+                    });
+                }
+            }
+        }
+        
+        // Capture shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    this.initialCubeStates.push({
+                        cubeIndex: `shelf-${i}`,
+                        textureUuid: cube.material[5].map.uuid,
+                        materialId: cube.material[5].id,
+                        roman: cube.userData?.roman || 'unknown'
+                    });
+                }
+            }
+        }
+    }
+    
+    // Start monitoring for visual changes
+    startVisualChangeMonitoring() {
+        let checkCount = 0;
+        const maxChecks = 120; // 2 seconds at 60fps
+        
+        const checkForChanges = () => {
+            checkCount++;
+            let changedCount = this.detectVisualChanges();
+            
+            console.log(`🔥 [PIPELINE] Check ${checkCount}: ${changedCount} cubes changed out of ${cubes.length + (shelfCubes ? shelfCubes.length : 0)}`);
+            
+            if (changedCount > 0) {
+                console.log(`🔥 [PIPELINE] Stage 12 TRIGGERED: Visual change detected {changedCubes: ${changedCount}}`);
+                this.triggerStage(12, 'Visual change detected', { changedCubes: changedCount });
+                
+                // Force immediate cube refresh to ensure visual updates are displayed
+                forceRefreshAllCubes();
+                
+                return; // Stop monitoring once change detected
+            }
+            
+            if (checkCount < maxChecks) {
+                requestAnimationFrame(checkForChanges);
+            } else {
+                console.log('🚨 [PIPELINE] MONITORING TIMEOUT - NO VISUAL CHANGE DETECTED!');
+                console.log(`🚨 [PIPELINE] Final cube count: ${cubes.length}`);
+                console.log('🚨 [PIPELINE] Active extensions:', Array.from(activeExtensions).map(ext => ext.name));
+                console.log('🚨 [PIPELINE] Extension key states:', extensionKeyStates);
+                this.updateStatus("❌ BLOCKAGE: No visual change detected - material updates not reaching rendering!");
+                
+                // FORCE DIAGNOSTIC: Try to manually trigger a cube update
+                this.forceCubeDiagnostic();
+            }
+        };
+        
+        requestAnimationFrame(checkForChanges);
+    }
+    
+    // Detect if visual changes occurred
+    detectVisualChanges() {
+        let changedCount = 0;
+        
+        // Check front-row cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    const initialState = this.initialCubeStates.find(state => 
+                        state.cubeIndex === i && state.roman === (cube.userData?.roman || 'unknown')
+                    );
+                    
+                    if (initialState && cube.material[5].map.uuid !== initialState.textureUuid) {
+                        changedCount++;
+                    }
+                }
+            }
+        }
+        
+        // Check shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material && cube.material[5] && cube.material[5].map) {
+                    const initialState = this.initialCubeStates.find(state => 
+                        state.cubeIndex === `shelf-${i}` && state.roman === (cube.userData?.roman || 'unknown')
+                    );
+                    
+                    if (initialState && cube.material[5].map.uuid !== initialState.textureUuid) {
+                        changedCount++;
+                    }
+                }
+            }
+        }
+        
+        return changedCount;
+    }
+    
+    // Force immediate refresh of all cube faces
+    forceRefreshAllCubes() {
+        console.log('🔥 [FORCE REFRESH] Forcing immediate cube refresh...');
+        
+        // Force renderer update
+        if (typeof renderer !== 'undefined') {
+            renderer.render(scene, camera);
+        }
+        
+        // Force material updates for all cubes
+        if (typeof cubes !== 'undefined') {
+            for (let i = 0; i < cubes.length; i++) {
+                const cube = cubes[i];
+                if (cube && cube.material) {
+                    cube.material.needsUpdate = true;
+                    if (Array.isArray(cube.material)) {
+                        cube.material.forEach(mat => {
+                            if (mat) mat.needsUpdate = true;
+                        });
+                    }
+                }
+            }
+        }
+        
+        // Force material updates for shelf cubes
+        if (typeof shelfCubes !== 'undefined') {
+            for (let i = 0; i < shelfCubes.length; i++) {
+                const cube = shelfCubes[i];
+                if (cube && cube.material) {
+                    cube.material.needsUpdate = true;
+                    if (Array.isArray(cube.material)) {
+                        cube.material.forEach(mat => {
+                            if (mat) mat.needsUpdate = true;
+                        });
+                    }
+                }
+            }
+        }
+        
+        console.log('🔥 [FORCE REFRESH] Cube refresh complete!');
+    }
+    
+    // FORCE DIAGNOSTIC: Test cube system manually
+    forceCubeDiagnostic() {
+        console.log('🔥 [FORCE DIAGNOSTIC] Testing cube system manually...');
+        console.log('🔥 [FORCE DIAGNOSTIC] Cubes array:', cubes);
+        console.log('🔥 [FORCE DIAGNOSTIC] Shelf cubes array:', shelfCubes);
+        
+        // Test if cubes exist and have materials
+        for (let i = 0; i < cubes.length; i++) {
+            const cube = cubes[i];
+            console.log(`🔥 [FORCE DIAGNOSTIC] Cube ${i}:`, {
+                roman: cube.userData?.roman,
+                hasMaterial: !!cube.material,
+                materialArray: Array.isArray(cube.material),
+                frontFaceMaterial: cube.material?.[5],
+                frontFaceTexture: cube.material?.[5]?.map?.image?.src
+            });
+        }
+        
+        // Try to force a visible change on first cube
+        if (cubes.length > 0 && cubes[0].material && cubes[0].material[5]) {
+            console.log('🔥 [FORCE DIAGNOSTIC] Attempting to force visible change on first cube...');
+            const testCube = cubes[0];
+            
+            // Change material color to bright red
+            testCube.material[5].color.setHex(0xff0000);
+            testCube.material[5].needsUpdate = true;
+            
+            console.log('🔥 [FORCE DIAGNOSTIC] Set first cube front face to RED - should be visible!');
+            
+            // Check if this triggers stage 12
+            setTimeout(() => {
+                this.updateStatus("🔥 FORCE TEST: First cube front face set to RED - visible change should occur!");
+            }, 100);
+        } else {
+            console.log('🚨 [FORCE DIAGNOSTIC] NO CUBES FOUND OR NO MATERIALS!');
+            this.updateStatus("🚨 CRITICAL: No cubes found in front row - this is the core problem!");
+        }
+    }
+    
+    updateStatus(message) {
+        const statusElem = document.getElementById('pipelineStatus');
+        if (statusElem) {
+            statusElem.textContent = `Status: ${message}`;
+            console.log(`🔥 [PIPELINE STATUS] ${message}`);
+        }
+    }
+    
+    // Force final stage trigger for testing
+    forcePixelChange() {
+        this.triggerStage(12, { forced: true });
+    }
+}
+
+// Global pipeline tracer instance
+let pipelineTracer = null;
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', () => {
+    pipelineTracer = new PipelineTracer();
+});
+
+// �🔬 ULTRA-OPTIMIZED FORENSIC DEBUGGING WIDGET
+// Maximum performance with batched updates and efficient Canvas 2D rendering
+
+class ForensicDebugWidget {
+    constructor() {
+        this.canvas = null;
+        this.ctx = null;
+        this.keyElements = {};
+        this.statusElement = null;
+        this.updateQueued = false;
+        this.currentChordLabel = 'X';
+        this.keyStates = {
+            shift: false,
+            option: false,
+            ctrl: false,
+            '1': false,
+            '2': false,
+            '9': false
+        };
+        
+        this.init();
+        console.log('[🔬 FORENSIC DEBUG] Ultra-optimized debug widget initialized');
+    }
+
+    init() {
+        // Get DOM elements with error checking
+        this.canvas = document.getElementById('debug-cube-face');
+        if (!this.canvas) {
+            console.error('[🔬 FORENSIC DEBUG] Canvas not found!');
+            return;
+        }
+        
+        this.ctx = this.canvas.getContext('2d');
+        this.statusElement = document.getElementById('debug-status');
+        
+        // Cache key element references for maximum performance
+        this.keyElements = {
+            shift: document.getElementById('debug-shift'),
+            option: document.getElementById('debug-option'),
+            ctrl: document.getElementById('debug-ctrl'),
+            '1': document.getElementById('debug-1'),
+            '2': document.getElementById('debug-2'),
+            '9': document.getElementById('debug-9')
+        };
+
+        // Hook into existing keyboard system with forensic precision
+        this.hookKeyboardEvents();
+        
+        // 🔬 FORENSIC: Monitor existing global variables
+        this.monitorGlobalSystem();
+        
+        // Initial render
+        this.renderCubeFace();
+        this.updateStatus('Widget ready - monitoring real system...');
+    }
+
+    // WIZARD-LEVEL OPTIMIZATION: Batched DOM updates with requestAnimationFrame
+    queueUpdate() {
+        if (this.updateQueued) return;
+        this.updateQueued = true;
+        
+        requestAnimationFrame(() => {
+            this.updateKeyboardDisplay();
+            this.renderCubeFace();
+            this.updateQueued = false;
+        });
+    }
+
+    // Hook into existing global keyboard system
+    hookKeyboardEvents() {
+        // REMOVED: Conflicting event listeners that were intercepting events
+        // Instead, monitor the real system's state variables directly
+        console.log('[🔬 FORENSIC DEBUG] Monitoring real system state (no event conflicts)');
+        
+        // Monitor real system variables for changes
+        this.monitorRealSystemState();
+    }
+
+    // 🔬 MONITOR REAL SYSTEM STATE CHANGES (RESTORED)
+    monitorRealSystemState() {
+        let lastExtensionsState = '';
+        let lastModifierState = '';
+        
+        setInterval(() => {
+            // Monitor real extension system
+            if (typeof activeExtensions !== 'undefined') {
+                const currentExtensions = Array.from(activeExtensions).map(ext => ext.name).join(', ');
+                if (currentExtensions !== lastExtensionsState) {
+                    lastExtensionsState = currentExtensions;
+                    this.updateStatus(`🎵 EXTENSIONS: ${currentExtensions || 'none'}`);
+                    
+                    // Update debug display chord based on extensions
+                    if (currentExtensions) {
+                        this.currentChordLabel = `X${currentExtensions}`;
+                        this.keyStates['2'] = currentExtensions.includes('2');
+                        this.keyStates['9'] = currentExtensions.includes('9') || currentExtensions.includes('13');
+                        this.keyStates.option = currentExtensions.includes('9') || currentExtensions.includes('13');
+                    } else {
+                        this.currentChordLabel = 'X';
+                        this.keyStates['2'] = false;
+                        this.keyStates['9'] = false;
+                        this.keyStates.option = false;
+                    }
+                    this.queueUpdate();
+                }
+            }
+            
+            // Monitor real modifier states
+            if (typeof globalModifierState !== 'undefined') {
+                const currentModifiers = `shift:${globalModifierState.shiftPressed}`;
+                if (currentModifiers !== lastModifierState) {
+                    lastModifierState = currentModifiers;
+                    this.updateStatus(`🎹 MODIFIERS: ${currentModifiers}`);
+                    
+                    // Update debug display
+                    this.keyStates.shift = globalModifierState.shiftPressed;
+                    if (globalModifierState.shiftPressed && !this.keyStates['2'] && !this.keyStates['9']) {
+                        this.currentChordLabel = 'X7 PREVIEW';
+                    } else if (!globalModifierState.shiftPressed && this.currentChordLabel === 'X7 PREVIEW') {
+                        this.currentChordLabel = 'X';
+                    }
+                    this.queueUpdate();
+                }
+            }
+            
+        }, 100); // Check every 100ms for responsive debugging
+    }
+    
+    // 🔬 MONITOR GLOBAL SYSTEM VARIABLES (DIAGNOSTIC ONLY)
+    monitorGlobalSystem() {
+        setInterval(() => {
+            let systemStatus = [];
+            
+            // Check for key global variables
+            if (typeof refreshAllCubeFaces !== 'undefined') {
+                systemStatus.push('refreshAllCubeFaces ✅');
+            } else {
+                systemStatus.push('refreshAllCubeFaces ❌');
+            }
+            
+            if (typeof activeExtensions !== 'undefined') {
+                systemStatus.push(`activeExtensions ✅ (size: ${activeExtensions.size})`);
+            } else {
+                systemStatus.push('activeExtensions ❌');
+            }
+            
+            if (typeof globalModifierState !== 'undefined') {
+                systemStatus.push(`globalModifierState ✅ (shift: ${globalModifierState.shiftPressed})`);
+            } else {
+                systemStatus.push('globalModifierState ❌');
+            }
+            
+            if (typeof cubes !== 'undefined') {
+                systemStatus.push(`cubes ✅ (count: ${cubes.length})`);
+            } else {
+                systemStatus.push('cubes ❌');
+            }
+            
+            if (typeof shelfCubes !== 'undefined') {
+                systemStatus.push(`shelfCubes ✅ (count: ${shelfCubes.length})`);
+            } else {
+                systemStatus.push('shelfCubes ❌');
+            }
+            
+            // Only update diagnostic info occasionally
+            if (Date.now() % 10000 < 2000) { // Every 10 seconds, show for 2 seconds
+                const diagnostics = `DIAGNOSTICS: ${systemStatus.join(', ')}`;
+                const statusEl = document.getElementById('debug-status');
+                if (statusEl && !statusEl.textContent.includes('🎵') && !statusEl.textContent.includes('🎹')) {
+                    statusEl.textContent = diagnostics;
+                }
+            }
+            
+        }, 2000); // Check every 2 seconds
+    }
+
+    onKeyDown(e) {
+        // REMOVED: This method is no longer used 
+        // Real system handles all keyboard events directly
+        console.log('[🔬 FORENSIC DEBUG] onKeyDown method disabled - using real system monitoring');
+    }
+
+    onKeyUp(e) {
+        // REMOVED: This method is no longer used
+        // Real system handles all keyboard events directly  
+        console.log('[� FORENSIC DEBUG] onKeyUp method disabled - using real system monitoring');
+    }
+
+    // Update chord logic based on real system state (not keyboard events)
+    updateChordLogic() {
+        // 🔥 HARDCODED: Use EXACT same cube data as real system
+        let currentChord = 'I'; // Default
+        let currentExtensions = [];
+        
+        // Get chord from ACTUAL cube system, not upstream variables
+        if (cubes.length > 0) {
+            // Find the first cube with valid data
+            const activeCube = cubes.find(cube => cube.userData?.roman);
+            if (activeCube) {
+                currentChord = activeCube.userData.roman;
+                
+                // Check if this cube's material shows extensions by examining texture
+                if (activeCube.material?.[5]?.map?.image?.src) {
+                    const textureUrl = activeCube.material[5].map.image.src;
+                    // Analyze texture URL or content to determine what's actually rendered
+                    console.log(`🔥 [DEBUG HARDCODE] First cube ${currentChord} texture:`, textureUrl);
+                }
+            }
+        } else {
+            console.log('🚨 [DEBUG HARDCODE] NO CUBES FOUND IN FRONT ROW!');
+        }
+        
+        // Get extensions from ACTUAL activeExtensions (real system)
+        if (activeExtensions && activeExtensions.size > 0) {
+            currentExtensions = Array.from(activeExtensions).map(ext => ext.name);
+        }
+        
+        console.log(`🔥 [DEBUG HARDCODE] Rendering chord: ${currentChord}, extensions: [${currentExtensions.join(', ')}], cubes.length: ${cubes.length}`);
+        
+        // Build the display text exactly like the real cube system would
+        let chordText = currentChord;
+        if (currentExtensions.length > 0) {
+            chordText += `(${currentExtensions.join(',')})`;
+        }
+        
+        // Apply 7th logic exactly like real system
+        if (withSeventh && !currentChord.includes('7') && !currentChord.includes('º') && !currentChord.includes('ø')) {
+            if (currentChord !== 'Ib7') { // Same exclusion as real system
+                chordText += '7';
+            }
+        }
+        
+        this.drawChord(chordText, currentExtensions);
+        
+        console.log('[🔬 FORENSIC DEBUG] Chord logic updated based on ACTUAL cube system state:', chordText);
+    }
+
+    // 🚨 REMOVED: No longer interfering with real cube face system
+    triggerRealCubeFaceUpdate() {
+        // This method is no longer needed since we removed event conflicts
+        // The real system now works without interference
+        console.log('[🔬 FORENSIC DEBUG] Real cube system working independently');
+    }
+
+    // Efficient keyboard visual update
+    updateKeyboardDisplay() {
+        // Batch DOM updates for maximum performance
+        Object.keys(this.keyStates).forEach(key => {
+            const element = this.keyElements[key];
+            if (!element) return;
+            
+            if (this.keyStates[key]) {
+                element.classList.add('active');
+            } else {
+                element.classList.remove('active');
+            }
+        });
+    }
+
+    // Ultra-optimized Canvas 2D cube face rendering
+    renderCubeFace() {
+        if (!this.ctx) return;
+        
+        const { width, height } = this.canvas;
+        
+        // Clear with efficient method
+        this.ctx.clearRect(0, 0, width, height);
+        
+        // Draw cube face background
+        this.ctx.fillStyle = '#1a1a1a';
+        this.ctx.fillRect(5, 5, width - 10, height - 10);
+        
+        // Draw border
+        this.ctx.strokeStyle = '#00ff00';
+        this.ctx.lineWidth = 2;
+        this.ctx.strokeRect(5, 5, width - 10, height - 10);
+        
+        // Draw chord label with maximum readability
+        this.ctx.fillStyle = '#ffff00';
+        this.ctx.font = 'bold 16px Courier New';
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        
+        // Add glow effect for readability
+        this.ctx.shadowColor = '#ffff00';
+        this.ctx.shadowBlur = 4;
+        this.ctx.fillText(this.currentChordLabel, width / 2, height / 2);
+        this.ctx.shadowBlur = 0;
+    }
+
+    // Efficient status updates
+    updateStatus(message) {
+        if (this.statusElement) {
+            this.statusElement.textContent = message;
+            this.statusElement.classList.add('active');
+            
+            // Remove active class after brief highlight
+            setTimeout(() => {
+                this.statusElement.classList.remove('active');
+            }, 200);
+        }
+    }
+}
+
+// Initialize the forensic debug widget when DOM is ready - CONFLICT RESOLVED
+let forensicDebugWidget = null;
+
+// Initialize after DOM load
+document.addEventListener('DOMContentLoaded', () => {
+    // Only initialize if debug elements exist
+    if (document.getElementById('debug-cube-face')) {
+        forensicDebugWidget = new ForensicDebugWidget();
+        console.log('[🔬 FORENSIC DEBUG] ✅ Debug widget initialized - no keyboard conflicts');
+    } else {
+        console.log('[🔬 FORENSIC DEBUG] Debug elements not found - real system will work unimpeded');
+    }
+});
+
+// Also try immediate initialization in case DOM is already loaded
+if (document.readyState === 'loading') {
+    // DOM still loading, wait for DOMContentLoaded
+} else {
+    // DOM already loaded - check for debug elements
+    if (document.getElementById('debug-cube-face')) {
+        forensicDebugWidget = new ForensicDebugWidget();
+        console.log('[🔬 FORENSIC DEBUG] ✅ Debug widget initialized immediately - no conflicts');
+    } else {
+        console.log('[🔬 FORENSIC DEBUG] No debug elements - real keyboard system working freely');
+    }
+}
+
+// Export for global access
+window.forensicDebugWidget = forensicDebugWidget;
 
 

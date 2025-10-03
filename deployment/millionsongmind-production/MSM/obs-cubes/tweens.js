@@ -37,43 +37,14 @@ export function animatePosition(obj, to, duration = 700) {
     });
 }
 
-export function animateQuaternion(obj, toQuat, duration = 900, onCompleteUser) {
+export function animateQuaternion(obj, toQuat, duration = 900) {
     const fromQuat = obj.quaternion.clone();
     const to = toQuat.clone();
-    let finished = false;
     return tweenObject({
-        duration, owner: obj,
-        onUpdate: (v) => {
+        duration, owner: obj, onUpdate: (v) => {
             obj.quaternion.slerpQuaternions(fromQuat, to, v);
-        },
-        onComplete: () => {
-            if (finished) return; finished = true;
-            try {
-                // Snap to nearest quarter-turn around Z (cube faces) and emit rotation-finished
-                const zAngles = [0, Math.PI / 2, Math.PI, -Math.PI / 2];
-                const cur = new THREE.Euler().setFromQuaternion(obj.quaternion, 'XYZ');
-                // Only snap around Z; keep X/Y small if any drift
-                let z = cur.z;
-                let best = zAngles[0], bestDiff = Math.abs(normalizeAngle(z) - normalizeAngle(zAngles[0]));
-                for (let i = 1; i < zAngles.length; i++) {
-                    const d = Math.abs(normalizeAngle(z) - normalizeAngle(zAngles[i]));
-                    if (d < bestDiff) { best = zAngles[i]; bestDiff = d; }
-                }
-                cur.z = best; cur.x = 0; cur.y = 0;
-                obj.quaternion.setFromEuler(cur);
-                // Update rotationIndex from quaternion via app helper if present
-                if (typeof window.syncRotationIndexFromQuaternion === 'function') {
-                    window.syncRotationIndexFromQuaternion(obj);
-                }
-                obj.userData && (obj.userData.rotEventTs = performance.now());
-            } catch (_) { }
-            try { if (typeof onCompleteUser === 'function') onCompleteUser(); } catch (_) { }
         }
     });
-}
-
-function normalizeAngle(a) {
-    let x = a; while (x <= -Math.PI) x += Math.PI * 2; while (x > Math.PI) x -= Math.PI * 2; return x;
 }
 
 export function animateScale(obj, toScalar, duration = 500) {

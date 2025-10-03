@@ -11,11 +11,8 @@ export function setupDiagnostics(getInfo) {
     if (!isDebugOn()) return { update() { } };
     const box = document.createElement('div');
     box.style.position = 'fixed';
-    // Move to bottom-right per request
-    box.style.bottom = '8px';
+    box.style.top = '8px';
     box.style.right = '8px';
-    box.style.top = '';
-    box.style.left = '';
     box.style.zIndex = '9999';
     box.style.padding = '8px 10px';
     box.style.borderRadius = '6px';

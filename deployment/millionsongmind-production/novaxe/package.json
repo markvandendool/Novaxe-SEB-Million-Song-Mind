@@ -1,0 +1,39 @@
+{
+  "name": "@novaxe/angular20",
+  "version": "20.0.0", 
+  "description": "Novaxe Angular 20 - Complete music theory app with Magic 18 harmonic analysis",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8081",
+    "dev": "python3 -m http.server 8081", 
+    "build": "echo 'Angular 20 build - production build already compiled'",
+    "test": "echo 'Angular 20 tests - TODO: implement Angular testing'",
+    "lint": "echo 'Angular 20 linting - TODO: implement ESLint for Angular'",
+    "clean": "echo 'Angular 20 clean - no artifacts to clean'"
+  },
+  "keywords": [
+    "music-theory",
+    "angular",
+    "harmonic-analysis", 
+    "magic-18",
+    "interactive-instruments",
+    "chord-progressions"
+  ],
+  "author": "NOVAXE Team",
+  "license": "MIT",
+  "dependencies": {
+    "@angular/core": "^20.0.0",
+    "@angular/common": "^20.0.0",
+    "@angular/router": "^20.0.0",
+    "@angular/forms": "^20.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markvandendool/novaxe-phoenix-ecosystem.git",
+    "directory": "apps/novaxe-angular"
+  },
+  "bugs": {
+    "url": "https://github.com/markvandendool/novaxe-phoenix-ecosystem/issues"
+  },
+  "homepage": "https://github.com/markvandendool/novaxe-phoenix-ecosystem/tree/main/apps/novaxe-angular#readme"
+}

@@ -1,0 +1,1152 @@
+<!----------------------------------------->
+<!----------------------------------------->
+<!-------------- BRAID TONAL -------------->
+<!----------------------------------------->
+<!----------------------------------------->
+
+<section id="braid-tonal" [style.display]="braidType=='tonal' ? 'block' : 'none'">
+    <span style="position:fixed" font-size="15px"  >{{displayed_chord}}</span>
+    
+    <div class="braid" style="width:100%;height:100%;">
+    <svg (load)="svg_loaded()" version="1.1" width="100%" viewBox="-10 40 320 1600" xmlns="http://www.w3.org/2000/svg">
+            
+            <defs>
+                <linearGradient id="greenGradient" x1="0.5" x2="0.8" y1="0.1" y2="0.8">
+                    <stop offset="0%" stop-color="#00a450"/>
+                    <stop offset="100%" stop-color="#416c63"/>
+                </linearGradient>
+
+                <radialGradient id="greyGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7f8899"/>
+                    <stop offset="100%" stop-color="#58595b"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient0" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#6d7481"/>
+                    <stop offset="100%" stop-color="#545659"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient1" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#6a717f"/>
+                    <stop offset="100%" stop-color="#505255"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient2" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5f6472"/>
+                    <stop offset="100%" stop-color="#494c4f"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient3" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5e636e"/>
+                    <stop offset="100%" stop-color="#46494c"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient4" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5d646f"/>
+                    <stop offset="100%" stop-color="#4b4c4e"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient5" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5c626d"/>
+                    <stop offset="100%" stop-color="#4a4b4d"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient6" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#585d65"/>
+                    <stop offset="100%" stop-color="#434446"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient7" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#575d69"/>
+                    <stop offset="100%" stop-color="#404245"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient8" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#4f555f"/>
+                    <stop offset="100%" stop-color="#3a3d41"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient9" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#434a51"/>
+                    <stop offset="100%" stop-color="#3a3f45"/>
+                </radialGradient>
+
+                <radialGradient id="eraseGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#343a40"/>
+                    <stop offset="100%" stop-color="#343a40"/>
+                </radialGradient>
+
+                <linearGradient id="greenOrangeGradient" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#979da2ff"/>
+                    <stop offset="100%" stop-color="#f1ded7ff"/>
+                </linearGradient>
+
+                <!-- radial-gradient(#7f8899, #6a717f, #5c626d, #575d69,** #4f555f, #434a51, #343a40)
+                radial-gradient(#58595b, #505255, #4a4b4d, #404245, #3a3d41, #3a3f45, #343a40) -->
+                <filter id="f1">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                </filter>
+
+                <filter id="f2">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="imgBlur" />
+                    <feSpecularLighting in="imgBlur" surfaceScale="2" specularConstant=".75"
+                      specularExponent="20" lighting-color="#bbbbbb" result="imgSpecular">
+                     <fePointLight x="-5" y="-100" z="100" />
+                    </feSpecularLighting>
+                    <!-- Restrict the specular highlight to the object; this is necessary. -->
+                    <feComposite in="imgSpecular" in2="SourceAlpha" operator="in" result="imgMasked" />
+                    <feComposite in="SourceGraphic" in2="imgMasked"
+                      operator="arithmetic" k1="0" k2="1" k3="2" k4="0"/>
+                </filter>
+
+
+                <!-- braid -->
+                <g id="leftCommaXL" style="transform: scale(1.5) translate(-33px, -203px);">
+                    <path d="m 32.734375,179.20618 c 0,0 12.113735,-0.82137 8.401424,13.54174 -2.342291,6.20927 -8.707643,9.85526 -9.083293,10.09833 -0.68501,0.48614 -8.461794,5.67897 -9.257288,11.5789 -0.352227,3.65595 -0.689274,10.31176 10.020883,11.82129 -9.013122,0.002 -23.157482,-6.89426 -23.144332,-23.81622 0.01445,-18.60061 15.886974,-23.24613 23.062606,-23.22404 z"/>
+                </g>
+
+                <g id="rightCommaXL" style="transform: scale(1.5) translate(-33px, -203px);">
+                    <path d="m 33.024778,226.20487 c 0,0 -13.443364,-0.0489 -9.683064,-13.47923 1.243181,-4.30995 6.111411,-8.15928 9.392661,-10.28428 3.21875,-2.125 6.102754,-5.36321 7.859805,-8.419 4.860534,-14.74796 -6.999423,-14.84859 -6.999423,-14.84859 6.473148,0 21.785508,5.24551 22.271648,23.5419 0.48613,18.29638 -16.172921,23.52203 -22.841627,23.4892 z"/>
+                </g>
+
+                <g id="leftArrow">
+                    <path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+                    <path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+                    <path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+                    <path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+                </g>
+
+                <g id="leftCommaSM" style="transform: scale(1.2) translate(-35px, -200px);">
+                    <path d="m 32.734375,179.20618 c 0,0 12.113735,-0.82137 8.401424,13.54174 -2.342291,6.20927 -8.707643,9.85526 -9.083293,10.09833 -0.68501,0.48614 -8.461794,5.67897 -9.257288,11.5789 -0.352227,3.65595 -0.689274,10.31176 10.020883,11.82129 -9.013122,0.002 -23.157482,-6.89426 -23.144332,-23.81622 0.01445,-18.60061 15.886974,-23.24613 23.062606,-23.22404 z"/>
+                </g>
+
+                <g id="rightCommaSM" style="transform: scale(1.2) translate(-35px, -200px);">
+                    <path d="m 33.024778,226.20487 c 0,0 -13.443364,-0.0489 -9.683064,-13.47923 1.243181,-4.30995 6.111411,-8.15928 9.392661,-10.28428 3.21875,-2.125 6.102754,-5.36321 7.859805,-8.419 4.860534,-14.74796 -6.999423,-14.84859 -6.999423,-14.84859 6.473148,0 21.785508,5.24551 22.271648,23.5419 0.48613,18.29638 -16.172921,23.52203 -22.841627,23.4892 z"/>
+                </g>
+
+                <g id="rightArrow" transform="scale(-1 1)">
+                    <path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+                    <path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+                    <path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+                    <path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+                </g>
+
+                <g id="circle" style="transform: translate(-150px, -160px);">
+                    <path cx="150.45" cy="161.55" r="84.076797" d="M 234.52679,161.55 A 84.076797,84.076797 0 0 1 150.45,245.6268 84.076797,84.076797 0 0 1 66.373199,161.55 84.076797,84.076797 0 0 1 150.45,77.473206 84.076797,84.076797 0 0 1 234.52679,161.55 Z"/>
+                </g>
+
+                <g id="rectHleft">
+                    <path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+                </g>
+
+                <g id="rectHright" transform="rotate(180)">
+                    <path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+                </g>
+
+                <g id="rectV">
+                    <path d="m-17-26s19.6 25.5 0 52c.631-.631 18.1-8.98 33.1-.312-.315 0-19.6-25.8 0-51.4 0-.315-16.6 9.22-33.1-.312z"/>
+                </g>
+
+                <g id="arrow">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+
+                <g id="arrowL" transform="rotate(-90)">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+
+                <g id="arrowR" transform="rotate(90)">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+                <!-- end of braid -->
+            </defs>
+            
+            <g transform="translate(150 0) scale(0.9)">
+
+                <!-- background layer (circles)-->
+                <g *ngFor='let tona of center_left; let i=index' [attr.class]="cm.emphasis_chords?'tona erase':'tona'"
+                [attr.transform]="'translate(0 '+(i+1)*90+')'">
+                <use class="braidBack" *ngIf="i!=0 && i!=center_left_in_use.length-1" 
+                    [attr.class]="(tonality_focused == center_left[i] || tonality_focused == center_right[i]+'m')?'greenCircle active':'greenCircle'" 
+                    xlink:href="#circle"/>
+                </g>
+
+                <!-- intermediate layer (arrows and links) mostly the yellow part-->
+                <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">
+                    
+                    <!-- links between bubbles -->
+                    <use *ngIf="i!=center_left.length-1" [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" xlink:href="#rectV" transform="translate(0 45)"/>
+                    <use [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" *ngIf="i!=0 && i!=center_left.length-1" xlink:href="#rectHright" transform="translate(50 0)"/>
+                    <use [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" *ngIf="i!=0 && i!=center_left.length-1" xlink:href="#rectHleft" transform="translate(-50 0)"/>
+
+                    <!-- big arrows inside links-->
+                    <g [attr.id]="'arrowsR_'+i" *ngIf="i!=0 && i!=center_left.length-1" 
+                       [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowR" transform="translate(45 0)"/>
+                    </g>
+                    <g [attr.id]="'arrowsL_'+i" *ngIf="i!=0 && i!=center_left.length-1"
+                       [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowL" transform="translate(-46 0)"/>
+                    </g>
+                    <g [attr.id]="'arrows_'+i" *ngIf="i!=center_left.length-1" 
+                       [attr.class]="get_arrow_class(center_left[i], chord_type.center.left, center_right[i], chord_type.center.right, center_left[i+1], chord_type.center.left, center_right[i+1], chord_type.center.right)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(0 45)"/>
+                    </g>
+
+                    <!-- green to green arrows -->
+                    <g [attr.id]="'arrowsMidL_'+i" *ngIf="i!=0 && i<center_left.length-2" 
+                       [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, left_up[i], chord_type.left.up, left_down[i], chord_type.left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(-92 48)"/>
+                    </g>
+                    <g [attr.id]="'arrowsMidR_'+i" *ngIf="i!=0 && i<center_left.length-2" 
+                       [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, right_up[i], chord_type.right.up, right_down[i], chord_type.right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(94 48)"/>
+                    </g>
+
+                    <!-- red to green arrows -->
+                    <g [attr.id]="'arrowsExtRL_'+i" *ngIf="i!=0 && i<center_left.length-1" transform="rotate(-30)" 
+                       [attr.class]="get_arrow_class(fifth_left_up[i-1], chord_type.fifth_left.up, fifth_left_down[i-1], chord_type.fifth_left.down,left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(-105 -70)"/>
+                    </g>
+                    <g [attr.id]="'arrowsExtLR_'+i" *ngIf="i!=0 && i<center_left.length-1" transform="rotate(30)" 
+                       [attr.class]="get_arrow_class(fifth_right_up[i-1], chord_type.fifth_right.up, fifth_right_down[i-1], chord_type.fifth_right.down, right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(105 -70)"/>
+                    </g>
+
+                    <!-- green to red arrows-->
+                    <g [attr.id]="'arrowsExtRR_'+i" *ngIf="i!=0 && i<center_left.length-2" transform="rotate(-30)" 
+                       [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, fifth_right_up[i], chord_type.fifth_right.up, fifth_right_down[i], chord_type.fifth_right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(105 75)"/>
+                    </g>
+                    <g [attr.id]="'arrowsExtLL_'+i" *ngIf="i!=0 && i<center_left.length-2" transform="rotate(30)" 
+                       [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, fifth_left_up[i], chord_type.fifth_left.up, fifth_left_down[i], chord_type.fifth_left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrow" transform="translate(-105 75)"/>
+                    </g>
+
+                </g>
+
+
+                <!-- foreground layer (bubbles) -->
+                <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">  
+                     
+                    <!-- center bubble -->
+                    <g  [attr.id]="'center_bubble_'+i" class="medBubble">
+                        <g [attr.id]="'center_bubble_left_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#leftCommaXL" [attr.class]="get_bubble_class(center_left[i], chord_type.center.left)" />
+                            <text [attr.class]="display_as_roman?'left duo roman':'left duo'" [attr.x]="display_as_roman?'0':'-5'" y="-6" >{{center_left_in_use[i]}},{{chord_type.center.left}}</text>
+                        </g>
+                        <g [attr.id]="'center_bubble_right_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                                <use xlink:href="#rightCommaXL" [attr.class]="get_bubble_class(center_right[i], chord_type.center.right)" />
+                            <text *ngIf="!display_as_roman" class="right duo" x="0" y="19" >{{center_right_in_use[i]}},{{chord_type.center.right}}</text>
+                            <text *ngIf="display_as_roman" class="right duo roman" x="0" y="19" >{{center_right_in_use[i].toLowerCase()}}</text>
+                        </g>
+                    </g>
+
+                    <!-- green bubbles close to center-->
+                    <g *ngIf="i!=0 && i!=center_left.length-1" class="smallBubble" transform="translate(-85 0)">
+                        <g [attr.id]="'left_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use  xlink:href="#leftCommaSM" [attr.class]="get_bubble_class(left_up[i-1], chord_type.left.up)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" x="-20" y="-4" >{{left_up_in_use[i-1]}},{{chord_type.left.up}}</text>
+                        </g>
+                        <g [attr.id]="'left_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                                <use xlink:href="#rightCommaSM" [attr.class]="get_bubble_class(left_down[i-1], chord_type.left.down)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" x="-5" y="16" >{{left_down_in_use[i-1]}},{{chord_type.left.down}}</text>
+                        </g>
+                    </g>
+                    <g *ngIf="i!=0 && i!=center_left.length-1" class="smallBubble"  transform="translate(90 0)">
+                        <g [attr.id]="'right_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#leftCommaSM"[attr.class]="get_bubble_class(right_up[i-1], chord_type.right.up)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" [attr.x]="display_as_roman?'-22':'-20'" y="-4" >{{right_up_in_use[i-1]}},{{chord_type.right.up}}</text>
+                        </g>
+                        <g [attr.id]="'right_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                                <use xlink:href="#rightCommaSM" [attr.class]="get_bubble_class(right_down[i-1], chord_type.right.down)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" x="0" y="16" >{{right_down_in_use[i-1]}},{{chord_type.right.down}}</text>
+                        </g>
+                    </g>
+
+                    <!-- red bubbles outer ones-->
+                    <g [attr.id]="'outer_'+i" *ngIf="i!=center_left.length-2 && i!=center_left.length-1" class="smallBubble outer" transform="translate(-130 45)">
+                        <g [attr.id]="'fifth_left_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#leftCommaSM" [attr.class]=" get_bubble_class(fifth_left_up[i], chord_type.fifth_left.up)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" x="-22" y="-4" >{{fifth_left_up_in_use[i]}},{{chord_type.fifth_left.up}}</text>
+                        </g>
+                        <g [attr.id]="'fifth_left_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#rightCommaSM" [attr.class]="get_bubble_class(fifth_left_down[i], chord_type.fifth_left.down)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" [attr.x]="display_as_roman?'-5':'-3'" y="14" >{{fifth_left_down_in_use[i]}},{{chord_type.fifth_left.down}}</text>
+                        </g>
+                    </g>
+                    <g *ngIf="i!=center_left.length-2 && i!=center_left.length-1" class="smallBubble outer" transform="translate(130 45)">
+                        <g [attr.id]="'fifth_right_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#leftCommaSM" [attr.class]="
+                            get_bubble_class(fifth_right_up[i], chord_type.fifth_right.up)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" [attr.x]="display_as_roman?'-25':'-22'" y="-4" >{{fifth_right_up_in_use[i]}},{{chord_type.fifth_right.up}}</text>
+                        </g>
+                        <g [attr.id]="'fifth_right_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                        <use class="comma" xlink:href="#rightCommaSM" [attr.class]="get_bubble_class(fifth_right_down[i], chord_type.fifth_right.down)" />
+                            <text [attr.class]="display_as_roman?'duo roman':'duo'" [attr.x]="display_as_roman?'-5':'-2'" y="13" >{{fifth_right_down_in_use[i]}},{{chord_type.fifth_right.down}}</text>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+</section>
+
+
+
+
+
+
+
+<!----------------------------------------->
+<!----------------------------------------->
+<!-------------- BRAID BLUES -------------->
+<!----------------------------------------->
+<!----------------------------------------->
+<section id="braid-blues" [style.display]="braidType=='blues' ? 'block' : 'none'">
+    <span style="position:fixed" font-size="15px"  >{{displayed_chord}}</span>
+    
+    <div class="braid" style="width:100%;height:100%;">
+        <svg id="braid_blues_svg" (load)="svg_loaded()" version="1.1" width="100%" viewBox="-10 50 320 1600" xmlns="http://www.w3.org/2000/svg">
+            
+            <defs>
+                <linearGradient id="greenGradientBlues" x1="0.5" x2="0.8" y1="0.1" y2="0.8">
+                    <stop offset="0%" stop-color="#00a450"/>
+                    <stop offset="100%" stop-color="#416c63"/>
+                </linearGradient>
+
+                <radialGradient id="greyGradientBlues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#7f8899"/>
+                    <stop offset="100%" stop-color="#58595b"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient0Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#6d7481"/>
+                    <stop offset="100%" stop-color="#545659"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient1Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#6a717f"/>
+                    <stop offset="100%" stop-color="#505255"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient2Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5f6472"/>
+                    <stop offset="100%" stop-color="#494c4f"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient3Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5e636e"/>
+                    <stop offset="100%" stop-color="#46494c"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient4Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5d646f"/>
+                    <stop offset="100%" stop-color="#4b4c4e"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient5Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#5c626d"/>
+                    <stop offset="100%" stop-color="#4a4b4d"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient6Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#585d65"/>
+                    <stop offset="100%" stop-color="#434446"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient7Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#575d69"/>
+                    <stop offset="100%" stop-color="#404245"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient8Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#4f555f"/>
+                    <stop offset="100%" stop-color="#3a3d41"/>
+                </radialGradient>
+
+                <radialGradient id="greyGradient9Blues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#434a51"/>
+                    <stop offset="100%" stop-color="#3a3f45"/>
+                </radialGradient>
+
+                <radialGradient id="eraseGradientBlues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#343a40"/>
+                    <stop offset="100%" stop-color="#343a40"/>
+                </radialGradient>
+
+                <linearGradient id="greenOrangeGradientBlues" x1="0.1" y1="0.1" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#979da2ff"/>
+                    <stop offset="100%" stop-color="#f1ded7ff"/>
+                </linearGradient>
+
+                <!-- radial-gradient(#7f8899, #6a717f, #5c626d, #575d69,** #4f555f, #434a51, #343a40)
+                radial-gradient(#58595b, #505255, #4a4b4d, #404245, #3a3d41, #3a3f45, #343a40) -->
+                <filter id="f1Blues">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="3" />
+                </filter>
+
+                <filter id="f2Blues">
+                    <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="imgBlur" />
+                    <feSpecularLighting in="imgBlur" surfaceScale="2" specularConstant=".75"
+                      specularExponent="20" lighting-color="#bbbbbb" result="imgSpecular">
+                     <fePointLight x="-5" y="-100" z="100" />
+                    </feSpecularLighting>
+                    <!-- Restrict the specular highlight to the object; this is necessary. -->
+                    <feComposite in="imgSpecular" in2="SourceAlpha" operator="in" result="imgMasked" />
+                    <feComposite in="SourceGraphic" in2="imgMasked"
+                      operator="arithmetic" k1="0" k2="1" k3="2" k4="0"/>
+                </filter>
+
+                <!-- BRAID -->
+                <g id="centerCommaXLBlues" style="transform: translate(-151px, -80px);">
+                    <path d="M 134.75245,51.925521 C 122.79293,57.699114 106.50542,80.34136 126.91778,104.45123 106.86566,80.816497 127.72661,58.591246 149.9981,81.281364 178.31376,66.941328 162.42857,38.10778 134.75245,51.925521 Z"/>
+                </g>
+
+
+                <g id="leftCommaXLBlues" style="transform: translate(-151px, -80px);">
+                    <path d="m 126.79203,104.3306 c 24.47774,21.62735 56.18127,2.69932 55.99164,-24.07104 0.0349,31.87926 -32.1397,32.7236 -32.79432,0.873722 -22.52574,-22.479653 -42.63979,-0.91969 -23.19732,23.197318 z"/>
+                </g>
+
+                <g id="rightCommaXLBlues" style="transform: translate(-151px, -80px);">
+                    <path d="m 134.61687,52.080563 c 24.72127,-11.894162 47.05093,5.884524 48.00186,28.260797 0.0349,31.87926 -32.13968,32.72361 -32.9113,0.901177 28.31566,-14.340036 13.6367,-42.983346 -15.09056,-29.161974 z"/>
+                </g>
+
+                <g id="leftArrowBlues">
+                    <path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+                    <path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+                    <path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+                    <path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+                </g>
+
+                <g id="leftCommaSMBlues" style="transform: scale(1.2) translate(-35px, -200px);">
+                    <path d="m 32.734375,179.20618 c 0,0 12.113735,-0.82137 8.401424,13.54174 -2.342291,6.20927 -8.707643,9.85526 -9.083293,10.09833 -0.68501,0.48614 -8.461794,5.67897 -9.257288,11.5789 -0.352227,3.65595 -0.689274,10.31176 10.020883,11.82129 -9.013122,0.002 -23.157482,-6.89426 -23.144332,-23.81622 0.01445,-18.60061 15.886974,-23.24613 23.062606,-23.22404 z"/>
+                </g>
+
+                <g id="rightCommaSMBlues" style="transform: scale(1.2) translate(-35px, -200px);">
+                    <path d="m 33.024778,226.20487 c 0,0 -13.443364,-0.0489 -9.683064,-13.47923 1.243181,-4.30995 6.111411,-8.15928 9.392661,-10.28428 3.21875,-2.125 6.102754,-5.36321 7.859805,-8.419 4.860534,-14.74796 -6.999423,-14.84859 -6.999423,-14.84859 6.473148,0 21.785508,5.24551 22.271648,23.5419 0.48613,18.29638 -16.172921,23.52203 -22.841627,23.4892 z"/>
+                </g>
+
+                <g id="rightArrowBlues" transform="scale(-1 1)">
+                    <path d="m-21.4 6.82c3.4-2.29 9.5 2.32 13.9-.5-5.07-3.38-9.5-8.43-14-13.2.027 4.38-.438 9.39.09 13.7z"/>
+                    <path d="m-21.5-6.87c.996.215 2 .223 3 .0117.961-.203 1.88-.664 2.81-1.06.949-.406 1.91-.695 2.91-.648 1.01.043 2 .402 2.95.898 1.87.969 3.67 2.34 5.35 3.9 1.74 1.62 3.36 3.49 5.09 5.14 1.54 1.47 3.15 2.73 4.73 4.1.16.137.961-.106 1.12.0312-1.53 1.27-3.74 2.67-5.51 2.9-1.82.238-3.75.137-5.52-.551-1.19-.457-2.34-1.12-3.46-1.86-.91-.606-1.78-1.28-2.67-1.97l-1.49-1.34-2.02-1.95-1.74-1.75-1.74-1.84-1.95-2.11-1.87-1.89"/>
+                    <path d="m-6.82-5.8c.059.0508.426-.227.496-.266.176-.0977.352-.195.527-.293.367-.207.734-.41 1.1-.609.762-.41 1.54-.789 2.32-1.06.781-.27 1.59-.426 2.4-.438 1.23-.0195 2.44.473 3.56 1.22.324.223.648.461.957.719.547.449 1.09.953 1.7 1.16.289.0977.586.0937.879.121.141.0156.5.16.508-.188v-.453c.01-.34 0-.684 0-1.03v-3.84l1.65 1.34v5.32s-14 .004-14.1.004c-.047 0-.145-.125-.184-.16-.152-.133-.309-.27-.461-.402-.355-.309-.707-.617-1.06-.926-.082-.0742-.168-.144-.254-.219z"/>
+                    <path d="m5.88 5.35s1.09.0664 1.75.0664h1.65v5.18l11.8-9.93-11.8-10.1v5.49l-13.8-.168-.098.215 4.64 4.69s1.28 1.27 2.69 2.5 2.41 1.95 2.41 1.95z"/>
+                </g>
+
+                <g id="circleBlues" style="transform: translate(-150px, -160px);">
+                    <path cx="150.45" cy="161.55" r="84.076797" d="M 234.52679,161.55 A 84.076797,84.076797 0 0 1 150.45,245.6268 84.076797,84.076797 0 0 1 66.373199,161.55 84.076797,84.076797 0 0 1 150.45,77.473206 84.076797,84.076797 0 0 1 234.52679,161.55 Z"/>
+                </g>
+
+                <g id="rectHleftBlues">
+                    <path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+                </g>
+
+                <g id="rectHrightBlues" transform="rotate(180)">
+                    <path d="m-22.4-9.55s22.9 9.15 44.7 0c-2.41 5.55-2.64 13.9-.624 19.1-.158.158-19.8-8.2-44.7 0 3.17-4.85 3.33-12.9.002-19.1z"/>
+                </g>
+
+                <g id="rectVBlues">
+                    <path d="m-17-26s19.6 25.5 0 52c.631-.631 18.1-8.98 33.1-.312-.315 0-19.6-25.8 0-51.4 0-.315-16.6 9.22-33.1-.312z"/>
+                </g>
+
+                <g id="arrowBlues">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+
+                <g id="arrowLBlues" transform="rotate(-90)">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+
+                <g id="arrowRBlues" transform="rotate(90)">
+                  <path d="m5.46-8.1-5.75 7.18-5.78-7.19v7.14l5.77 9.14 5.72-8.97z"/>
+                </g>
+                <!-- END OF BRAID -->
+
+            </defs>
+            
+
+
+            <g transform="translate(150 0) scale(0.9)">
+
+                <!-- background layer (circles)-->
+                <g *ngFor='let tona of center_up; let i=index' [attr.class]="cm.emphasis_chords?'tona erase':'tona'"
+                [attr.transform]="'translate(0 '+(i+1)*90+')'">
+                <use *ngIf="i!=0 && i!=center_up.length-1" 
+                    [attr.class]="(tonality_focused == center_up[i] || tonality_focused == center_right[i]+'m'|| tonality_focused == center_right[i]+'b7')?'greenCircle active':'greenCircle'" xlink:href="#circleBlues"/>
+                </g>
+
+                <!-- intermediate layer (arrows and links) mostly the yellow part-->
+                <g *ngFor='let tona of center_up; let i=index' class="tona" [attr.transform]="'translate(0 '+(i+1)*90+')'">
+                    
+                    <!-- links between bubbles -->
+                    <use *ngIf="i!=center_up.length-1" [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" xlink:href="#rectVBlues" transform="translate(0 45)"/>
+                    <use [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" *ngIf="i!=0 && i!=center_up.length-1" xlink:href="#rectHrightBlues" transform="translate(50 0)"/>
+                    <use [attr.class]="cm.emphasis_chords?'rect-arrow erase':'rect-arrow'" *ngIf="i!=0 && i!=center_up.length-1" xlink:href="#rectHleftBlues" transform="translate(-50 0)"/>
+
+                    <!-- big arrows inside links-->
+                    <g [attr.id]="'arrowsR_'+i" *ngIf="i!=0 && i!=center_up.length-1" 
+                    [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right, center_up[i], chord_type.center.up)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowRBlues" transform="translate(45 0)"/>
+                    </g>
+                    <g [attr.id]="'arrowsL_'+i" *ngIf="i!=0 && i!=center_up.length-1"
+                    [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right, center_up[i], chord_type.center.up)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowLBlues" transform="translate(-50 0)"/>
+                    </g>
+                    <g [attr.id]="'arrows_'+i" *ngIf="i!=center_up.length-1"
+                    [attr.class]="get_arrow_class(center_left[i], chord_type.center.left, center_right[i], chord_type.center.right, center_left[i+1], chord_type.center.left, center_right[i+1], chord_type.center.right, center_up[i+1], chord_type.center.up, center_up[i], chord_type.center.up)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(0 45)"/>
+                    </g>
+
+                    <!-- green to green arrows -->
+                    <g [attr.id]="'arrowsMidL_'+i" *ngIf="i!=0 && i<center_up.length-2" 
+                    [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, left_up[i], chord_type.left.up, left_down[i], chord_type.left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(-92 48)"/>
+                    </g>
+                    <g [attr.id]="'arrowsMidR_'+i" *ngIf="i!=0 && i<center_up.length-2" 
+                    [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, right_up[i], chord_type.right.up, right_down[i], chord_type.right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(94 48)"/>
+                    </g>
+
+                    <!-- red to green arrows -->
+                    <g [attr.id]="'arrowsExtRL_'+i" *ngIf="i!=0 && i<center_up.length-1" transform="rotate(-30)" 
+                    [attr.class]="get_arrow_class(fifth_left_up[i-1], chord_type.fifth_left.up, fifth_left_down[i-1], chord_type.fifth_left.down,left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(-105 -70)"/>
+                    </g>
+                    <g [attr.id]="'arrowsExtLR_'+i" *ngIf="i!=0 && i<center_up.length-1" transform="rotate(30)" 
+                    [attr.class]="get_arrow_class(fifth_right_up[i-1], chord_type.fifth_right.up, fifth_right_down[i-1], chord_type.fifth_right.down, right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(105 -70)"/>
+                    </g>
+
+
+                    <!-- green to red arrows-->
+                    <g [attr.id]="'arrowsExtRR_'+i" *ngIf="i!=0 && i<center_up.length-2" transform="rotate(-30)" 
+                    [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, fifth_right_up[i], chord_type.fifth_right.up, fifth_right_down[i], chord_type.fifth_right.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(105 75)"/>
+                    </g>
+                    <g [attr.id]="'arrowsExtLL_'+i" *ngIf="i!=0 && i<center_up.length-2" transform="rotate(30)" 
+                    [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, fifth_left_up[i], chord_type.fifth_left.up, fifth_left_down[i], chord_type.fifth_left.down)">
+                        <use [attr.class]="cm.emphasis_chords?'arrows-2 erase':'arrows-2'" xlink:href="#arrowBlues" transform="translate(-105 75)"/>
+                    </g>
+
+                </g>
+
+
+                <!-- foreground layer (bubbles) -->
+                <g *ngFor='let tona of center_up; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i+1)*90+')'">  
+                     
+                    <!-- center bubble -->
+                    <g  [attr.id]="'center_bubble_'+i" class="medBubble">
+                        <g [attr.id]="'center_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#centerCommaXLBlues" [attr.class]="get_bubble_class(center_up[i], chord_type.center.up)" />
+                            <text [attr.class]="display_as_roman?'center roman':'center'" x="2" y="-12">{{center_up_in_use[i]}},{{chord_type.center.up}}</text>
+                        </g>
+                        
+                        <g [attr.id]="'center_bubble_right_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#rightCommaXLBlues" [attr.class]="get_bubble_class(center_right[i], chord_type.center.right)" />
+                            <text *ngIf="!display_as_roman" class="right" x="8" y="10" >{{center_right_in_use[i]}},{{chord_type.center.right}}</text>
+                            <text *ngIf="display_as_roman" class="right" x="8" y="10" >{{center_right_in_use[i].toLowerCase()}}</text>
+                        </g>
+
+                        <g [attr.id]="'center_bubble_left_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#leftCommaXLBlues" [attr.class]="get_bubble_class(center_left[i], chord_type.center.left)" />
+                            <text [attr.class]="display_as_roman?'left roman':'left'"  [attr.x]="display_as_roman?'-4':'-7'" y="18">{{center_left_in_use[i]}},{{chord_type.center.left}}</text>
+                        </g>
+                    </g>
+
+                    <!-- bubbles close to center-->
+                    <g *ngIf="i!=0 && i!=center_up.length-1" class="smallBubble" transform="translate(-90 0)">
+                        <g [attr.id]="'left_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use  xlink:href="#leftCommaSMBlues" [attr.class]="get_bubble_class(left_up[i-1], chord_type.left.up)" />
+                            <text [attr.x]="display_as_roman?'-23':'-19'" y="-2" >{{left_up_in_use[i-1]}},{{chord_type.left.up}}</text>
+                            <!-- <text x="-19" y="-2" >{{i}}</text> -->
+                        </g>
+
+                        <g [attr.id]="'left_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#rightCommaSMBlues" [attr.class]="get_bubble_class(left_down[i-1], chord_type.left.down)" />
+                            <text [attr.x]="display_as_roman?'-5':'-3'" y="14" >{{left_down_in_use[i-1]}},{{chord_type.left.down}}</text>
+                            <!-- <text x="-3" y="14" >{{i}}</text> -->
+                        </g>
+                    </g>
+
+                    <g *ngIf="i!=0 && i!=center_up.length-1" class="smallBubble"  transform="translate(95 0)">
+                        <g [attr.id]="'right_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#leftCommaSMBlues"[attr.class]="get_bubble_class(right_up[i-1], chord_type.right.up)" />
+                            <text x="-19" y="-2" >{{right_up_in_use[i-1]}},{{chord_type.right.up}}</text>
+                        </g>
+
+                        <g [attr.id]="'right_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use xlink:href="#rightCommaSMBlues" [attr.class]="get_bubble_class(right_down[i-1], chord_type.right.down)" />
+                            <text x="0" y="14" >{{right_down_in_use[i-1]}},{{chord_type.right.down}}</text>
+                        </g>
+                    </g>
+
+                    <!-- bubbles outer ones-->
+                    <g [attr.id]="'outer_'+i" *ngIf="i!=center_up.length-2 && i!=center_up.length-1" class="smallBubble outer" transform="translate(-130 45)">
+                        <g [attr.id]="'fifth_left_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#leftCommaSMBlues" [attr.class]="get_bubble_class(fifth_left_up[i], chord_type.fifth_left.up)" />
+                            <text [attr.x]="display_as_roman?'-25':'-19'" y="-2" >{{fifth_left_up_in_use[i]}},{{chord_type.fifth_left.up}}</text>
+                        </g>
+
+                        <g [attr.id]="'fifth_left_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#rightCommaSMBlues" [attr.class]="get_bubble_class(fifth_left_down[i], chord_type.fifth_left.down)" />
+                            <text x="-3" y="14" >{{fifth_left_down_in_use[i]}},{{chord_type.fifth_left.down}}</text>
+                        </g>
+                    </g>
+
+                    <g *ngIf="i!=center_up.length-2 && i!=center_up.length-1" class="smallBubble outer" transform="translate(135 45)">
+                        <g [attr.id]="'fifth_right_bubble_up_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#leftCommaSMBlues" [attr.class]="get_bubble_class(fifth_right_up[i], chord_type.fifth_right.up)" />
+                            <text [attr.x]="display_as_roman?'-25':'-19'" y="-2" >{{fifth_right_up_in_use[i]}},{{chord_type.fifth_right.up}}</text>
+                        </g>
+
+                        <g [attr.id]="'fifth_right_bubble_down_'+i" class="bub" (click)='hoverMe($event)' (mouseleave)="hoverMeNot($event)">
+                            <use class="comma" xlink:href="#rightCommaSMBlues" [attr.class]="get_bubble_class(fifth_right_down[i], chord_type.fifth_right.down)" />
+                            <text x="-3" y="14" >{{fifth_right_down_in_use[i]}},{{chord_type.fifth_right.down}}</text>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </svg>
+    </div>
+</section>
+
+
+
+
+
+
+
+
+
+<!----------------------------------------->
+<!----------------------------------------->
+<!-------------- BRAID NEW1 --------------->
+<!----------------------------------------->
+<!----------------------------------------->
+<section id="braid1" [style.display]="braidType=='new1' ? 'block' : 'none'">
+    <span style="position:fixed" font-size="15px"  >{{displayed_chord}}</span>
+    <div class="braid" style="width:100%;height:100%;margin-top: 50px;">
+    
+    <svg version="1.1" width="100%" viewBox="26 -115 100 480" xmlns="http://www.w3.org/2000/svg">
+
+        <defs>
+            <!-- ACTIVE HALF -->
+            <filter id="darkGlowN1" filterUnits="userSpaceOnUse" x="-50%" y="-50%" width="200%" height="200%">
+            <!-- Blur the token at different levels-->
+                <feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur5"/>
+                <feGaussianBlur in="SourceGraphic" stdDeviation="10" result="blur10"/>
+                <!-- <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur20"/> -->
+                <!-- <feGaussianBlur in="SourceGraphic" stdDeviation="30" result="blur30"/> TOO HEAVY --> 
+                <!-- <feGaussianBlur in="SourceGraphic" stdDeviation="50" result="blur50"/> -->
+    
+             <!-- Merge all the blurs except for the first one -->
+                <feMerge result="blur-merged">
+                    <feMergeNode in="blur10"/>
+                    <!-- <feMergeNode in="blur20"/> -->
+                    <!-- <feMergeNode in="blur30"/> -->
+                    <!-- <feMergeNode in="blur50"/> -->
+                </feMerge>
+    
+             <!-- Recolour the merged blurs red-->
+                <feColorMatrix result="darkGlow" in="blur-merged" type="matrix"
+                               values="1 0 0 0 0
+                                       0 0.06 0 0 0
+                                       0 0 0.44 0 0
+                                       0 0 0 1 0" />
+                <feMerge>
+                    <feMergeNode in="darkGlow"/>       <!-- largest blurs coloured red -->
+                    <feMergeNode in="blur5"/>          <!-- smallest blur left white -->
+                    <feMergeNode in="SourceGraphic"/>  <!-- original white text -->
+                </feMerge>
+            </filter>
+
+
+            <!-- HALVES -->
+            <g id="fifth_left_up">
+                <path d="m 30.138448,-75.129942 c -3.554333,-4.043042 -3.594285,-9.911651 0.302154,-13.80809 3.89644,-3.896434 9.813925,-3.856501 13.808102,-0.302152 z"/>
+            </g>
+            <g id="fifth_left_down">
+                <path d="m 44.855261,-88.633627 c 3.554333,4.043045 3.594285,9.911651 -0.302154,13.808088 -3.89644,3.896437 -9.813925,3.856503 -13.808075,0.302157 z"/>
+            </g>
+            <g id="fifth_right_up">
+                <path d="m 107.75844,-75.129937 c -3.55433,-4.043045 -3.59426,-9.911651 0.30216,-13.808087 3.89644,-3.896437 9.81392,-3.856504 13.8081,-0.302157 z"/>
+            </g>
+            <g id="fifth_right_down">
+                <path d="m 122.47526,-88.633621 c 3.55435,4.043042 3.59428,9.911651 -0.30216,13.80809 -3.89644,3.896434 -9.8139,3.856501 -13.80807,0.302152 z"/>
+            </g>
+            <g id="left_up">
+                <path d="m 43.309168,-61.936732 c -3.554333,-4.043043 -3.594285,-9.911652 0.302154,-13.808091 3.89644,-3.896434 9.813925,-3.856501 13.808077,-0.302152 z"/>
+            </g>
+            <g id="left_down">
+                <path d="m 117.23606,142.82796 c 13.4337,15.2808 13.5847,37.46136 -1.142,52.18805 -14.7267,14.72669 -37.092005,14.57576 -52.188105,1.14201 z" transform="matrix(0.26458333,0,0,0.26458333,27.007275,-113.23032)"/>
+            </g>
+            <g id="right_up">
+                <path d="m 94.597643,-61.970461 c -3.554333,-4.043045 -3.594285,-9.911652 0.302155,-13.808088 3.896439,-3.896437 9.813922,-3.856504 13.808072,-0.302157 z"/>
+            </g>
+            <g id="right_down">
+                <path d="m 109.31446,-75.474146 c 3.55433,4.043042 3.59428,9.911651 -0.30216,13.808091 -3.89644,3.896434 -9.813923,3.8565 -13.808099,0.302151 z"/>
+            </g>
+            <g id="center_left">
+                <path d="m 63.443088,-83.238024 c -6.224746,-7.08062 -6.294702,-17.358366 0.529167,-24.182236 6.823869,-6.82387 17.187201,-6.75393 24.182229,-0.52917 z"/>
+            </g>
+            <g id="center_right">
+                <path d="m 89.574317,-106.52961 c 6.224773,7.080624 6.294702,17.358371 -0.529167,24.18224 -6.823842,6.823866 -17.187174,6.753928  -24.182228,0.529166 z"/>
+            </g>
+            
+
+            <!-- ARROWS -->
+            <g id="big-arrow_R">
+                <path d="m 103.0931,-58.373141 h -2.43062 l 1.26666,2.345065 z"/>
+                <path d="m 103.0931,-56.435238 h -2.43062 l 1.26666,2.345066 z"/>
+                <path d="m 103.0931,-54.49735 h -2.43062 l 1.26666,2.345066 z"/>
+            </g>
+            <g id="arrow_R0">
+                <path d="m 93.313753,-67.491112 v -2.430631 l -2.345082,1.266671 z" d="m 108.61746,-62.836096 -1.71657,1.720882 2.55485,0.759322 z"/>
+            </g>
+            <g id="arrow_R1">
+                <path d="m 93.313753,-67.491112 v -2.430631 l -2.345082,1.266671 z"/>
+            </g>
+
+            <g id="big-arrow_L">
+                <path d="m 52.119952,-58.373147 h -2.430621 l 1.266666,2.345066 z"/>
+                <path d="m 52.119952,-56.435243 h -2.430621 l 1.266666,2.345066 z"/>
+                <path d="m 52.119952,-54.497355 h -2.430621 l 1.266666,2.345065 z"/>
+            </g>
+            <g id="arrow_L0">
+                <path d="m 59.667431,-69.919767 v 2.430632 l 2.345055,-1.266672 z"/>
+            </g>
+            <g id="arrow_L1">
+                <path d="m 45.27,-61.28064 -1.718654,-1.71876 -0.762609,2.553853 z"/>
+            </g>
+
+            <g id="arrow_FR">
+                <path d="m 110.14353,-75.256148 -1.71868,-1.71876 -0.76258,2.553854 z"/>
+            </g>
+
+            <g id="arrow_FL">
+                <path d="m 43.884452,-76.52582 -1.716564,1.720882 2.554843,0.759322 z"/>
+            </g>
+
+            <g id="arrow_C">
+                <path d="m 77.545248,-85.452539 h -2.430622 l 1.266667,2.345066 z"/>
+            </g>
+
+            <!-- BACK CIRCLES -->
+            <g id="circleN1">
+                <ellipse cx="81.927818" cy="-55.48246" rx="23.623093" ry="24.518995" transform="translate(-5.4 -13.5)"/>
+            </g>
+        </defs>
+    
+
+        <!-- BACKGROUND CIRCLES -->
+            <g *ngFor='let tona of center_left; let i=index' [attr.class]="cm.emphasis_chords?'tona erase':'tona'"
+            [attr.transform]="'translate(0 '+(i-1)*26.4+')'">
+            <use *ngIf="i!=0 && i!=center_left.length-1" 
+                [attr.class]="(tonality_focused == center_left[i] || tonality_focused == center_right[i]+'m')?'greenCircle active':'greenCircle'" xlink:href="#circleN1"/>
+            </g>
+
+
+        <!-- HALVES -->
+        <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+i*26.4+')'">  
+
+            <!--------- FIFTHS LEFT --------->  
+            <g *ngIf="i!=center_left.length-2 && i!=center_left.length-1">   
+                <g [attr.id]="'fifth_left_bubble_up_'+i" class="token fifLU" (click)='hoverMe($event)'>
+                    <use xlink:href="#fifth_left_up" [attr.class]="get_bubble_class(fifth_left_up[i], chord_type.fifth_left.up,'fifths')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" y="-83.503036" [attr.x]="display_as_roman?'29':'30.508127'">{{fifth_left_up_in_use[i]}},{{chord_type.fifth_left.up}}</text>
+
+                </g>
+
+                <g [attr.id]="'fifth_left_bubble_down_'+i" class="token fifLD" (click)='hoverMe($event)'>
+                    <use xlink:href="#fifth_left_down" [attr.class]="get_bubble_class(fifth_left_down[i], chord_type.fifth_left.down,'fifths')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'37.563381':'37.563381'" y="-77.906845" >{{fifth_left_down_in_use[i]}},{{chord_type.fifth_left.down}}</text>
+                </g>
+            </g>
+
+            <!--------- FIFTHS RIGHT --------->
+            <g *ngIf="i!=center_left.length-2 && i!=center_left.length-1">
+                <g [attr.id]="'fifth_right_bubble_up_'+i" class="token fifRU" (click)='hoverMe($event)'>
+                    <use xlink:href="#fifth_right_up"[attr.class]="get_bubble_class(fifth_right_up[i], chord_type.fifth_right.up,'fifths')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'106.81116':'108.81116'" y="-83.109123" >{{fifth_right_up_in_use[i]}},{{chord_type.fifth_right.up}}</text>
+                </g>
+                <g [attr.id]="'fifth_right_bubble_down_'+i" class="token fifRD" (click)='hoverMe($event)'>
+                    <use xlink:href="#fifth_right_down" [attr.class]="get_bubble_class(fifth_right_down[i], chord_type.fifth_right.down,'fifths')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'114.53078':'114.53078'" y="-77.450386" >{{fifth_right_down_in_use[i]}},{{chord_type.fifth_right.down}}</text>
+                </g>
+            </g>
+
+            <!--------- LEFT SIDE --------->
+            <g *ngIf="i!=0 && i!=center_left.length-1" transform="translate(0 -26.4)">
+                <g [attr.id]="'left_bubble_up_'+i" class="token sidLU" (click)='hoverMe($event)'>
+                    <use xlink:href="#left_up"[attr.class]="get_bubble_class(left_up[i-1], chord_type.left.up,'sides')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'42.6301':'44.6301'" y="-69.878464" >{{left_up_in_use[i-1]}},{{chord_type.left.up}}</text>
+                </g>
+                <g [attr.id]="'left_bubble_down_'+i" *ngIf="i!=0 && i!=center_left.length-1" class="token sidLD" (click)='hoverMe($event)'>
+                    <use xlink:href="#left_down" [attr.class]="get_bubble_class(left_down[i-1], chord_type.left.down,'sides')"/>
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" x="48.9" y="-63.159477" >{{left_down_in_use[i-1]}},{{chord_type.left.down}}</text>
+                </g>
+            </g>
+
+            <!---------- RIGHT SIDE ---------->
+            <g *ngIf="i!=0 && i!=center_left.length-1" transform="translate(0 -26.4)">
+                <g [attr.id]="'right_bubble_up_'+i" class="token sidRU" (click)='hoverMe($event)'>
+                    <use xlink:href="#right_up" [attr.class]="get_bubble_class(right_up[i-1], chord_type.right.up,'sides')"/>
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'95.488441':'96.488441'" y="-70.189491" >{{right_up_in_use[i-1]}},{{chord_type.right.up}}</text>
+                </g>
+                <g [attr.id]="'right_bubble_down_'+i" *ngIf="i!=0 && i!=center_left.length-1" class="token sidRD" (click)='hoverMe($event)'>
+                    <use xlink:href="#right_down" [attr.class]="get_bubble_class(right_down[i-1], chord_type.right.down,'sides')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" x="102.6119" y="-63.179623" >{{right_down_in_use[i-1]}},{{chord_type.right.down}}</text>
+                </g>
+            </g>
+
+            <!--------- CENTERS --------->  
+            <g [attr.id]="'center_bubble_left_'+i" class="token ctrU" (click)='hoverMe($event)'>
+                <use xlink:href="#center_left" [attr.class]="get_bubble_class(center_left[i], chord_type.center.left,'center')" />
+                <text [attr.class]="display_as_roman?'left duo roman braid-chords big':'left duo braid-chords big'" [attr.x]="display_as_roman?'62.933678':'66.933678'" y="-96.826027" >{{center_left_in_use[i]}},{{chord_type.center.left}}</text>
+            </g>
+
+            <g [attr.id]="'center_bubble_right_'+i" class="token ctrD" (click)='hoverMe($event)'>
+                <use xlink:href="#center_right" [attr.class]="get_bubble_class(center_right[i], chord_type.center.right,'center')" />
+                <text *ngIf="!display_as_roman" class="right duo braid-chords big" x="78.733383" y="-87.5" >{{center_right_in_use[i]}},{{chord_type.center.right}}</text>
+                <text *ngIf="display_as_roman" class="right duo roman braid-chords big" x="78.733383" y="-87.5" >{{center_right_in_use[i].toLowerCase()}}</text>
+            </g>
+        </g>
+        
+
+
+        <!-- ARROWS -->
+        <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+i*26.4+')'">
+
+            <!--------- ARROWS RIGHT --------->
+            <g *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" transform="translate(0 -26.4)">
+                <g [attr.id]="'arrowsMidR_'+i" 
+                [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, right_up[i], chord_type.right.up, right_down[i], chord_type.right.down)">
+                    <use [attr.class]="cm.emphasis_chords?'arrow big-arrow erase':'arrow big-arrow'" xlink:href="#big-arrow_R"/>
+                </g>
+
+                <g [attr.id]="'arrowsExtRL_'+i" 
+                [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, fifth_right_up[i], chord_type.fifth_right.up, fifth_right_down[i], chord_type.fifth_right.down)">
+                    <use [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'" xlink:href="#arrow_R0"/>
+                </g>
+            </g>
+
+            <g [attr.id]="'arrowsR_'+i" *ngIf="i!=0 && i!=center_left.length-1" transform="translate(0 -26.4)" 
+            [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                <use xlink:href="#arrow_R1" [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'"/>
+            </g>
+
+            <!--------- ARROWS LEFT --------->
+            <g *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" transform="translate(0 -26.4)">
+                <g [attr.id]="'arrowsMidL_'+i" 
+                [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, left_up[i], chord_type.left.up, left_down[i], chord_type.left.down)">
+                    <use [attr.class]="cm.emphasis_chords?'arrow big-arrow erase':'arrow big-arrow'" xlink:href="#big-arrow_L"/>
+                </g>
+
+                <g [attr.id]="'arrowsExtLR_'+i" 
+                [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, fifth_left_up[i], chord_type.fifth_left.up, fifth_left_down[i], chord_type.fifth_left.down)">
+                    <use [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'" xlink:href="#arrow_L1"/>
+                </g>
+            </g>
+
+            <g [attr.id]="'arrowsL_'+i" *ngIf="i!=0 && i!=center_left.length-1" transform="translate(0 -26.4)" 
+            [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                <use xlink:href="#arrow_L0" [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'"/>
+            </g>
+
+            <!--------- ARROWS FIFTHS RIGHT --------->
+            <g [attr.id]="'arrowsExtRR_'+i" *ngIf="i!=center_left.length-2 && i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(fifth_right_up[i], chord_type.fifth_right.up, fifth_right_down[i], chord_type.fifth_right.down, right_up[i], chord_type.right.up, right_down[i], chord_type.right.down)">
+                <use xlink:href="#arrow_FR" [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'"/>
+            </g>
+
+            <!--------- ARROWS FIFTHS LEFT ------------>
+            <g [attr.id]="'arrowsExtLL_'+i" *ngIf="i!=center_left.length-2 && i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(fifth_left_up[i], chord_type.fifth_left.up, fifth_left_down[i], chord_type.fifth_left.down, left_up[i], chord_type.left.up, left_down[i], chord_type.left.down)">
+                <use xlink:href="#arrow_FL" [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'"/>
+            </g>
+
+            <!--------- ARROWS CENTER ---------->
+            <g [attr.id]="'arrows_'+i" *ngIf="i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(center_left[i], chord_type.center.left, center_right[i], chord_type.center.right, center_left[i+1], chord_type.center.left, center_right[i+1], chord_type.center.right)">
+                <use xlink:href="#arrow_C" [attr.class]="cm.emphasis_chords?'arrow erase':'arrow'"/>
+            </g>
+        </g>
+    </svg>   
+</div>
+</section>
+
+
+
+
+
+
+
+<!----------------------------------------->
+<!----------------------------------------->
+<!-------------- BRAID NEW2 --------------->
+<!----------------------------------------->
+<!----------------------------------------->
+<section id="braid2" [style.display]="braidType=='new2' ? 'block' : 'none'">
+    <div class="braid" style="width:100%;height:100%;">
+    <svg version="1.1" width="100%" viewBox="26 -100 100 400" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+            <filter id="darkGlowN2">
+                <!-- COLORS -->
+                <!-- <feFlood flood-color="#343a40" result="COLOR-outline"></feFlood> -->
+    
+                <!-- OUTLINE -->
+                <feMorphology operator="dilate" radius="5" in="SourceAlpha" result="OUTLINE_10"></feMorphology>
+                <!-- <feComposite operator="in" in="COLOR-outline" in2="OUTLINE_10" result="OUTLINE_20"></feComposite> -->
+    
+                <!-- LIGHTING EFFECTS -->
+                <feGaussianBlur stdDeviation="4" in="SourceAlpha" result="LIGHTING-EFFECTS_10"></feGaussianBlur>
+                <feSpecularLighting surfaceScale="5" specularConstant="0.8" specularExponent="7.5" lighting-color="#white" in="LIGHTING-EFFECTS_10" result="LIGHTING-EFFECTS_20">
+                     <fePointLight x="-250" y="-50" z="300"></fePointLight>
+                </feSpecularLighting>
+                <feComposite operator="in" in="LIGHTING-EFFECTS_20" in2="SourceAlpha" result="LIGHTING-EFFECTS_30"></feComposite>
+                <feComposite in="SourceGraphic" in2="LIGHTING-EFFECTS_30" operator="arithmetic" k1="1" k2="1" k3="1" k4="0" result="LIGHTING-EFFECTS_40"></feComposite>
+    
+                <!-- COLOR EFFECTS -->
+                <feComponentTransfer in="LIGHTING-EFFECTS_40" result="COLOR-EFFECTS_10">
+                    <feFuncR type="gamma" offset="-0.3" amplitude="1.1" exponent="4.84"></feFuncR>
+                    <feFuncG type="gamma" offset="13.3" amplitude="0.1" exponent="1.84"></feFuncG>
+                    <feFuncB type="gamma" offset="-0.3" amplitude="3.1" exponent="4.84"></feFuncB>
+                </feComponentTransfer>
+    
+                <feMerge>
+                    <feMergeNode in="OUTLINE_20"></feMergeNode>
+                    <feMergeNode in="COLOR-EFFECTS_10"></feMergeNode>
+                </feMerge>
+            </filter>
+
+             <!-- CENTER CHORDS -->
+            <g id="center_leftN2">
+                <path d="m 82.149815,-114.61615 -12.138189,0.0488 -6.025002,10.53625 6.111294,10.485627 z"/>
+            </g>
+            <g id="center_rightN2">
+                <path d="m 81.99968,-114.61615 -12.051894,21.070651 12.138184,-0.04878 6.02501,-10.536271 z"/>
+            </g>
+
+            <!-- FIFTHS RIGHT CHORDS -->
+            <g id="fifth_right_upN2">
+                <path d="m 119.08842,-93.380713 -12.13819,0.04878 -6.025,10.536249 6.1113,10.485637 z"/>
+            </g>
+            <g id="fifth_right_downN2">
+                <path d="m 119.35203,-93.380715 -12.05189,21.070654 12.13817,-0.04878 6.02501,-10.536279 z"/>
+            </g>
+
+            <!-- FIFTHS LEFT CHORDS -->
+            <g id="fifth_left_upN2">
+                <path d="m 44.631518,-93.336748 -12.138189,0.04879 -6.025002,10.536248 6.111294,10.485638 z"/>
+            </g>
+            <g id="fifth_left_downN2">
+                <path d="m 44.926221,-93.283668 -12.051896,21.070656 12.138178,-0.04879 6.025012,-10.536278 z"/>
+            </g>
+
+            <!-- RIGHT CHORDS -->
+            <g id="right_upN2">
+                <path d="m 100.40764,-82.670082 -12.138196,0.04878 -6.025002,10.536282 6.111294,10.485637 z"/>
+            </g>
+            <g id="right_downN2">
+                <path d="m 100.67125,-82.670082 -12.051903,21.070693 12.138183,-0.04879 6.02502,-10.536283 z"/>
+            </g>
+
+            <!-- LEFT CHORDS -->
+            <g id="left_upN2">
+                <path d="m 63.462427,-82.670082 -12.138188,0.04878 -6.025002,10.536282 6.111294,10.485637 z"/>
+            </g>
+            <g id="left_downN2">
+                <path d="m 63.726037,-82.670082 -12.051896,21.070693 12.13818,-0.04879 6.025011,-10.536283 z"/>
+            </g>
+
+            <!-- FIFTHS LEFT SKULL -->
+            <g id="skull_FL"> 
+                <path d="m 45.299237,-50.483132 -12.805909,-0.117298 -6.025002,-10.614611 6.111295,-11.051031 12.719616,0.181046"/>
+            </g>
+
+            <!-- FIFTHS RIGHT SKULL -->
+            <g id="skull_FR"> 
+                <path d="m 106.78255,-72.184462 12.65576,-0.174379 6.02501,10.675454 -6.0184,11.077754 -12.66237,0.02306"/>
+            </g>
+
+            <!-- CENTER LEFT UP SKULL -->
+            <g id="skull_CLU"> 
+                <path d="m 69.97888,-72.35401 -6.166559,10.705826 z"/>
+            </g>
+
+            <!-- CENTER RIGHT UP SKULL -->
+            <g id="skull_CRU"> 
+                <path d="M 88.110977,-61.538048 82.117059,-72.40279 Z"/>
+            </g>
+
+            <!-- CENTER DOWN SKULL -->
+            <g id="skull_CD"> 
+                <path d="M 82.848286,-93.28955 H 69.472219"/>
+            </g>
+
+            <!-- CIRCLE TONAL -->
+            <g id="circleN2">
+                <ellipse _ngcontent-lox-c51="" cx="76" cy="-61.5" rx="12" ry="12"></ellipse>
+            </g>
+        </defs>
+
+        <!----------------->
+        <!---- HALVES ----->
+        <!----------------->
+        <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+i*21.25+')'">
+
+            <!-- CENTER CHORDS -->
+            <g [attr.id]="'center_bubble_left_'+i" class="token middle" (click)='showMe($event)'>
+                <use xlink:href="#center_leftN2" [attr.class]="get_bubble_class(center_left[i], chord_type.center.left,'center','up')" />
+                <text [attr.class]="display_as_roman?'left duo roman braid-chords big':'left duo braid-chords big'" [attr.x]="display_as_roman?'67.5':'69.257904'" y="-104.1017">{{center_left_in_use[i]}},{{chord_type.center.left}}</text>
+            </g>
+
+            <g [attr.id]="'center_bubble_right_'+i" class="token middle" (click)='showMe($event)'>
+                <use xlink:href="#center_rightN2" [attr.class]="get_bubble_class(center_right[i], chord_type.center.right,'center','down')" />
+                <text *ngIf="!display_as_roman" class="right duo braid-chords big" x="76" y="-99.076569" >{{center_right_in_use[i]}},{{chord_type.center.right}}</text>
+                <text *ngIf="display_as_roman" class="right duo roman braid-chords big" x="76" y="-99.076569" >{{center_right_in_use[i].toLowerCase()}}</text>
+            </g>
+
+            <g *ngIf="i!=center_left.length-2 && i!=center_left.length-1">
+
+                <!-- FIFTHS RIGHT CHORDS -->  
+                <g [attr.id]="'fifth_right_bubble_up_'+i" class="token fifth" (click)='showMe($event)'>
+                    <use xlink:href="#fifth_right_upN2"[attr.class]="get_bubble_class(fifth_right_up[i], chord_type.fifth_right.up,'fifths','up')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'104':'104.80918'" y="-83.471275" >{{fifth_right_up_in_use[i]}},{{chord_type.fifth_right.up}}</text>
+                </g>
+
+                <g [attr.id]="'fifth_right_bubble_down_'+i" class="token fifth" (click)='showMe($event)'>
+                    <use xlink:href="#fifth_right_downN2" [attr.class]="get_bubble_class(fifth_right_down[i], chord_type.fifth_right.down,'fifths','down')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'113.14061':'113.14061'" y="-78.988449" >{{fifth_right_down_in_use[i]}},{{chord_type.fifth_right.down}}</text>
+                </g>
+
+                <!-- FIFTHS LEFT CHORDS -->
+                <g [attr.id]="'fifth_left_bubble_up_'+i" class="token fifth" (click)='showMe($event)'>
+                    <use xlink:href="#fifth_left_upN2" [attr.class]="get_bubble_class(fifth_left_up[i], chord_type.fifth_left.up,'fifths','up')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" y="-83.163498" [attr.x]="display_as_roman?'28.5':'30'">{{fifth_left_up_in_use[i]}},{{chord_type.fifth_left.up}}</text>
+                </g>
+
+                <g [attr.id]="'fifth_left_bubble_down_'+i" class="token fifth" (click)='showMe($event)'>
+                    <use xlink:href="#fifth_left_downN2" [attr.class]="get_bubble_class(fifth_left_down[i], chord_type.fifth_left.down,'fifths','down')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'38':'38'" y="-77.714493" >{{fifth_left_down_in_use[i]}},{{chord_type.fifth_left.down}}</text>
+                </g>
+            </g>
+
+            <g *ngIf="i!=0 && i!=center_left.length-1" transform="translate(0 -21.25)">
+                <!-- RIGHT CHORDS -->
+                <g [attr.id]="'right_bubble_up_'+i" class="token side" (click)='showMe($event)'>
+                    <use xlink:href="#right_upN2" [attr.class]="get_bubble_class(right_up[i-1], chord_type.right.up,'sides','up')"/>
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'84.807625':'86.307625'" y="-71.930176" >{{right_up_in_use[i-1]}},{{chord_type.right.up}}</text>
+                </g>
+
+                <g [attr.id]="'right_bubble_down_'+i" class="token side" (click)='showMe($event)'>
+                    <use xlink:href="#right_downN2" [attr.class]="get_bubble_class(right_down[i-1], chord_type.right.down, 'sides','down')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'94.468475':'96.468475'" y="-67.454323" >{{right_down_in_use[i-1]}},{{chord_type.right.down}}</text>
+                </g>
+
+                <!-- LEFT CHORDS -->
+                <g [attr.id]="'left_bubble_up_'+i" class="token side" (click)='showMe($event)'>
+                    <use xlink:href="#left_upN2" [attr.class]="get_bubble_class(left_up[i-1], chord_type.left.up, 'sides', 'up')" />
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" [attr.x]="display_as_roman?'48.036549':'50.036549'" y="-71.780281" >{{left_up_in_use[i-1]}},{{chord_type.left.up}}</text>
+                </g>
+
+                <g [attr.id]="'left_bubble_down_'+i" class="token side" (click)='showMe($event)'>
+                    <use xlink:href="#left_downN2" [attr.class]=" get_bubble_class(left_down[i-1], chord_type.left.down, 'sides','down')"/>
+                    <text [attr.class]="display_as_roman?'duo roman braid-chords':'duo braid-chords'" x="56.5" y="-66.784576" >{{left_down_in_use[i-1]}},{{chord_type.left.down}}</text>
+                </g>
+            </g>
+        </g>
+
+
+        <!----------------->
+        <!----- SKULL ----->
+        <!----------------->
+        <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+(i-1)*21.25+')'">
+            <!----------------->
+            <!-- GREEN SKULL -->
+            <!----------------->
+
+            <!-- CENTER LEFT UP SKULL -->
+            <g [attr.id]="'skullL_'+i" *ngIf="i!=0 && i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                <use xlink:href="#skull_CLU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'"/>
+            </g>
+
+            <!-- CENTER RIGHT UP SKULL -->
+            <g [attr.id]="'skullR_'+i" *ngIf="i!=0 && i!=center_left.length-1"
+            [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                <use xlink:href="#skull_CRU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'"/>
+            </g>
+
+            <!-- FIFTH LEFT DOWN SKULL -->
+            <g [attr.id]="'skullExtLL_'+i" *ngIf="i!=0 && i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(fifth_left_up[i-1], chord_type.fifth_left.up, fifth_left_down[i-1], chord_type.fifth_left.down, left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down)">
+                <use xlink:href="#skull_CLU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(-19 -10.25)"/>
+            </g>
+
+            <!-- FIFTH RIGHT DOWN SKULL -->
+            <g [attr.id]="'skullExtRR_'+i" *ngIf="i!=0 && i!=center_left.length-1" 
+            [attr.class]="get_arrow_class(fifth_right_up[i-1], chord_type.fifth_right.up, fifth_right_down[i-1], chord_type.fifth_right.down, right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down)">
+                <use xlink:href="#skull_CRU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(18.85 -10.25)"/>
+            </g>
+
+            <!-- FIFTH LEFT UP SKULL -->
+            <g *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" [attr.id]="'skullExtRL_'+i" 
+            [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, fifth_left_up[i], chord_type.fifth_left.up, fifth_left_down[i], chord_type.fifth_left.down)">
+                <use xlink:href="#skull_CRU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(-37 0)"/>
+            </g>
+
+            <!-- FIFTH RIGHT UP SKULL -->
+            <g *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" [attr.id]="'skullExtLR_'+i" 
+            [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, fifth_right_up[i], chord_type.fifth_right.up, fifth_right_down[i], chord_type.fifth_right.down)">
+                <use xlink:href="#skull_CLU" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(37 0)"/>
+            </g>
+        </g>
+
+        <g *ngFor='let tona of center_left; let i=index' class="tona simpleShape" [attr.transform]="'translate(0 '+i*21.25+')'">
+
+            <!-- CENTER DOWN SKULL -->
+            <g [attr.id]="'skull_'+i" *ngIf="i!=0" 
+
+            [attr.class]="get_arrow_class(center_left[i-1], chord_type.center.left, center_right[i-1], chord_type.center.right, center_left[i], chord_type.center.left, center_right[i], chord_type.center.right)">
+                <use xlink:href="#skull_CD" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(-0.2 0)"/>
+            </g>
+
+            <!-- LEFT DOWN SKULL -->
+            <g [attr.id]="'skullMidL_'+i" *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" 
+            [attr.class]="get_arrow_class(left_up[i-1], chord_type.left.up, left_down[i-1], chord_type.left.down, left_up[i], chord_type.left.up, left_down[i], chord_type.left.down)">
+                <use xlink:href="#skull_CD" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(-19 10.5)"/>
+            </g>
+
+            <!-- RIGHT DOWN SKULL -->
+            <g [attr.id]="'skullMidR_'+i" *ngIf="i!=0 && i!=center_left.length-1 && i!=center_left.length-2" 
+            [attr.class]="get_arrow_class(right_up[i-1], chord_type.right.up, right_down[i-1], chord_type.right.down, right_up[i], chord_type.right.up, right_down[i], chord_type.right.down)">
+                <use xlink:href="#skull_CD" [attr.class]="cm.emphasis_chords?'green-skull erase':'green-skull'" transform="translate(18 10.5)"/>
+            </g>
+
+            <!----------------->
+            <!-- BLACK SKULL -->
+            <!----------------->
+            <!-- CENTER LEFT DOWN SKULL -->
+            <use *ngIf="i!=center_left.length-2 && i!=center_left.length-1" xlink:href="#skull_CRU" [attr.class]="cm.emphasis_chords?'black-skull erase':'black-skull'" transform="translate(-18 -10.5)"/>
+            <!-- CENTER RIGHT DOWN SKULL -->
+            <use *ngIf="i!=center_left.length-2 && i!=center_left.length-1" xlink:href="#skull_CLU" [attr.class]="cm.emphasis_chords?'black-skull erase':'black-skull'" transform="translate(18 -10.5)"/>
+            <!-- FIFTH LEFT SKULL -->
+            <use *ngIf="i!=0 && i!=center_left.length-2 && i!=center_left.length-1" xlink:href="#skull_CD" transform="translate(-37.5 0)" [attr.class]="cm.emphasis_chords?'black-skull erase':'black-skull'"/>
+            <!-- FIFTH RIGHT SKULL -->
+            <use *ngIf="i!=0 && i!=center_left.length-2 && i!=center_left.length-1" xlink:href="#skull_CD" transform="translate(37 0)" [attr.class]="cm.emphasis_chords?'black-skull erase':'black-skull'"/>
+        </g>
+
+        <!----------------->
+        <!-- BACKCIRCLES -->
+        <!----------------->
+        <g *ngFor='let tona of center_left; let i=index' [attr.class]="cm.emphasis_chords?'tona erase':'tona'" [attr.transform]="'translate(0 '+(i-1)*21.25+')'">
+            <use *ngIf="i!=center_left.length" [attr.class]="(tonality_focused == center_left[i] || tonality_focused == center_right[i]+'m')?'greenCircle active':'greenCircle'" xlink:href="#circleN2"/>
+        </g>
+    </svg>
+        <div id="zoomed">
+            <span class="chord-zoomed"></span>
+        </div>
+    </div>
+</section>

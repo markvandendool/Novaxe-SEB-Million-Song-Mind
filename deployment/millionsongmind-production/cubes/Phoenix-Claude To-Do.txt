@@ -1,0 +1,39 @@
+1. Reset button must add unlock all -(melody, bass, chords) and stop playback to its functions
+
+2. Add a red STOP button below the central Play Progression in the menu, in the chord instrument stack
+
+3. Compound intervals are not working, holding shift AND the number together should insert the compound interval within that chord.  For example, holding shift and 9 down will add a 13th, while holding 9 down alone will simply add a 6th.  
+
+4. Drums OFF should NOT stop the playback, just must the drum loops/presets.  Add a red stop icon next to the play icon in the DRUM MACHINE  widget title.  
+
+5. We have to set HARD limits for each voice - I though we had, but upon using the loop function where the progression repeats many times, both the melody and bass ‘voice led’ themselves into extreme ranges.  
+
+6. Force Chord Quality:  breaking the rules a bit, but holding m, n, or d will FORCE the chord clicked to become a Major, miNor, or Diminished quality chord in both sound, and in cube notation - meaning the cube face must change from IV to iv for example, and the ingredients will have to change as well from 4613 to 4 b6 1 3.  The ONLY modification to the chord quality will be to the 3rd.. notice how the 7th of the chord, the 3 did not change to a b3, making the ‘assumption’ that the user intended to use the minor key.  The user would have just clicked the iv chord on the shelf then, right?  This is a way of unlocking more chord varieties and fringe outliers while using the same simple system.  
+The same goes for the 5th of the chord when using the forced diminished key press - BOTH the third AND the fifth of the chord will be dropped, but not the 7th!!!!   We only force EXACTLY what the keypress name implies - and nothing more.  The other chord tones like 7th will get forced (and altered on the cube faces!!!!) by the interval keypress logic.  
+
+For example… right now, holding 0 on the keyboard and clicking chord IV does indeed create a IV (b7th) chord, a IV dominant chord… but currently the scale degrees on the cubes do NOT reflect those changes.  The 4 6 1 3 diamonds MUST reflect forced changes, so in this example, the 3 diamond would be altered to the b3 diamond, and the circular chord tone would now be a slightly darker b7th chord tone colour.  
+
+
+This is complex, let us work through examples together before implementing this fix please.
+
+
+7. Staves - we will comment out the 3d staves for now and instead use 2D staves so we can work on it efficiently.   Make sure the camera can see it clearly and cleanly by positioning it intelligently/mathematically in view.  By the way, pressing play should definitely NOT make the staves appear.   And the show staves buttons are underneath the bass/melody/back view buttons.  
+
+8.  Back view button does not currently take the camera behind the shelf, looking at the shelf, it should.
+
+9 . We need a system of keyboard shortcuts for functions, I will create a list soon. Please create the framework by looking at the Novaxe Midi controller shortcuts service.  This allows users to control functions and settings of novaxe through a midi controller as well.  We need to be capable of sending midi messages too across multiple devices/channels - in essence we need to implant the entire novaxe midi system line by line.  Let us copy/paste the exact service/components verbatim, then wrap them in a useful format for threejs.  Does that work?  Any other suggestions?
+
+10. Once we complete the above, we are going to place this in the actual novaxe angular app again, but using a different tabbing system.  We will use the exact same system that the magic 18 was using, adding another tab along the bottom with cubes for an icon.  That will open up a large window the size of the score, and then we can start wiring it into the novaxe brain.  
+
+11. FONT FONT FONT FONT fontdec13 for cube faces
+
+
+12. Free Play user options - we need to add, for freeplay a toggle between last chord cutoff, and fixed sustain with an empty text field for seconds, default 3 like we have.  This way we can crush chords together, because sometimes it’s actually very very nice.  We will write a more advance algorithm for that later, the toggle will be enough for now.  
+
+13. NON Chord tones for melodies, non chord tones for bass!! G/C for example.   We have a number pad for a new set of numbers… we could dedicate the numpad to the bass.  When thinking about this part it might be better to think of scale degrees (diamonds) rather than chord tones.  Its more natural for musicians to think about what scale degree is on the bass especially for techniques like pedal point etc than to think about ‘it’s the 4th of the chord on the bass’… each number on the number pad could be scale degrees 1-7, and the short . Next to the 0 could act as a ‘flat’ modifier, while the taller ‘enter’ button could act like the ‘sharp’ modifier, meaning that in the above mentioned case, G/C, we would click the G chord on the root for standard non inversion pull while holding the numpad 4.  If G was over Db for some strange reason, we would click the G, hold the numpad . for flat, and hold 2.  This way the actual physical mechanics of the double press are easier than before, the numpad is quite small and all is within reach with one hand, while the other operates the mouse.  
+
+
+
+14. Backspace removes the last added chord to the front line!
+
+15. 

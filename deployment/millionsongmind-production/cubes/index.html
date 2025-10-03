@@ -4,7 +4,8 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>🎼 ChordCubes 5.0 - Revolutionary Audio Cutoff System ⚡</title>
+	<base href="/cubes/">
+		<title>ChordCubes 6.0 V1.50 RESTORED FROM REAL V1.49 BACKUP</title>
 	<link rel="stylesheet" href="./styles.css?v=2" />
 	<style>
 		@font-face {
@@ -15,6 +16,31 @@
 			font-weight: 400;
 			font-style: normal;
 			font-display: swap;
+		}
+
+		@font-face {
+			font-family: 'FontJan16';
+			src: url('./fonts/Font Jan16.otf') format('opentype');
+			font-weight: normal;
+			font-style: normal;
+			font-display: swap;
+		}
+
+		/* FONT JAN16 LIGATURE ENABLEMENT - Novaxe's Masterful System */
+		.font-jan16-ligatures {
+			font-family: 'FontJan16', 'Cochin', 'Times New Roman', serif;
+			font-feature-settings: "liga" 1, "kern" 1, "calt" 1;
+			font-variant-ligatures: common-ligatures discretionary-ligatures;
+			text-rendering: optimizeLegibility;
+			-webkit-font-smoothing: antialiased;
+			-moz-osx-font-smoothing: grayscale;
+		}
+
+		/* Apply ligature features globally to ensure Font Jan16 b→l transformation works */
+		* {
+			font-feature-settings: "liga" 1, "kern" 1;
+			font-variant-ligatures: common-ligatures;
+			text-rendering: optimizeLegibility;
 		}
 
 		/* GIANT 2.0 Version Display */
@@ -374,6 +400,95 @@
 			font-weight: bold;
 		}
 	</style>
+
+	<!-- 🧙‍♂️ ULTRA-OPTIMIZED DEBUG WIDGET CSS -->
+	<style>
+		.debug-panel {
+			position: fixed;
+			bottom: 120px; /* Above any existing HUD */
+			right: 20px;
+			background: rgba(0, 0, 0, 0.9);
+			border: 2px solid #00ff00;
+			border-radius: 10px;
+			padding: 15px;
+			font-family: 'Courier New', monospace;
+			color: #00ff00;
+			z-index: 10000;
+			min-width: 200px;
+			backdrop-filter: blur(5px);
+			box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+		}
+
+		.debug-title {
+			font-size: 12px;
+			font-weight: bold;
+			text-align: center;
+			margin-bottom: 10px;
+			color: #ffff00;
+		}
+
+		.debug-keyboard {
+			margin-bottom: 15px;
+		}
+
+		.debug-row {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 5px;
+			justify-content: center;
+		}
+
+		.debug-key {
+			display: inline-block;
+			padding: 4px 8px;
+			background: #333;
+			border: 1px solid #666;
+			border-radius: 3px;
+			font-size: 10px;
+			min-width: 20px;
+			text-align: center;
+			transition: all 0.1s ease;
+		}
+
+		.debug-key.active {
+			background: #00ff00;
+			color: #000;
+			box-shadow: 0 0 10px #00ff00;
+			transform: scale(1.1);
+		}
+
+		.debug-cube-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+
+		.debug-cube-label {
+			font-size: 10px;
+			margin-top: 5px;
+			color: #ffff00;
+		}
+
+		#debug-cube-face {
+			border: 1px solid #00ff00;
+			border-radius: 5px;
+			background: #111;
+		}
+
+		.debug-status {
+			font-size: 9px;
+			text-align: center;
+			color: #888;
+			border-top: 1px solid #333;
+			padding-top: 8px;
+		}
+
+		.debug-status.active {
+			color: #00ff00;
+			font-weight: bold;
+		}
+	</style>
 	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
 </head>
 
@@ -422,15 +537,22 @@
 			<!-- CLEAN ALIGNED INSTRUMENT LAYOUT -->
 			<div
 				style="display: inline-flex; align-items: flex-start; margin-left: 12px; gap: 20px; vertical-align: top; margin-top: 24px;">
-				<!-- Bass Column -->
 				<div style="display: flex; flex-direction: column; align-items: flex-start;">
 					<label style="margin-bottom: 2px; font-size: 12px;">Bass Instrument</label>
 					<select id="bass-inst" style="width: 120px; margin-bottom: 6px;">
 						<option value="contrabass" selected>Contrabass</option>
 						<option value="acoustic_bass">Acoustic Bass</option>
 						<option value="electric_bass_finger">Electric Bass</option>
+						<option value="electric_bass_pick">Electric Bass (Pick)</option>
 						<option value="cello">Cello</option>
-						<option value="synth_bass_1">Synth Bass</option>
+						<option value="viola">Viola</option>
+						<option value="synth_bass_1">Synth Bass 1</option>
+						<option value="synth_bass_2">Synth Bass 2</option>
+						<option value="trombone">Trombone</option>
+						<option value="french_horn">French Horn</option>
+						<option value="bassoon">Bassoon</option>
+						<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+						<option value="acoustic_guitar_steel">Steel Guitar</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Bass Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -453,10 +575,31 @@
 				<div style="display: flex; flex-direction: column; align-items: flex-start;">
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Instrument</label>
 					<select id="chord-inst" style="width: 120px; margin-bottom: 6px;">
-						<option value="acoustic_grand_piano" selected>Piano</option>
-						<option value="string_ensemble_1">Strings (Ensemble)</option>
-						<option value="choir_aahs">Choir</option>
-						<option value="string_ensemble_2">Strings 2</option>
+						<optgroup label="🎹 Keyboards">
+							<option value="acoustic_grand_piano" selected>Piano</option>
+							<option value="electric_piano_1">Electric Piano 1</option>
+							<option value="electric_piano_2">Electric Piano 2</option>
+							<option value="harpsichord">Harpsichord</option>
+						</optgroup>
+						<optgroup label="🎺 Organs">
+							<option value="church_organ">Church Organ</option>
+							<option value="jazz_organ">Jazz Organ</option>
+						</optgroup>
+						<optgroup label="🎻 Strings">
+							<option value="string_ensemble_1">Strings (Ensemble)</option>
+							<option value="string_ensemble_2">Strings 2</option>
+							<option value="pizzicato_strings">Pizzicato Strings</option>
+						</optgroup>
+						<optgroup label="👥 Voices">
+							<option value="choir_aahs">Choir</option>
+							<option value="voice_oohs">Voice Oohs</option>
+							<option value="synth_voice">Synth Voice</option>
+						</optgroup>
+						<optgroup label="🎸 Other">
+							<option value="accordion">Accordion</option>
+							<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+							<option value="acoustic_guitar_steel">Steel Guitar</option>
+						</optgroup>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Chord Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -474,6 +617,10 @@
 					<button id="play-progression-main"
 						style="width:120px; padding:4px; margin-top:4px; background:#333; color:#fff; border:1px solid #555; border-radius:4px; cursor:pointer;">▶
 						Play Progression</button>
+					<!-- PHASE 1 TASK 1B: RED STOP BUTTON -->
+					<button id="emergency-stop-btn"
+						style="width:120px; padding:4px; margin-top:4px; background:#cc0000; color:#fff; border:1px solid #aa0000; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 2px 4px rgba(204,0,0,0.5);">🛑
+						STOP</button>
 				</div>
 
 				<!-- Melody Column -->
@@ -481,10 +628,27 @@
 					<label style="margin-bottom: 2px; font-size: 12px;">Melody Instrument</label>
 					<select id="melody-inst" style="width: 120px; margin-bottom: 6px;">
 						<option value="violin" selected>Violin</option>
+						<option value="viola">Viola</option>
+						<option value="cello">Cello</option>
 						<option value="flute">Flute</option>
 						<option value="clarinet">Clarinet</option>
+						<option value="oboe">Oboe</option>
+						<option value="bassoon">Bassoon</option>
+						<option value="alto_sax">Alto Sax</option>
+						<option value="tenor_sax">Tenor Sax</option>
 						<option value="trumpet">Trumpet</option>
-						<option value="cello">Cello</option>
+						<option value="trombone">Trombone</option>
+						<option value="french_horn">French Horn</option>
+						<option value="orchestral_harp">Orchestral Harp</option>
+						<option value="marimba">Marimba</option>
+						<option value="xylophone">Xylophone</option>
+						<option value="vibraphone">Vibraphone</option>
+						<option value="acoustic_guitar_nylon">Nylon Guitar</option>
+						<option value="acoustic_guitar_steel">Steel Guitar</option>
+						<option value="voice_oohs">Voice Oohs</option>
+						<option value="synth_voice">Synth Voice</option>
+						<option value="sitar">Sitar</option>
+						<option value="banjo">Banjo</option>
 					</select>
 					<label style="margin-bottom: 2px; font-size: 12px;">Melody Volume</label>
 					<div style="display: flex; align-items: center; margin-bottom: 6px;">
@@ -559,7 +723,7 @@
 				<span id="improv-mode-free"
 					style="cursor: pointer; margin-right: 8px; opacity: 1; font-size: 18px; transition: all 0.3s ease; transform: scale(1.2);"
 					title="Free Improv: Root position only">🎵</span>
-				DRUM MACHINE
+				V1.50
 				<span id="improv-mode-creation"
 					style="cursor: pointer; margin-left: 8px; opacity: 0.4; font-size: 18px; transition: all 0.3s ease; transform: scale(1);"
 					title="Creation Improv: Full inversions + front row">🎼</span>
@@ -567,6 +731,9 @@
 			<span id="drum-play-progression"
 				style="cursor: pointer; margin-left: 12px; margin-right: 8px; font-size: 20px; opacity: 1.0; transition: all 0.2s ease; color: #00ff00; text-shadow: 0 0 4px rgba(0,255,0,0.5); background: rgba(0,255,0,0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,255,0,0.3);"
 				title="Play Progression">▶</span>
+			<span id="drum-stop-progression"
+				style="cursor: pointer; margin-right: 8px; font-size: 20px; opacity: 1.0; transition: all 0.2s ease; color: #ff0000; text-shadow: 0 0 4px rgba(255,0,0,0.5); background: rgba(255,0,0,0.1); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,0,0,0.3);"
+				title="Stop Progression">⏹</span>
 			<div class="status-indicator" id="status-light"></div>
 		</div>
 
@@ -668,8 +835,9 @@
 	<script src="./musical-staves-3d.js"></script>
 	<script src="./staves-integration.js"></script>
 	<script type="module" src="./chords.js?v=4"></script>
-	<script type="module" src="./main.js?v=152"></script>
-	<script src="./professional-drum-machine.js?v=11"></script>
+	<script type="module" src="./instrumentManager.js"></script>
+	<script type="module" src="./main.js?v=1049"></script>
+	<!-- OLD PROFESSIONAL-DRUM-MACHINE.JS REMOVED - CONFLICTS WITH MAIN.JS -->
 
 	<!-- PROFESSIONAL FONT CONTROL MODAL -->
 	<div id="font-control-modal"
@@ -827,6 +995,54 @@
 				</div>
 			</div>
 		</div>
+	</div>
+
+	<!-- � COMPREHENSIVE PIPELINE TRACER 🔥 -->
+	<div id="pipelineTracer" style="
+		position: fixed;
+		bottom: 10px;
+		left: 10px;
+		right: 10px;
+		background: rgba(0,20,0,0.95);
+		border: 2px solid #00ff00;
+		border-radius: 10px;
+		padding: 15px;
+		font-family: 'Courier New', monospace;
+		color: #00ff00;
+		z-index: 10000;
+		box-shadow: 0 0 20px rgba(0,255,0,0.3);
+	">
+		<div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+			🔥 KEYBOARD → CUBE FACE PIPELINE TRACER 🔥
+		</div>
+		<div id="pipelineStages" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+			<!-- Pipeline stages will be inserted here -->
+		</div>
+		<div id="pipelineStatus" style="text-align: center; margin-top: 10px; font-size: 14px;">
+			Status: Waiting for keypress...
+		</div>
+	</div>
+
+	<!-- �🔬 FORENSIC DEBUGGING WIDGET - ULTRA OPTIMIZED -->
+	<div id="debug-widget" class="debug-panel">
+		<div class="debug-title">🔬 FORENSIC KEYBOARD DEBUGGER</div>
+		<div class="debug-keyboard">
+			<div class="debug-row">
+				<span class="debug-key" id="debug-shift">SHIFT</span>
+				<span class="debug-key" id="debug-option">OPTION</span>
+				<span class="debug-key" id="debug-ctrl">CTRL</span>
+			</div>
+			<div class="debug-row">
+				<span class="debug-key" id="debug-1">1</span>
+				<span class="debug-key" id="debug-2">2</span>
+				<span class="debug-key" id="debug-9">9</span>
+			</div>
+		</div>
+		<div class="debug-cube-container">
+			<canvas id="debug-cube-face" width="80" height="80"></canvas>
+			<div class="debug-cube-label">CHORD X</div>
+		</div>
+		<div class="debug-status" id="debug-status">Ready...</div>
 	</div>
 
 </body>

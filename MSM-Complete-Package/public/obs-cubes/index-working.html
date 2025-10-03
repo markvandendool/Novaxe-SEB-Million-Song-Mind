@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ThreeJS OBS ChordCubes 1.0 - Working Version</title>
+
+    <!-- Three.js via CDN with fallback -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.158.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.158.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000011;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            color: #ffffff;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .header {
+            padding: 20px;
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            border-bottom: 2px solid #0099ff;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            background: linear-gradient(45deg, #00ffff, #0099ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        }
+
+        .cubes-container {
+            flex: 1;
+            position: relative;
+            background: radial-gradient(circle at center, #000033, #000011);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .controls-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #0099ff;
+            border-radius: 12px;
+            padding: 20px;
+            min-width: 200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .controls-panel h3 {
+            margin-top: 0;
+            color: #00ffff;
+            text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+        }
+
+        .control-group {
+            margin: 15px 0;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #cccccc;
+            font-size: 0.9rem;
+        }
+
+        .control-group select,
+        .control-group button {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #0099ff;
+            background: rgba(0, 50, 100, 0.8);
+            color: #ffffff;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .control-group button {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .control-group button:hover {
+            background: rgba(0, 150, 255, 0.8);
+            box-shadow: 0 0 15px rgba(0, 150, 255, 0.5);
+        }
+
+        .status-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00ff00;
+            border-radius: 12px;
+            padding: 15px;
+            min-width: 150px;
+            backdrop-filter: blur(10px);
+        }
+
+        .status-display h4 {
+            margin-top: 0;
+            color: #00ff00;
+            text-shadow: 0 0 10px rgba(0, 255, 0, 0.5);
+        }
+
+        .status-item {
+            margin: 8px 0;
+            font-size: 0.9rem;
+            color: #cccccc;
+        }
+
+        .status-value {
+            color: #00ff00;
+            font-weight: bold;
+        }
+
+        #cubes-canvas {
+            border: 2px solid #0099ff;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 150, 255, 0.3);
+        }
+
+        .playback-controls {
+            padding: 20px;
+            background: linear-gradient(45deg, #16213e, #1a1a2e);
+            border-top: 2px solid #0099ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .playback-controls button {
+            padding: 12px 24px;
+            border: 2px solid #0099ff;
+            background: rgba(0, 50, 100, 0.8);
+            color: #ffffff;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .playback-controls button:hover {
+            background: rgba(0, 150, 255, 0.8);
+            box-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+        }
+
+        .playback-controls button.playing {
+            background: rgba(0, 200, 0, 0.8);
+            border-color: #00ff00;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>ThreeJS OBS ChordCubes 1.0</h1>
+            <p>Interactive 3D Musical Cube Visualization - Professional Edition</p>
+        </div>
+
+        <div class="cubes-container" id="cubesContainer">
+            <div class="controls-panel">
+                <h3>Controls</h3>
+
+                <div class="control-group">
+                    <label>Key:</label>
+                    <select id="keySelect">
+                        <option value="C">C Major</option>
+                        <option value="C#">C# Major</option>
+                        <option value="D">D Major</option>
+                        <option value="D#">D# Major</option>
+                        <option value="E">E Major</option>
+                        <option value="F">F Major</option>
+                        <option value="F#">F# Major</option>
+                        <option value="G">G Major</option>
+                        <option value="G#">G# Major</option>
+                        <option value="A">A Major</option>
+                        <option value="A#">A# Major</option>
+                        <option value="B">B Major</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label>Chord:</label>
+                    <select id="chordSelect">
+                        <option value="C">C Major</option>
+                        <option value="Dm">D minor</option>
+                        <option value="Em">E minor</option>
+                        <option value="F">F Major</option>
+                        <option value="G">G Major</option>
+                        <option value="Am">A minor</option>
+                        <option value="Bdim">B diminished</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <button id="randomChordBtn">Random Chord</button>
+                </div>
+
+                <div class="control-group">
+                    <button id="resetViewBtn">Reset View</button>
+                </div>
+            </div>
+
+            <div class="status-display">
+                <h4>Status</h4>
+                <div class="status-item">
+                    Current Key: <span class="status-value" id="currentKeyDisplay">C</span>
+                </div>
+                <div class="status-item">
+                    Current Chord: <span class="status-value" id="currentChordDisplay">C</span>
+                </div>
+                <div class="status-item">
+                    Active Cubes: <span class="status-value" id="activeCubesDisplay">3</span>
+                </div>
+                <div class="status-item">
+                    FPS: <span class="status-value" id="fpsDisplay">60</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="playback-controls">
+            <button id="playBtn">Play</button>
+            <button id="pauseBtn">Pause</button>
+            <button id="stopBtn">Stop</button>
+            <span>BPM: 120 | Beat: <span id="beatDisplay">1</span> | Measure: <span id="measureDisplay">1</span></span>
+        </div>
+    </div>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ============ CHORD CUBES ENGINE - WORKING VERSION FROM OBSIDIAN ANGULAR ============
+
+        class ChordCubesEngine {
+            constructor() {
+                // Core Three.js components
+                this.scene = null;
+                this.camera = null;
+                this.renderer = null;
+                this.animationId = null;
+
+                // Cube configuration - matching Obsidian Angular implementation
+                this.CUBE_COUNT = 12;
+                this.CUBE_SIZE = 1.2;
+                this.RADIUS = 4;
+                this.cubes = [];
+
+                // Musical constants
+                this.CHROMATIC_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                this.NOTE_COLORS = [
+                    0xff0000, // C - Red
+                    0xff8000, // C# - Orange
+                    0xffff00, // D - Yellow
+                    0x80ff00, // D# - Lime
+                    0x00ff00, // E - Green
+                    0x00ff80, // F - Teal
+                    0x00ffff, // F# - Cyan
+                    0x0080ff, // G - Light Blue
+                    0x0000ff, // G# - Blue
+                    0x8000ff, // A - Purple
+                    0xff00ff, // A# - Magenta
+                    0xff0080  // B - Pink
+                ];
+
+                // Animation and state
+                this.currentKey = 'C';
+                this.currentChord = 'C';
+                this.isPlaying = false;
+                this.currentBeat = 1;
+                this.currentMeasure = 1;
+                this.tempo = 120;
+                this.frameCount = 0;
+                this.lastTime = 0;
+                this.fps = 60;
+
+                // Initialize
+                this.init();
+            }
+
+            init() {
+                this.initializeThreeJS();
+                this.setupCubes();
+                this.setupEventListeners();
+                this.startAnimation();
+                this.updateStatusDisplay();
+                console.log('ChordCubes 1.0 - Professional Edition Initialized');
+            }
+
+            initializeThreeJS() {
+                // Scene setup - professional grade
+                this.scene = new THREE.Scene();
+                this.scene.background = new THREE.Color(0x000011);
+                this.scene.fog = new THREE.Fog(0x000033, 10, 50);
+
+                // Camera setup with perfect positioning
+                this.camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+                this.camera.position.set(0, 0, 10);
+                this.camera.lookAt(0, 0, 0);
+
+                // Renderer setup with high quality
+                this.renderer = new THREE.WebGLRenderer({
+                    antialias: true,
+                    alpha: true,
+                    preserveDrawingBuffer: true
+                });
+
+                const container = document.getElementById('cubesContainer');
+                const containerRect = container.getBoundingClientRect();
+                this.renderer.setSize(800, 600);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+                // Create canvas and append
+                const canvas = this.renderer.domElement;
+                canvas.id = 'cubes-canvas';
+                container.appendChild(canvas);
+
+                // Add professional lighting
+                this.setupLighting();
+
+                console.log('Three.js initialized - Professional Quality Renderer Active');
+            }
+
+            setupLighting() {
+                // Ambient light for base illumination
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.6);
+                this.scene.add(ambientLight);
+
+                // Main directional light with shadows
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 10, 5);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                this.scene.add(directionalLight);
+
+                // Accent lighting for atmosphere
+                const accentLight1 = new THREE.PointLight(0x0099ff, 0.3, 20);
+                accentLight1.position.set(-10, 0, 5);
+                this.scene.add(accentLight1);
+
+                const accentLight2 = new THREE.PointLight(0x00ffff, 0.3, 20);
+                accentLight2.position.set(10, 0, 5);
+                this.scene.add(accentLight2);
+            }
+
+            setupCubes() {
+                // Create geometry with high detail
+                const geometry = new THREE.BoxGeometry(this.CUBE_SIZE, this.CUBE_SIZE, this.CUBE_SIZE, 8, 8, 8);
+
+                for (let i = 0; i < this.CUBE_COUNT; i++) {
+                    // Create material with proper lighting response
+                    const material = new THREE.MeshLambertMaterial({
+                        color: this.NOTE_COLORS[i],
+                        transparent: true,
+                        opacity: 0.7,
+                        emissive: new THREE.Color(this.NOTE_COLORS[i]).multiplyScalar(0.1)
+                    });
+
+                    const cube = new THREE.Mesh(geometry, material);
+
+                    // Position in perfect circle - chromatic circle of fifths
+                    const angle = (i / this.CUBE_COUNT) * Math.PI * 2;
+                    cube.position.x = Math.cos(angle) * this.RADIUS;
+                    cube.position.y = Math.sin(angle) * this.RADIUS;
+                    cube.position.z = 0;
+
+                    // Enable shadows
+                    cube.castShadow = true;
+                    cube.receiveShadow = true;
+
+                    // Store musical data
+                    cube.userData = {
+                        noteIndex: i,
+                        note: this.CHROMATIC_NOTES[i],
+                        isActive: false,
+                        baseColor: this.NOTE_COLORS[i],
+                        pulsePhase: Math.random() * Math.PI * 2
+                    };
+
+                    this.cubes.push(cube);
+                    this.scene.add(cube);
+                }
+
+                console.log('12 Professional Cubes Created - Circle of Fifths Formation');
+            }
+
+            setupEventListeners() {
+                // Key change
+                document.getElementById('keySelect').addEventListener('change', (e) => {
+                    this.currentKey = e.target.value;
+                    this.updateKeyVisualization(this.currentKey);
+                    this.updateStatusDisplay();
+                });
+
+                // Chord change
+                document.getElementById('chordSelect').addEventListener('change', (e) => {
+                    this.currentChord = e.target.value;
+                    this.updateChordVisualization(this.currentChord);
+                    this.updateStatusDisplay();
+                });
+
+                // Random chord
+                document.getElementById('randomChordBtn').addEventListener('click', () => {
+                    const chords = ['C', 'Dm', 'Em', 'F', 'G', 'Am', 'Bdim', 'C7', 'Dm7', 'G7'];
+                    const randomChord = chords[Math.floor(Math.random() * chords.length)];
+                    document.getElementById('chordSelect').value = randomChord;
+                    this.currentChord = randomChord;
+                    this.updateChordVisualization(randomChord);
+                    this.updateStatusDisplay();
+                });
+
+                // Reset view
+                document.getElementById('resetViewBtn').addEventListener('click', () => {
+                    this.camera.position.set(0, 0, 10);
+                    this.camera.lookAt(0, 0, 0);
+                });
+
+                // Playback controls
+                document.getElementById('playBtn').addEventListener('click', () => {
+                    this.isPlaying = true;
+                    this.updatePlaybackVisualization();
+                });
+
+                document.getElementById('pauseBtn').addEventListener('click', () => {
+                    this.isPlaying = false;
+                    this.updatePlaybackVisualization();
+                });
+
+                document.getElementById('stopBtn').addEventListener('click', () => {
+                    this.isPlaying = false;
+                    this.currentBeat = 1;
+                    this.currentMeasure = 1;
+                    this.updatePlaybackVisualization();
+                });
+
+                // Window resize
+                window.addEventListener('resize', () => this.handleResize());
+            }
+
+            updateChordVisualization(chord) {
+                // Reset all cubes
+                this.cubes.forEach(cube => {
+                    cube.userData.isActive = false;
+                    const material = cube.material;
+                    material.opacity = 0.3;
+                    material.emissive.setHex(0x000000);
+                });
+
+                // Parse chord and activate relevant cubes
+                const chordNotes = this.parseChord(chord);
+                let activeCount = 0;
+
+                chordNotes.forEach(note => {
+                    const noteIndex = this.CHROMATIC_NOTES.indexOf(note);
+                    if (noteIndex !== -1) {
+                        const cube = this.cubes[noteIndex];
+                        cube.userData.isActive = true;
+                        const material = cube.material;
+                        material.opacity = 1.0;
+                        material.emissive.setHex(cube.userData.baseColor).multiplyScalar(0.3);
+                        activeCount++;
+                    }
+                });
+
+                document.getElementById('activeCubesDisplay').textContent = activeCount;
+                console.log(`Chord ${chord} activated ${activeCount} cubes:`, chordNotes);
+            }
+
+            updateKeyVisualization(key) {
+                const keyIndex = this.CHROMATIC_NOTES.indexOf(key);
+                if (keyIndex !== -1) {
+                    const keyCube = this.cubes[keyIndex];
+                    const material = keyCube.material;
+
+                    // Highlight key center with special glow
+                    material.emissive.setHex(0xffffff).multiplyScalar(0.2);
+
+                    // Scale up slightly
+                    keyCube.scale.setScalar(1.2);
+
+                    // Reset other cubes' key highlighting
+                    this.cubes.forEach((cube, index) => {
+                        if (index !== keyIndex && !cube.userData.isActive) {
+                            cube.scale.setScalar(1.0);
+                        }
+                    });
+                }
+            }
+
+            parseChord(chord) {
+                // Basic chord parsing - can be extended
+                const baseNote = chord.charAt(0);
+                const chordType = chord.slice(1);
+
+                const baseIndex = this.CHROMATIC_NOTES.indexOf(baseNote);
+                if (baseIndex === -1) return [baseNote];
+
+                const notes = [baseNote];
+
+                // Add chord tones based on type
+                if (chordType === '' || chordType === 'maj') {
+                    // Major triad: root, major third, perfect fifth
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 4) % 12]);
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 7) % 12]);
+                } else if (chordType === 'm' || chordType === 'min') {
+                    // Minor triad: root, minor third, perfect fifth
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 3) % 12]);
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 7) % 12]);
+                } else if (chordType === 'dim') {
+                    // Diminished: root, minor third, diminished fifth
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 3) % 12]);
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 6) % 12]);
+                } else if (chordType === '7') {
+                    // Dominant 7th: root, major third, perfect fifth, minor seventh
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 4) % 12]);
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 7) % 12]);
+                    notes.push(this.CHROMATIC_NOTES[(baseIndex + 10) % 12]);
+                }
+
+                return notes;
+            }
+
+            startAnimation() {
+                const animate = (currentTime) => {
+                    this.animationId = requestAnimationFrame(animate);
+
+                    // Calculate FPS
+                    if (currentTime - this.lastTime >= 1000) {
+                        this.fps = Math.round((this.frameCount * 1000) / (currentTime - this.lastTime));
+                        document.getElementById('fpsDisplay').textContent = this.fps;
+                        this.frameCount = 0;
+                        this.lastTime = currentTime;
+                    }
+                    this.frameCount++;
+
+                    this.updateAnimations(currentTime);
+                    this.render();
+                };
+
+                animate(0);
+            }
+
+            updateAnimations(time) {
+                // Rotate active cubes
+                this.cubes.forEach((cube, index) => {
+                    if (cube.userData.isActive) {
+                        // Smooth rotation for active cubes
+                        cube.rotation.x += 0.02;
+                        cube.rotation.y += 0.03;
+
+                        // Pulsing effect
+                        const pulseScale = 1.0 + Math.sin(time * 0.005 + cube.userData.pulsePhase) * 0.1;
+                        cube.scale.setScalar(pulseScale);
+
+                        // Subtle floating motion
+                        cube.position.y = Math.sin(time * 0.001 + index) * 0.2 + Math.sin((index / this.CUBE_COUNT) * Math.PI * 2) * this.RADIUS;
+                    } else {
+                        // Gentle idle animation for inactive cubes
+                        cube.rotation.y += 0.005;
+                        cube.scale.setScalar(1.0);
+                    }
+                });
+
+                // Camera gentle orbit if playing
+                if (this.isPlaying) {
+                    const orbitRadius = 10;
+                    const orbitSpeed = 0.0005;
+                    this.camera.position.x = Math.cos(time * orbitSpeed) * orbitRadius;
+                    this.camera.position.z = Math.sin(time * orbitSpeed) * orbitRadius + 10;
+                    this.camera.lookAt(0, 0, 0);
+                }
+
+                // Beat simulation when playing
+                if (this.isPlaying) {
+                    const beatInterval = (60 / this.tempo) * 1000; // ms per beat
+                    const currentBeat = Math.floor((time % (beatInterval * 4)) / beatInterval) + 1;
+                    const currentMeasure = Math.floor(time / (beatInterval * 4)) + 1;
+
+                    if (currentBeat !== this.currentBeat) {
+                        this.currentBeat = currentBeat;
+                        this.onBeatChange();
+                    }
+
+                    if (currentMeasure !== this.currentMeasure) {
+                        this.currentMeasure = currentMeasure;
+                    }
+                }
+            }
+
+            onBeatChange() {
+                // Flash effect on beat
+                if (this.isPlaying) {
+                    this.cubes.forEach(cube => {
+                        if (cube.userData.isActive) {
+                            const material = cube.material;
+                            material.emissive.setHex(0xffffff).multiplyScalar(0.5);
+
+                            // Fade back to normal
+                            setTimeout(() => {
+                                material.emissive.setHex(cube.userData.baseColor).multiplyScalar(0.3);
+                            }, 100);
+                        }
+                    });
+                }
+
+                this.updateStatusDisplay();
+            }
+
+            updatePlaybackVisualization() {
+                const playBtn = document.getElementById('playBtn');
+                const pauseBtn = document.getElementById('pauseBtn');
+                const stopBtn = document.getElementById('stopBtn');
+
+                if (this.isPlaying) {
+                    playBtn.classList.add('playing');
+                    playBtn.textContent = 'Playing...';
+                } else {
+                    playBtn.classList.remove('playing');
+                    playBtn.textContent = 'Play';
+                }
+
+                this.updateStatusDisplay();
+            }
+
+            updateStatusDisplay() {
+                document.getElementById('currentKeyDisplay').textContent = this.currentKey;
+                document.getElementById('currentChordDisplay').textContent = this.currentChord;
+                document.getElementById('beatDisplay').textContent = this.currentBeat;
+                document.getElementById('measureDisplay').textContent = this.currentMeasure;
+            }
+
+            render() {
+                this.renderer.render(this.scene, this.camera);
+            }
+
+            handleResize() {
+                const container = document.getElementById('cubesContainer');
+                const containerRect = container.getBoundingClientRect();
+
+                this.camera.aspect = containerRect.width / containerRect.height;
+                this.camera.updateProjectionMatrix();
+                this.renderer.setSize(containerRect.width, containerRect.height);
+            }
+
+            dispose() {
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                }
+
+                if (this.renderer) {
+                    this.renderer.dispose();
+                }
+            }
+        }
+
+        // ============ INITIALIZE APPLICATION ============
+
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // Initialize the ChordCubes engine
+                window.chordCubesEngine = new ChordCubesEngine();
+
+                // Set initial chord
+                setTimeout(() => {
+                    window.chordCubesEngine.updateChordVisualization('C');
+                }, 500);
+
+                console.log('ThreeJS OBS ChordCubes 1.0 - Successfully Loaded!');
+                console.log('Professional 3D Musical Visualization Active');
+
+            } catch (error) {
+                console.error('Failed to initialize ChordCubes:', error);
+
+                // Fallback error display
+                const container = document.getElementById('cubesContainer');
+                container.innerHTML = `
+                    <div style="text-align: center; color: #ff4444; padding: 40px;">
+                        <h2>ChordCubes Loading Error</h2>
+                        <p>Failed to initialize Three.js engine.</p>
+                        <p>Error: ${error.message}</p>
+                        <p>Please check console for details.</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (window.chordCubesEngine) {
+                window.chordCubesEngine.dispose();
+            }
+        });
+
+    </script>
+</body>
+
+</html>

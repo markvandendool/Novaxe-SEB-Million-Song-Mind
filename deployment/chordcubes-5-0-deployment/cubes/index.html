@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>🎼 ChordCubes 6.0 V1.3 - High Contrast Text & Clean Shelf Extensions ⚡</title>
+		<title>ChordCubes 6.0 V1.50 RESTORED FROM REAL V1.49 BACKUP</title>
 	<link rel="stylesheet" href="./styles.css?v=2" />
 	<style>
 		@font-face {
@@ -399,6 +399,95 @@
 			font-weight: bold;
 		}
 	</style>
+
+	<!-- 🧙‍♂️ ULTRA-OPTIMIZED DEBUG WIDGET CSS -->
+	<style>
+		.debug-panel {
+			position: fixed;
+			bottom: 120px; /* Above any existing HUD */
+			right: 20px;
+			background: rgba(0, 0, 0, 0.9);
+			border: 2px solid #00ff00;
+			border-radius: 10px;
+			padding: 15px;
+			font-family: 'Courier New', monospace;
+			color: #00ff00;
+			z-index: 10000;
+			min-width: 200px;
+			backdrop-filter: blur(5px);
+			box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+		}
+
+		.debug-title {
+			font-size: 12px;
+			font-weight: bold;
+			text-align: center;
+			margin-bottom: 10px;
+			color: #ffff00;
+		}
+
+		.debug-keyboard {
+			margin-bottom: 15px;
+		}
+
+		.debug-row {
+			display: flex;
+			gap: 8px;
+			margin-bottom: 5px;
+			justify-content: center;
+		}
+
+		.debug-key {
+			display: inline-block;
+			padding: 4px 8px;
+			background: #333;
+			border: 1px solid #666;
+			border-radius: 3px;
+			font-size: 10px;
+			min-width: 20px;
+			text-align: center;
+			transition: all 0.1s ease;
+		}
+
+		.debug-key.active {
+			background: #00ff00;
+			color: #000;
+			box-shadow: 0 0 10px #00ff00;
+			transform: scale(1.1);
+		}
+
+		.debug-cube-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			margin-bottom: 10px;
+		}
+
+		.debug-cube-label {
+			font-size: 10px;
+			margin-top: 5px;
+			color: #ffff00;
+		}
+
+		#debug-cube-face {
+			border: 1px solid #00ff00;
+			border-radius: 5px;
+			background: #111;
+		}
+
+		.debug-status {
+			font-size: 9px;
+			text-align: center;
+			color: #888;
+			border-top: 1px solid #333;
+			padding-top: 8px;
+		}
+
+		.debug-status.active {
+			color: #00ff00;
+			font-weight: bold;
+		}
+	</style>
 	<script src="https://unpkg.com/soundfont-player@0.15.7/dist/soundfont-player.js"></script>
 </head>
 
@@ -633,7 +722,7 @@
 				<span id="improv-mode-free"
 					style="cursor: pointer; margin-right: 8px; opacity: 1; font-size: 18px; transition: all 0.3s ease; transform: scale(1.2);"
 					title="Free Improv: Root position only">🎵</span>
-				V1.18
+				V1.50
 				<span id="improv-mode-creation"
 					style="cursor: pointer; margin-left: 8px; opacity: 0.4; font-size: 18px; transition: all 0.3s ease; transform: scale(1);"
 					title="Creation Improv: Full inversions + front row">🎼</span>
@@ -746,8 +835,8 @@
 	<script src="./staves-integration.js"></script>
 	<script type="module" src="./chords.js?v=4"></script>
 	<script type="module" src="./instrumentManager.js"></script>
-	<script type="module" src="./main.js?v=152"></script>
-	<script src="./professional-drum-machine.js?v=11"></script>
+	<script type="module" src="./main.js?v=1049"></script>
+	<!-- OLD PROFESSIONAL-DRUM-MACHINE.JS REMOVED - CONFLICTS WITH MAIN.JS -->
 
 	<!-- PROFESSIONAL FONT CONTROL MODAL -->
 	<div id="font-control-modal"
@@ -905,6 +994,54 @@
 				</div>
 			</div>
 		</div>
+	</div>
+
+	<!-- � COMPREHENSIVE PIPELINE TRACER 🔥 -->
+	<div id="pipelineTracer" style="
+		position: fixed;
+		bottom: 10px;
+		left: 10px;
+		right: 10px;
+		background: rgba(0,20,0,0.95);
+		border: 2px solid #00ff00;
+		border-radius: 10px;
+		padding: 15px;
+		font-family: 'Courier New', monospace;
+		color: #00ff00;
+		z-index: 10000;
+		box-shadow: 0 0 20px rgba(0,255,0,0.3);
+	">
+		<div style="text-align: center; font-size: 16px; font-weight: bold; margin-bottom: 10px;">
+			🔥 KEYBOARD → CUBE FACE PIPELINE TRACER 🔥
+		</div>
+		<div id="pipelineStages" style="display: flex; flex-wrap: wrap; gap: 5px; justify-content: center;">
+			<!-- Pipeline stages will be inserted here -->
+		</div>
+		<div id="pipelineStatus" style="text-align: center; margin-top: 10px; font-size: 14px;">
+			Status: Waiting for keypress...
+		</div>
+	</div>
+
+	<!-- �🔬 FORENSIC DEBUGGING WIDGET - ULTRA OPTIMIZED -->
+	<div id="debug-widget" class="debug-panel">
+		<div class="debug-title">🔬 FORENSIC KEYBOARD DEBUGGER</div>
+		<div class="debug-keyboard">
+			<div class="debug-row">
+				<span class="debug-key" id="debug-shift">SHIFT</span>
+				<span class="debug-key" id="debug-option">OPTION</span>
+				<span class="debug-key" id="debug-ctrl">CTRL</span>
+			</div>
+			<div class="debug-row">
+				<span class="debug-key" id="debug-1">1</span>
+				<span class="debug-key" id="debug-2">2</span>
+				<span class="debug-key" id="debug-9">9</span>
+			</div>
+		</div>
+		<div class="debug-cube-container">
+			<canvas id="debug-cube-face" width="80" height="80"></canvas>
+			<div class="debug-cube-label">CHORD X</div>
+		</div>
+		<div class="debug-status" id="debug-status">Ready...</div>
 	</div>
 
 </body>
